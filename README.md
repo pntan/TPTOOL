@@ -39,7 +39,7 @@ Công cụ này được viết bằng JS và chạy trực tiếp trên trình 
 2) Sau khi cài đặt, mở giao diện Tampermonkey bằng cách nhấn vào biểu tượng trên thanh công cụ trình duyệt.
 3) Nhấp vào **Create a new script** hoặc **Thêm script mới**.
 4) Xóa nội dung mặc định và dán đoạn mã sau đây.
-   // @require      https://cdn.jsdelivr.net/gh/pntan/TPTOOL/TOOL.js
+   // @require      https://cdn.jsdelivr.net/gh/pntan/TPTOOL@latest/TOOL.js
 5) Lưu script và tải lại trang để công cụ bắt đầu hoạt động.
    ## **Khắc phục lỗi thường gặp:**
 
@@ -51,7 +51,7 @@ Công cụ này được viết bằng JS và chạy trực tiếp trên trình 
 
 - **Trang web không phản hồi sau khi cài đặt:** Điều này thường do xung đột với các tiện ích mở rộng khác. Để xử lý, người dùng cần vô hiệu hóa từng tiện ích một và thử lại, nhằm xác định tiện ích gây xung đột.
 6) Hoặc có thể tải qua CDN:
-  [https://cdn.jsdelivr.net/gh/pntan/TPTOOL/TOOL.js](https://cdn.jsdelivr.net/gh/pntan/TPTOOL/TOOL.js)
+  [https://cdn.jsdelivr.net/gh/pntan/TPTOOL@latest/TOOL.js](https://cdn.jsdelivr.net/gh/pntan/TPTOOL@latest/TOOL.js)
 
 ## SỬ DỤNG
 
