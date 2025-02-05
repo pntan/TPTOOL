@@ -1,1 +1,1144 @@
-function _0x4e53(){var _0x37a7bd=['6200AelacB','sapXepHinhAnhShopeeLayout','flex','img','Khung\x20giờ\x20bắt\x20đầu\x20từ\x20','20vh','fromCharCode','.layout-tab\x20#setData','1vh\x201vw','tgFlashSaleTiktok','FLASHSALE','ajax','span','https://code.jquery.com/jquery-3.7.1.min.js','999999999999999999999999999999999999999999','566194YOvufc','setRequestHeader','.response-content','stringify','margin-right','.options-item.drag-item','.tab-container\x20.tab','\x20kết\x20thúc\x20lúc\x20','#shopee','#sapo','overflowX','tool','.header-title','head','center','Facebook','3WKSMmA','.layout-tab\x20.header\x20input','.tp-container\x20*','.tab-content\x20.dev_ing','html','3px','setAttribute','position_x','.batch-setting-wrapper\x20.campaign-stock\x20input.eds-input__input','16556710LFWZja','40%','20%','5vh','both','div.image-manager-wrapper','header-title','90%','.current-item-selected\x20.item-title','.img-list','split','#excuse-command','crimson','70%','value','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22choice-func\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span>Chọn\x20Chức\x20Năng</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20hidden></option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20data-func=\x22autobrowser\x22\x20data-layout=\x22autobrowserLayout\x22>Trình\x20Duyệt\x20Tự\x20Động</option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','Khác','.image-manager-wrapper\x20.shopee-image-manager:nth-child(1)\x20.container','content','.layout-tab\x20div\x20label','2px\x20#000\x20solid','giaDuoiShopee','text-indent','<div\x20class=\x22layout-tab\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22header\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span>Số\x20Khung\x20Muốn\x20Chia:\x20</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20id=\x22frame-count\x22\x20placeholder=\x22Nhập\x20số\x20khung\x22\x20/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22box-frame\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>','input#max-price','3674895ypYWFf','messages','.box-frame\x20p','11LEmFbn','onload','5px','.tp-container','animate','onchange','3357tqkNgb','val','trigger','main-container','removeAllRanges','readText','substring','relative','#cost','GIÁ\x20ĐUÔI:\x20','.layout-tab\x20.button-control','createElement','gpt-3.5-turbo','justify-content','padding','margin','.currency-input\x20.eds-input__input','align-items','sapo','Tèo\x20vẫn\x20đang\x20được\x20phát\x20triển,\x20mọi\x20người\x20đợi\x20Tèo\x20vài\x20bữa\x20nghen\x20<3\x20<|:>','.tab-container','.choice-func\x20select','color','images-info','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','checked','.choice-func\x20p','select\x20option:first','.layout-tab\x20.img-list','dispatchEvent','border-radius','100px','parent','1vw','fixed','position','.layout-tab\x20#cancelData','line-height','.layout-tab\x20.input-cost','keyup','\x20select\x20option:selected','hidden','height','backdrop-filter','.respon-content','.choice-func\x20select\x20option','iframe','type','#ai-req-content','push','https://code.jquery.com/ui/1.14.1/jquery-ui.js','.layout-tab\x20.box-img\x20img','pink','querySelectorAll','left','toFixed','background-size','modelValue','#188afc','.inner-rows\x20.inner-row','max-width','9999999999','Authorization','5langiaShopeeLayout','30vh','which','bot-chat','float','length','.variation\x20.ellipsis-content','click','.layout-tab\x20.input-cost\x20input','scroll','querySelector','input','flashSaleShopeeLayout','100%','CÔNG\x20CỤ\x20HỖ\x20TRỢ','<button>CHẠY</button>','right','.item-selector','000','user','.layout-tab\x20textarea','<p\x20class=\x22dev_ing\x22>ĐANG\x20PHÁT\x20TRIỂN\x20TÍNH\x20NĂNG</p>','top','none','text-align','white','tinhGiaBanShopeeLayout','.active','#cdcdcd','#last-price','1\x20/\x201','10%','10px','each','.layout-tab\x20div\x20input','border','Instagram','user-select','tgFlashSaleTiktokLayout','#sapo\x20.item-name','.hIhsai','.tab-content','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22choice-func\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span>Chọn\x20Chức\x20Năng</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20hidden></option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20data-func=\x22giaDuoiShopee\x22>Cập\x20Nhật\x20Giá\x20Đuôi</option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20data-func=\x225LanGiaShopee\x22\x20data-layout=\x225langiaShopeeLayout\x22)>Kiểm\x20Tra\x205\x20Lần\x20Giá</option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20data-func=\x22batKhuyenMaiShopee\x22>Bật\x20Khuyến\x20Mãi</option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20data-func=\x22sapXepHinhAnhShopee\x22\x20data-layout=\x22sapXepHinhAnhShopeeLayout\x22>Sắp\x20Xếp\x20Hình\x20Ảnh\x20Sản\x20Phẩm</option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20data-func=\x22flashSaleShopee\x22\x20data-layout=\x22flashSaleShopeeLayout\x22>Flash\x20Sale</option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20data-func=\x22tinhGiaBanShopee\x22\x20data-layout=\x22tinhGiaBanShopeeLayout\x22>Tính\x20Giá\x20Bán</option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','5oOrWZM','max-height','Giá\x20cao\x20nhất:\x20','fit-content','add','async','option:selected','keyCode','focus','0.5vh\x201vw','border-bottom-left-radius','blur(10px)','parentElement','.layout-tab\x20.button-control\x20button','user-chat','instagram','classList','replace','.tp-popup','attr','children','Dựng\x20Giao\x20Diện','Shopee','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22choice-func\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span>Chọn\x20Chức\x20Năng</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20hidden></option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20data-func=\x22tgFlashSaleTiktok\x22\x20data-layout=\x22tgFlashSaleTiktokLayout\x22>Chỉnh\x20Khung\x20Giờ\x20Khuyến\x20Mãi</option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','clipboard','charCodeAt','hasClass','.layout-tab\x20.img-list\x20.box-img','#tiktok','appendChild','Code\x20lỏ\x20nên\x20chịu\x20khó\x20Bấm\x20F12\x20>\x20Console\x20rồi\x20dán\x20code\x20ra\x20chạy\x20hen\x20^_^','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22layout-tab\x20autoSelectStore\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22header-button\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22getData\x22>Lưu\x20Gian\x20Hàng</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22content-data\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>Gian\x20Hàng:\x20<span\x20class=\x22shop-name\x22></span></p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>Tên\x20Sản\x20Phẩm:\x20<span\x20class=\x22item-name\x22></span></p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','modelCout','positionYTP','#frame-count','.layout-tab','justtify-content','Bearer\x20','auto','rel','.discount-input\x20.eds-input__input','preload','join','icon-toggle','AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c','#fff','draggable','empty','909200QaXukh','.user-input\x20button','tab-content','model','Lazada','POST','body','2vh','aspect-ratio','background','tiktok','positionXTP','excuse-command','data-tab','text','bot','rgb(8,\x20102,\x20255)','shopee','writeText','<p></p>','includes','5LanGiaShopee','display','CẬP\x20NHẬT\x20GIÁ\x20ĐUÔI','.main-container','Content-Type','toString','.item-selector\x20input.eds-checkbox__input','0px\x200px','addClass','src','gap','margin-left','</p>','.shopee-image-manager__itembox','border-top-right-radius','tp-container','select','flex-grow','px\x20','https://api.openai.com/v1/chat/completions','#before-price','z-index','flashSaleShopee','#instagram','Content-Security-Policy','fint-content','0\x201vw','#000','linear','tab','removeClass','.box-frame','.layout-tab\x20#getData','data-func','change','input#min-price','getItem','createEvent','giaDuoiLazada','font-size','position_y','80vh','#a3a3a3','.layout-tab\x20.box-frame','script','70vh','hide','log','#FFFFFFB2','find','autoSelectStoreSapoLayout','remove','7vh','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22layout-tab\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22input-cost\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<label\x20for=\x22cost\x22>Nhập\x20Giá\x20Vốn</label>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22text\x22\x20id=\x22cost\x22\x20maxlength=\x2215\x22\x20/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22output-cost\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>Giá\x20sau\x20Khuyễn\x20mãi:\x20<span\x20id=\x22after-price\x22></span></p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>Giá\x20trước\x20Khuyễn\x20mãi:\x20<span\x20id=\x22before-price\x22></span></p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<p>Giá\x20Đăng\x20Bán:\x20<span\x20id=\x22last-price\x22></span></p>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','clear','<div\x20class=\x22layout-tab\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22getGeminiKey\x22>Lấy\x20Key\x20Gemini</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>','button','selection','2025.02.03.17.10','shopName','.icon-toggle','active','Không\x20có\x20Dữ\x20Liệu','1972908pbAwxd','fireEvent','lazada','margin-top','800','forEach','connect-src\x20\x27self\x27\x20https://api.openai.com\x20typesense.jquery.com','.layout-tab\x20.input-cost\x20*','#ee4d2d','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22layout-tab\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<textarea\x20id=\x22flahsSaleName\x22\x20placeholder=\x22Nhập\x20Tên\x20Cần\x20Bật\x20Lên\x22></textarea>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','show','Công\x20Cụ\x20Hỗ\x20Trợ','setItem','.layout-tab\x20div','font-weight','overflow','\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22choice-func\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span>Chọn\x20Chức\x20Năng</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20hidden></option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20data-func=\x22giaDuoiLazada\x22>Cập\x20Nhật\x20Giá\x20Đuôi</option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20','\x20=>\x20','6620316ybxuyg','min','#lazada','css','#3178f6','Tiktok','60%','.choice-func','calc(100%\x20-\x202vw)','#tool','append','<div></div>','offset','#flahsSaleName','2vw','.layout-tab\x20.header','\x20-\x20','facebook','background-position','keypress','width'];_0x4e53=function(){return _0x37a7bd;};return _0x4e53();}function _0xc760(_0x31479e,_0xf103ca){var _0x4e5323=_0x4e53();return _0xc760=function(_0xc760a9,_0x909d4d){_0xc760a9=_0xc760a9-0xb9;var _0x4e259c=_0x4e5323[_0xc760a9];return _0x4e259c;},_0xc760(_0x31479e,_0xf103ca);}(function(_0x47dddb,_0x27f854){var _0x1e403b=_0xc760,_0x20223c=_0x47dddb();while(!![]){try{var _0x589e36=-parseInt(_0x1e403b(0xe4))/0x1+-parseInt(_0x1e403b(0x16e))/0x2*(-parseInt(_0x1e403b(0x17e))/0x3)+parseInt(_0x1e403b(0x138))/0x4+-parseInt(_0x1e403b(0x213))/0x5*(parseInt(_0x1e403b(0x14a))/0x6)+parseInt(_0x1e403b(0x1a0))/0x7+-parseInt(_0x1e403b(0x15f))/0x8*(parseInt(_0x1e403b(0x1a9))/0x9)+parseInt(_0x1e403b(0x187))/0xa*(parseInt(_0x1e403b(0x1a3))/0xb);if(_0x589e36===_0x27f854)break;else _0x20223c['push'](_0x20223c['shift']());}catch(_0xeee80f){_0x20223c['push'](_0x20223c['shift']());}}}(_0x4e53,0x9ffd7),(function(){'use strict';var _0x337ffc=_0xc760;var _0x5cce45=![];window[_0x337ffc(0x1a4)]=function(){var _0x4b750b=_0x337ffc,_0x2562d5=document['createElement'](_0x4b750b(0x125));_0x2562d5[_0x4b750b(0x184)](_0x4b750b(0x102),_0x4b750b(0x16c)),_0x2562d5[_0x4b750b(0x184)](_0x4b750b(0xdb),_0x4b750b(0xdd)),_0x2562d5[_0x4b750b(0x184)](_0x4b750b(0xb9),'async'),document[_0x4b750b(0x17b)]['appendChild'](_0x2562d5);var _0x26307f=document[_0x4b750b(0x1b4)](_0x4b750b(0x125));_0x26307f[_0x4b750b(0x184)](_0x4b750b(0x102),_0x4b750b(0x1db)),_0x26307f[_0x4b750b(0x184)](_0x4b750b(0xdb),'preload'),_0x26307f[_0x4b750b(0x184)](_0x4b750b(0xb9),_0x4b750b(0xb9)),document[_0x4b750b(0x17b)]['appendChild'](_0x26307f);var _0x31ce5a=0x0,_0x3c73b6=_0x4b750b(0xe0);const _0x3a36e8=_0x4b750b(0x133);function _0x2ec3e3(){var _0x220d39=_0x4b750b;_0x31ce5a++;if(window[_0x220d39(0x1c9)]!=window['top']){console[_0x220d39(0x128)]('we\x27ve\x20been\x20framed\x20I\x20tell\x20ya');return;}console['log'](_0x220d39(0xc9));var _0x56481c=document[_0x220d39(0x1b4)]('div');_0x56481c[_0x220d39(0xc4)][_0x220d39(0x217)](_0x220d39(0x108)),document[_0x220d39(0x1f2)](_0x220d39(0xea))[_0x220d39(0xd1)](_0x56481c);var _0x16b32d,_0x307e04;if(localStorage['getItem']('positionYTP')==null)_0x16b32d='0';else _0x16b32d=localStorage['getItem'](_0x220d39(0xd5));if(localStorage[_0x220d39(0x11d)](_0x220d39(0xef))==null)_0x307e04='0';else _0x307e04=localStorage[_0x220d39(0x11d)]('positionXTP');if($(_0x220d39(0xea))['height']()/0x2<_0x16b32d)_0x16b32d=$(_0x220d39(0xea))['height']()/0x2;if($('body')['width']()/0x2<_0x307e04)_0x307e04=$('body')[_0x220d39(0x15e)]()/0x2;var _0x229f8c={};_0x229f8c['position']=_0x220d39(0x1cb),_0x229f8c['width']=_0x220d39(0xda),_0x229f8c['height']=_0x220d39(0xda),_0x229f8c[_0x220d39(0x1fe)]=_0x16b32d+'px',_0x229f8c['left']=_0x307e04+'px',_0x229f8c['z-index']=_0x220d39(0x1e6),_0x229f8c[_0x220d39(0x20d)]=_0x220d39(0x1ff),_0x56481c=$('.tp-container')[_0x220d39(0x14d)](_0x229f8c);var _0x450980={};_0x450980[_0x220d39(0x1b8)]='0',_0x450980[_0x220d39(0x1b7)]='0',_0x450980[_0x220d39(0x20b)]='0',_0x450980[_0x220d39(0x1bf)]='#000',$(_0x220d39(0x180))[_0x220d39(0x14d)](_0x450980),$(_0x220d39(0x1a6))[_0x220d39(0xe2)]({'drag':function(){var _0x39da35=_0x220d39,_0x45d5a9=$(this)[_0x39da35(0x156)](),_0x24c432=_0x45d5a9[_0x39da35(0x1df)],_0x51be2f=_0x45d5a9[_0x39da35(0x1fe)];localStorage[_0x39da35(0x144)](_0x39da35(0xd5),_0x51be2f),localStorage[_0x39da35(0x144)](_0x39da35(0xef),_0x24c432);}});var _0x136bb8={};_0x136bb8[_0x220d39(0x15e)]='fit-content',_0x136bb8['height']=_0x220d39(0xda),_0x136bb8[_0x220d39(0xed)]='linear-gradient(90deg,\x20rgba(255,0,0,0.8)\x200%,\x20rgba(192,42,138,0.8)\x205%,\x20rgba(111,102,167,0.8)\x2010%,\x20rgba(89,172,184,1)\x2015%,\x20rgba(74,196,115,1)\x2020%,\x20rgba(106,199,59,0.8)\x2025%,\x20rgba(202,194,79,0.8)\x2030%,\x20rgba(201,169,118,0.8)\x2035%,\x20rgba(187,118,118,1)\x2040%,\x20rgba(255,0,0,1)\x2045%,\x20rgba(255,0,0,1)\x2050%,\x20rgba(187,118,118,1)\x2055%,\x20rgba(201,169,118,0.8)\x2060%,\x20rgba(202,194,79,0.8)\x2065%,\x20rgba(106,199,59,0.8)\x2070%,\x20rgba(74,196,115,1)\x2075%,\x20rgba(89,172,184,1)\x2080%,\x20rgba(192,42,138,0.8)\x2085%,\x20rgba(255,0,0,0.8)\x2090%)',_0x136bb8[_0x220d39(0x1e1)]='1200%',_0x136bb8[_0x220d39(0x146)]=_0x220d39(0x13c),_0x136bb8[_0x220d39(0x1bf)]=_0x220d39(0xe1),_0x136bb8[_0x220d39(0x1b7)]=_0x220d39(0xbd),_0x136bb8[_0x220d39(0x1c7)]=_0x220d39(0x1c8),$(_0x220d39(0x1a6))[_0x220d39(0x154)]($(_0x220d39(0x155))[_0x220d39(0x101)](_0x220d39(0xdf))[_0x220d39(0xf2)](_0x220d39(0x143))[_0x220d39(0x14d)](_0x136bb8)),$(_0x220d39(0x135))['on']('dblclick',function(){var _0x693acf=_0x220d39;$(this)[_0x693acf(0xce)](_0x693acf(0x136))?($(_0x693acf(0x1bd))['css'](_0x693acf(0xfa),_0x693acf(0x1ff)),$(_0x693acf(0xfc))[_0x693acf(0x14d)]('display',_0x693acf(0x1ff)),$(this)[_0x693acf(0x117)]('active')):($('.tab-container')[_0x693acf(0x14d)]('display','flex'),$(_0x693acf(0xfc))[_0x693acf(0x14d)]('display','block'),$(this)[_0x693acf(0x101)](_0x693acf(0x136)));});var _0x41cc5d=$(_0x220d39(0x135));function _0x1240fc(){var _0x39d14f=_0x220d39;_0x41cc5d[_0x39d14f(0x14d)](_0x39d14f(0x15c),_0x39d14f(0x100));var _0x3fd1d8={};_0x3fd1d8[_0x39d14f(0x185)]=0x0,_0x3fd1d8[_0x39d14f(0x121)]=0x0;var _0x153e25={};_0x153e25[_0x39d14f(0x185)]=-0x1388,_0x153e25[_0x39d14f(0x121)]=-0x9c4,$(_0x3fd1d8)[_0x39d14f(0x1a7)](_0x153e25,{'duration':0xc350,'easing':_0x39d14f(0x115),'step':function(){var _0x1aadb8=_0x39d14f;_0x41cc5d['css'](_0x1aadb8(0x15c),this[_0x1aadb8(0x185)]+_0x1aadb8(0x10b)+this['position_y']+'px');},'complete':function(){_0x1240fc();}});}_0x1240fc();var _0x18a3cc={};_0x18a3cc['display']=_0x220d39(0x1ff),_0x18a3cc[_0x220d39(0x103)]=_0x220d39(0x1ca),$(_0x220d39(0x1a6))[_0x220d39(0x154)]($(_0x220d39(0x155))[_0x220d39(0x101)]('tab-container')[_0x220d39(0x14d)](_0x18a3cc));var _0x24f6b6={};_0x24f6b6[_0x220d39(0xed)]=_0x220d39(0xf4),_0x24f6b6[_0x220d39(0x1bf)]=_0x220d39(0xe1),$(_0x220d39(0x1bd))['append']($(_0x220d39(0x155))[_0x220d39(0x101)](_0x220d39(0x116))[_0x220d39(0xf2)](_0x220d39(0x17d))['attr'](_0x220d39(0xf1),_0x220d39(0x15b))[_0x220d39(0x14d)](_0x24f6b6));var _0x5056e5={};_0x5056e5['background']='linear-gradient(to\x20top\x20left,\x20#fbe18a,\x20#fcbb45,\x20#f86738,\x20#f86738,\x20#f74440,\x20#f5326e,\x20#d53692,\x20#8f39ce,\x20#544ced,\x20#395dfb)',_0x5056e5['color']=_0x220d39(0xe1),$('.tab-container')['append']($('<div></div>')['addClass'](_0x220d39(0x116))['text'](_0x220d39(0x20c))[_0x220d39(0xc7)](_0x220d39(0xf1),_0x220d39(0xc3))[_0x220d39(0x14d)](_0x5056e5));var _0x2eb1c2={};_0x2eb1c2[_0x220d39(0xed)]=_0x220d39(0x140),_0x2eb1c2[_0x220d39(0x1bf)]=_0x220d39(0xe1),$('.tab-container')[_0x220d39(0x154)]($(_0x220d39(0x155))[_0x220d39(0x101)]('tab')[_0x220d39(0xf2)](_0x220d39(0xca))['attr'](_0x220d39(0xf1),_0x220d39(0xf5))[_0x220d39(0x14d)](_0x2eb1c2));var _0x542e98={};_0x542e98[_0x220d39(0xed)]=_0x220d39(0x14e),_0x542e98['color']='#fff',$(_0x220d39(0x1bd))[_0x220d39(0x154)]($('<div></div>')[_0x220d39(0x101)]('tab')[_0x220d39(0xf2)](_0x220d39(0xe8))[_0x220d39(0xc7)]('data-tab','lazada')[_0x220d39(0x14d)](_0x542e98));var _0x49ff00={};_0x49ff00['background']=_0x220d39(0x114),_0x49ff00[_0x220d39(0x1bf)]='#fff',$(_0x220d39(0x1bd))['append']($(_0x220d39(0x155))[_0x220d39(0x101)]('tab')[_0x220d39(0xf2)](_0x220d39(0x14f))[_0x220d39(0xc7)](_0x220d39(0xf1),_0x220d39(0xee))[_0x220d39(0x14d)](_0x49ff00));var _0x4a81fa={};_0x4a81fa['background']=_0x220d39(0xe1),_0x4a81fa[_0x220d39(0x1bf)]=_0x220d39(0x1e3),$('.tab-container')[_0x220d39(0x154)]($(_0x220d39(0x155))[_0x220d39(0x101)](_0x220d39(0x116))[_0x220d39(0x182)]('<span\x20style=\x22width:\x20fit-content;\x20height:\x20fit-content;\x20padding:\x200\x200.25vw;\x20background:\x20#23d187;\x20color:\x20#fff\x22>S</span>apo')['attr'](_0x220d39(0xf1),_0x220d39(0x1bb))[_0x220d39(0x14d)](_0x4a81fa));var _0x3d99ef={};_0x3d99ef[_0x220d39(0xed)]=_0x220d39(0xe1),_0x3d99ef['color']=_0x220d39(0x114),$('.tab-container')[_0x220d39(0x154)]($(_0x220d39(0x155))[_0x220d39(0x101)](_0x220d39(0x116))[_0x220d39(0xf2)](_0x220d39(0x197))[_0x220d39(0xc7)]('data-tab','tool')['css'](_0x3d99ef));var _0x28f2d0={};_0x28f2d0[_0x220d39(0x15e)]=_0x220d39(0x216),_0x28f2d0[_0x220d39(0x1d3)]=_0x220d39(0x112),_0x28f2d0[_0x220d39(0x1b7)]=_0x220d39(0xbd),_0x28f2d0['border-top-left-radius']='10px',_0x28f2d0[_0x220d39(0x107)]='10px',_0x28f2d0['font-weight']=_0x220d39(0x13c),$('.tab-container\x20.tab')[_0x220d39(0x14d)](_0x28f2d0);var _0x2138ef={};_0x2138ef[_0x220d39(0x15e)]=_0x220d39(0xda),_0x2138ef[_0x220d39(0x1d3)]=_0x220d39(0xda),_0x2138ef['background']='rgba(\x20255,\x20255,\x20255,\x200.7\x20)',_0x2138ef['backdrop-filter']=_0x220d39(0xbf),_0x2138ef[_0x220d39(0xbe)]='10px',_0x2138ef['border-bottom-right-radius']='10px',_0x2138ef[_0x220d39(0x20b)]=_0x220d39(0x19b),_0x2138ef[_0x220d39(0x1bf)]='#000',_0x2138ef[_0x220d39(0xfa)]=_0x220d39(0x1ff),$('.tp-container')[_0x220d39(0x154)]($(_0x220d39(0x155))[_0x220d39(0x101)](_0x220d39(0x1ac))[_0x220d39(0x14d)](_0x2138ef));var _0x2718fd={};_0x2718fd[_0x220d39(0x15e)]=_0x220d39(0xda),_0x2718fd[_0x220d39(0x1d3)]=_0x220d39(0x12d),_0x2718fd['line-height']=_0x220d39(0x12d),_0x2718fd[_0x220d39(0x200)]=_0x220d39(0x17c),_0x2718fd[_0x220d39(0x120)]='2vw',_0x2718fd[_0x220d39(0x1b7)]=_0x220d39(0x167),$(_0x220d39(0xfc))['append']($(_0x220d39(0x155))[_0x220d39(0x101)](_0x220d39(0x18d))[_0x220d39(0xf2)](_0x220d39(0x1f6)+'\x20'+_0x3a36e8)[_0x220d39(0x14d)](_0x2718fd));var _0x122cea={};_0x122cea[_0x220d39(0x15e)]=_0x220d39(0x1f5),_0x122cea[_0x220d39(0x1d3)]=_0x220d39(0xda),$('.main-container')[_0x220d39(0x154)]($(_0x220d39(0x155))[_0x220d39(0x101)]('tab-content')['attr']('id',_0x220d39(0x15b))[_0x220d39(0x14d)](_0x122cea));var _0x251bab={};_0x251bab['width']='100%',_0x251bab[_0x220d39(0x1d3)]=_0x220d39(0xda),$(_0x220d39(0xfc))[_0x220d39(0x154)]($('<div></div>')[_0x220d39(0x101)](_0x220d39(0xe6))[_0x220d39(0xc7)]('id',_0x220d39(0xc3))[_0x220d39(0x14d)](_0x251bab));var _0x5854d6={};_0x5854d6['width']=_0x220d39(0x1f5),_0x5854d6['height']=_0x220d39(0xda),$(_0x220d39(0xfc))[_0x220d39(0x154)]($(_0x220d39(0x155))['addClass']('tab-content')[_0x220d39(0xc7)]('id','shopee')['css'](_0x5854d6));var _0x4bda97={};_0x4bda97['width']='100%',_0x4bda97[_0x220d39(0x1d3)]='auto',$(_0x220d39(0xfc))[_0x220d39(0x154)]($('<div></div>')[_0x220d39(0x101)](_0x220d39(0xe6))[_0x220d39(0xc7)]('id',_0x220d39(0x13a))[_0x220d39(0x14d)](_0x4bda97));var _0x42df25={};_0x42df25[_0x220d39(0x15e)]='100%',_0x42df25[_0x220d39(0x1d3)]=_0x220d39(0xda),$(_0x220d39(0xfc))[_0x220d39(0x154)]($(_0x220d39(0x155))[_0x220d39(0x101)]('tab-content')[_0x220d39(0xc7)]('id','tiktok')[_0x220d39(0x14d)](_0x42df25));var _0x48d04c={};_0x48d04c[_0x220d39(0x15e)]=_0x220d39(0x1f5),_0x48d04c['height']=_0x220d39(0xda),$(_0x220d39(0xfc))[_0x220d39(0x154)]($(_0x220d39(0x155))[_0x220d39(0x101)](_0x220d39(0xe6))[_0x220d39(0xc7)]('id',_0x220d39(0x1bb))[_0x220d39(0x14d)](_0x48d04c));var _0x14506e={};_0x14506e[_0x220d39(0x15e)]=_0x220d39(0x1f5),_0x14506e[_0x220d39(0x1d3)]=_0x220d39(0xda),$(_0x220d39(0xfc))[_0x220d39(0x154)]($('<div></div>')[_0x220d39(0x101)](_0x220d39(0xe6))['attr']('id',_0x220d39(0x179))[_0x220d39(0x14d)](_0x14506e)),$('.tab-content')[_0x220d39(0x127)](),$('#facebook')['append']($(_0x220d39(0x1fd))),$(_0x220d39(0x110))['append']($(_0x220d39(0x1fd))),$('#shopee')[_0x220d39(0x154)]($(_0x220d39(0x212))),$(_0x220d39(0x14c))['append']($(_0x220d39(0x148))),$('#tiktok')[_0x220d39(0x154)]($(_0x220d39(0xcb))),$('#sapo')[_0x220d39(0x154)]($('\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22choice-func\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span>Chọn\x20Chức\x20Năng</span>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20hidden></option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<option\x20data-func=\x22autoSelectStore\x22\x20data-layout=\x22autoSelectStoreSapoLayout\x22>Tự\x20Động\x20Chọn\x20Gian\x20Hàng</option>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</select>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20')),$(_0x220d39(0x153))['append']($(_0x220d39(0x196)));var _0x309992={};_0x309992[_0x220d39(0xfa)]=_0x220d39(0x161),_0x309992[_0x220d39(0x1ba)]=_0x220d39(0x17c),_0x309992['justify-content']=_0x220d39(0x17c),_0x309992[_0x220d39(0x103)]=_0x220d39(0x158),_0x309992['height']=_0x220d39(0x18a),_0x309992[_0x220d39(0x1b7)]=_0x220d39(0x113),$(_0x220d39(0x151))[_0x220d39(0x14d)](_0x309992);var _0x982c6a={};_0x982c6a[_0x220d39(0x15e)]=_0x220d39(0x188),_0x982c6a[_0x220d39(0x1d3)]='5vh',_0x982c6a[_0x220d39(0x1ce)]=_0x220d39(0x18a),_0x982c6a['vertical-align']=_0x220d39(0x17c),_0x982c6a[_0x220d39(0x200)]=_0x220d39(0x17c),_0x982c6a[_0x220d39(0x19d)]=_0x220d39(0x207),$(_0x220d39(0x1c3))['css'](_0x982c6a);var _0x816e29={};_0x816e29[_0x220d39(0x15e)]='60%',_0x816e29['height']=_0x220d39(0x18a),_0x816e29[_0x220d39(0x1ce)]=_0x220d39(0x18a),_0x816e29[_0x220d39(0x10a)]='3',_0x816e29[_0x220d39(0xed)]='#FFFFFFB2',_0x816e29['backdrop-filter']=_0x220d39(0xbf),_0x816e29[_0x220d39(0x1c7)]=_0x220d39(0x208),_0x816e29[_0x220d39(0x19d)]='5%',_0x816e29[_0x220d39(0x1bf)]=_0x220d39(0x114),$(_0x220d39(0x1be))['css'](_0x816e29);var _0x38da83={};_0x38da83[_0x220d39(0x15e)]=_0x220d39(0x150),_0x38da83[_0x220d39(0x1d3)]='5vh',_0x38da83[_0x220d39(0x1ce)]='5vh',_0x38da83['flex-grow']='3',_0x38da83[_0x220d39(0xed)]=_0x220d39(0x129),_0x38da83['backdrop-filter']='blur(10px)',_0x38da83['border-radius']=_0x220d39(0x208),_0x38da83[_0x220d39(0x19d)]='5%',_0x38da83[_0x220d39(0x1bf)]=_0x220d39(0x114),$(_0x220d39(0x1d6))[_0x220d39(0x14d)](_0x38da83),$('select')['on']('change',function(){var _0x340880=_0x220d39,_0x1f0f50=$(this)[_0x340880(0x12a)](_0x340880(0xba))[_0x340880(0xc7)]('data-func');$(_0x340880(0x192))[_0x340880(0x142)](),$(_0x340880(0x192))[_0x340880(0xc7)](_0x340880(0x11a),_0x1f0f50),$(_0x340880(0xd7))[_0x340880(0x12c)](),_0x4cb3cf($(this)['find']('option:selected')[_0x340880(0xc7)]('data-layout'));});var _0xfe8d5c={};_0xfe8d5c[_0x220d39(0x15e)]=_0x220d39(0x1f5),_0xfe8d5c[_0x220d39(0x1d3)]=_0x220d39(0x18a),_0xfe8d5c['line-height']='5vh',_0xfe8d5c[_0x220d39(0x200)]=_0x220d39(0x17c),$(_0x220d39(0x181))[_0x220d39(0x14d)](_0xfe8d5c),$(_0x220d39(0x174))['on']('click',function(_0x562d8a){var _0x58a489=_0x220d39;if(!$(this)[_0x58a489(0xce)](_0x58a489(0x136))){$(this)[_0x58a489(0x1c9)]()[_0x58a489(0x12a)](_0x58a489(0x203))[_0x58a489(0x117)](_0x58a489(0x136)),$(this)['addClass']('active'),$(_0x58a489(0x211))[_0x58a489(0x127)]();var _0x9455b8=$(this)[_0x58a489(0xc7)](_0x58a489(0xf1));$(_0x58a489(0x17a))['text']('ĐANG\x20CHỌN:\x20'+_0x9455b8['toUpperCase']()),$('#'+_0x9455b8)[_0x58a489(0x142)](),$('#'+_0x9455b8)[_0x58a489(0x12a)]('select')['val']($('#'+_0x9455b8)[_0x58a489(0x12a)](_0x58a489(0x1c4))[_0x58a489(0x1aa)]()),$(_0x58a489(0xd7))['remove'](),$(_0x58a489(0x192))[_0x58a489(0x142)](),$(_0x58a489(0x192))[_0x58a489(0xc7)](_0x58a489(0x11a),$('#'+_0x9455b8+_0x58a489(0x1d1))[_0x58a489(0xc7)](_0x58a489(0x11a)));}});var _0xa56222={};_0xa56222['id']=_0x220d39(0xf0),_0xa56222[_0x220d39(0x11a)]='',$(_0x220d39(0xfc))['append']($(_0x220d39(0x1f7))[_0x220d39(0xc7)](_0xa56222));var _0x5ac8a3={};_0x5ac8a3[_0x220d39(0x15e)]=_0x220d39(0x18e),_0x5ac8a3['height']=_0x220d39(0x18a),_0x5ac8a3['background']=_0x220d39(0x193),_0x5ac8a3[_0x220d39(0x1bf)]=_0x220d39(0xe1),_0x5ac8a3[_0x220d39(0x146)]='800',_0x5ac8a3[_0x220d39(0x104)]='5%',_0x5ac8a3['margin-top']=_0x220d39(0xeb),_0x5ac8a3[_0x220d39(0x20b)]='none',$(_0x220d39(0x192))['css'](_0x5ac8a3),$(_0x220d39(0x192))['on'](_0x220d39(0x1ef),function(){var _0x5989c4=_0x220d39,_0x512cf7=$(this)[_0x5989c4(0xc7)]('data-func');switch(_0x512cf7){case _0x5989c4(0x19c):_0x36cf5a();break;case _0x5989c4(0xf9):_0x136938();break;case'tinhGiaBanShopee':_0x506b4e();break;case _0x5989c4(0x168):_0x5db3f0();break;case'autoSelectStoreSapo':_0x2da0d7();break;case _0x5989c4(0x10f):_0x587f64();break;case _0x5989c4(0x11f):_0x4847f3();break;}}),$[_0x220d39(0x209)]($(_0x220d39(0x1d7)),(_0x22f9c3,_0x2d0c2a)=>{var _0x493a13=_0x220d39;$(_0x493a13(0x1d7))['eq'](_0x22f9c3)[_0x493a13(0x12c)]();});}!_0x5cce45&&(_0x5cce45=!![],_0x2ec3e3());function _0x4cb3cf(_0x5e83e6){var _0x654d80=_0x4b750b;$('.layout-tab')[_0x654d80(0x12c)]();switch(_0x5e83e6){case _0x654d80(0x1e8):$(_0x654d80(0x176))['append']($('<div\x20class=\x22layout-tab\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<label\x20for=\x22max-price\x22>Giá\x20cao\x20nhất:\x20</label>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20placeholder=\x22Nhập\x20giá\x20cao\x20nhất\x22\x20type=\x22number\x22\x20id=\x22max-price\x22\x20value=\x22200000\x22\x20/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<label\x20for=\x22min-price\x22>Giá\x20thấp\x20nhất:\x20</label>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20placeholder=\x22Nhập\x20giá\x20thấp\x20nhất\x22\x20type=\x22number\x22\x20id=\x22min-price\x22\x20value=\x2220000\x22\x20/>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>'));var _0x2e13b8={};_0x2e13b8[_0x654d80(0x1cc)]=_0x654d80(0x1b0),_0x2e13b8[_0x654d80(0xfa)]='flex',_0x2e13b8[_0x654d80(0x15e)]=_0x654d80(0x1f5),_0x2e13b8[_0x654d80(0x1d3)]=_0x654d80(0x18a),_0x2e13b8['align-items']=_0x654d80(0x17c),_0x2e13b8[_0x654d80(0x1b6)]=_0x654d80(0x17c),_0x2e13b8['margin-top']=_0x654d80(0xeb),$(_0x654d80(0x145))[_0x654d80(0x14d)](_0x2e13b8);var _0x46bc6b={};_0x46bc6b[_0x654d80(0x15e)]='70%',_0x46bc6b[_0x654d80(0x1d3)]='5vh',_0x46bc6b[_0x654d80(0xed)]=_0x654d80(0x129),_0x46bc6b[_0x654d80(0x1d4)]=_0x654d80(0xbf),_0x46bc6b['text-indent']='20px',_0x46bc6b[_0x654d80(0x1c7)]=_0x654d80(0x1c8),$(_0x654d80(0x20a))[_0x654d80(0x14d)](_0x46bc6b);var _0x452fe3={};_0x452fe3[_0x654d80(0x15e)]=_0x654d80(0x189),_0x452fe3[_0x654d80(0x1d3)]=_0x654d80(0x18a),_0x452fe3[_0x654d80(0x1ce)]=_0x654d80(0x18a),_0x452fe3['color']='#000',$(_0x654d80(0x19a))[_0x654d80(0x14d)](_0x452fe3);break;case _0x654d80(0x160):$(_0x654d80(0x192))[_0x654d80(0x127)](),$(_0x654d80(0xea))[_0x654d80(0x154)]($('\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22layout-tab\x20tp-popup\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22button-control\x22>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22getData\x22>Lấy\x20Dữ\x20Liệu</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22setData\x22>Xác\x20Nhận</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20id=\x22cancelData\x22>Hủy</button>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22img-list\x22></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20'));var _0x476777={};_0x476777[_0x654d80(0x15e)]=_0x654d80(0x1f5),_0x476777[_0x654d80(0x1d3)]=_0x654d80(0xda),_0x476777['margin-top']=_0x654d80(0xeb),_0x476777[_0x654d80(0xed)]=_0x654d80(0x201),$(_0x654d80(0xd7))[_0x654d80(0x14d)](_0x476777);var _0x2d4a34={};_0x2d4a34['position']='fixed',_0x2d4a34[_0x654d80(0x1fe)]='0',_0x2d4a34[_0x654d80(0x1df)]='0',_0x2d4a34[_0x654d80(0x10e)]=_0x654d80(0x16d),$(_0x654d80(0xc6))[_0x654d80(0x14d)](_0x2d4a34);var _0x3eeaf1={};_0x3eeaf1[_0x654d80(0x15e)]=_0x654d80(0x1f5),_0x3eeaf1[_0x654d80(0x1d3)]=_0x654d80(0xda),_0x3eeaf1[_0x654d80(0xfa)]=_0x654d80(0x161),_0x3eeaf1[_0x654d80(0x1b6)]='center',_0x3eeaf1['align-items']=_0x654d80(0x17c),_0x3eeaf1['gap']=_0x654d80(0x158),$(_0x654d80(0x1b3))[_0x654d80(0x14d)](_0x3eeaf1);var _0x4cdbf0={};_0x4cdbf0['width']=_0x654d80(0x1f5),_0x4cdbf0[_0x654d80(0x1d3)]=_0x654d80(0x18a),_0x4cdbf0[_0x654d80(0x1ce)]=_0x654d80(0x18a),_0x4cdbf0[_0x654d80(0xfa)]=_0x654d80(0x161),_0x4cdbf0[_0x654d80(0x1b6)]=_0x654d80(0x17c),_0x4cdbf0[_0x654d80(0x1ba)]=_0x654d80(0x17c),_0x4cdbf0[_0x654d80(0x1c7)]=_0x654d80(0x1a5),_0x4cdbf0['background']=_0x654d80(0x204),$(_0x654d80(0xc1))[_0x654d80(0x14d)](_0x4cdbf0),$(_0x654d80(0x1c5))['sortable']();var _0x2a2c70={};_0x2a2c70[_0x654d80(0x15e)]=_0x654d80(0xda),_0x2a2c70[_0x654d80(0x1e5)]='100%',_0x2a2c70['height']=_0x654d80(0xda),_0x2a2c70[_0x654d80(0x214)]='70vh',_0x2a2c70[_0x654d80(0x147)]=_0x654d80(0x1d2),_0x2a2c70[_0x654d80(0x178)]='scroll',_0x2a2c70[_0x654d80(0xfa)]=_0x654d80(0x161),_0x2a2c70[_0x654d80(0x1b6)]='center',_0x2a2c70[_0x654d80(0x1ba)]=_0x654d80(0x17c),$(_0x654d80(0x1c5))[_0x654d80(0x14d)](_0x2a2c70);var _0x486e4f={};_0x486e4f[_0x654d80(0x15e)]=_0x654d80(0xda),_0x486e4f[_0x654d80(0x1d3)]=_0x654d80(0x152),_0x486e4f[_0x654d80(0xec)]=_0x654d80(0x206),_0x486e4f[_0x654d80(0x214)]=_0x654d80(0x164),$(_0x654d80(0xcf))[_0x654d80(0x14d)](_0x486e4f),_0x1e7a42();break;case _0x654d80(0x1f4):$(_0x654d80(0x176))['append']($(_0x654d80(0x141)));var _0x404dec={};_0x404dec['width']=_0x654d80(0x1f5),_0x404dec[_0x654d80(0x1d3)]=_0x654d80(0xda),_0x404dec[_0x654d80(0x214)]=_0x654d80(0x122),_0x404dec[_0x654d80(0x147)]=_0x654d80(0x1f1),$(_0x654d80(0xd7))[_0x654d80(0x14d)](_0x404dec);var _0x1adf03={};_0x1adf03[_0x654d80(0x15e)]=_0x654d80(0x1f5),_0x1adf03['height']=_0x654d80(0xda),$(_0x654d80(0x1fc))['css'](_0x1adf03);break;case _0x654d80(0x202):$(_0x654d80(0x176))['append']($(_0x654d80(0x12e)));var _0x5cec8c={};_0x5cec8c[_0x654d80(0x15e)]='100%',_0x5cec8c[_0x654d80(0x1d3)]='auto',_0x5cec8c[_0x654d80(0x214)]=_0x654d80(0x122),_0x5cec8c['overflow-y']=_0x654d80(0x1f1),$(_0x654d80(0xd7))[_0x654d80(0x14d)](_0x5cec8c);var _0xafd885={};_0xafd885['width']=_0x654d80(0x1f5),_0xafd885['height']=_0x654d80(0x18a),_0xafd885[_0x654d80(0x1ce)]='5vh',_0xafd885[_0x654d80(0xfa)]='flex',_0xafd885[_0x654d80(0x1ba)]=_0x654d80(0x17c),_0xafd885[_0x654d80(0xd8)]=_0x654d80(0x17c),$(_0x654d80(0x1cf))['css'](_0xafd885);var _0x1e06b2={};_0x1e06b2[_0x654d80(0x15e)]='100%',_0x1e06b2['height']='5vh',_0x1e06b2[_0x654d80(0x1ce)]=_0x654d80(0x18a),$(_0x654d80(0x13f))['css'](_0x1e06b2);var _0x4edcfd={};_0x4edcfd[_0x654d80(0x19d)]='5%',$(_0x654d80(0x1f0))[_0x654d80(0x14d)](_0x4edcfd),_0x5ec4da();break;case'autobrowserLayout':$('#excuse-command')['hide'](),$('#tool')[_0x654d80(0x154)]($(_0x654d80(0x130))),_0x5e9794();break;case _0x654d80(0x20e):$(_0x654d80(0xd0))[_0x654d80(0x154)]($(_0x654d80(0x19e)));var _0x2c7df4={};_0x2c7df4['display']=_0x654d80(0x161),_0x2c7df4[_0x654d80(0x1ba)]=_0x654d80(0x17c),_0x2c7df4[_0x654d80(0x1b6)]=_0x654d80(0x17c),_0x2c7df4[_0x654d80(0x103)]='5%',_0x2c7df4[_0x654d80(0x13b)]=_0x654d80(0xeb),$(_0x654d80(0x159))[_0x654d80(0x14d)](_0x2c7df4);var _0x43040b={};_0x43040b[_0x654d80(0x1c7)]=_0x654d80(0x183),_0x43040b['text-indent']='5%',$(_0x654d80(0x17f))[_0x654d80(0x14d)](_0x43040b);var _0x49b339={};_0x49b339[_0x654d80(0x15e)]=_0x654d80(0x1f5),_0x49b339[_0x654d80(0x1d3)]='auto',_0x49b339[_0x654d80(0x214)]=_0x654d80(0x126),_0x49b339[_0x654d80(0x19d)]='5%',$(_0x654d80(0x124))[_0x654d80(0x14d)](_0x49b339);break;case _0x654d80(0x12b):$(_0x654d80(0x177))[_0x654d80(0x154)]($(_0x654d80(0xd3))),_0x3c0507();break;}}function _0x136938(){var _0x8bb310=_0x4b750b,_0xd0a2e9=$(_0x8bb310(0x19f))['val'](),_0x1452f3=$(_0x8bb310(0x11c))[_0x8bb310(0x1aa)]();if(_0xd0a2e9/0x5>_0x1452f3){var _0xe67900=_0xd0a2e9/0x5;_0x1452f3=_0xe67900,console[_0x8bb310(0x128)](_0x8bb310(0x215)+_0xd0a2e9),console[_0x8bb310(0x128)]('Giá\x20đề\x20xuất:\x20'+_0x1452f3);}}function _0x56d63f(_0xa23871){var _0xccbcb9=_0x4b750b,_0x5cb24e=_0xa23871;_0x5cb24e=_0x5cb24e[_0xccbcb9(0xc5)](',','');var _0x2fdac7=_0x5cb24e[_0xccbcb9(0xc5)](/\B(?=(\d{3})+(?!\d))/g,',')[_0xccbcb9(0x191)](','),_0x1f9b6f,_0x324e1c,_0x77b2af;if(parseInt(_0x2fdac7[_0x2fdac7[_0xccbcb9(0x1ed)]-0x1])!=0x0){for(var _0x1c69ab=0x0;_0x1c69ab<_0x2fdac7['length']-0x1;_0x1c69ab++){_0x1f9b6f+=_0x2fdac7[_0x1c69ab];}_0x1f9b6f=_0x1f9b6f[_0xccbcb9(0x1af)](0x9),_0x1f9b6f=_0x1f9b6f[_0xccbcb9(0x1af)](0x0,_0x1f9b6f[_0xccbcb9(0x1ed)]-(_0x2fdac7[_0xccbcb9(0x1ed)]-0x2));for(_0x1c69ab=0x0;_0x1c69ab<=_0x5cb24e[_0xccbcb9(0x1ed)];_0x1c69ab++){if(parseInt(_0x5cb24e[_0xccbcb9(0x1af)](_0x1c69ab,0x2))==0x0){_0x77b2af=_0x1c69ab;break;}_0x324e1c=parseInt(_0x5cb24e[_0xccbcb9(0x1af)](_0x1f9b6f[_0xccbcb9(0x1ed)]))[_0xccbcb9(0xfe)]();}while(_0x1f9b6f[_0xccbcb9(0x1ed)]<_0x5cb24e[_0xccbcb9(0x1ed)]){_0x1f9b6f=_0x1f9b6f+'0';}while(_0x324e1c['length']<_0x5cb24e[_0xccbcb9(0x1ed)]){_0x324e1c=_0x324e1c+'0';}while(parseInt(_0x1f9b6f)<parseInt(_0x324e1c)){_0x324e1c=_0x324e1c[_0xccbcb9(0x1af)](0x0,_0x324e1c['length']-0x1);}}if(_0x324e1c==undefined)return-0x1;return _0x324e1c;}function _0x36cf5a(){var _0x32a97d=_0x4b750b;console[_0x32a97d(0x128)](_0x32a97d(0xfb));var _0x11726c=document[_0x32a97d(0x1de)](_0x32a97d(0x1b9)),_0x27d525=document[_0x32a97d(0x1de)](_0x32a97d(0xdc));_0x11726c[_0x32a97d(0x13d)]((_0x374922,_0x3ee279)=>{var _0x35f8f6=_0x32a97d,_0xcd5e3=_0x374922[_0x35f8f6(0xc0)][_0x35f8f6(0xc0)][_0x35f8f6(0xc0)][_0x35f8f6(0xc0)]['parentElement'][_0x35f8f6(0xc0)][_0x35f8f6(0xc0)]['parentElement'][_0x35f8f6(0xc0)]['parentElement'][_0x35f8f6(0xc0)];if(_0xcd5e3[_0x35f8f6(0x1de)]('.discount-item-selector\x20input')[0x0][_0x35f8f6(0x1c2)]){var _0x4aa2d6=_0x374922[_0x35f8f6(0x195)],_0x42c5c2=_0x56d63f(_0x4aa2d6);if(_0x42c5c2>=0x0){console[_0x35f8f6(0x128)](_0x35f8f6(0x1b2)+_0x42c5c2);var _0x21ad14=_0x42c5c2/_0x4aa2d6*0x64;_0x374922[_0x35f8f6(0x109)](),_0x374922[_0x35f8f6(0x195)]=_0x42c5c2;if(window['getSelection'])window['getSelection']()[_0x35f8f6(0x1ad)]();else document[_0x35f8f6(0x132)]&&document[_0x35f8f6(0x132)][_0x35f8f6(0xe3)]();if(_0x35f8f6(0x11e)in document){var _0x3a7633=document[_0x35f8f6(0x11e)]('HTMLEvents');_0x3a7633['initEvent'](_0x35f8f6(0x11b),![],!![]),_0x374922[_0x35f8f6(0x1c6)](_0x3a7633);}else _0x374922[_0x35f8f6(0x139)](_0x35f8f6(0x1a8));}}});}function _0x506b4e(){var _0x606064=_0x4b750b,_0x12bb6a=$(_0x606064(0x1b1))[_0x606064(0x1aa)]()[_0x606064(0x191)](',');_0x12bb6a=_0x12bb6a[_0x606064(0xde)]('');var _0x4981f6,_0x4e1346;if(!_0x12bb6a==''&&_0x12bb6a[_0x606064(0x1ed)]>0x0){_0x4981f6=parseInt((_0x12bb6a/0.45)[_0x606064(0x1e0)](0x0)),_0x4e1346=_0x4981f6+parseInt((_0x4981f6*0.3)[_0x606064(0x1e0)](0x0)),_0x4981f6=_0x4981f6[_0x606064(0xfe)]()[_0x606064(0xc5)](/\B(?=(\d{3})+(?!\d))/g,','),_0x4e1346=_0x4e1346[_0x606064(0xfe)]()[_0x606064(0xc5)](/\B(?=(\d{3})+(?!\d))/g,',');var _0xd3e306=_0x4e1346[_0x606064(0x191)](',')[_0x606064(0x1ed)],_0x1d82ed=0x0,_0x55d25a=[],_0xe96f03=0x0,_0x578dff=0x0;_0x55d25a=_0x4e1346['split'](','),_0x1d82ed=_0x55d25a[_0x55d25a[_0x606064(0x1ed)]-0x1];for(var _0x2fd7b6=0x0;_0x2fd7b6<_0x55d25a[_0x606064(0x1ed)]-0x1;_0x2fd7b6++){_0xe96f03+=_0x55d25a[_0x2fd7b6];}_0xe96f03=parseInt(_0xe96f03);if(parseInt(_0x1d82ed)>0x0)_0xe96f03+=0x1;_0x55d25a=_0x4981f6['split'](','),_0x1d82ed=_0x55d25a[_0x55d25a[_0x606064(0x1ed)]-0x1];for(_0x2fd7b6=0x0;_0x2fd7b6<_0x55d25a['length']-0x1;_0x2fd7b6++){_0x578dff+=_0x55d25a[_0x2fd7b6];}_0x578dff=parseInt(_0x578dff);if(parseInt(_0x1d82ed)>0x0)_0x578dff+=0x1;_0x4981f6=_0x578dff+_0x606064(0x1fa),_0x4e1346=_0xe96f03+_0x606064(0x1fa),$('#after-price')[_0x606064(0xf2)](_0x4981f6[_0x606064(0xfe)]()['replace'](/\B(?=(\d{3})+(?!\d))/g,',')),$(_0x606064(0x10d))[_0x606064(0xf2)](_0x4e1346[_0x606064(0xfe)]()[_0x606064(0xc5)](/\B(?=(\d{3})+(?!\d))/g,','));var _0xdb504c=_0x4e1346[_0x606064(0xfe)]()[_0x606064(0xc5)](/\B(?=(\d{3})+(?!\d))/g,',')[_0x606064(0x191)](','),_0x35c728=_0x4981f6[_0x606064(0xfe)]()[_0x606064(0xc5)](/\B(?=(\d{3})+(?!\d))/g,',')[_0x606064(0x191)](','),_0x10394e=[],_0x266379,_0x1d7df9;for(_0x2fd7b6=0x0;_0x2fd7b6<_0xdb504c['length']-0x1;_0x2fd7b6++){_0x266379+=_0xdb504c[_0x2fd7b6];}for(_0x2fd7b6=0x0;_0x2fd7b6<_0x35c728[_0x606064(0x1ed)]-0x1;_0x2fd7b6++){_0x1d7df9+=_0x35c728[_0x2fd7b6];}_0x266379=_0x266379[_0x606064(0x1af)](0x9),_0x1d7df9=_0x1d7df9[_0x606064(0x1af)](0x9),_0x10394e=_0x4e1346['split'](''),$['each'](_0x10394e,(_0x8d047c,_0x342270)=>{_0x10394e[_0x8d047c]=0x0;});var _0x267bbf,_0x1d5a35;$[_0x606064(0x209)](_0x266379[_0x606064(0x191)](''),(_0x4c0de0,_0x450b54)=>{_0x10394e[_0x4c0de0]=_0x266379[_0x4c0de0],_0x267bbf=_0x4c0de0;}),$[_0x606064(0x209)](_0x1d7df9['split'](''),(_0x42bcbb,_0x3150d6)=>{var _0x3095bb=_0x606064;_0x10394e[_0x3095bb(0x1ed)]-_0x1d7df9[_0x3095bb(0x1ed)]+_0x42bcbb==_0x267bbf&&(_0x10394e[_0x267bbf-0x1]=parseInt(_0x10394e[_0x267bbf-0x1])+0x1),_0x10394e[_0x10394e[_0x3095bb(0x1ed)]-_0x1d7df9[_0x3095bb(0x1ed)]+_0x42bcbb]=_0x1d7df9[_0x42bcbb];}),_0x10394e=_0x10394e[_0x606064(0xde)](''),$(_0x606064(0x205))[_0x606064(0xf2)](_0x10394e[_0x606064(0xc5)](/\B(?=(\d{3})+(?!\d))/g,',')[_0x606064(0x191)](','));}}function _0x5ec4da(){var _0x253c8f=_0x4b750b;$('#after-price')[_0x253c8f(0x1c9)]()['on'](_0x253c8f(0x1ef),function(){var _0x1e6355=_0x253c8f;navigator[_0x1e6355(0xcc)][_0x1e6355(0xf6)]($(this)[_0x1e6355(0x12a)]('span')['text']()['replace'](',',''));}),$('#before-price')[_0x253c8f(0x1c9)]()['on'](_0x253c8f(0x1ef),function(){var _0x1090b5=_0x253c8f;navigator[_0x1090b5(0xcc)]['writeText']($(this)[_0x1090b5(0x12a)](_0x1090b5(0x16b))['text']()[_0x1090b5(0xc5)](',',''));}),$(_0x253c8f(0x205))[_0x253c8f(0x1c9)]()['on'](_0x253c8f(0x1ef),function(){var _0x14e7fa=_0x253c8f;navigator[_0x14e7fa(0xcc)][_0x14e7fa(0xf6)]($(this)[_0x14e7fa(0x12a)](_0x14e7fa(0x16b))[_0x14e7fa(0xf2)]()[_0x14e7fa(0xc5)](',',''));}),$(_0x253c8f(0x1b1))['on'](_0x253c8f(0x1d0),function(_0xf5ef7){var _0x274f6f=_0x253c8f,_0x229244=$(_0x274f6f(0x1b1))[_0x274f6f(0x1aa)]();_0x229244=_0x229244['split'](','),_0x229244=_0x229244[_0x274f6f(0xde)](''),_0x229244=_0x229244['replace'](/\B(?=(\d{3})+(?!\d))/g,','),$(_0x274f6f(0x1b1))[_0x274f6f(0x1aa)](_0x229244),_0x506b4e();});}function _0x4847f3(){var _0x2eabad=_0x4b750b,_0x5d3651=document['querySelectorAll']('.next-table-row'),_0x5d62f4=0x0;_0x5d3651[_0x2eabad(0x13d)]((_0x138685,_0x2314de)=>{var _0xd32fd=_0x2eabad,_0x228786=_0x138685[_0xd32fd(0xc8)][0x1][_0xd32fd(0x1f2)](_0xd32fd(0x1f3))[_0xd32fd(0x195)],_0x370562=_0x56d63f(_0x228786);_0x138685['children'][0x2][_0xd32fd(0x1f2)](_0xd32fd(0x131))[_0xd32fd(0x1ef)](),document[_0xd32fd(0x1de)]('.next-balloon-content\x20input')[_0x5d62f4][_0xd32fd(0x195)]=_0x370562['toString']()[_0xd32fd(0xc5)](/\B(?=(\d{3})+(?!\d))/g,','),_0x5d62f4++;}),navigator[_0x2eabad(0xcc)]['writeText']('document.querySelectorAll(\x22.next-balloon-content\x20.action-wrapper\x20button.next-btn-primary\x22).forEach((current,\x20index)\x20=>\x20{current.click()})'),alert(_0x2eabad(0xd2));}function _0x3262ca(){var _0x4b2d80=_0x4b750b;$(_0x4b2d80(0xe5))['on']('click',function(_0xe0ca6d){var _0x29dec8=_0x4b2d80,_0x38df38=$(_0x29dec8(0x1d9))['val']();_0x2fd42f('user',_0x38df38),_0x2fd42f(_0x29dec8(0xf3),_0x29dec8(0x1bc));}),$(_0x4b2d80(0x1d9))['on'](_0x4b2d80(0x1d0),function(_0x52b421){var _0x593df2=_0x4b2d80;if(_0x52b421[_0x593df2(0xbb)]==0xd){var _0x1d59bf=$(this)[_0x593df2(0x1aa)]();_0x2fd42f('user',_0x1d59bf),_0x2fd42f('bot','Tèo\x20vẫn\x20đang\x20được\x20phát\x20triển,\x20mọi\x20người\x20đợi\x20Tèo\x20vài\x20bữa\x20nghen\x20<3\x20<|:>');}});}function _0x2fd42f(_0x22911f,_0x2d4d92){var _0x383933=_0x4b750b;$(_0x383933(0x1d9))[_0x383933(0x1aa)](''),$(_0x383933(0x1d5))[_0x383933(0x1a7)]({'scrollTop':$(document)[_0x383933(0x1d3)]()},0x3e8);if(!_0x2d4d92[_0x383933(0x1ed)]<=0x0)switch(_0x22911f){case'user':var _0x2e3b50={};_0x2e3b50['width']='auto',_0x2e3b50[_0x383933(0x1e5)]=_0x383933(0x194),_0x2e3b50[_0x383933(0x1d3)]=_0x383933(0xda),_0x2e3b50[_0x383933(0x214)]=_0x383933(0x1e9),_0x2e3b50[_0x383933(0x172)]='5%',_0x2e3b50[_0x383933(0x1ec)]=_0x383933(0x1f8),_0x2e3b50[_0x383933(0x12f)]=_0x383933(0x18b),_0x2e3b50[_0x383933(0xed)]=_0x383933(0x1dd),_0x2e3b50[_0x383933(0x1b7)]=_0x383933(0xbd),_0x2e3b50['border-radius']='100px',$(_0x383933(0x1d5))[_0x383933(0x154)]($('<p></p>')[_0x383933(0x101)](_0x383933(0xc2))[_0x383933(0xf2)](_0x2d4d92)[_0x383933(0x14d)](_0x2e3b50));break;case _0x383933(0xf3):var _0x29f0cc={};_0x29f0cc[_0x383933(0x15e)]=_0x383933(0xda),_0x29f0cc[_0x383933(0x1e5)]=_0x383933(0x194),_0x29f0cc[_0x383933(0x1d3)]='auto',_0x29f0cc[_0x383933(0x214)]=_0x383933(0x1e9),_0x29f0cc[_0x383933(0x104)]='5%',_0x29f0cc[_0x383933(0x1ec)]=_0x383933(0x1df),_0x29f0cc['clear']=_0x383933(0x18b),_0x29f0cc['background']=_0x383933(0x123),_0x29f0cc[_0x383933(0x1b7)]=_0x383933(0xbd),_0x29f0cc[_0x383933(0x1c7)]='100px',$(_0x383933(0x1d5))['append']($(_0x383933(0xf7))[_0x383933(0x101)](_0x383933(0x1eb))['text'](_0x2d4d92)[_0x383933(0x14d)](_0x29f0cc));break;}}function _0x37a8a3(_0x4c1fa3){var _0x3e5f8d=_0x4b750b,_0x583232=_0x3e5f8d(0x1c1),_0x3ada69={};_0x3ada69['role']=_0x3e5f8d(0x1fb),_0x3ada69[_0x3e5f8d(0x199)]=_0x4c1fa3;var _0x424799={};_0x424799[_0x3e5f8d(0xe7)]=_0x3e5f8d(0x1b5),_0x424799[_0x3e5f8d(0x1a1)]=[_0x3ada69],$[_0x3e5f8d(0x16a)]({'url':_0x3e5f8d(0x10c),'type':_0x3e5f8d(0xe9),'beforeSend':function(_0x7cfac3){var _0x15b0d9=_0x3e5f8d;_0x7cfac3[_0x15b0d9(0x16f)](_0x15b0d9(0x1e7),_0x15b0d9(0xd9)+_0x583232),_0x7cfac3[_0x15b0d9(0x16f)](_0x15b0d9(0xfd),'application/json'),_0x7cfac3[_0x15b0d9(0x16f)](_0x15b0d9(0x111),_0x15b0d9(0x13e));},'data':JSON[_0x3e5f8d(0x171)](_0x424799),'success':function(_0x435cf4){var _0x115862=_0x3e5f8d;$(_0x115862(0x170))[_0x115862(0x154)]($('<p\x20class=\x22user-chat\x22>'+_0x435cf4+_0x115862(0x105))),console['log'](_0x435cf4);},'error':function(_0x12fc42){console['error'](_0x12fc42);}});}function _0x5db3f0(){var _0x49bd29=_0x4b750b;console[_0x49bd29(0x128)](_0x49bd29(0x169));var _0x5cab52=$(_0x49bd29(0xd6))[_0x49bd29(0x1aa)](),_0x5ce919=0x15180,_0x3ea73d=parseInt(_0x5ce919/_0x5cab52),_0x5e096b=parseInt(_0x3ea73d/(0x3c*0x3c)),_0x1a1aa0=0x0,_0x504293=_0x5e096b,_0x4396e4,_0x462748=![],_0x26c29c=[];$(_0x49bd29(0x1a2))['remove']();while(!![]){_0x4396e4=_0x1a1aa0+_0x49bd29(0x15a)+_0x504293,_0x26c29c[_0x49bd29(0x1da)](_0x4396e4),_0x1a1aa0=_0x504293,_0x504293+=_0x5e096b;_0x504293>=0x18&&(_0x504293=0x18,_0x26c29c[_0x49bd29(0x1da)](_0x1a1aa0+'-'+_0x504293),_0x462748=!![]);if(_0x462748==!![])break;}console[_0x49bd29(0x128)](_0x26c29c),$[_0x49bd29(0x209)](_0x26c29c,(_0x2f1ee1,_0x4c4d30)=>{var _0x2f1499=_0x49bd29,_0x2fdce=_0x4c4d30[_0x2f1499(0x191)]('-'),_0x420779=_0x2fdce[0x0],_0x357581=_0x2fdce[0x1];parseInt(_0x420779)<0xa&&(_0x420779='0'+_0x420779),parseInt(_0x357581)<0xa&&(_0x357581='0'+parseInt(_0x357581)),$(_0x2f1499(0x118))[_0x2f1499(0x154)]($(_0x2f1499(0xf7))['text'](_0x2f1499(0x163)+_0x420779+_0x2f1499(0x175)+_0x357581));});}function _0x1e7a42(){var _0x5908a4=_0x4b750b;$(_0x5908a4(0x119))['on'](_0x5908a4(0x1ef),function(){var _0x31b6e7=_0x5908a4,_0x551da9=$(_0x31b6e7(0x198)),_0x2d232c=_0x551da9[_0x31b6e7(0x12a)](_0x31b6e7(0x106)),_0x25ff06=$('.options-item.drag-item'),_0x417560=_0x2d232c[_0x31b6e7(0x1ed)]-_0x25ff06[_0x31b6e7(0x1ed)]*0x2-0x1,_0xb2ed6a=[];for(var _0x5009c=0x0;_0x5009c<_0x417560;_0x5009c++){_0xb2ed6a[_0x31b6e7(0x1da)](_0x2d232c['eq'](_0x5009c)[_0x31b6e7(0x12a)](_0x31b6e7(0x162))[_0x31b6e7(0xc7)](_0x31b6e7(0x102)));}$[_0x31b6e7(0x209)](_0xb2ed6a,(_0x49312b,_0xd9cfb0)=>{var _0x366752=_0x31b6e7;$(_0x366752(0x190))[_0x366752(0x154)]('\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22box-img\x22><img\x20src=\x22'+_0xd9cfb0+'\x22\x20/></div>\x0a\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20');});var _0x3c00f3=$(_0x31b6e7(0x18c))['attr'](_0x31b6e7(0x1c0));console[_0x31b6e7(0x128)](_0x3c00f3);}),$(_0x5908a4(0x166))['on'](_0x5908a4(0x1ef),function(){var _0x5083ef=_0x5908a4,_0x1e9fb1=$(_0x5083ef(0x198)),_0x1c59f2=_0x1e9fb1[_0x5083ef(0x12a)](_0x5083ef(0x106)),_0x137e5d=$(_0x5083ef(0x173)),_0x4cfdb3=_0x1c59f2['length']-_0x137e5d[_0x5083ef(0x1ed)]*0x2-0x1,_0x50064e=$(_0x5083ef(0x1dc)),_0x21f428=[];$[_0x5083ef(0x209)](_0x50064e,(_0x1a171b,_0x460df9)=>{var _0xee2cb5=_0x5083ef;_0x21f428[_0xee2cb5(0x1da)](_0x50064e['eq'](_0x1a171b)['attr'](_0xee2cb5(0x102)));}),$[_0x5083ef(0x209)](_0x21f428,(_0x10e18d,_0x1caf77)=>{var _0x132ee8=_0x5083ef;$('div[data-v-6101bd68]')[_0x132ee8(0x1ab)]('click'),_0x1c59f2['eq'](_0x10e18d)[_0x132ee8(0x12a)](_0x132ee8(0x162))['attr'](_0x132ee8(0x102),_0x1caf77);}),$(_0x5083ef(0xd7))[_0x5083ef(0x12c)]();}),$(_0x5908a4(0x1cd))['on'](_0x5908a4(0x1ef),function(){var _0x1b6fbb=_0x5908a4;$(_0x1b6fbb(0xd7))[_0x1b6fbb(0x12c)]();});}function _0x5e9794(){var _0x105c87=_0x4b750b;$('#getGeminiKey')['on'](_0x105c87(0x1ef),()=>{var _0x7814=_0x105c87;navigator[_0x7814(0xcc)][_0x7814(0xf6)](_0x3c73b6);});}function _0x3c0507(){var _0x56efcf=_0x4b750b;$(_0x56efcf(0x210))['on']('click',function(){var _0x2b0fd4=_0x56efcf,_0x23dc00=$(_0x2b0fd4(0x18f))['text']();localStorage['setItem'](_0x2b0fd4(0x134),_0x23dc00);});}function _0x2da0d7(){var _0x404f48=_0x4b750b,_0x2a9867=localStorage[_0x404f48(0x11d)](_0x404f48(0x134));if(_0x2a9867==null)_0x2a9867=_0x404f48(0x137);var _0x25c05b=navigator['clipboard'][_0x404f48(0x1ae)]()['then'](_0x2a0099=>{return _0x2a0099;});$('#sapo\x20.shop-name')[_0x404f48(0xf2)](_0x2a9867),$(_0x404f48(0x20f))[_0x404f48(0xf2)](_0x25c05b);}function _0x587f64(){var _0xa011a2=_0x4b750b,_0x47f724=$(_0xa011a2(0x157))['val']()['split']('\x0a');$['each'](_0x47f724,(_0x1cf337,_0x5a25ec)=>{var _0x4cbb37=_0xa011a2;_0x5a25ec=_0x5a25ec['split']('\x09');var _0x48916c=_0x5a25ec[0x0],_0x5bd289=_0x5a25ec[0x1],_0x23782c=$('.products-container-content\x20form.product-table\x20.table-card');$[_0x4cbb37(0x209)](_0x23782c,(_0x263d06,_0x208d33)=>{var _0x36bf3d=_0x4cbb37,_0x5933d2=_0x23782c['eq'](_0x263d06)['find'](_0x36bf3d(0x1e4));$[_0x36bf3d(0x209)](_0x5933d2,(_0x18bc82,_0x53039b)=>{var _0x359380=_0x36bf3d,_0x123e93=_0x5933d2['eq'](_0x18bc82)['find'](_0x359380(0x1ee))['text']();if(_0x123e93[_0x359380(0xf8)](_0x48916c)){_0x5933d2['eq'](_0x18bc82)[_0x359380(0x12a)](_0x359380(0x1f9))[_0x359380(0x1ab)](_0x359380(0x1ef)),_0x5933d2['eq'](_0x18bc82)[_0x359380(0x12a)](_0x359380(0xff))['val']('true');var _0x115d25=$(_0x359380(0x186));console['log'](_0x115d25);for(var _0xa8bfb4=0x0;_0xa8bfb4<_0x5bd289[_0x359380(0x1ed)];_0xa8bfb4++){var _0x271999=_0x5bd289[_0x359380(0xcd)](_0xa8bfb4),_0x46ea67={};_0x46ea67[_0x359380(0x1d8)]=_0x359380(0x15d),_0x46ea67[_0x359380(0x1ea)]=_0x271999,_0x115d25[_0x359380(0xbc)]()[_0x359380(0x109)]()['trigger'](_0x46ea67),console['log'](_0xa8bfb4+':\x20'+_0x271999+_0x359380(0x149)+String[_0x359380(0x165)](_0x271999));}var _0x477890={};_0x477890[_0x359380(0xd4)]=_0x5bd289,_0x477890[_0x359380(0x1e2)]=_0x5bd289,_0x477890[_0x359380(0x14b)]=_0x5bd289,_0x477890['max']=_0x5bd289,_0x115d25['attr'](_0x477890),_0x115d25[_0x359380(0xc7)]('value',_0x5bd289),$('.panel-actions\x20.actions\x20button')['eq'](0x0)[_0x359380(0x1ef)]();}});});});}};}()));
+// ==UserScript==
+// @name         Công Cụ Hỗ Trợ
+// @namespace    http://tampermonkey.net/
+// @version      2025-01-02
+// @description  Bộ công cụ tích hợp các chức năng hỗ trợ cho sàn TMĐT
+// @author       TanPhan
+// @match        https://*/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=http://anonymouse.org/
+// @grant        none
+// @require      https://code.jquery.com/jquery-3.7.1.min.js
+// @require      https://code.jquery.com/ui/1.14.1/jquery-ui.js
+// @require      https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js
+// ==/UserScript==
+/* globals       jQuery, $, waitForKeyElements */
+
+(function() {
+    'use strict';
+    var createUI = false;
+    window.onload = function(){
+        /*
+        var Jqu = document.createElement("script");
+        Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
+        Jqu.setAttribute("rel", "preload");
+        Jqu.setAttribute("async", "async");
+        document.head.appendChild(Jqu);
+
+        var JquUI = document.createElement("script");
+        JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
+        JquUI.setAttribute("rel", "preload");
+        JquUI.setAttribute("async", "async");
+        document.head.appendChild(JquUI);
+        */
+        var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c"
+
+        const VERSION = "2025.02.05.14.56";
+
+        // Dựng giao diện
+        function createLayout(){
+            if (window.parent != window.top) {
+                console.log("we've been framed I tell ya");
+                return;
+            }
+            console.log("Dựng Giao Diện");
+
+            // Tạo khung giao diện
+            var container = document.createElement("div");
+            container.classList.add("tp-container");
+            document.querySelector("body").appendChild(container);
+
+            var top, left;
+            if(localStorage.getItem("positionYTP") == null)
+                top = "0";
+            else
+                top = localStorage.getItem("positionYTP");
+            if(localStorage.getItem("positionXTP") == null)
+                left = "0";
+            else
+                left = localStorage.getItem("positionXTP");
+            if($("body").height() / 2 < top)
+                top = $("body").height() / 2;
+            if($("body").width() / 2 < left)
+                left = $("body").width() / 2;
+
+            container = $(".tp-container").css({
+                "position": "fixed",
+                "width": "auto",
+                "height": "auto",
+                "top": `${top}px`,
+                "left": `${left}px`,
+                "z-index": "9999999999",
+                "user-select": "none",
+            });
+
+            $(".tp-container *").css({
+                "margin": "0",
+                "padding": "0",
+                "border": "0",
+                "color": "#000",
+            });
+
+            // Kéo thả khung
+            $(".tp-container").draggable({
+                drag: function() {
+                    var offset = $(this).offset();
+                    var xPos = offset.left;
+                    var yPos = offset.top;
+                    localStorage.setItem("positionYTP",yPos);
+                    localStorage.setItem("positionXTP",xPos);
+                },
+            });
+
+            // Nút ẩn/hiện giao diện
+            $(".tp-container").append($("<div></div>").addClass("icon-toggle").text("Công Cụ Hỗ Trợ").css({
+                "width": "fit-content",
+                "height": "auto",
+                "background": "linear-gradient(90deg, rgba(255,0,0,0.8) 0%, rgba(192,42,138,0.8) 5%, rgba(111,102,167,0.8) 10%, rgba(89,172,184,1) 15%, rgba(74,196,115,1) 20%, rgba(106,199,59,0.8) 25%, rgba(202,194,79,0.8) 30%, rgba(201,169,118,0.8) 35%, rgba(187,118,118,1) 40%, rgba(255,0,0,1) 45%, rgba(255,0,0,1) 50%, rgba(187,118,118,1) 55%, rgba(201,169,118,0.8) 60%, rgba(202,194,79,0.8) 65%, rgba(106,199,59,0.8) 70%, rgba(74,196,115,1) 75%, rgba(89,172,184,1) 80%, rgba(192,42,138,0.8) 85%, rgba(255,0,0,0.8) 90%)",
+                "background-size": "1200%",
+                "font-weight": "800",
+                "color": "#fff",
+                "padding": "0.5vh 1vw",
+                "border-radius": "100px",
+            }));
+
+            // Ẩn hiện giao diện
+            $(".icon-toggle").on("dblclick", function(){
+                if($(this).hasClass("active")){
+                    $(".tab-container").css("display", "none");
+                    $(".main-container").css("display", "none");
+                    $(this).removeClass("active");
+                }else{
+                    $(".tab-container").css("display", "flex");
+                    $(".main-container").css("display", "block");
+                    $(this).addClass("active");
+                }
+            });
+
+            // Hiệu ứng nút điều khiển
+            var animate = $(".icon-toggle");
+            function loopbackground() {
+                animate.css('background-position', '0px 0px');
+                $({position_x: 0, position_y: 0}).animate({position_x: -5000, position_y: -2500}, {
+                    duration: 50000,
+                    easing: 'linear',
+                    step: function() {
+                        animate.css('background-position', this.position_x+'px '+this.position_y+'px');
+                    },
+                    complete: function() {
+                        loopbackground();
+                    }
+                });
+            }
+            loopbackground();
+
+            // Tạo vùng chứa nhãn tab
+            $(".tp-container").append($("<div></div>").addClass("tab-container").css({
+                "display": "none",
+                "gap": "1vw",
+            }));
+
+            // Tạo nhãn tab
+            $(".tab-container").append($("<div></div>").addClass("tab").text("Facebook").attr("data-tab", "facebook").css({
+                "background": "rgb(8, 102, 255)",
+                "color": "#fff",
+            }));
+            $(".tab-container").append($("<div></div>").addClass("tab").text("Instagram").attr("data-tab", "instagram").css({
+                "background": "linear-gradient(to top left, #fbe18a, #fcbb45, #f86738, #f86738, #f74440, #f5326e, #d53692, #8f39ce, #544ced, #395dfb)",
+                "color": "#fff",
+            }));
+            $(".tab-container").append($("<div></div>").addClass("tab").text("Shopee").attr("data-tab", "shopee").css({
+                "background": "#ee4d2d",
+                "color": "#fff",
+            }));
+            $(".tab-container").append($("<div></div>").addClass("tab").text("Lazada").attr("data-tab", "lazada").css({
+                "background": "#3178f6",
+                "color": "#fff",
+            }));
+            $(".tab-container").append($("<div></div>").addClass("tab").text("Tiktok").attr("data-tab", "tiktok").css({
+                "background": "#000",
+                "color": "#fff",
+            }));
+
+            $(".tab-container").append($("<div></div>").addClass("tab").html(`<span style="width: fit-content; height: fit-content; padding: 0 0.25vw; background: #23d187; color: #fff">S</span>apo`).attr("data-tab", "sapo").css({
+                "background": "#fff",
+                "color": "#188afc",
+            }));
+
+            $(".tab-container").append($("<div></div>").addClass("tab").text("Khác").attr("data-tab", "tool").css({
+                "background": "#fff",
+                "color": "#000",
+            }));
+
+            $(".tab-container .tab").css({
+                "width": "fit-content",
+                "height": "fint-content",
+                "padding": "0.5vh 1vw",
+                "border-top-left-radius": "10px",
+                "border-top-right-radius": "10px",
+                "font-weight": "800",
+            });
+
+            // Tạo vùng chứa nội dung của tab
+            $(".tp-container").append($("<div></div>").addClass("main-container").css({
+                "width": "auto",
+                "height": "auto",
+                "background": "rgba( 255, 255, 255, 0.7 )",
+                "backdrop-filter": "blur(10px)",
+                "border-bottom-left-radius": "10px",
+                "border-bottom-right-radius": "10px",
+                "border": "2px #000 solid",
+                "color": "#000",
+                "display": "none",
+            }));
+
+            // Tiêu đề
+            $(".main-container").append($("<div></div>").addClass("header-title").text("CÔNG CỤ HỖ TRỢ" + " " + VERSION).css({
+                "width": "auto",
+                "height": "7vh",
+                "line-height": "7vh",
+                "text-align": "center",
+                "font-size": "2vw",
+                "padding": "1vh 1vw",
+            }));
+
+            // Tạo tab
+            $(".main-container").append($("<div></div>").addClass("tab-content").attr("id","facebook").css({
+                "width": "100%",
+                "height": "auto",
+            }));
+
+            $(".main-container").append($("<div></div>").addClass("tab-content").attr("id","instagram").css({
+                "width": "100%",
+                "height": "auto",
+            }));
+
+            $(".main-container").append($("<div></div>").addClass("tab-content").attr("id","shopee").css({
+                "width": "100%",
+                "height": "auto",
+            }));
+
+            $(".main-container").append($("<div></div>").addClass("tab-content").attr("id","lazada").css({
+                "width": "100%",
+                "height": "auto",
+            }));
+
+            $(".main-container").append($("<div></div>").addClass("tab-content").attr("id","tiktok").css({
+                "width": "100%",
+                "height": "auto",
+            }));
+
+            $(".main-container").append($("<div></div>").addClass("tab-content").attr("id","sapo").css({
+                "width": "100%",
+                "height": "auto",
+            }));
+
+            $(".main-container").append($("<div></div>").addClass("tab-content").attr("id","tool").css({
+                "width": "100%",
+                "height": "auto",
+            }));
+
+            $(".tab-content").hide();
+            //$("#tiktok").show();
+
+            // Tạo nội dung của tab
+            $("#facebook").append($(`<p class="dev_ing">ĐANG PHÁT TRIỂN TÍNH NĂNG</p>`));
+
+            $("#instagram").append($(`<p class="dev_ing">ĐANG PHÁT TRIỂN TÍNH NĂNG</p>`));
+
+            $("#shopee").append($(`
+            <div class="choice-func">
+                <span>Chọn Chức Năng</span>
+                <select>
+                    <option hidden></option>
+                    <option data-func="giaDuoiShopee">Cập Nhật Giá Đuôi</option>
+                    <option data-func="5LanGiaShopee" data-layout="5langiaShopeeLayout")>Kiểm Tra 5 Lần Giá</option>
+                    <option data-func="batKhuyenMaiShopee">Bật Khuyến Mãi</option>
+                    <option data-func="sapXepHinhAnhShopee" data-layout="sapXepHinhAnhShopeeLayout">Sắp Xếp Hình Ảnh Sản Phẩm</option>
+                    <option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
+                    <option data-func="tinhGiaBanShopee" data-layout="tinhGiaBanShopeeLayout">Tính Giá Bán</option>
+                </select>
+            </div>
+                                `));
+
+            $("#lazada").append($(`
+            <div class="choice-func">
+                <span>Chọn Chức Năng</span>
+                <select>
+                    <option hidden></option>
+                    <option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
+                </select>
+            </div>
+                                `));
+
+            $("#tiktok").append($(`
+            <div class="choice-func">
+                <span>Chọn Chức Năng</span>
+                <select>
+                    <option hidden></option>
+                    <option data-func="tgFlashSaleTiktok" data-layout="tgFlashSaleTiktokLayout">Chỉnh Khung Giờ Khuyến Mãi</option>
+                </select>
+            </div>
+                                `));
+
+            $("#sapo").append($(`
+            <div class="choice-func">
+                <span>Chọn Chức Năng</span>
+                <select>
+                    <option hidden></option>
+                    <option data-func="autoSelectStore" data-layout="autoSelectStoreSapoLayout">Tự Động Chọn Gian Hàng</option>
+                </select>
+            </div>
+                                `));
+
+            $("#tool").append($(`
+            <div class="choice-func">
+                <span>Chọn Chức Năng</span>
+                <select>
+                    <option hidden></option>
+                    <option data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option>
+                </select>
+            </div>
+                                `));
+
+            $(".choice-func").css({
+                "display": "flex",
+                "align-items": "center",
+                "justify-content": "center",
+                "gap": "2vw",
+                "height": "5vh",
+                "padding": "0 1vw",
+            });
+
+            $(".choice-func p").css({
+                "width": "40%",
+                "height": "5vh",
+                "line-height": "5vh",
+                "vertical-align": "center",
+                "text-align": "center",
+                "text-indent": "10%",
+            });
+
+            $(".choice-func select").css({
+                "width": "60%",
+                "height": "5vh",
+                "line-height": "5vh",
+                "flex-grow": "3",
+                "background": "#FFFFFFB2",
+                "backdrop-filter": "blur(10px)",
+                "border-radius": "10px",
+                "text-indent": "5%",
+                "color": "#000",
+            });
+
+            $(".choice-func select option").css({
+                "width": "60%",
+                "height": "5vh",
+                "line-height": "5vh",
+                "flex-grow": "3",
+                "background": "#FFFFFFB2",
+                "backdrop-filter": "blur(10px)",
+                "border-radius": "10px",
+                "text-indent": "5%",
+                "color": "#000",
+            });
+
+            $("select").on("change", function(){
+                var option = $(this).find("option:selected").attr("data-func");
+                $("#excuse-command").show();
+                $("#excuse-command").attr("data-func", option);
+                $(".layout-tab").remove();
+                createLayoutTab($(this).find("option:selected").attr("data-layout"));
+            });
+
+            $(".tab-content .dev_ing").css({
+                "width": "100%",
+                "height": "5vh",
+                "line-height": "5vh",
+                "text-align": "center",
+            });
+
+            $(".tab-container .tab").on("click", function(e){
+                if(!$(this).hasClass("active")){
+                    $(this).parent().find(".active").removeClass("active");
+                    $(this).addClass("active");
+                    $(".tab-content").hide();
+                    var nameTab = $(this).attr("data-tab");
+                    $(".header-title").text("ĐANG CHỌN: " + nameTab.toUpperCase());
+                    $("#" + nameTab).show();
+                    $("#" + nameTab).find("select").val($("#" + nameTab).find("select option:first").val());
+                    $(".layout-tab").remove();
+                    $("#excuse-command").show();
+                    $("#excuse-command").attr("data-func", $("#" + nameTab + " select option:selected").attr("data-func"));
+               }
+            });
+
+            // Tạo nút chạy
+            $(".main-container").append($("<button>CHẠY</button>").attr({
+                "id": "excuse-command",
+                "data-func": "",
+            }));
+            $("#excuse-command").css({
+                "width": "90%",
+                "height": "5vh",
+                "background": "crimson",
+                "color": "#fff",
+                "font-weight": "800",
+                "margin-left": "5%",
+                "margin-top": "2vh",
+                "border": "none",
+            })
+
+            $("#excuse-command").on("click", function(){
+                var func = $(this).attr("data-func");
+                switch (func){
+                    case "giaDuoiShopee":
+                        giaDuoiShopee();
+                        break;
+                    case "5LanGiaShopee":
+                        kTr5LanGiaShopee();
+                        break;
+                    case "tinhGiaBanShopee":
+                        tinhGiaBanShopee();
+                        break;
+                    case "batKhuyenMaiShopee":
+                        batKhuyenMaiShopee();
+                        break;
+                    case "tgFlashSaleTiktok":
+                        tgFlashSaleTiktok();
+                        break;
+                    case "autoSelectStoreSapo":
+                        autoSelectStoreSapo();
+                        break;
+                    case "flashSaleShopee":
+                        flashSaleShopee();
+                        break;
+                    case "giaDuoiLazada":
+                        giaDuoiLazada();
+                        break;
+                }
+            });
+
+            $.each($("iframe"), (index, value) => {
+                $("iframe").eq(index).remove();
+            });
+        }
+        if (!createUI) {
+            createUI = true;
+            createLayout();
+        }
+
+        // Dựng giao diện của mỗi lựa chọn
+        function createLayoutTab(layoutName){
+            $(".layout-tab").remove();
+            switch(layoutName){
+                case "5langiaShopeeLayout":
+                    $("#shopee").append($(`<div class="layout-tab">
+                                                <div>
+                                                    <label for="max-price">Giá cao nhất: </label>
+                                                    <input placeholder="Nhập giá cao nhất" type="text" id="max-price" value="" />
+                                                </div>
+                                                <div>
+                                                    <label for="min-price">Giá thấp nhất: </label>
+                                                    <input placeholder="Nhập giá thấp nhất" type="text" id="min-price" value="" />
+                                                </div>
+                                            </div>`
+                                         ));
+                    $(".layout-tab div").css({
+                        "position": "relative",
+                        "display": "flex",
+                        "width": "100%",
+                        "height": "5vh",
+                        "align-items": "center",
+                        "justify-content": "center",
+                        "margin-top": "2vh",
+                    });
+                    $(".layout-tab div input").css({
+                        "width": "70%",
+                        "height": "5vh",
+                        "background": "#FFFFFFB2",
+                        "backdrop-filter": "blur(10px)",
+                        "text-indent": "20px",
+                        "border-radius": "100px",
+                    });
+                    $(".layout-tab div label").css({
+                        "width": "20%",
+                        "height": "5vh",
+                        "line-height": "5vh",
+                        "color": "#000",
+                    });
+                    setEventKtra5LanGiaShopee();
+                    break;
+                case "sapXepHinhAnhShopeeLayout":
+                    $("#excuse-command").hide();
+                    $("body").append($(`
+                        <div class="layout-tab tp-popup">
+                            <div class="button-control">
+                                <button id="getData">Lấy Dữ Liệu</button>
+                                <button id="setData">Xác Nhận</button>
+                                <button id="cancelData">Hủy</button>
+                            </div>
+                            <div class="img-list"></div>
+                        </div>
+                    `));
+                    $(".layout-tab").css({
+                        "width": "100%",
+                        "height": "auto",
+                        "margin-top": "2vh",
+                        "background": "white",
+                    });
+                    $(".tp-popup").css({
+                        "position": "fixed",
+                        "top": "0",
+                        "left": "0",
+                        "z-index": "999999999999999999999999999999999999999999",
+                    });
+                    $(".layout-tab .button-control").css({
+                        "width": "100%",
+                        "height": "auto",
+                        "display": "flex",
+                        "justify-content": "center",
+                        "align-items": "center",
+                        "gap": "2vw",
+                    });
+                    $(".layout-tab .button-control button").css({
+                        "width": "100%",
+                        "height": "5vh",
+                        "line-height": "5vh",
+                        "display": "flex",
+                        "justify-content": "center",
+                        "align-items": "center",
+                        "border-radius": "5px",
+                        "background": "#cdcdcd",
+                    });
+                    $(".layout-tab .img-list").sortable();
+                    $(".layout-tab .img-list").css({
+                        "width": "auto",
+                        "max-width": "100%",
+                        "height": "auto",
+                        "max-height": "70vh",
+                        "overflow": "hidden",
+                        "overflowX": "scroll",
+                        "display": "flex",
+                        "justify-content": "center",
+                        "align-items": "center",
+                    });
+                    $(".layout-tab .img-list .box-img").css({
+                        "width": "auto",
+                        "height": "calc(100% - 2vw)",
+                        "aspect-ratio": "1 / 1",
+                        "max-height": "20vh",
+                    });
+                    setEventSapXepAnhShopee();
+                    break;
+                case "flashSaleShopeeLayout":
+                    $("#shopee").append($(`
+                        <div class="layout-tab">
+                            <textarea id="flahsSaleName" placeholder="Nhập Tên Cần Bật Lên"></textarea>
+                        </div>
+                    `));
+                    $(".layout-tab").css({
+                        "width": "100%",
+                        "height": "auto",
+                        "max-height": "80vh",
+                        "overflow": "scroll",
+                    });
+
+                    $(".layout-tab textarea").css({
+                        "width": "100%",
+                        "height": "auto",
+                    })
+                    break;
+                case "tinhGiaBanShopeeLayout":
+                    $("#shopee").append($(`
+                        <div class="layout-tab">
+                            <div class="input-cost">
+                                <label for="cost">Nhập Giá Vốn</label>
+                                <input type="text" id="cost" maxlength="15" />
+                            </div>
+                            <div class="output-cost">
+                                <p>Giá sau Khuyễn mãi: <span id="after-price"></span></p>
+                                <p>Giá trước Khuyễn mãi: <span id="before-price"></span></p>
+                                <p>Giá Đăng Bán: <span id="last-price"></span></p>
+                            </div>
+                        </div>
+                    `));
+                    $(".layout-tab").css({
+                        "width": "100%",
+                        "height": "auto",
+                        "max-height": "80vh",
+                        "overflow-y": "scroll",
+                    });
+                    $(".layout-tab .input-cost").css({
+                        "width": "100%",
+                        "height": "5vh",
+                        "line-height": "5vh",
+                        "display": "flex",
+                        "align-items": "center",
+                        "justtify-content": "center",
+                    });
+                    $(".layout-tab .input-cost *").css({
+                        "width": "100%",
+                        "height": "5vh",
+                        "line-height": "5vh",
+                    });
+                    $(".layout-tab .input-cost input").css({
+                        "text-indent": "5%",
+                    });
+                    setEventTinhGiaBanShopee();
+                    break;
+                case "autobrowserLayout":
+                    $("#excuse-command").hide();
+                    $("#tool").append($(`<div class="layout-tab">
+                                                <button id="getGeminiKey">Lấy Key Gemini</button>
+                                            </div>`
+                                         ));
+                    setEventAutobrowser();
+                    break;
+                case "tgFlashSaleTiktokLayout":
+                    $("#tiktok").append($(`<div class="layout-tab">
+                                                    <div class="header">
+                                                        <span>Số Khung Muốn Chia: </span>
+                                                        <input id="frame-count" placeholder="Nhập số khung" />
+                                                    </div>
+                                                    <div class="box-frame"></div>
+                                            </div>`
+                                         ));
+                    $(".layout-tab .header").css({
+                        "display": "flex",
+                        "align-items": "center",
+                        "justify-content": "center",
+                        "gap": "5%",
+                        "margin-top": "2vh",
+                    });
+                    $(".layout-tab .header input").css({
+                        "border-radius": "3px",
+                        "text-indent": "5%",
+                    });
+                    $(".layout-tab .box-frame").css({
+                        "width": "100%",
+                        "height": "auto",
+                        "max-height": "70vh",
+                        "text-indent": "5%",
+                    });
+                    break;
+                case "autoSelectStoreSapoLayout":
+                    $("#sapo").append($(`
+                        <div class="layout-tab autoSelectStore">
+                            <div class="header-button">
+                                <button id="getData">Lưu Gian Hàng</button>
+                            </div>
+                            <div class="content-data">
+                                <p>Gian Hàng: <span class="shop-name"></span></p>
+                                <p>Tên Sản Phẩm: <span class="item-name"></span></p>
+                            </div>
+                        </div>
+                    `));
+                    setEventAutoSelectorStoreSapo();
+                    break;
+            }
+        }
+
+        // Kiểm tra 5 lần giá đuôi
+        function kTr5LanGiaShopee(){
+            var max = $("input#max-price").val(), min = $("input#min-price").val();
+            if (max / 5 > min){
+                var suggPrice = max / 5;
+                min = suggPrice;
+                console.log("Giá cao nhất: " + max);
+                console.log("Giá đề xuất: " + min);
+            }
+        }
+
+        function setEventKtra5LanGiaShopee(){
+            $("input#max-price").on("keyup", function (e) {
+                var cost = $("input#max-price").val();
+                console.log(cost);
+                cost = cost.split(",");
+                cost = cost.join("");
+                cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                $("#cost").val(cost);
+                tinhGiaBanShopee();
+            });
+            $("input#min-price").on("keyup", function (e) {
+                var cost = $("input#max-price").val();
+                cost = cost.split(",");
+                cost = cost.join("");
+                cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                $("#cost").val(cost);
+                tinhGiaBanShopee();
+            });
+        }
+
+        // Sửa giá đuôi
+        function suaGiaDuoi(price){
+            var gia = price;
+            gia = gia.replace(",", "");
+            var arrayGia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
+            var giaDau;
+            var giaDuoi;
+            var flag;
+            if(parseInt(arrayGia[arrayGia.length - 1]) != 0){
+                for(var i = 0; i < arrayGia.length - 1; i++){
+                    giaDau += arrayGia[i];
+                }
+                giaDau = giaDau.substring(9);
+                giaDau = giaDau.substring(0, giaDau.length - (arrayGia.length - 2))
+                for(i = 0; i <= gia.length; i++){
+                    if(parseInt(gia.substring(i, 2)) == 0){
+                        flag = i;
+                        break;
+                    }
+                    giaDuoi = parseInt(gia.substring(giaDau.length)).toString();
+                }
+
+
+                while((giaDau).length < (gia).length){
+                    giaDau = giaDau + "0";
+                }
+
+                while((giaDuoi).length < (gia).length){
+                    giaDuoi = giaDuoi + "0";
+                }
+
+                while(parseInt(giaDau) < parseInt(giaDuoi)){
+                    giaDuoi = giaDuoi.substring(0, giaDuoi.length - 1);
+                }
+            }
+            if(giaDuoi == undefined)
+                return -1;
+
+            return giaDuoi;
+        }
+
+        // Cập nhật giá đuôi sàn cam
+        function giaDuoiShopee(){
+            console.log("CẬP NHẬT GIÁ ĐUÔI");
+            var tien = document.querySelectorAll(".currency-input .eds-input__input");
+            var phanTram = document.querySelectorAll(".discount-input .eds-input__input");
+
+            tien.forEach((current, index) => {
+                var parent = current.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
+                if(parent.querySelectorAll(".discount-item-selector input")[0].checked){
+                    var gia = current.value;
+                    var giaKM = suaGiaDuoi(gia);
+                    if(giaKM >= 0){
+                        console.log("GIÁ ĐUÔI: " + giaKM);
+                        var phamTramGiam = (giaKM / gia) * 100;
+                        current.select();
+                        current.value = giaKM;
+
+                        if (window.getSelection) {
+                            window.getSelection().removeAllRanges();
+                        }else if (document.selection) {
+                            document.selection.empty();
+                        }
+
+                        if ("createEvent" in document) {
+                            var evt = document.createEvent("HTMLEvents");
+                            evt.initEvent("change", false, true);
+                            current.dispatchEvent(evt);
+                        }
+                        else {
+                            current.fireEvent("onchange");
+                        }
+                    }
+                }
+            });
+        }
+
+        // Tính giá bán sàn cam
+        function tinhGiaBanShopee(){
+            var cost = $("#cost").val().split(",");
+            cost = cost.join("");
+            var afterPrice, beforePrice;
+            if(!cost == "" && cost.length > 0){
+                afterPrice = parseInt((cost / 0.45).toFixed(0));
+                beforePrice = afterPrice + parseInt((afterPrice * 0.3).toFixed(0));
+
+                afterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                beforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+                var len = beforePrice.split(",").length;
+                var dong = 0, arrayTien = [], tienTruoc = 0, tienSau = 0;
+                arrayTien = beforePrice.split(",");
+                dong = arrayTien[arrayTien.length - 1];
+                for(var i = 0; i < arrayTien.length - 1; i++){
+                    tienTruoc += arrayTien[i];
+                }
+
+                tienTruoc = parseInt(tienTruoc);
+                if(parseInt(dong) > 0)
+                    tienTruoc += 1;
+
+                arrayTien = afterPrice.split(",");
+                dong = arrayTien[arrayTien.length - 1];
+                for(i = 0; i < arrayTien.length - 1; i++){
+                    tienSau += arrayTien[i];
+                }
+
+                tienSau = parseInt(tienSau);
+                if(parseInt(dong) > 0)
+                    tienSau += 1;
+
+                afterPrice = tienSau + "000";
+                beforePrice = tienTruoc + "000";
+
+                $("#after-price").text(afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+                $("#before-price").text(beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+
+                var arrayBefore = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
+                var arrayAfter = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
+
+                var lastPrice = [], giaDau, giaDuoi;
+
+                for(i = 0; i < arrayBefore.length - 1; i++){
+                    giaDau += arrayBefore[i];
+                }
+
+                for(i = 0; i < arrayAfter.length - 1; i++){
+                    giaDuoi += arrayAfter[i];
+                }
+
+                giaDau = giaDau.substring(9);
+                giaDuoi = giaDuoi.substring(9);
+
+                lastPrice = beforePrice.split("");
+
+                $.each(lastPrice, (index, value) => {
+                    lastPrice[index] = 0;
+                })
+
+                var flagDau, flagCuoi;
+
+                $.each(giaDau.split(""), (index, value) => {
+                    lastPrice[index] = giaDau[index];
+                    flagDau = index;
+                })
+
+                $.each(giaDuoi.split(""), (index, value) => {
+                    if(lastPrice.length - giaDuoi.length + index == flagDau){
+                        lastPrice[flagDau - 1] = parseInt(lastPrice[flagDau - 1]) + 1;
+                    }
+                    lastPrice[lastPrice.length - giaDuoi.length + index] = giaDuoi[index];
+                })
+
+                lastPrice = lastPrice.join("");
+                $("#last-price").text(lastPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(","));
+            }
+        }
+
+        function setEventTinhGiaBanShopee(){
+            $("#after-price").parent().on("click", function(){
+                navigator.clipboard.writeText($(this).find("span").text().replace(",", ""));
+            });
+            $("#before-price").parent().on("click", function(){
+                navigator.clipboard.writeText($(this).find("span").text().replace(",", ""));
+            });
+            $("#last-price").parent().on("click", function(){
+                navigator.clipboard.writeText($(this).find("span").text().replace(",", ""));
+            });
+
+            $("#cost").on("keyup", function (e) {
+                var cost = $("#cost").val();
+                cost = cost.split(",");
+                cost = cost.join("");
+                cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                $("#cost").val(cost);
+                tinhGiaBanShopee();
+            });
+        }
+
+        // Cập nhật giá đuôi sàn L
+        function giaDuoiLazada(){
+            var row = document.querySelectorAll(".next-table-row");
+
+            var i = 0;
+            row.forEach((current, index) => {
+                var gia = current.children[1].querySelector("input").value
+                var giaKM = suaGiaDuoi(gia);
+                current.children[2].querySelector("button").click();
+
+                document.querySelectorAll(".next-balloon-content input")[i].value = giaKM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+                i++;
+            })
+            navigator.clipboard.writeText('document.querySelectorAll(".next-balloon-content .action-wrapper button.next-btn-primary").forEach((current, index) => {current.click()})');
+            alert("Code lỏ nên chịu khó Bấm F12 > Console rồi dán code ra chạy hen ^_^");
+        }
+
+        // Tám chuyện với AI
+        function setEventAiReq(){
+            $(".user-input button").on("click", function(e){
+                var req = $("#ai-req-content").val();
+                //aiChat(ques);
+                sendMess("user", req);
+                sendMess("bot", "Tèo vẫn đang được phát triển, mọi người đợi Tèo vài bữa nghen <3 <|:>");
+            });
+
+            $("#ai-req-content").on("keyup", function(e){
+                if (e.keyCode == 13) {
+                    var req = $(this).val();
+                    sendMess("user", req);
+                    sendMess("bot", "Tèo vẫn đang được phát triển, mọi người đợi Tèo vài bữa nghen <3 <|:>");
+                }
+            });
+        }
+
+        function sendMess(role, content){
+            $("#ai-req-content").val("");
+            $(".respon-content").animate({ scrollTop: $(document).height() }, 1000);
+            if(!content.length <= 0){
+                switch (role){
+                    case "user":
+                        $(".respon-content").append($("<p></p>").addClass("user-chat").text(content).css({
+                            "width": "auto",
+                            "max-width": "70%",
+                            "height": "auto",
+                            "max-height": "30vh",
+                            "margin-right": "5%",
+                            "float": "right",
+                            "clear": "both",
+                            "background": "pink",
+                            "padding": "0.5vh 1vw",
+                            "border-radius": "100px",
+                        }));
+                        break;
+                    case "bot":
+                        $(".respon-content").append($("<p></p>").addClass("bot-chat").text(content).css({
+                            "width": "auto",
+                            "max-width": "70%",
+                            "height": "auto",
+                            "max-height": "30vh",
+                            "margin-left": "5%",
+                            "float": "left",
+                            "clear": "both",
+                            "background": "#a3a3a3",
+                            "padding": "0.5vh 1vw",
+                            "border-radius": "100px",
+                        }));
+                        break;
+                }
+            }
+        }
+
+        function aiChat(question){
+            var chatGPTKey = "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";
+            $.ajax({
+                url: "https://api.openai.com/v1/chat/completions",
+                type: "POST",
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + chatGPTKey);
+                    xhr.setRequestHeader("Content-Type", "application/json");
+                    xhr.setRequestHeader("Content-Security-Policy", "connect-src 'self' https://api.openai.com typesense.jquery.com");
+                },
+                data: JSON.stringify({
+                    model: "gpt-3.5-turbo",
+                    messages: [{ role: "user", content: question }]
+                }),
+                success: function(response) {
+                    // Handle successful response here
+                    $(".response-content").append($(`<p class="user-chat">${response}</p>`));
+                    console.log(response);
+                },
+                error: function(error) {
+                    // Handle error here
+                    console.error(error);
+                }
+            });
+        }
+
+        // Chia thời gian khuyến mãi
+        function tgFlashSaleTiktok(){
+            console.log("FLASHSALE");
+            var frame = $("#frame-count").val();
+            var secDay = 86400;
+            var day = parseInt(secDay / frame);
+            var hours = parseInt(day / (60 * 60));
+            var startTime = 0, endTime = hours;
+            var setTime, stop = false;
+            var arrayTime = [];
+            $(".box-frame p").remove();
+            while(true){
+                setTime = startTime + " - " + endTime;
+                arrayTime.push(setTime);
+
+                startTime = endTime;
+                endTime += hours;
+                if(endTime >= 24){
+                    endTime = 24;
+                    arrayTime.push(startTime + "-" +endTime);
+                    stop = true;
+                }
+
+                if(stop == true){
+                    break;
+                }
+            }
+            console.log(arrayTime);
+            $.each(arrayTime, (index, value) => {
+                var time = value.split("-"), startTime = time[0], endTime = time[1];
+                if(parseInt(startTime) < 10){
+                    startTime = "0" + startTime;
+                }
+
+                if(parseInt(endTime) < 10){
+                    endTime = "0" + parseInt(endTime);
+                }
+
+                $(".box-frame").append($("<p></p>").text(`Khung giờ bắt đầu từ ${startTime} kết thúc lúc ${endTime}`));
+            });
+        }
+
+        // Sắp xếp hình ảnh sản phẩm
+        function setEventSapXepAnhShopee(){
+            $(".layout-tab #getData").on("click", function(){
+                var parentBox = $(".image-manager-wrapper .shopee-image-manager:nth-child(1) .container");
+                var item = parentBox.find(".shopee-image-manager__itembox");
+                var phanLoai = $(".options-item.drag-item");
+                var len = item.length - phanLoai.length * 2 - 1
+                var imgList = [];
+                for(var i = 0; i < len; i++){
+                    imgList.push(item.eq(i).find("img").attr("src"));
+                }
+                $(".img-list").find("*").remove();
+                $.each(imgList, (index, value) => {
+                    $(".img-list").append(`
+                    <div class="box-img" data-pos="${index}"><img src="${value}" /></div>
+                    `);
+                });
+
+                var dataIn4 = $("div.image-manager-wrapper").attr("images-info");
+            });
+
+            $(".layout-tab #setData").on("click", function(){
+                var parentBox = $(".image-manager-wrapper .shopee-image-manager:nth-child(1) .container");
+                var item = parentBox.find(".shopee-image-manager__itembox");
+                var phanLoai = $(".options-item.drag-item");
+                var len = item.length - phanLoai.length * 2 - 1
+                var img = $(".layout-tab .box-img img");
+                var imgList = [];
+                var posList = [];
+                var box = $("div[data-v-145c0745].shopee-image-manager .container");
+                $.each(img, (index, value) => {
+                    imgList.push(img.eq(index).attr("src"));
+                    posList.push(img.eq(index).parent().attr("data-pos"));
+                });
+                box.find("*").remove();
+                $.each(posList, (index, value) => {
+                    /*
+                    console.log($("div[data-v-6101bd68].shopee-file-upload").eq(0).find(".eds-upload input.eds-upload__input"));
+                    document.querySelector("div[data-v-6101bd68].shopee-file-upload").dispatchEvent(new Event ("click", { bubble: true}));
+                    $("div[data-v-6101bd68].shopee-file-upload").eq(0).find(".eds-upload input.eds-upload__input").trigger("click");
+                    item.eq(index).find("img").attr("src", value);
+                    */
+                    box.append($(`
+                    <div data-v-145c0745="" class="can-drag shopee-image-manager__itembox" data-draggable="true" style="width: 80px; max-width: 80px; height: 80px; max-height: 80px;">
+                        <div data-v-452090d4="" data-v-145c0745="" class="popover-wrap"><div data-v-145c0745="" class="shopee-image-manager__content content-fill">
+                            <img data-v-145c0745="" src="${imgList[value]}" class="shopee-image-manager__image">
+                            <div data-v-145c0745="" class="shopee-image-manager__tools" style="display: none;">
+                                <span data-v-145c0745="" class="shopee-image-manager__icon shopee-image-manager__icon--crop">
+                                    <i data-v-ef5019c0="" data-v-145c0745="" class="eds-icon">
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 32 32" xml:space="preserve">
+                                            <path d="M29.9,26.2h-2.8V7.9l3.2-3.2c0.4-0.4,0.4-1,0-1.4s-1-0.4-1.4,0l-3.1,3.1H7.7V4c0-0.6-0.4-1-1-1s-1,0.4-1,1v2.4H2.9 c-0.6,0-1,0.4-1,1s0.4,1,1,1h2.8v18.8c0,0.6,0.4,1,1,1h18.4v2.4c0,0.6,0.4,1,1,1s1-0.4,1-1v-2.4h2.8c0.6,0,1-0.4,1-1 S30.5,26.2,29.9,26.2z M23.8,8.4L7.7,24.5V8.4H23.8z M8.9,26.2L25.1,9.9v16.3H8.9z"></path>
+                                        </svg>
+                                    </i>
+                                </span>
+                                <span data-v-145c0745="" class="decollator"></span>
+                                <span data-v-145c0745="" class="shopee-image-manager__icon shopee-image-manager__icon--delete">
+                                    <i data-v-ef5019c0="" data-v-145c0745="" class="eds-icon">
+                                        <svg viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke-width="1" fill-rule="evenodd"><g fill-rule="nonzero"><g transform="translate(1.015625, 1.015625)"><path d="M13.5,2 L9.5,2 L9.5,1 C9.5,0.8640625 9.471875,0.73125 9.421875,0.6109375 C9.3453125,0.43125 9.21875,0.278125 9.059375,0.171875 C8.9796875,0.11875 8.890625,0.075 8.796875,0.0453125 C8.703125,0.015625 8.6015625,0 8.5,0 L5.5,0 C5.3640625,0 5.23125,0.028125 5.1109375,0.078125 C4.93125,0.1546875 4.778125,0.28125 4.671875,0.440625 C4.61875,0.5203125 4.575,0.609375 4.5453125,0.703125 C4.515625,0.796875 4.5,0.8984375 4.5,1 L4.5,2 L0.5,2 C0.2234375,2 0,2.2234375 0,2.5 C0,2.7765625 0.2234375,3 0.5,3 L1.5,3 L1.5,13 C1.5,13.1359375 1.528125,13.26875 1.578125,13.3890625 C1.6546875,13.56875 1.78125,13.721875 1.940625,13.828125 C2.0203125,13.88125 2.109375,13.925 2.203125,13.9546875 C2.296875,13.984375 2.3984375,14 2.5,14 L11.5,14 C11.6359375,14 11.76875,13.971875 11.8890625,13.921875 C12.06875,13.8453125 12.221875,13.71875 12.328125,13.559375 C12.38125,13.4796875 12.425,13.390625 12.4546875,13.296875 C12.484375,13.203125 12.5,13.1015625 12.5,13 L12.5,3 L13.5,3 C13.7765625,3 14,2.7765625 14,2.5 C14,2.2234375 13.7765625,2 13.5,2 Z M5.5,1 L8.5,1 L8.5,2 L5.5,2 L5.5,1 Z M11.5,13 L2.5,13 L2.5,3 L11.5,3 L11.5,13 Z"></path><path d="M4.5,11 C4.7765625,11 5,10.7765625 5,10.5 L5,6.5 C5,6.2234375 4.7765625,6 4.5,6 C4.2234375,6 4,6.2234375 4,6.5 L4,10.5 C4,10.7765625 4.2234375,11 4.5,11 Z"></path><path d="M7,11 C7.2765625,11 7.5,10.7765625 7.5,10.5 L7.5,5.5 C7.5,5.2234375 7.2765625,5 7,5 C6.7234375,5 6.5,5.2234375 6.5,5.5 L6.5,10.5 C6.5,10.7765625 6.7234375,11 7,11 Z"></path><path d="M9.5,11 C9.7765625,11 10,10.7765625 10,10.5 L10,6.5 C10,6.2234375 9.7765625,6 9.5,6 C9.2234375,6 9,6.2234375 9,6.5 L9,10.5 C9,10.7765625 9.2234375,11 9.5,11 Z"></path></g><path opacity="0" d="M0 0H16V16H0z"></path></g></g></svg>
+                                    </i>
+                                </span>
+                            </div>
+                            <div data-v-145c0745="" class="shopee-image-manager__tools flex-center" style="">
+                                <span data-v-145c0745="" class="mandatory-icon">*</span>
+                                <span data-v-145c0745="" class="shopee-image-manager__text">Ảnh bìa</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    `));
+                });
+                $(".layout-tab").remove();
+            });
+
+            $(".layout-tab #cancelData").on("click", function(){
+                $(".layout-tab").remove();
+            });
+        }
+
+        // Lấy Key
+        function setEventAutobrowser(){
+            $("#getGeminiKey").on("click", () => {
+                navigator.clipboard.writeText(GEMINIKEY);
+            })
+        }
+
+        // Tự động chọn gian hàng và sản phẩm Sapo
+        function setEventAutoSelectorStoreSapo(){
+            $(".hIhsai").on("click", function(){
+                var itemName = $(".current-item-selected .item-title").text();
+                localStorage.setItem("shopName", itemName);
+            });
+        }
+
+        function autoSelectStoreSapo(){
+            var shopName = localStorage.getItem("shopName");
+            if(shopName == null)
+                shopName = "Không có Dữ Liệu";
+            var itemName = navigator.clipboard.readText()
+                .then((text) => {
+                    return text;
+                })
+
+            $("#sapo .shop-name").text(shopName);
+            $("#sapo .item-name").text(itemName);
+        }
+
+        // Bật flash sale shopee theo tên
+        function flashSaleShopee(){
+            var data = $("#flahsSaleName").val().split("\n");
+            $.each(data, (index, value) => {
+                value = value.split("\t");
+                var name = value[0];
+                var count = value[1];
+                var container = $(".products-container-content form.product-table .table-card");
+                $.each(container, (index, value) => {
+                    var productBox = container.eq(index).find(".inner-rows .inner-row");
+                    $.each(productBox, (index, value) => {
+                        var productName = productBox.eq(index).find(".variation .ellipsis-content").text();
+                        if(productName.includes(name)){
+
+                            productBox.eq(index).find(".item-selector").trigger("click");
+                            productBox.eq(index).find(".item-selector input.eds-checkbox__input").val("true");
+
+                            /*
+                            // Số Lượng
+                            var countBox = productBox.eq(index).find(".campaign-stock input.eds-input__input");
+                            //var countBox = $(".batch-setting-wrapper .campaign-stock input.eds-input__input");
+                            console.log(countBox);
+                            for(var i = 0; i < count.length; i++){
+                                var code = count.charCodeAt(i);
+                                console.log(countBox.val());
+                                countBox.focus().select().trigger({ type : 'change', which : code });
+                                countBox.val(parseInt(count));
+                                console.log(i + ": " + code + " => " + String.fromCharCode(code));
+                            }
+                            countBox.attr({
+                                "modelCout": count,
+                                "modelValue": count,
+                                "min": count,
+                                "max": count,
+                            });
+                            countBox.attr("value", count);
+                           $(".panel-actions .actions button").eq(0).click();
+                            //countBox.focus().trigger({ type : 'keypress', which : 96 });
+                            //countBox.focus().trigger({ type : 'keypress', which : 8 });
+                            */
+                        }
+                    })
+                });
+            });
+        }
+    }
+})();
