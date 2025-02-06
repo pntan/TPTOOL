@@ -32,7 +32,7 @@
         */
         var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c"
 
-        const VERSION = "2025.02.05.14.56";
+        const VERSION = "2025.02.06.16.45";
 
         // Dựng giao diện
         function createLayout(){
@@ -137,7 +137,7 @@
                 "gap": "1vw",
             }));
 
-            // Tạo nhãn tab
+            /* Tạo nhãn tab
             $(".tab-container").append($("<div></div>").addClass("tab").text("Facebook").attr("data-tab", "facebook").css({
                 "background": "rgb(8, 102, 255)",
                 "color": "#fff",
@@ -145,7 +145,7 @@
             $(".tab-container").append($("<div></div>").addClass("tab").text("Instagram").attr("data-tab", "instagram").css({
                 "background": "linear-gradient(to top left, #fbe18a, #fcbb45, #f86738, #f86738, #f74440, #f5326e, #d53692, #8f39ce, #544ced, #395dfb)",
                 "color": "#fff",
-            }));
+            }));*/
             $(".tab-container").append($("<div></div>").addClass("tab").text("Shopee").attr("data-tab", "shopee").css({
                 "background": "#ee4d2d",
                 "color": "#fff",
@@ -159,10 +159,10 @@
                 "color": "#fff",
             }));
 
-            $(".tab-container").append($("<div></div>").addClass("tab").html(`<span style="width: fit-content; height: fit-content; padding: 0 0.25vw; background: #23d187; color: #fff">S</span>apo`).attr("data-tab", "sapo").css({
+            /*$(".tab-container").append($("<div></div>").addClass("tab").html(`<span style="width: fit-content; height: fit-content; padding: 0 0.25vw; background: #23d187; color: #fff">S</span>apo`).attr("data-tab", "sapo").css({
                 "background": "#fff",
                 "color": "#188afc",
-            }));
+            }));*/
 
             $(".tab-container").append($("<div></div>").addClass("tab").text("Khác").attr("data-tab", "tool").css({
                 "background": "#fff",
@@ -240,22 +240,17 @@
             $(".tab-content").hide();
             //$("#tiktok").show();
 
-            // Tạo nội dung của tab
-            $("#facebook").append($(`<p class="dev_ing">ĐANG PHÁT TRIỂN TÍNH NĂNG</p>`));
-
-            $("#instagram").append($(`<p class="dev_ing">ĐANG PHÁT TRIỂN TÍNH NĂNG</p>`));
-
             $("#shopee").append($(`
             <div class="choice-func">
                 <span>Chọn Chức Năng</span>
                 <select>
                     <option hidden></option>
                     <option data-func="giaDuoiShopee">Cập Nhật Giá Đuôi</option>
-                    <option data-func="5LanGiaShopee" data-layout="5langiaShopeeLayout")>Kiểm Tra 5 Lần Giá</option>
-                    <option data-func="batKhuyenMaiShopee">Bật Khuyến Mãi</option>
-                    <option data-func="sapXepHinhAnhShopee" data-layout="sapXepHinhAnhShopeeLayout">Sắp Xếp Hình Ảnh Sản Phẩm</option>
                     <option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
                     <option data-func="tinhGiaBanShopee" data-layout="tinhGiaBanShopeeLayout">Tính Giá Bán</option>
+                    <!-- <option data-func="sapXepHinhAnhShopee" data-layout="sapXepHinhAnhShopeeLayout">Sắp Xếp Hình Ảnh Sản Phẩm</option> -->
+                    <!-- <option data-func="batKhuyenMaiShopee">Bật Khuyến Mãi</option> -->
+                    <!-- <option data-func="5LanGiaShopee" data-layout="5langiaShopeeLayout")>Kiểm Tra 5 Lần Giá</option> --?
                 </select>
             </div>
                                 `));
@@ -275,17 +270,6 @@
                 <span>Chọn Chức Năng</span>
                 <select>
                     <option hidden></option>
-                    <option data-func="tgFlashSaleTiktok" data-layout="tgFlashSaleTiktokLayout">Chỉnh Khung Giờ Khuyến Mãi</option>
-                </select>
-            </div>
-                                `));
-
-            $("#sapo").append($(`
-            <div class="choice-func">
-                <span>Chọn Chức Năng</span>
-                <select>
-                    <option hidden></option>
-                    <option data-func="autoSelectStore" data-layout="autoSelectStoreSapoLayout">Tự Động Chọn Gian Hàng</option>
                 </select>
             </div>
                                 `));
@@ -546,6 +530,7 @@
                     $(".layout-tab textarea").css({
                         "width": "100%",
                         "height": "auto",
+                        "min-height": "30vh",
                     })
                     break;
                 case "tinhGiaBanShopeeLayout":
@@ -592,48 +577,12 @@
                                                 <button id="getGeminiKey">Lấy Key Gemini</button>
                                             </div>`
                                          ));
+                    $(".layout-tab button").css({
+                        "padding": "1vh 1vw",
+                        "background": "crimson",
+                        "color": "#fff",
+                    });
                     setEventAutobrowser();
-                    break;
-                case "tgFlashSaleTiktokLayout":
-                    $("#tiktok").append($(`<div class="layout-tab">
-                                                    <div class="header">
-                                                        <span>Số Khung Muốn Chia: </span>
-                                                        <input id="frame-count" placeholder="Nhập số khung" />
-                                                    </div>
-                                                    <div class="box-frame"></div>
-                                            </div>`
-                                         ));
-                    $(".layout-tab .header").css({
-                        "display": "flex",
-                        "align-items": "center",
-                        "justify-content": "center",
-                        "gap": "5%",
-                        "margin-top": "2vh",
-                    });
-                    $(".layout-tab .header input").css({
-                        "border-radius": "3px",
-                        "text-indent": "5%",
-                    });
-                    $(".layout-tab .box-frame").css({
-                        "width": "100%",
-                        "height": "auto",
-                        "max-height": "70vh",
-                        "text-indent": "5%",
-                    });
-                    break;
-                case "autoSelectStoreSapoLayout":
-                    $("#sapo").append($(`
-                        <div class="layout-tab autoSelectStore">
-                            <div class="header-button">
-                                <button id="getData">Lưu Gian Hàng</button>
-                            </div>
-                            <div class="content-data">
-                                <p>Gian Hàng: <span class="shop-name"></span></p>
-                                <p>Tên Sản Phẩm: <span class="item-name"></span></p>
-                            </div>
-                        </div>
-                    `));
-                    setEventAutoSelectorStoreSapo();
                     break;
             }
         }
@@ -1108,33 +1057,37 @@
                     $.each(productBox, (index, value) => {
                         var productName = productBox.eq(index).find(".variation .ellipsis-content").text();
                         if(productName.includes(name)){
-
                             productBox.eq(index).find(".item-selector").trigger("click");
                             productBox.eq(index).find(".item-selector input.eds-checkbox__input").val("true");
 
-                            /*
                             // Số Lượng
                             var countBox = productBox.eq(index).find(".campaign-stock input.eds-input__input");
                             //var countBox = $(".batch-setting-wrapper .campaign-stock input.eds-input__input");
-                            console.log(countBox);
-                            for(var i = 0; i < count.length; i++){
-                                var code = count.charCodeAt(i);
-                                console.log(countBox.val());
-                                countBox.focus().select().trigger({ type : 'change', which : code });
-                                countBox.val(parseInt(count));
-                                console.log(i + ": " + code + " => " + String.fromCharCode(code));
-                            }
+                            countBox.focus();
+                            countBox.parent().addClass("focused");
                             countBox.attr({
-                                "modelCout": count,
-                                "modelValue": count,
-                                "min": count,
-                                "max": count,
+                                "modelvalue": count,
                             });
-                            countBox.attr("value", count);
-                           $(".panel-actions .actions button").eq(0).click();
-                            //countBox.focus().trigger({ type : 'keypress', which : 96 });
-                            //countBox.focus().trigger({ type : 'keypress', which : 8 });
-                            */
+
+                            countBox.select();
+
+                            var press = $.Event("keydown",
+                            {
+                             "key": "Backspace",
+                             "keyCode": 8,
+                             "which": 8,
+                             "code": "Backspace",
+                             "location": 0,
+                             "altKey": false,
+                             "ctrlKey": false,
+                             "metaKey": false,
+                             "shiftKey": false,
+                             "repeat": false
+                            });
+
+                            countBox.trigger(press);
+
+                            countBox.val(count);
                         }
                     })
                 });
