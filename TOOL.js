@@ -32,7 +32,7 @@
         */
         var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c"
 
-        const VERSION = "2025.02.06.16.45";
+        const VERSION = "2025.02.06.17.15";
 
         // Dựng giao diện
         function createLayout(){
@@ -1063,31 +1063,31 @@
                             // Số Lượng
                             var countBox = productBox.eq(index).find(".campaign-stock input.eds-input__input");
                             //var countBox = $(".batch-setting-wrapper .campaign-stock input.eds-input__input");
-                            countBox.focus();
-                            countBox.parent().addClass("focused");
-                            countBox.attr({
-                                "modelvalue": count,
+
+                            countBox.addClass("changeValueTP");
+                            countBox.attr("data-value-TP", count);
+
+                            navigator.clipboard.writeText(`
+                            $.each($("input.changeValueTP"), (index, value) => {
+                                $(this).select();
+                                $("input.changeValueTP").eq(index).val($("input.changeValueTP").attr("data-value-TP"));
+                                $(this).removeClass("changeValueTP");
+                                if (window.getSelection) {
+                                    window.getSelection().removeAllRanges();
+                                }else if (document.selection) {
+                                    document.selection.empty();
+                                }
+
+                                if ("createEvent" in document) {
+                                    var evt = document.createEvent("HTMLEvents");
+                                    evt.initEvent("change", false, true);
+                                    value.dispatchEvent(evt);
+                                }
+                                else {
+                                    value.fireEvent("onchange");
+                                }
                             });
-
-                            countBox.select();
-
-                            var press = $.Event("keydown",
-                            {
-                             "key": "Backspace",
-                             "keyCode": 8,
-                             "which": 8,
-                             "code": "Backspace",
-                             "location": 0,
-                             "altKey": false,
-                             "ctrlKey": false,
-                             "metaKey": false,
-                             "shiftKey": false,
-                             "repeat": false
-                            });
-
-                            countBox.trigger(press);
-
-                            countBox.val(count);
+                            `);
                         }
                     })
                 });
