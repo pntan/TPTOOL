@@ -32,7 +32,7 @@
         */
         var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c"
 
-        const VERSION = "2025.02.07.09.45";
+        const VERSION = "2025.02.07.10.02";
 
         // Dựng giao diện
         function createLayout(){
@@ -1069,7 +1069,7 @@
                             countBox.addClass("changeValueTP");
                             countBox.attr("data-value-TP", count);
 
-                            navigator.clipboard.writeText(`
+                            /*navigator.clipboard.writeText(`
                             $.each($("input.changeValueTP"), (index, value) => {
                                 $(this).select();
                                 $("input.changeValueTP").eq(index).val($("input.changeValueTP").eq(index).attr("data-value-TP"));
@@ -1089,7 +1089,7 @@
                                     value.fireEvent("onchange");
                                 }
                             });
-                            `);
+                            `);*/
                         }
                     })
                 });
