@@ -32,7 +32,7 @@
         */
         var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c"
 
-        const VERSION = "2025.02.07.09.34";
+        const VERSION = "2025.02.07.09.45";
 
         // Dựng giao diện
         function createLayout(){
