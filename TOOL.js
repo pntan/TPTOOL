@@ -32,7 +32,7 @@
         */
         var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c"
 
-        const VERSION = "2025.02.06.17.15";
+        const VERSION = "2025.02.07.09.34";
 
         // Dựng giao diện
         function createLayout(){
@@ -329,6 +329,7 @@
             $("select").on("change", function(){
                 var option = $(this).find("option:selected").attr("data-func");
                 $("#excuse-command").show();
+                $("#excuse-command").text("Chạy");
                 $("#excuse-command").attr("data-func", option);
                 $(".layout-tab").remove();
                 createLayoutTab($(this).find("option:selected").attr("data-layout"));
@@ -353,6 +354,7 @@
                     $(".layout-tab").remove();
                     $("#excuse-command").show();
                     $("#excuse-command").attr("data-func", $("#" + nameTab + " select option:selected").attr("data-func"));
+                    $("#excuse-command").text("Chạy");
                }
             });
 
@@ -384,6 +386,9 @@
                     case "tinhGiaBanShopee":
                         tinhGiaBanShopee();
                         break;
+                    case "flashSaleShopee":
+                        flashSaleShopee();
+                        break;
                     case "batKhuyenMaiShopee":
                         batKhuyenMaiShopee();
                         break;
@@ -392,9 +397,6 @@
                         break;
                     case "autoSelectStoreSapo":
                         autoSelectStoreSapo();
-                        break;
-                    case "flashSaleShopee":
-                        flashSaleShopee();
                         break;
                     case "giaDuoiLazada":
                         giaDuoiLazada();
@@ -1070,7 +1072,7 @@
                             navigator.clipboard.writeText(`
                             $.each($("input.changeValueTP"), (index, value) => {
                                 $(this).select();
-                                $("input.changeValueTP").eq(index).val($("input.changeValueTP").attr("data-value-TP"));
+                                $("input.changeValueTP").eq(index).val($("input.changeValueTP").eq(index).attr("data-value-TP"));
                                 $(this).removeClass("changeValueTP");
                                 if (window.getSelection) {
                                     window.getSelection().removeAllRanges();
