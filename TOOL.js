@@ -32,7 +32,7 @@
         */
         var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c"
 
-        const VERSION = "2025.02.07.10.20";
+        const VERSION = "2025.02.19.10.22";
 
         // Dựng giao diện
         function createLayout(){
@@ -801,18 +801,22 @@
 
         // Cập nhật giá đuôi sàn L
         function giaDuoiLazada(){
-            var row = document.querySelectorAll(".next-table-row");
+            var row = $(".next-table-row");
+            var price = [];
 
             var i = 0;
-            row.forEach((current, index) => {
-                var gia = current.children[1].querySelector("input").value
+            $.each(row, (index, value) => {
+                var gia = $(value).find("input").val();
                 var giaKM = suaGiaDuoi(gia);
-                current.children[2].querySelector("button").click();
-
-                document.querySelectorAll(".next-balloon-content input")[i].value = giaKM.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-                i++;
+                console.log(gia + " => " + giaKM);
+                price.push(giaKM);
+                $(value).find("td.special_price button.next-btn").click();
             })
+
+            var balloon = $(".next-balloon-content")
+            $.each(balloon, (index, value) => {
+                $(value).find(" .money-number-picker input").val(price[index]);
+            });
             navigator.clipboard.writeText('document.querySelectorAll(".next-balloon-content .action-wrapper button.next-btn-primary").forEach((current, index) => {current.click()})');
             alert("Code lỏ nên chịu khó Bấm F12 > Console rồi dán code ra chạy hen ^_^");
         }
