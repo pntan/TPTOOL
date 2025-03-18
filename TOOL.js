@@ -71,7 +71,7 @@
 
                         <!-- Tiêu đề -->
                         <div class="content-header">
-                          <p>Công Cụ Hỗ Trợ <span class="version">ver 1.0.0</span></p>
+                          <p>Công Cụ Hỗ Trợ <span class="version">ver 1.0.1</span></p>
                         </div>
 
                         <!-- Khu vực log -->
