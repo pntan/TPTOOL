@@ -30,9 +30,7 @@
         JquUI.setAttribute("async", "async");
         document.head.appendChild(JquUI);
         */
-        var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c"
-
-        const VERSION = "2025.02.19.10.22";
+        var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c";
 
         // Ghi console log
         function boxAlert(content){
@@ -71,7 +69,7 @@
 
                         <!-- Tiêu đề -->
                         <div class="content-header">
-                          <p>Công Cụ Hỗ Trợ <span class="version">ver 1.0.0</span></p>
+                          <p>Công Cụ Hỗ Trợ <span class="version">ver 1.1.0</span></p>
                         </div>
 
                         <!-- Khu vực log -->
