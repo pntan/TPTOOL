@@ -44,7 +44,6 @@
         function boxLogging(content){
             var log = $(".content-log textarea");
             var data = log.text();
-            boxAlert(data);
             log.text(`${data}\n${content}`);
             log.scrollTop(log.prop("scrollHeight"));
         }
@@ -77,7 +76,7 @@
 
                         <!-- Khu vực log -->
                         <div class="content-log">
-                          <textarea disabled placeholder="Logging...">ABC</textarea>
+                          <textarea disabled placeholder="Logging..."></textarea>
                         </div>
 
                         <!-- Khu vực chọn chức năng -->
@@ -90,6 +89,7 @@
                               <option data-func="giaDuoiShopee">Cập Nhật Giá Đuôi</option>
                               <option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
                               <option data-func="tinhGiaBanShopee" data-layout="tinhGiaBanShopeeLayout">Tính Giá Bán</option>
+                              <option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
                             </optgroup>
 
                             <!-- Lazada -->
@@ -166,13 +166,12 @@
                 .tp-container .toggle-content {
                     background: linear-gradient(90deg, rgba(255,0,0,0.8) 0%, rgba(192,42,138,0.8) 5%, rgba(111,102,167,0.8) 10%, rgba(89,172,184,1) 15%, rgba(74,196,115,1) 20%, rgba(106,199,59,0.8) 25%, rgba(202,194,79,0.8) 30%, rgba(201,169,118,0.8) 35%, rgba(187,118,118,1) 40%, rgba(255,0,0,1) 45%, rgba(255,0,0,1) 50%, rgba(187,118,118,1) 55%, rgba(201,169,118,0.8) 60%, rgba(202,194,79,0.8) 65%, rgba(106,199,59,0.8) 70%, rgba(74,196,115,1) 75%, rgba(89,172,184,1) 80%, rgba(192,42,138,0.8) 85%, rgba(255,0,0,0.8) 90%);
                     background-size: 1200%;
-                    font-weight: 800;
+                    font-weight: bold;
                     color: #fff;
-                    padding: 0.5vh 0.5vw;
+                    padding: 0.5vh auto;
                     border-radius: 100px;
                     transition: 0.5s;
                     text-align: center;
-                    font-size: 1.25vw;
                     margin-bottom: 1vh;
                 }
 
@@ -394,15 +393,20 @@
 
             // Map các hàm tương ứng với data-func
             const actionMap = {
+                // --- SHOPEE
                 "giaDuoiShopee": giaDuoiShopee,
                 "5LanGiaShopee": kTr5LanGiaShopee,
                 "tinhGiaBanShopee": tinhGiaBanShopee,
                 "flashSaleShopee": flashSaleShopee,
+                "suaGiaSKUShopee": suaGiaSKUShopee,
                 //"batKhuyenMaiShopee": batKhuyenMaiShopee,
+                // --- TIKTOK
                 "tgFlashSaleTiktok": tgFlashSaleTiktok,
                 "giaDuoiTiktok": giaDuoiTiktok,
                 "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
+                // --- SAPO
                 "autoSelectStoreSapo": autoSelectStoreSapo,
+                // -- LAZADA
                 "giaDuoiLazada": giaDuoiLazada,
                 "themPhanLoaiLazada": themPhanLoaiLazada,
                 "ktraGiaChuongTrinhKMLazada": ktraGiaChuongTrinhKMLazada
@@ -430,6 +434,14 @@
             var content = $(".content-layout");
             $(".layout-tab").remove();
             switch(layoutName){
+                case "suaGiaSKUShopeeLayout":
+                    content.append($(`
+                    <div class="layout-tab">
+                        <textarea id="data" placeholder="SKU {tab} Giá"></textarea>
+                    </div>
+                    `));
+                    setEventSuaGiaSKUShopee();
+                    break;
                 case "5langiaShopeeLayout":
                     content.append($(`<div class="layout-tab">
                                                 <div>
@@ -604,6 +616,8 @@
         function suaGiaDuoi(price){
             var gia = price.toString().replace(",", "");
             gia = gia.replace(".", "");
+            gia = gia.trim();
+            boxAlert(gia);
             var mid = Math.ceil(gia.length / 2);
             var du = Math.floor(gia.length % 2);
 
@@ -621,11 +635,16 @@
                 giaDuoi = giaDuoi.join("");
             }
 
+            var giaCuoi = giaDuoi;
+
             giaDau = giaDau.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             giaDuoi = giaDuoi.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             gia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
+            boxAlert(giaDuoi);
             boxLogging(`Giá Gốc ${gia} => Giá Đuôi ${giaDuoi}`);
+
+            return giaCuoi;
 
             //console.log(`${price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} - ${giaDau} - ${giaDuoi}`);
         }
@@ -942,6 +961,57 @@
             });
         }
 
+        // Sửa giá theo SKU Shopee
+        function setEventSuaGiaSKUShopee(){
+            setEventTabTextarea();
+        }
+
+        function suaGiaSKUShopee(){
+            var data = $(".tp-container .content-layout .layout-tab #data");
+            var arrayData = data.val().split("\n");
+            $.each(arrayData, (index, value) => {
+                var listData = value.toString().split("\t");
+                var sku = listData[0];
+                var gia = listData[1];
+
+                var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+
+                $.each(box, (index, value) => {
+                    var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
+                    var priceBox = box.eq(index).find(".table-cell").eq(0).find("input");
+
+                    if(skuBox.val().includes(sku)){
+                        boxAlert(`Giá của ${sku} đã sửa từ ${priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} => ${gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`);
+                        boxLogging(`Giá của ${sku} đã sửa từ ${priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} => ${gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`);
+
+                        if(parseInt(priceBox.val()) < parseInt(gia)){
+                            boxLogging(`SKU: ${sku} có giá mới cao hơn giá hiện tại`);
+                            box.eq(index).css("background", "crimson");
+                        }else
+                            box.eq(index).css("background", "lightgreen");
+
+                        priceBox.select();
+                        priceBox.val(gia);
+
+                        if (window.getSelection) {
+                            window.getSelection().removeAllRanges();
+                        }else if (document.selection) {
+                            document.selection.empty();
+                        }
+
+                        if ("createEvent" in document) {
+                            var evt = document.createEvent("HTMLEvents");
+                            evt.initEvent("change", false, true);
+                            $(priceBox).get(0).dispatchEvent(evt);
+                        }
+                        else {
+                            current.fireEvent("onchange");
+                        }
+                    }
+                });
+            });
+        }
+
         // Cập nhật giá đuôi tiktok
         function giaDuoiTiktok(){
             var box = $(".theme-arco-table-body").find("div div");
@@ -1216,10 +1286,9 @@
             }
         }
 
-        // Sự kiện flash sale shopee
-        function setEventFlashSaleShopee(){
-            console.log("SETEVENT");
-            $("#flahsSaleName").on("keydown", function(event){
+        function setEventTabTextarea(){
+            boxAlert("Gắn sự kiện nhấn tab cho textarea");
+            $(".tp-container .content-layout .layout-tab textarea").on("keydown", function(event){
                 if (event.keyCode === 9) { // keyCode 9 là mã ASCII của phím Tab
                     event.preventDefault();
 
@@ -1231,6 +1300,11 @@
                     this.selectionStart = this.selectionEnd = start + 1;
                 }
             })
+        }
+
+        // Sự kiện flash sale shopee
+        function setEventFlashSaleShopee(){
+            setEventTabTextarea();
         }
 
         // Bật flash sale shopee theo tên
