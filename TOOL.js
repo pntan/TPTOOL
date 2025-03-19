@@ -30,7 +30,9 @@
         JquUI.setAttribute("async", "async");
         document.head.appendChild(JquUI);
         */
-        var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c";
+        var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c"
+
+        const VERSION = "2025.02.19.10.22";
 
         // Ghi console log
         function boxAlert(content){
@@ -69,7 +71,7 @@
 
                         <!-- Tiêu đề -->
                         <div class="content-header">
-                          <p>Công Cụ Hỗ Trợ <span class="version">ver 1.1.0</span></p>
+                          <p>Công Cụ Hỗ Trợ <span class="version">ver 1.0.0</span></p>
                         </div>
 
                         <!-- Khu vực log -->
@@ -88,6 +90,7 @@
                               <option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
                               <option data-func="tinhGiaBanShopee" data-layout="tinhGiaBanShopeeLayout">Tính Giá Bán</option>
                               <option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
+                              <option data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option>
                             </optgroup>
 
                             <!-- Lazada -->
@@ -304,8 +307,8 @@
                 }
 
                 .tp-container .content .content-layout button {
-                    color: #000;
-                    background: #fff;
+                    color: #fff;
+                    background: gray;
                     width: auto;
                     height: auto;
                     padding: 1vh 0.5vw;
@@ -397,6 +400,7 @@
                 "tinhGiaBanShopee": tinhGiaBanShopee,
                 "flashSaleShopee": flashSaleShopee,
                 "suaGiaSKUShopee": suaGiaSKUShopee,
+                //"keoPhanLoaiShopee": keoPhanLoaiShopee,
                 //"batKhuyenMaiShopee": batKhuyenMaiShopee,
                 // --- TIKTOK
                 "tgFlashSaleTiktok": tgFlashSaleTiktok,
@@ -432,6 +436,22 @@
             var content = $(".content-layout");
             $(".layout-tab").remove();
             switch(layoutName){
+                case "keoPhanLoaiShopeeLayout":
+                    $("#excuse-command").hide();
+                    content.append($(`
+                    <div class="layout-tab">
+                        <select id="group">
+                            <option>Phân Loại 1</option>
+                            <option>Phân Loại 2</option>
+                        </select>
+                        <div class="btn-control">
+                            <button id="get">Lấy Phân Loại</button>
+                            <button id="set">Cập Nhật Phân Loại</button>
+                        </div>
+                    </div>
+                    `));
+                    setEventKeoPhanLoaiShopee();
+                    break;
                 case "suaGiaSKUShopeeLayout":
                     content.append($(`
                     <div class="layout-tab">
@@ -817,6 +837,60 @@
             });
             navigator.clipboard.writeText('document.querySelectorAll(".next-balloon-content .action-wrapper button.next-btn-primary").forEach((current, index) => {current.click()})');
             alert("Code lỏ nên chịu khó Bấm F12 > Console rồi dán code ra chạy hen ^_^");
+        }
+
+        // Kéo Phân Loại shopee
+        function setEventKeoPhanLoaiShopee(){
+            $(".tp-container .content-layout .layout-tab button#get").on("click", () => {
+                boxAlert("Đang lấy danh sách phân loại");
+                boxLogging("Đang lấy danh sách phân loại");
+                layPhanLoaiShopee();
+            });
+            $(".tp-container .content-layout .layout-tab button#set").on("click", () => {
+                boxAlert("Đang cập nhật danh sách phân loại");
+                boxLogging("Đang cập nhật danh sách phân loại");
+                capNhatLoaiShopee();
+            });
+        }
+
+        function layPhanLoaiShopee(){
+            var group = $(".tp-container .content-layout .layout-tab #group").find("option:selected").index();
+            var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
+            $(".tp-container .content-layout .layout-tab").append($(`<ul class="option-sortable"></ul>`));
+
+            $(".tp-container .layout-tab .option-sortable").css({
+                "display": "flex",
+                "max-height": "30vh",
+                "max-width": "60vw",
+                "flex-wrap": "wrap",
+                "overflow": "scroll",
+                "justify-content": "space-around",
+            });
+
+            $(".tp-container .layout-tab .option-sortable .ui-state-default").css({
+                "width": "50%",
+                "background": "red",
+            });
+
+            $(".tp-container .layout-tab .option-sortable").sortable();
+
+            $(".tp-container .layout-tab .option-sortable").disableSelection();
+
+            $.each(box, (index, value) => {
+                var content = $(".tp-container .layout-tab .option-sortable");
+                content.append($(box).eq(index).clone());
+            });
+        }
+
+        function capNhatLoaiShopee(){
+            var group = $(".tp-container .content-layout .layout-tab #group").find("option:selected").index();
+            var box = $(".variation-edit-item.version-a").eq(group).find(".option-container");
+
+            var data = $(".tp-container .content-layout .layout-tab .option-sortable .options-item.drag-item");
+
+            $.each(data, (index, value) => {
+                box.append(value);
+            });
         }
 
         // Kiểm tra giá chương trình khuyến mãi
@@ -1311,11 +1385,15 @@
             $.each(data, (index, value) => {
                 value = value.split("\t");
                 var name = value[0];
-                var count = value[1];
+                var count = value[1] || -1;
                 var container = $(".products-container-content form.product-table .table-card");
                 $.each(container, (index, value) => {
                     var productBox = container.eq(index).find(".inner-rows .inner-row");
                     $.each(productBox, (index, value) => {
+                        productBox.eq(index).css({
+                            "background": "transparent",
+                            "color": "#000"
+                        });
                         var productName = productBox.eq(index).find(".variation .ellipsis-content");
                         var originalPrice = productBox.eq(index).find(".original-price");
                         var currentcyPrice = productBox.eq(index).find(".currency-input input");
@@ -1329,18 +1407,22 @@
                             gia = gia.replace(".", "");
                             gia = parseInt(suaGiaDuoi(gia));
 
-                            if(gia <= 0)
-                                return;
+                            if(!gia <= 0){
+                                gia -= 1000;
 
-                            gia -= 1000;
+                                gia = gia.toString().split("");
+                                gia[gia.length - 1] = "1";
+                                gia = gia.join("");
 
-                            gia = gia.toString().split("");
-                            gia[gia.length - 1] = "1";
-                            gia = gia.join("");
-
-                            currentcyPrice.select();
-                            currentcyPrice.val(gia);
-                            currentcyPrice.attr("modelvalue", gia);
+                                currentcyPrice.select();
+                                currentcyPrice.val(gia);
+                                currentcyPrice.attr("modelvalue", gia);
+                            }else{
+                                productBox.eq(index).css({
+                                    "background": "crimson",
+                                    "color": "#fff"
+                                });
+                            }
 
                             if (window.getSelection) {
                                 window.getSelection().removeAllRanges();
@@ -1357,45 +1439,41 @@
                                 value.fireEvent("onchange");
                             }
 
-                            var countTrue = false;
+                            if(count == -1)
+                                count = parseInt(currentStock.text());
 
-                            if(count != undefined){
-                                if(parseInt(currentStock.text()) >= parseInt(count)){
-                                    // Xử lý số lượng
-                                    campaignStock.select();
-                                    //let nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-                                    //nativeInputValueSetter.call($(campaignStock).get(0), count);
-                                    campaignStock.val(count);
-                                    campaignStock.attr("modelvalue", count);
+                            if(parseInt(currentStock.text()) >= parseInt(count)){
+                                // Xử lý số lượng
+                                campaignStock.select();
+                                //let nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+                                //nativeInputValueSetter.call($(campaignStock).get(0), count);
+                                campaignStock.val(count);
+                                campaignStock.attr("modelvalue", count);
 
-                                    if (window.getSelection) {
-                                        window.getSelection().removeAllRanges();
-                                    }else if (document.selection) {
-                                        document.selection.empty();
-                                    }
-
-                                    if ("createEvent" in document) {
-                                        evt = document.createEvent("HTMLEvents");
-                                        evt.initEvent("change", false, true);
-                                        $(campaignStock).get(0).dispatchEvent(evt);
-                                    }
-                                    else {
-                                        value.fireEvent("onchange");
-                                    }
-
-                                    countTrue = true;
-
-                                    if(!buttonSwitch.hasClass("eds-switch--open")){
-                                        buttonSwitch.parent().parent().parent().click();
-                                    }
+                                if (window.getSelection) {
+                                    window.getSelection().removeAllRanges();
+                                }else if (document.selection) {
+                                    document.selection.empty();
                                 }
-                            }else
-                                countTrue = true;
 
-                            if(countTrue == true){
+                                if ("createEvent" in document) {
+                                    evt = document.createEvent("HTMLEvents");
+                                    evt.initEvent("change", false, true);
+                                    $(campaignStock).get(0).dispatchEvent(evt);
+                                }
+                                else {
+                                    value.fireEvent("onchange");
+                                }
+
+                                if(!buttonSwitch.hasClass("eds-switch--open")){
+                                    buttonSwitch.parent().parent().parent().click();
+                                }
+
                                 // Xử lý chọn
                                 productBox.eq(index).find(".item-selector").trigger("click");
                                 productBox.eq(index).find(".item-selector input.eds-checkbox__input").val("true");
+
+                                boxLogging(`Đã chọn: ${$(productName).text()}\nt\tGiá: ${gia}\n\tSố Lượng: ${count}\n`);
                             }
 
                             /*navigator.clipboard.writeText(`
