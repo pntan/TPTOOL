@@ -41,10 +41,21 @@
         }
 
         // Ghi logging
-        function boxLogging(content){
-            var log = $(".content-log textarea");
-            var data = log.text();
-            log.text(`${data}\n${content}`);
+        function boxLogging(text, words = [], colors = []){
+            var log = $(".content-log pre");
+            var data = log.html();
+            if (words.length === 0) {
+                // Không truyền từ khóa -> Tô màu đen toàn bộ văn bản
+                log.html(`${data}\n<span style="color: black;">${text}</span>`);
+            }else{
+                // Nếu có từ khóa -> Tô màu cho từ khóa, còn lại giữ nguyên màu
+                words.forEach((word, index) => {
+                    var regex = new RegExp(`(${word})`, "gi");
+                    text = text.replace(regex, `<span style="color: ${colors[index]}; font-weight: bold;">$1</span>`);
+                });
+
+                log.html(`${data}\n${text}`);
+            }
             log.scrollTop(log.prop("scrollHeight"));
         }
 
@@ -76,7 +87,7 @@
 
                         <!-- Khu vực log -->
                         <div class="content-log">
-                          <textarea disabled placeholder="Logging..."></textarea>
+                          <pre></pre>
                         </div>
 
                         <!-- Khu vực chọn chức năng -->
@@ -221,15 +232,17 @@
                     height: auto;
                 }
 
-                .tp-container .content .content-log textarea {
-                    width: 100%;
+                .tp-container .content .content-log pre {
+                    width: auto;
                     height: auto;
+                    max-height: 20vh;
                     min-height: 7vh;
                     line-height: 3vh;
                     background: #90A4AE;
                     color: #fff;
                     font-size: 1vw;
                     text-indent: 5%;
+                    overflow: scroll;
                 }
 
                 .tp-container .content .content-feature {
@@ -347,7 +360,7 @@
                     localStorage.setItem("positionYTP",yPos);
                     localStorage.setItem("positionXTP",xPos);
                     boxAlert(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`);
-                    boxLogging(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`);
+                    boxLogging(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`, [`${xPos}`, `${yPos}`], ["orange", "yellow"]);
                 },
             });
 
@@ -388,7 +401,7 @@
                 $("#excuse-command").text("Chạy");
                 $("#excuse-command").attr("data-func", option.attr("data-func"));
                 $(".layout-tab").remove();
-                boxLogging(`Đã chọn ${option.parent().attr("label")} > ${option.text()}`);
+                boxLogging(`Đã chọn ${option.parent().attr("label")} > ${option.text()}`, [`${option.parent().attr("label")}`, `${option.text()}`], ["crimson", "crimson"]);
                 createLayoutTab(option.attr("data-layout"));
             });
 
@@ -432,7 +445,7 @@
         function createLayoutTab(layoutName){
             console.log("TP LOAD LAYOUT: " + layoutName);
             layoutName = layoutName == undefined ? "Không có giao diện" : layoutName;
-            boxLogging(`Giao Diện: ${layoutName}`);
+            boxLogging(`Giao Diện: ${layoutName}`, [`${layoutName}`], ["crimson"]);
             var content = $(".content-layout");
             $(".layout-tab").remove();
             switch(layoutName){
@@ -660,7 +673,7 @@
             gia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
             boxAlert(giaDuoi);
-            boxLogging(`Giá Gốc ${gia} => Giá Đuôi ${giaDuoi}`);
+            boxLogging(`Giá Gốc ${gia} => Giá Đuôi ${giaDuoi}`, [`${gia}`, `${giaDuoi}`], ["green", "yellow"]);
 
             return giaCuoi;
 
@@ -678,7 +691,60 @@
         // Cập nhật giá đuôi sàn cam
         function giaDuoiShopee(){
             console.log("CẬP NHẬT GIÁ ĐUÔI");
-            var tien = document.querySelectorAll(".currency-input .eds-input__input");
+
+            var box = $(".discount-item-component");
+
+            $.each(box, (index, value) => {
+                var parent = box.eq(index).find(".discount-edit-item-model-list .discount-edit-item-model-component");
+                $.each(parent, (index, value) => {
+                    var name = parent.eq(index).find(".item-content.item-variation .ellipsis-content.single");
+                    var currentPrice = parent.eq(index).find(".item-content.item-price");
+                    var price = parent.eq(index).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.currency-input input");
+                    var percent = parent.eq(index).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.discount-input input");
+                    var stock = parent.eq(index).find(".item-content.item-stock");
+                    var switcher = parent.eq(index).find(".item-content.item-enable-disable .eds-switch.eds-switch--normal");
+
+                    console.log(price);
+
+                    var gia = currentPrice.text().replace("₫", "");
+                    gia = gia.replace(".", "");
+
+                    var giaKM = suaGiaDuoi(gia);
+
+                    if(parseInt(giaKM) <= 0){
+                        boxLogging(`Sản phẩm ${name.text()} không có giá đuôi, vui lòng kiểm tra những khung được đánh dấu`, [`${name.text()}`], ["crimson"]);
+                        parent.eq(index).css("background", "crimson");
+                    }else{
+                        price.select();
+                        price.val(giaKM);
+
+                        if (window.getSelection) {
+                            window.getSelection().removeAllRanges();
+                        }else if (document.selection) {
+                            document.selection.empty();
+                        }
+
+                        if ("createEvent" in document) {
+                            var evt = document.createEvent("HTMLEvents");
+                            evt.initEvent("change", false, true);
+                            $(price).get(0).dispatchEvent(evt);
+                        }
+                        else {
+                            $(price).get(0).fireEvent("onchange");
+                        }
+
+                        price.blur();
+
+                        parent.eq(index).css("background", "green");
+                    }
+
+                    if(!switcher.hasClass("eds-switch--open")){
+                        switcher.trigger("click").click();
+                    }
+                });
+            });
+
+            /*var tien = document.querySelectorAll(".currency-input .eds-input__input");
             var phanTram = document.querySelectorAll(".discount-input .eds-input__input");
 
             tien.forEach((current, index) => {
@@ -710,9 +776,15 @@
                         else {
                             current.fireEvent("onchange");
                         }
+                        $(parent).css("background", "green");
+
+
+                    }else{
+                        $(parent).css("background", "crimson");
+                        console.log("ABC: " + $(parent));
                     }
                 }
-            });
+            });*/
         }
 
         // Tính giá bán sàn cam
@@ -1054,10 +1126,10 @@
 
                     if(skuBox.val().includes(sku)){
                         boxAlert(`Giá của ${sku} đã sửa từ ${priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} => ${gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`);
-                        boxLogging(`Giá của ${sku} đã sửa từ ${priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} => ${gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`);
+                        boxLogging(`Giá của ${sku} đã sửa từ ${priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} => ${gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`, [`${sku}`, `${priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`, `${gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`], ["crimson", "yellow", "yellow"]);
 
                         if(parseInt(priceBox.val()) < parseInt(gia)){
-                            boxLogging(`SKU: ${sku} có giá mới cao hơn giá hiện tại`);
+                            boxLogging(`SKU: ${sku} có giá mới cao hơn giá hiện tại`, [`${sku}`], ["crimson"]);
                             box.eq(index).css("background", "crimson");
                         }else
                             box.eq(index).css("background", "lightgreen");
@@ -1473,7 +1545,7 @@
                                 productBox.eq(index).find(".item-selector").trigger("click");
                                 productBox.eq(index).find(".item-selector input.eds-checkbox__input").val("true");
 
-                                boxLogging(`Đã chọn: ${$(productName).text()}\nt\tGiá: ${gia}\n\tSố Lượng: ${count}\n`);
+                                boxLogging(`Đã chọn: ${$(productName).text()}\nt\tGiá: ${gia}\n\tSố Lượng: ${count}\n`, [`${$(productName).text()}`, `${gia}`, `${count}`], ["crimson", "green", "blue"]);
                             }
 
                             /*navigator.clipboard.writeText(`
