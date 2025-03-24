@@ -16,23 +16,18 @@
 (function() {
     'use strict';
     var createUI = false;
+    var Jqu = document.createElement("script");
+    Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
+    Jqu.setAttribute("rel", "preload");
+    Jqu.setAttribute("async", "async");
+    document.head.appendChild(Jqu);
+
+    var JquUI = document.createElement("script");
+    JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
+    JquUI.setAttribute("rel", "preload");
+    JquUI.setAttribute("async", "async");
+    document.head.appendChild(JquUI);
     window.onload = function(){
-        /*
-        var Jqu = document.createElement("script");
-        Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
-        Jqu.setAttribute("rel", "preload");
-        Jqu.setAttribute("async", "async");
-        document.head.appendChild(Jqu);
-
-        var JquUI = document.createElement("script");
-        JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
-        JquUI.setAttribute("rel", "preload");
-        JquUI.setAttribute("async", "async");
-        document.head.appendChild(JquUI);
-        */
-        var GEMINIKEY = "AIzaSyDwwDQzjLc5C8iBgxGwTs0KbQvEzGJcS2c"
-
-        const VERSION = "2025.02.19.10.22";
 
         // Ghi console log
         function boxAlert(content){
@@ -176,10 +171,12 @@
                 }
 
                 .tp-container .toggle-content {
-                    background: linear-gradient(90deg, rgba(255,0,0,0.8) 0%, rgba(192,42,138,0.8) 5%, rgba(111,102,167,0.8) 10%, rgba(89,172,184,1) 15%, rgba(74,196,115,1) 20%, rgba(106,199,59,0.8) 25%, rgba(202,194,79,0.8) 30%, rgba(201,169,118,0.8) 35%, rgba(187,118,118,1) 40%, rgba(255,0,0,1) 45%, rgba(255,0,0,1) 50%, rgba(187,118,118,1) 55%, rgba(201,169,118,0.8) 60%, rgba(202,194,79,0.8) 65%, rgba(106,199,59,0.8) 70%, rgba(74,196,115,1) 75%, rgba(89,172,184,1) 80%, rgba(192,42,138,0.8) 85%, rgba(255,0,0,0.8) 90%);
+                    // background: linear-gradient(90deg, rgba(255,0,0,0.8) 0%, rgba(192,42,138,0.8) 5%, rgba(111,102,167,0.8) 10%, rgba(89,172,184,1) 15%, rgba(74,196,115,1) 20%, rgba(106,199,59,0.8) 25%, rgba(202,194,79,0.8) 30%, rgba(201,169,118,0.8) 35%, rgba(187,118,118,1) 40%, rgba(255,0,0,1) 45%, rgba(255,0,0,1) 50%, rgba(187,118,118,1) 55%, rgba(201,169,118,0.8) 60%, rgba(202,194,79,0.8) 65%, rgba(106,199,59,0.8) 70%, rgba(74,196,115,1) 75%, rgba(89,172,184,1) 80%, rgba(192,42,138,0.8) 85%, rgba(255,0,0,0.8) 90%);
+                    background: "#fff";
+                    box-shadow: -5px 5px 10px pink;
                     background-size: 1200%;
                     font-weight: bold;
-                    color: #fff;
+                    color: #000;
                     padding: 0.5vh auto;
                     border-radius: 100px;
                     transition: 0.5s;
