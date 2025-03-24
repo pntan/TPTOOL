@@ -172,7 +172,7 @@
 
                 .tp-container .toggle-content {
                     // background: linear-gradient(90deg, rgba(255,0,0,0.8) 0%, rgba(192,42,138,0.8) 5%, rgba(111,102,167,0.8) 10%, rgba(89,172,184,1) 15%, rgba(74,196,115,1) 20%, rgba(106,199,59,0.8) 25%, rgba(202,194,79,0.8) 30%, rgba(201,169,118,0.8) 35%, rgba(187,118,118,1) 40%, rgba(255,0,0,1) 45%, rgba(255,0,0,1) 50%, rgba(187,118,118,1) 55%, rgba(201,169,118,0.8) 60%, rgba(202,194,79,0.8) 65%, rgba(106,199,59,0.8) 70%, rgba(74,196,115,1) 75%, rgba(89,172,184,1) 80%, rgba(192,42,138,0.8) 85%, rgba(255,0,0,0.8) 90%);
-                    background: "#fff";
+                    background: pink;
                     box-shadow: -5px 5px 10px pink;
                     background-size: 1200%;
                     font-weight: bold;
