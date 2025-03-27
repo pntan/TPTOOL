@@ -798,34 +798,34 @@
 
                     var giaKM = suaGiaDuoi(gia);
 
-                    if(parseInt(giaKM) <= 0){
-                        boxLogging(`Sản phẩm ${name.text()} không có giá đuôi, vui lòng kiểm tra những khung được đánh dấu`, [`${name.text()}`], ["crimson"]);
-                        parent.eq(index).css("background", "crimson");
-                    }else{
-                        $(price).select();
-                        $(price).val(giaKM);
-                        $(price).focus();
+                    if(switcher.hasClass("eds-switch--open")){
+                        if(parseInt(giaKM) <= 0){
+                            parent.eq(index).css("background", "crimson");
+                            boxLogging(`Sản phẩm ${name.text()} không có giá đuôi, vui lòng kiểm tra những khung được đánh dấu`, [`${name.text()}`], ["crimson"]);
+                        }else{
+                            $(price).select();
+                            $(price).val(giaKM);
+                            $(price).focus();
 
 
-                        if (window.getSelection) {
-                            window.getSelection().removeAllRanges();
-                        }else if (document.selection) {
-                            document.selection.empty();
+                            if (window.getSelection) {
+                                window.getSelection().removeAllRanges();
+                            }else if (document.selection) {
+                                document.selection.empty();
+                            }
+
+                            if ("createEvent" in document) {
+                                var evt = document.createEvent("HTMLEvents");
+                                evt.initEvent("change", false, true);
+                                $(price).get(0).dispatchEvent(evt);
+                            }
+                            else {
+                                $(price).get(0).fireEvent("onchange");
+                            }
+
+                            parent.eq(index).css("background", "green");
                         }
 
-                        if ("createEvent" in document) {
-                            var evt = document.createEvent("HTMLEvents");
-                            evt.initEvent("change", false, true);
-                            $(price).get(0).dispatchEvent(evt);
-                        }
-                        else {
-                            $(price).get(0).fireEvent("onchange");
-                        }
-
-                        parent.eq(index).css("background", "green");
-                    }
-
-                    if(!switcher.hasClass("eds-switch--open")){
                         switcher.trigger("click").click();
                     }
                 });
@@ -1325,7 +1325,9 @@
 
         // Cập nhật giá đuôi tiktok
         function giaDuoiTiktok(){
-            var box = $(".theme-arco-table-body").find("div div");
+            var box = $(".theme-arco-table-content-inner .theme-arco-table-body");
+
+            //var box = $(".theme-arco-table-body").find("div div");
             var sp = $(box).find("div");
             console.log("STOP: " + sp.find(".theme-arco-table-tr.theme-arco-table-row-custom-expand").find("div.theme-arco-table-td").eq(3).find("input"));
             console.log(sp.find("p"));
