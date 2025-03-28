@@ -1325,10 +1325,32 @@
 
         // Cập nhật giá đuôi tiktok
         function giaDuoiTiktok(){
-            var box = $(".theme-arco-table-content-inner .theme-arco-table-body");
+            var box = $(".theme-arco-table-content-inner .theme-arco-table-body").find("div div");
+
+            var countProduct = 0;
+            var currentProduct = 0;
+
+            $.each(box, (index, value) => {
+                if($(box).eq(index).hasClass("theme-arco-table-tr-custom-expand-row")){
+                    // Số lượng phân loại
+                    var checked = box.eq(index).find("div").find(".theme-arco-checkbox-mask").parent().parent();
+
+                    if(checked.hasClass("theme-arco-checkbox-checked")){
+                        var countProduct = box.eq(index).find("div").eq(39).find(".p-12").text();
+                        countProduct = countProduct.match(/\d+/);
+
+                        for(var i = 0; i < countProduct; i++){
+                            console.log(i);
+                        }
+                    }
+                }
+            });
+
+            /*
 
             //var box = $(".theme-arco-table-body").find("div div");
             var sp = $(box).find("div");
+            console.log(sp);
             console.log("STOP: " + sp.find(".theme-arco-table-tr.theme-arco-table-row-custom-expand").find("div.theme-arco-table-td").eq(3).find("input"));
             console.log(sp.find("p"));
             console.log(sp.find("input"));
@@ -1345,6 +1367,8 @@
 
             gia = suaGiaDuoiTiktok(gia.eq(lastFocus).text());
             giaKM.eq(lastFocus).val(gia).addClass("tp-change").select().attr("aria-valuenow", gia);
+
+            */
         }
 
         function suaGiaDuoiTiktok(price){
