@@ -798,35 +798,41 @@
 
                     var giaKM = suaGiaDuoi(gia);
 
-                    if(switcher.hasClass("eds-switch--open")){
-                        if(parseInt(giaKM) <= 0){
-                            parent.eq(index).css("background", "crimson");
-                            boxLogging(`Sản phẩm ${name.text()} không có giá đuôi, vui lòng kiểm tra những khung được đánh dấu`, [`${name.text()}`], ["crimson"]);
-                        }else{
-                            $(price).select();
-                            $(price).val(giaKM);
-                            $(price).focus();
-
-
-                            if (window.getSelection) {
-                                window.getSelection().removeAllRanges();
-                            }else if (document.selection) {
-                                document.selection.empty();
-                            }
-
-                            if ("createEvent" in document) {
-                                var evt = document.createEvent("HTMLEvents");
-                                evt.initEvent("change", false, true);
-                                $(price).get(0).dispatchEvent(evt);
-                            }
-                            else {
-                                $(price).get(0).fireEvent("onchange");
-                            }
-
-                            parent.eq(index).css("background", "green");
+                    if(!switcher.hasClass("eds-switch--disabled")){
+                        if(!switcher.hasClass("eds-switch--open")){
+                            parent.eq(index).css("background", "orange");
+                            switcher.trigger("click").click();
+                            boxLogging(`Có sản phẩm cần kiểm tra, vui lòng xem lại những sản phẩm được đánh dấu`, ["Có sản phẩm cần kiểm tra, vui lòng xem lại những sản phẩm được đánh dấu"], ["orange"]);
                         }
 
-                        switcher.trigger("click").click();
+                        if(switcher.hasClass("eds-switch--open")){
+                            if(parseInt(giaKM) <= 0){
+                                parent.eq(index).css("background", "crimson");
+                                boxLogging(`Sản phẩm ${name.text()} không có giá đuôi, vui lòng kiểm tra những khung được đánh dấu`, [`${name.text()}`], ["crimson"]);
+                            }else{
+                                $(price).select();
+                                $(price).val(giaKM);
+                                $(price).focus();
+
+
+                                if (window.getSelection) {
+                                    window.getSelection().removeAllRanges();
+                                }else if (document.selection) {
+                                    document.selection.empty();
+                                }
+
+                                if ("createEvent" in document) {
+                                    var evt = document.createEvent("HTMLEvents");
+                                    evt.initEvent("change", false, true);
+                                    $(price).get(0).dispatchEvent(evt);
+                                }
+                                else {
+                                    $(price).get(0).fireEvent("onchange");
+                                }
+
+                                parent.eq(index).css("background", "green");
+                            }
+                        }
                     }
                 });
             });
