@@ -16,18 +16,18 @@
 (function() {
 	'use strict';
 	var createUI = false;
-	window.onload = function(){
-		var Jqu = document.createElement("script");
-		Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
-		Jqu.setAttribute("rel", "preload");
-		Jqu.setAttribute("async", "async");
-		document.head.appendChild(Jqu);
+	var Jqu = document.createElement("script");
+	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
+	Jqu.setAttribute("rel", "preload");
+	Jqu.setAttribute("async", "async");
+	document.head.appendChild(Jqu);
 
-		var JquUI = document.createElement("script");
-		JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
-		JquUI.setAttribute("rel", "preload");
-		JquUI.setAttribute("async", "async");
-		document.head.appendChild(JquUI);
+	var JquUI = document.createElement("script");
+	JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
+	JquUI.setAttribute("rel", "preload");
+	JquUI.setAttribute("async", "async");
+	document.head.appendChild(JquUI);
+	window.onload = function(){
 
 		// Ghi console log
 		function boxAlert(content){
