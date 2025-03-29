@@ -25,9 +25,34 @@
 	var JquUI = document.createElement("script");
 	JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
 	JquUI.setAttribute("rel", "preload");
-	JquUI.setAttribute("async", "async");
 	document.head.appendChild(JquUI);
+
 	window.onload = function(){
+		// Lấy nonce từ thẻ meta hoặc bất kỳ thẻ script nào
+		function getNonce() {
+			let nonce = $('script[nonce]').attr('nonce');
+			if (!nonce) {
+				nonce = $('meta[http-equiv="Content-Security-Policy"]').attr('content')?.match(/nonce-([\w\d]+)/)?.[1] || '';
+			}
+			return nonce || '';
+		}
+
+		// Auto patch style, iframe, script dynamic
+		function applyNonce() {
+			const nonce = getNonce();
+			if (!nonce) return console.warn('Không tìm thấy nonce');
+
+			// Style inline
+			$('style:not([nonce])').attr('nonce', nonce);
+
+			// Iframe
+			$('iframe:not([nonce])').attr('nonce', nonce);
+
+			// Script do tool tạo
+			$('script:not([nonce]):not([src])').attr('nonce', nonce);
+
+			console.log('==> Nonce Applied:', nonce);
+		}
 
 		// Ghi console log
 		function boxAlert(content){
@@ -401,6 +426,7 @@
 				$(".layout-tab").remove();
 				boxLogging(`Đã chọn ${option.parent().attr("label")} > ${option.text()}`, [`${option.parent().attr("label")}`, `${option.text()}`], ["crimson", "crimson"]);
 				createLayoutTab(option.attr("data-layout"));
+				applyNonce();
 			});
 
 			// Map các hàm tương ứng với data-func
@@ -439,6 +465,7 @@
 		if (!createUI) {
 			createUI = true;
 			createLayout();
+			applyNonce();
 		}
 
 		// Dựng giao diện của mỗi lựa chọn
