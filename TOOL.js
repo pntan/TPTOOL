@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Công Cụ Hỗ Trợ
 // @namespace    http://tampermonkey.net/
-// @version      2025-01-02
+// @version      04-04-2025
 // @description  Bộ công cụ tích hợp các chức năng hỗ trợ cho sàn TMĐT
 // @author       TanPhan
 // @match        https://*/*
@@ -17,7 +17,7 @@
 	'use strict';
 	var createUI = false;
 
-	const VERSION = "1.0.1";
+	const VERSION = "1.0.2";
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 	Jqu.setAttribute("rel", "preload");
