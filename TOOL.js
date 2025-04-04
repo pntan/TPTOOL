@@ -138,7 +138,7 @@
 							<!-- TikTok -->
 							<optgroup label="TikTok">
 							  <option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
-							  <option data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
+							  <!-- <option data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option> -->
 							</optgroup>
 
 							<!-- Khác
