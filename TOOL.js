@@ -1,8 +1,7 @@
-alert("TPTOOL LOADED");
 var createUI = false;
 
 const VERSION = "1.0.2";
-/*var Jqu = document.createElement("script");
+var Jqu = document.createElement("script");
 Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 Jqu.setAttribute("rel", "preload");
 Jqu.setAttribute("async", "async");
@@ -11,7 +10,7 @@ document.head.appendChild(Jqu);
 var JquUI = document.createElement("script");
 JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
 JquUI.setAttribute("rel", "preload");
-document.head.appendChild(JquUI);*/
+document.head.appendChild(JquUI);
 
 // Lấy nonce từ thẻ meta hoặc bất kỳ thẻ script nào
 function getNonce() {
