@@ -141,10 +141,10 @@
 							  <option data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
-							<!-- Khác -->
+							<!-- Khác
 							<optgroup label="Khác">
 							  <option data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option>
-							</optgroup>
+							</optgroup> -->
 
 						  </select>
 						</div>
