@@ -1,5 +1,6 @@
 window.onload = function(){
 	'use strict';
+	alert("TPTOOL LOADED");
 	var createUI = false;
 
 	const VERSION = "1.0.2";
