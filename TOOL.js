@@ -16,6 +16,8 @@
 (function() {
 	'use strict';
 	var createUI = false;
+
+    const VERSION = "1.0.1";
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 	Jqu.setAttribute("rel", "preload");
@@ -102,7 +104,7 @@
 
 						<!-- Tiêu đề -->
 						<div class="content-header">
-						  <p>Công Cụ Hỗ Trợ <span class="version">ver 1.0.0</span></p>
+						  <p>Công Cụ Hỗ Trợ <span class="version">(ver ${VERSION})</span></p>
 						</div>
 
 						<!-- Khu vực log -->
@@ -138,13 +140,13 @@
 							<!-- TikTok -->
 							<optgroup label="TikTok">
 							  <option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
-							  <!-- <option data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option> -->
+							  <option data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
-							<!-- Khác
+							<!-- Khác -->
 							<optgroup label="Khác">
 							  <option data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option>
-							</optgroup> -->
+							</optgroup>
 
 						  </select>
 						</div>
