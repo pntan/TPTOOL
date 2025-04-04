@@ -1,18 +1,3 @@
-// ==UserScript==
-// @name         Công Cụ Hỗ Trợ
-// @namespace    http://tampermonkey.net/
-// @version      04-04-2025
-// @description  Bộ công cụ tích hợp các chức năng hỗ trợ cho sàn TMĐT
-// @author       TanPhan
-// @match        https://*/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=http://anonymouse.org/
-// @grant        none
-// @require      https://code.jquery.com/jquery-3.7.1.min.js
-// @require      https://code.jquery.com/ui/1.14.1/jquery-ui.js
-// @require      https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js
-// ==/UserScript==
-/* globals       jQuery, $, waitForKeyElements */
-
 (function() {
 	'use strict';
 	var createUI = false;
