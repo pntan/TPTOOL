@@ -1,7 +1,7 @@
 'use strict';
 var createUI = false;
 
-  const VERSION = "1.0.6";
+const VERSION = "1.0.6";
 /*var Jqu = document.createElement("script");
 Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 Jqu.setAttribute("rel", "preload");
@@ -12,6 +12,7 @@ var JquUI = document.createElement("script");
 JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
 JquUI.setAttribute("rel", "preload");
 document.head.appendChild(JquUI);*/
+
 // Lấy nonce từ thẻ meta hoặc bất kỳ thẻ script nào
 function getNonce() {
   let nonce = $('script[nonce]').attr('nonce');
