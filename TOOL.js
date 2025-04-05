@@ -2058,4 +2058,3 @@ document.head.appendChild(JquUI);*/
               })
           });
   }
-}
