@@ -1,7 +1,7 @@
 'use strict';
 var createUI = false;
 
-const VERSION = "1.0.1";
+const VERSION = "1.0.10";
 /*var Jqu = document.createElement("script");
 Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 Jqu.setAttribute("rel", "preload");
@@ -1297,7 +1297,7 @@ function capNhatLoaiShopee(){
 
         productName.parent().append($(`
         <div class="data-model-id">
-          ${productBox.attr("data-model-id")}
+          ${productBox.eq(index).attr("data-model-id")}
         </div>
         `));
       });
