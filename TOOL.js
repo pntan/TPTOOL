@@ -1,7 +1,7 @@
 'use strict';
 var createUI = false;
 
-const VERSION = "1.0.11";
+const VERSION = "1.0.12";
 /*var Jqu = document.createElement("script");
 Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 Jqu.setAttribute("rel", "preload");
@@ -2064,7 +2064,7 @@ function flashSaleShopee(){
             }
 
             if ("createEvent" in document) {
-              evt = document.createEvent("HTMLEvents");
+              var evt = document.createEvent("HTMLEvents");
               evt.initEvent("change", false, true);
               $(campaignStock).get(0).dispatchEvent(evt);
             }
