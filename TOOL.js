@@ -1,7 +1,7 @@
 'use strict';
 var createUI = false;
 
-const VERSION = "1.0.10";
+const VERSION = "1.0.11";
 /*var Jqu = document.createElement("script");
 Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 Jqu.setAttribute("rel", "preload");
@@ -12,6 +12,7 @@ var JquUI = document.createElement("script");
 JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
 JquUI.setAttribute("rel", "preload");
 document.head.appendChild(JquUI);*/
+
 // Lấy nonce từ thẻ meta hoặc bất kỳ thẻ script nào
 function getNonce() {
   let nonce = $('script[nonce]').attr('nonce');
@@ -692,63 +693,85 @@ function createLayoutTab(layoutName){
 // Kiểm tra 5 lần giá đuôi
 function kTr5LanGiaShopee(){
   var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+    var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
   var maxPrice = 0, minPrice = 0, min, maxSku, minSku, maxPos;
   var listSku = [], listPrice = [];
   var error = false;
+    var first = 0;
   box.css("background", "transparent");
+    boxLeft.css("background", "transparent");
   for(var i = 0; i < box.length; i++){
+      var name = boxLeft.eq(i).find(".table-cell").eq(0);
+      var nameProduct = name.contents()
+        .filter(function() {
+          return this.nodeType === 3; // chỉ lấy text thuần
+        })[0]?.nodeValue.trim();
   var price = box.eq(i).find(".table-cell").eq(0).find("input");
   var sku = box.eq(i).find(".table-cell").eq(2).find("textarea");
 
       if("x0".includes(sku.val().trim())){
-        boxLogging(`Đã bỏ qua sản phẩm x0`, [`sản phẩm x0`], ["pink"]);
+        boxLogging(`Đã bỏ qua sản phẩm ${nameProduct}`, [`${nameProduct}`], ["pink"]);
         box.eq(i).css("background", "pink");
+        boxLeft.eq(i).css("background", "pink");
          continue;
       }
 
-  if(maxPrice == 0 || maxPrice < parseInt(price.val())){
-    maxPrice = price.val();
-    min = suaGiaDuoi(price.val());
-    maxSku = sku.val();
-    maxPos = i;
-    i = 0;
-  }
-
-  minPrice = price.val();
-  minPrice = minPrice.replace(",", " ");
-  minPrice = minPrice.replace(".", " ");
-  minPrice = suaGiaDuoi(minPrice);
-
-  if(parseInt(minPrice) == 0){
-        if(!error){
-          sku.focus();
-        }
-        error = true;
-        boxLogging(`Sản phẩm ${sku.val()} chưa có giá đuôi, có thể bị sai!`, [`Sản phẩm ${sku.val()} chưa có giá đuôi, có thể bị sai!`], ["red"]);
+      if(first == 0){
+        minPrice = suaGiaDuoi(price.val());
+        minSku = sku.val();
+        first = 1;
         continue;
       }
 
-  if(parseInt(min) > parseInt(minPrice)){
-    min = minPrice;
-    minSku = sku.val();
+      if(minPrice > parseInt(suaGiaDuoi(price.val())) && parseInt(suaGiaDuoi(price.val())) > 0){
+        i = 0;
+        minPrice = suaGiaDuoi(price.val());
+        minSku = sku.val();
+        box.css("background", "transparent");
+        boxLeft.css("background", "transparent");
+        listSku = [];
+        listPrice = [];
+        continue;
+      }
+      console.log(parseInt(suaGiaDuoi(price.val())) == 0);
+      if(parseInt(suaGiaDuoi(price.val())) == 0){
+        boxLogging(`Sản phẩm ${nameProduct} chưa có giá đuôi!`, [`${nameProduct}`], [`crimson`])
+        box.eq(i).css("background", "crimson");
+        boxLeft.eq(i).css("background","crimson");
+        continue;
+      }
+
+  maxPrice = minPrice * 5;
+
+      if(maxPrice < price.val()){
+        box.eq(i).css("background" , "orange");
+        boxLeft.eq(i).css("background", "orange");
+        listSku.push(sku.val());
+        listPrice.push(price.val());
+      }
+
+      var arr = listPrice;
+
+      const maxIndex = arr.reduce((maxIdx, currentVal, currentIdx, array) => {
+        return currentVal > array[maxIdx] ? currentIdx : maxIdx;
+      }, 0);
+
+      maxPrice = listPrice[maxIndex];
+      console.log(listPrice);
+      min = minPrice;
+      maxSku = listSku[maxIndex];
   }
 
-  $(".tp-container .content .content-layout .layout-tab span#maxPrice").text(maxPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ','));
-  $(".tp-container .content .content-layout .layout-tab span#minPrice").text(min.replace(/\B(?=(\d{3})+(?!\d))/g, ','));
-  $(".tp-container .content .content-layout .layout-tab span#maxSku").text(maxSku);
-  $(".tp-container .content .content-layout .layout-tab span#minSku").text(minSku);
-  $(".tp-container .content .content-layout .layout-tab span#suggestPrice").text((parseInt(min) * 5).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+    if(listPrice.length > 0 && listSku.length > 0){
+      $(".tp-container .content .content-layout .layout-tab span#maxPrice").text(maxPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+      $(".tp-container .content .content-layout .layout-tab span#maxSku").text(maxSku);
+    }
+    $(".tp-container .content .content-layout .layout-tab span#minPrice").text(min.replace(/\B(?=(\d{3})+(?!\d))/g, ','));
+    $(".tp-container .content .content-layout .layout-tab span#minSku").text(minSku);
+    $(".tp-container .content .content-layout .layout-tab span#suggestPrice").text((parseInt(min) * 5).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
 
-  if(parseInt(minPrice) * 5 < maxPrice){
-    listSku.push(maxSku);
-    listPrice.push(maxPrice);
-    box.eq(maxPos).css("background", "orange");
-    error = true;
-  }
-  }
-
-  listSku = [...listSku.reduce((map, item) => map.set(item, true), new Map()).keys()];
-  listPrice = [...listPrice.reduce((map, item) => map.set(item, true), new Map()).keys()];
+  //listSku = [...listSku.reduce((map, item) => map.set(item, true), new Map()).keys()];
+  //listPrice = [...listPrice.reduce((map, item) => map.set(item, true), new Map()).keys()];
 
   $.each(listSku, (index, value) => {
   boxLogging(`${listSku[index]} bị 5 lần giá đuôi ${listPrice[index]}`, [`${listSku[index]}`, `${listPrice[index]}`], ["orange", "lightgreen"]);
@@ -1161,6 +1184,68 @@ function giaDuoiLazada(){
     });
   }
 
+  // Thêm SKU theo tên phân loại
+  function themSKUTheoPhanLoaiShopee(){
+    var data = $(".tp-container .content-layout .layout-tab #data");
+
+    var array = $(data).val().split("\n");
+
+    var arrayData = [], arraySku = [];
+
+    $.each(array, (index, value) => {
+      value = value.split("\t");
+      arrayData.push(value[0]);
+      arraySku.push(value[1]);
+    });
+
+    var currentPos = 0;
+    var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+    var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+  function writeValue(){
+      if(currentPos >= box.length){
+        boxLogging(`Đã thêm SKU`, [`Đã thêm SKU`], ["green"]);
+        return;
+      }
+
+      var name = boxLeft.eq(currentPos).find(".table-cell.first-variation-cell")
+      var nameProduct = name.contents()
+        .filter(function() {
+          return this.nodeType === 3; // chỉ lấy text thuần
+        })[0]?.nodeValue.trim();
+      var skuBox = box.eq(currentPos).find(".table-cell").eq(2).find("textarea");
+      var priceBox = box.eq(currentPos).find(".table-cell").eq(0).find("input");
+
+      console.log(nameProduct);
+
+      if(arrayData.includes(nameProduct)){
+        var pos = arrayData.indexOf(nameProduct);
+        skuBox.attr("modelValue", arraySku[pos]);
+        skuBox.val(arraySku[pos]).trigger("input");
+
+        if (window.getSelection) {
+          window.getSelection().removeAllRanges();
+        }else if (document.selection) {
+          document.selection.empty();
+        }
+
+        if ("createEvent" in document) {
+          var evt = document.createEvent("HTMLEvents");
+          evt.initEvent("input", false, true);
+          $(skuBox).get(0).dispatchEvent(evt);
+        }
+        else {
+          $(skuBox).get(0).fireEvent("oninput");
+        }
+      }
+
+      currentPos++;
+
+      setTimeout(writeValue, 10);
+    }
+    writeValue();
+  }
+
 // Thêm phân loại shopee
 function setEventThemPhanLoaiShopee(){
   setEventTabTextarea();
@@ -1169,16 +1254,33 @@ function setEventThemPhanLoaiShopee(){
 function themPhanLoaiShopee(){
   var group = $(".tp-container .content-layout .layout-tab #group").find("option:selected").index();
   //var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
-  var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.virtual-options-item");
+  var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item");
 
   var data = $(".tp-container .content-layout .layout-tab #data");
-  var arrayData = data.val().split("\n");
+  var array = data.val().split("\n");
 
-  $.each(arrayData, (index, value) => {
-      var inputBox = box.find("input");
-  inputBox.select();
-  inputBox.attr("modelvalue", value);
-      inputBox.val(value);
+    var arrayData = [], arraySku = [];
+
+    $.each(array, (index, value) => {
+      value = value.split("\t");
+      arrayData.push(value[0]);
+      arraySku.push(value[1]);
+    });
+
+    var currentPos = 0;
+
+  function writeValue(){
+      if(currentPos >= arrayData.length){
+        boxLogging(`Đã thêm phân loại, đang dò SKU...`, [`Đã thêm phân loại, đang dò SKU...`], ["orange"])
+        themSKUTheoPhanLoaiShopee(data);
+        return;
+      }
+
+      var inputBox = box.eq(box.length - 1).find("input").trigger("input");
+
+      inputBox.select();
+      inputBox.attr("modelValue", arrayData[currentPos]);
+      inputBox.val(arrayData[currentPos]);
 
       if (window.getSelection) {
         window.getSelection().removeAllRanges();
@@ -1195,27 +1297,11 @@ function themPhanLoaiShopee(){
         $(inputBox).get(0).fireEvent("oninput");
       }
 
-      simulateClearing(inputBox, 50, function(){
-        simulateTyping(inputBox, value);
-      });
+      currentPos++;
 
-      if (window.getSelection) {
-        window.getSelection().removeAllRanges();
-      }else if (document.selection) {
-        document.selection.empty();
-      }
-
-      if ("createEvent" in document) {
-        evt = document.createEvent("HTMLEvents");
-        evt.initEvent("input", false, true);
-        $(inputBox).get(0).dispatchEvent(evt);
-      }
-      else {
-        $(inputBox).get(0).fireEvent("oninput");
-      }
-
-      boxLogging(`${value} đã được tạo`, [`${value}`], ["orange"]);
-  });
+      setTimeout(writeValue, 500);
+    }
+    writeValue();
 }
 
 // Kéo Phân Loại shopee
@@ -1930,7 +2016,7 @@ function flashSaleShopee(){
         if(pos != -1){
           var name = nameList[pos], count = countList[pos];
 
-          var gia = originalPrice.text().replace("₫", "")
+          /*var gia = originalPrice.text().replace("₫", "")
           gia = gia.replace(".", "");
           gia = parseInt(suaGiaDuoi(gia));
 
@@ -1958,7 +2044,7 @@ function flashSaleShopee(){
             else {
               value.fireEvent("onchange");
             }
-          }
+          }*/
 
           if(count == -1)
             count = parseInt(currentStock.text());
@@ -1995,7 +2081,7 @@ function flashSaleShopee(){
             }
           }
 
-          boxLogging(`Đã chọn: ${productName.text()}\n\tGiá: ${originalPrice.text()} => ${gia}\n\tSố Lượng: ${count}/${campaignStock.val()}\n`, [`${productName.text()}`, `${originalPrice.text()}`, `${gia}`, `${count}`, `${campaignStock.val()}`], ["crimson", "green", "green", "blue", "blue"]);
+          boxLogging(`Đã chọn: ${productName.text()}\n\tGiá: ${originalPrice.text()}\n\tSố Lượng: ${count}/${campaignStock.val()}\n`, [`${productName.text()}`, `${originalPrice.text()}`, `${count}`, `${campaignStock.val()}`], ["crimson", "green", "blue", "blue"]);
         }else{
           boxLogging(`Sản phẩm ${productName.text()} không có trong danh sách`, [`${productName.text()}`], ["crimson"]);
         }
