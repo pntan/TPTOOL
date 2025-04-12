@@ -13,6 +13,43 @@
 	JquUI.setAttribute("rel", "preload");
 	document.head.appendChild(JquUI);*/
 
+const libraries = [
+          'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js',
+          'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+          'https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js'
+        ];
+
+        function loadScriptsSequentially(scripts, callback) {
+            let index = 0;
+
+            function loadNext() {
+            if (index >= scripts.length) {
+              if (callback) callback();
+              return;
+            }
+
+            const script = document.createElement('script');
+            script.src = scripts[index];
+            script.onload = () => {
+              index++;
+              loadNext();
+            };
+            script.onerror = () => {
+              console.error(`Không thể tải script: ${scripts[index]}`);
+              index++;
+              loadNext(); // vẫn tiếp tục nếu lỗi
+            };
+            document.head.appendChild(script);
+            }
+
+            loadNext();
+        }
+
+        loadScriptsSequentially(libraries, () => {
+          console.log('Đã load xong tất cả thư viện!');
+          // gọi hàm chính của bạn ở đây nếu cần
+        });
+
 		// Lấy nonce từ thẻ meta hoặc bất kỳ thẻ script nào
 		function getNonce() {
 			let nonce = $('script[nonce]').attr('nonce');
