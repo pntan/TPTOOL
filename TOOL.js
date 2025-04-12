@@ -790,37 +790,44 @@ const libraries = [
                   copyRow(originalRow, newRow);
                 }
 
-                // Copy merge (trong phần header)
-                originalSheet._merges && Object.keys(originalSheet._merges).forEach((merge) => {
-                  var range = ExcelJS.CellRange.decode(merge);
-                  if (range.top <= rowsToPreserve) {
-                    newSheet.mergeCells(merge);
-                  }
-                });
+                // Copy merged cells (chỉ phần header)
+                if (originalSheet._merges) {
+                  Object.keys(originalSheet._merges).forEach((mergeRange) => {
+                    const [startRow] = mergeRange.match(/\d+/g).map(Number);
+                    if (startRow <= rowsToPreserve) {
+                      newSheet.mergeCells(mergeRange);
+                    }
+                  });
+                }
 
                 var xlsxBuffer = await newWorkbook.xlsx.writeBuffer();
                 zip.file(`part_${chunkIndex++}.xlsx`, xlsxBuffer);
-                }
+            }
 
-                zip.generateAsync({ type: "blob" }).then(function (content) {
+            zip.generateAsync({ type: "blob" }).then(function (content) {
                 saveAs(content, "splitted_excel.zip");
             });
         }
 
         function copyRow(sourceRow, targetRow) {
-            targetRow.height = sourceRow.height;
-            sourceRow.eachCell({ includeEmpty: true }, function (cell, colNumber) {
-                var targetCell = targetRow.getCell(colNumber);
-                targetCell.value = cell.value;
+          targetRow.height = sourceRow.height;
 
-                if (cell.style) {
-                  targetCell.style = JSON.parse(JSON.stringify(cell.style));
-                }
+          // Kiểm tra xem dòng có bị ẩn không và ẩn nó lại trong sheet mới
+          if (sourceRow.hidden) {
+            targetRow.hidden = true;
+          }
 
-                if (cell.master && cell !== cell.master) {
-                  targetCell.value = cell.master.value;
-                }
-            });
+          sourceRow.eachCell({ includeEmpty: true }, function (cell, colNumber) {
+            var targetCell = targetRow.getCell(colNumber);
+            targetCell.value = cell.value;
+
+            // Deep clone style
+            targetCell.style = JSON.parse(JSON.stringify(cell.style || {}));
+
+            if (cell.master && cell !== cell.master) {
+              targetCell.value = cell.master.value;
+            }
+          });
         }
 
 
