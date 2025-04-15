@@ -1,7 +1,7 @@
 'use strict';
 var createUI = false;
 
-const VERSION = "1.0.18";
+const VERSION = "1.0.10";
 /*var Jqu = document.createElement("script");
 Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 Jqu.setAttribute("rel", "preload");
@@ -12,6 +12,7 @@ var JquUI = document.createElement("script");
 JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
 JquUI.setAttribute("rel", "preload");
 document.head.appendChild(JquUI);*/
+
 	const libraries = [
 		'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js',
 		'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
@@ -787,7 +788,7 @@ function createLayoutTab(layoutName){
 				var link = $("<a></a>");
 				link.attr({
 					"href": url,
-					"target": "_blank"
+					"target": "_bank"
 				});
 				link.text("Xem Trước").css("color", "crimson");
 
@@ -800,54 +801,73 @@ function createLayoutTab(layoutName){
 	function setEventKiemTraTonSapo(){
 		setEventTabTextarea();
 	}
-	function kiemTraTonSapo(){
+	function kiemTraTonSapo() {
 		var data = $(".tp-container .content-layout .layout-tab #data");
-		var arrayData = data.val().split("\n");
+		var arrayData = data.val().split("\n").filter(i => i.trim() !== "");
 
 		var currentPos = 0;
 
-		function searchData(){
-			if(currentData >= arrayData.length)
-				currentPos;
+		var listCanSell = [];
+
+		function searchData() {
+			if (currentPos >= arrayData.length) return;
+
 			var searchBox = $(".MuiBox-root input").eq(0);
+			if (!searchBox.length) {
+				console.warn("Không tìm thấy ô tìm kiếm.");
+				return;
+			}
 
-			console.log(searchBox);
-			searchBox.focus();
-			searchBox.val(value);
-			searchBox.val(value);
-			searchBox.attr("value", value);
-			searchBox.trigger("change");
-			searchBox.blur();
+		var keyword = arrayData[currentPos];
+		searchBox.focus();
+		searchBox.val(arrayData[currentPos]);
+		searchBox.val(arrayData[currentPos]);
+		searchBox.attr("value", arrayData[currentPos]);
+		searchBox.trigger("change");
+		searchBox.blur();
 
-			var box = $(".sc-dWZqqJ.dRUZhp").eq(1);
+		console.log(`Đang tìm: ${keyword}`);
+		boxLogging(`Đang kiểm tra: ${keyword}`, [`Đang kiểm tra: ${keyword}`], ["orange"]);
 
-			var item = box.find("tbody tr");
+		let retryCount = 0;
 
-			boxLogging(`Sản phẩm ${value} có:`, [`Sản phẩm ${value} có:\n`], ["white"]);
+		let checkReady = setInterval(() => {
+		let box = $(".sc-dWZqqJ.dRUZhp").eq(1);
+		let item = box.find("tbody tr");
 
-			setTimeout(checkData, 1000);
+		if (item.length > 0 || retryCount >= 20) { // Chờ tối đa ~4s (20 x 200ms)
+		clearInterval(checkReady);
+
+		if (item.length === 0) {
+		boxLogging("Không tìm thấy dữ liệu.", ["Không tìm thấy dữ liệu"], ["crimson"]);
+		} else {
+		item.each((index, value) => {
+		let name = $(value).find("td.sc-knuQbY").eq(2).find("p a");
+		let sku = $(value).find("td.sc-knuQbY").eq(4).find("p");
+		let canSell = $(value).find("td.sc-knuQbY").eq(5).find("p").eq(0);
+		let storage = $(value).find("td.sc-knuQbY").eq(6).find("p").eq(0);
+
+		let kq = parseInt(canSell.text()) > 0 ? "Có thể bán" : "Không có tồn";
+
+		if(parseInt(canSell.text()) > 0)
+		listCanSell.push(sku);
+
+		boxLogging(`${name.text()} ${sku.text()} ${canSell.text()}/${storage.text()}`);
+		boxLogging(kq, [kq], [kq === "Có thể bán" ? "lightgreen" : "crimson"]);
+		});
 		}
 
-		function checkData(){
-			$.each(item, (index, value) => {
-				var name = item.eq(index).find("td.sc-knuQbY").eq(2).find("p a");
-				var sku = item.eq(index).find("td.sc-knuQbY").eq(4).find("p");
-				var canSell = item.eq(index).find("td.sc-knuQbY").eq(5).find("p").eq(0);
-				var storage = item.eq(index).find("td.sc-knuQbY").eq(6).find("p").eq(0);
-
-				var kq = "Có thể bán";
-				if(!parseInt(canSell.text()) > 0)
-					kq = "Không có tồn";
-
-				boxLogging(`${name.text()} ${sku.text()} ${canSell.text()}/${storage.text()}`);
-				boxLogging(kq, [kq], [kq == "Có thể bán" ? "lightgreen" : "crimson"]);
-			})
-
-			boxLogging("\n");
-
-			searchData();
+		currentPos++;
+		setTimeout(searchData, 500); // Chờ 0.5s rồi tiếp
 		}
-	};
+
+		retryCount++;
+		}, 200); // Kiểm tra mỗi 200ms
+		}
+
+		searchData();
+	}
+
 
 	// Tách file excel
 	async function splitExcelFile() {
