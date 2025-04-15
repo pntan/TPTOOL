@@ -785,7 +785,10 @@ function createLayoutTab(layoutName){
 				var url = `https://shopee.vn/${productName}-i.${shopid}.${itemid}`;
 
 				var link = $("<a></a>");
-				link.attr("href", url);
+				link.attr({
+					"href": url,
+					"target": "_blank"
+				});
 				link.text("Xem Trước").css("color", "crimson");
 
 				title.empty().append(link);
