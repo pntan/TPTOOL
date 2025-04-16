@@ -2,7 +2,7 @@
 	'use strict';
 	var createUI = false;
 
-    const VERSION = "1.0.10";
+    const VERSION = "1.0.20";
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 	Jqu.setAttribute("rel", "preload");
