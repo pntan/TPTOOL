@@ -2,7 +2,7 @@
 	'use strict';
 	var createUI = false;
 
-    const VERSION = "1.0.20";
+    const VERSION = "1.1.0";
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 	Jqu.setAttribute("rel", "preload");
@@ -15,9 +15,12 @@
 	document.head.appendChild(JquUI);*/
 
         const libraries = [
-          'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js',
-          'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
-          'https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js'
+            'https://code.jquery.com/jquery-3.7.1.min.js',
+            'https://code.jquery.com/ui/1.14.1/jquery-ui.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js',
+
         ];
 
         function loadScriptsSequentially(scripts, callback) {
@@ -157,7 +160,7 @@
                                 <option data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
                                 <option data-func="themGioiTinhPhanLoaiShopee" data-layout="themGioiTinhPhanLoaiShopeeLayout">Thên Giới Tính Cho Phân Loại</option>
                                 <option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
-                                <option data-func="kiemTraMaPhanLoaiShopee" data-layout="kiemTraMaPhanLoaiShopeeLayout">Kiểm Tra Mã Phân Loại</option>
+                                <option data-func="kiemTraMaPhanLoaiShopee" data-layout="kiemTraMaPhanLoaiShopeeLayout">Hiển Thị Mã Mã Phân Loại</option>
 							</optgroup>
 
 							<!-- Lazada -->
@@ -196,6 +199,10 @@
 						</div>
 
 					</div>
+                    <div class="resize-handle top-left"></div>
+                    <div class="resize-handle top-right"></div>
+                    <div class="resize-handle bottom-left"></div>
+                    <div class="resize-handle bottom-right"></div>
 				</div>
 			`);
 			$("body").append(container);
@@ -222,195 +229,190 @@
 
 			var cssStyle = $(`
 			<style>
-				.tp-container {
-					position: fixed;
-					width: auto;
-					height: auto;
-					user-select: none;
-					top: ${top}px;
-					left: ${left}px;
-					z-index: 99999999999999999999;
-                    max-width: 90vw;
-				}
+                .tp-container {
+                    top: ${top}px;
+                    left: ${left}px;
+                    width: auto;
+                    background: rgba(255, 255, 255, 0.8); /* Nền trắng mờ */
+                    backdrop-filter: blur(12px); /* Làm mờ nền phía sau */
+                    -webkit-backdrop-filter: blur(12px);
+                    border: 1px solid rgba(200, 200, 200, 0.6);
+                    border-radius: 12px;
+                    font-family: 'Segoe UI', sans-serif;
+                    font-size: 14px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    z-index: 9999;
+                    resize: none !important; /* tránh conflict */
+                    position: fixed;
+                    overflow: auto; /* Hoặc hidden */
+                    max-width: 100%; /* Đảm bảo container không vượt quá màn hình */
+                    max-height: 100%; /* Đảm bảo container không vượt quá màn hình */
+                  }
 
-				.tp-container * {
-					padding: 0;
-					border: 0;
-					margin: 0;
-					user-select: none;
-				}
+                  .tp-container *::-webkit-scrollbar {
+                    display: none;
+                  }
 
-				.tp-container .toggle-content {
-					background: linear-gradient(90deg, rgba(255,0,0,0.8) 0%, rgba(192,42,138,0.8) 5%, rgba(111,102,167,0.8) 10%, rgba(89,172,184,1) 15%, rgba(74,196,115,1) 20%, rgba(106,199,59,0.8) 25%, rgba(202,194,79,0.8) 30%, rgba(201,169,118,0.8) 35%, rgba(187,118,118,1) 40%, rgba(255,0,0,1) 45%, rgba(255,0,0,1) 50%, rgba(187,118,118,1) 55%, rgba(201,169,118,0.8) 60%, rgba(202,194,79,0.8) 65%, rgba(106,199,59,0.8) 70%, rgba(74,196,115,1) 75%, rgba(89,172,184,1) 80%, rgba(192,42,138,0.8) 85%, rgba(255,0,0,0.8) 90%);
-					background-size: 1200%;
-					font-weight: bold;
-					color: #fff;
-					padding: 0.5vh auto;
-					border-radius: 100px;
-					transition: 0.5s;
-					text-align: center;
-					margin-bottom: 1vh;
-				}
+                  .tp-container .toggle-content {
+                    background: rgba(245, 245, 245, 0.8);
+                    padding: 10px;
+                    cursor: pointer;
+                    text-align: center;
+                    font-weight: 600;
+                    font-size: 15px;
+                    border-bottom: 1px solid rgba(180, 180, 180, 0.4);
+                    border-radius: 12px 12px 0 0;
+                  }
 
-				.tp-container .toggle-content:hover {
-					background: #fff;
-					color: #000;
-				}
+                  .tp-container .content {
+                    display: none;
+                    padding: 15px;
+                  }
 
-				.tp-container .toggle-content p {
-					padding: 1vh 1vw;
-				}
+                  .content-header {
+                    font-weight: 600;
+                    margin-bottom: 10px;
+                    color: #222;
+                  }
 
-				.tp-container .content {
-					background: rgba(255, 255, 255, 0.63);
-					width: auto;
-					height: auto;
-					padding: 2vh 1vw;
-					border: 5px #000 double;
-					display: none;
-				}
+                  .content-log pre {
+                    background: rgba(250, 250, 250, 0.6);
+                    border: 1px solid rgba(200, 200, 200, 0.5);
+                    border-radius: 8px;
+                    height: 100px;
+                    overflow: auto;
+                    padding: 10px;
+                    font-size: 13px;
+                    color: #333;
+                  }
 
-				.tp-container .content .content-header {
-					width: 100%;
-					height: 5vh;
-					line-height: 5vh;
-					padding: 0.5vh 0 !important;
-					padding-top: 0;
-					color: #000
-				}
+                  .content-feature select {
+                    width: 100%;
+                    padding: 10px;
+                    font-size: 14px;
+                    border-radius: 8px;
+                    border: 1px solid #bbb;
+                    margin-bottom: 15px;
+                    background: rgba(255, 255, 255, 0.7);
+                    color: #000;
+                    margin-top: 2vh
+                  }
 
-				.tp-container .content .content-header p {
-					width: 100%;
-					height: auto;
-					text-align: center;
-					font-size: 2vw;
-					font-weight: 800;
-				}
+                  .content-layout {
+                    margin-bottom: 15px;
+                  }
 
-				.tp-container .content .content-header p span.version {
-					font-size: 0.75vw;
-					color: gray;
-				}
+                  .content-button button {
+                    width: 100%;
+                    padding: 12px;
+                    font-size: 15px;
+                    font-weight: bold;
+                    background: rgba(220, 20, 60, 0.7);
+                    color: #fff;
+                    border: none;
+                    border-radius: 8px;
+                    transition: all 0.3s ease;
+                  }
 
-				.tp-container .content .content-log {
-					width: 100%;
-					height: auto;
-				}
+                  .content-button button:hover {
+                    background: rgba(180, 0, 40, 0.5);
+                    transform: scale(1.02);
+                  }
 
-				.tp-container .content .content-log pre {
-					width: auto;
-					height: auto;
-					max-height: 20vh;
-					min-height: 7vh;
-					line-height: 3vh;
-					background: #90A4AE;
-					color: #fff;
-					font-size: 1vw;
-					text-indent: 5%;
-					overflow: scroll;
-				}
+                  .tp-container .content .content-layout * {
+                    margin-bottom: 10px;
+                  }
 
-				.tp-container .content .content-feature {
-					width: 100%;
-					height: auto;
-				}
+                  .tp-container .content .content-layout input,
+                  .tp-container .content .content-layout textarea {
+                    width: 100%;
+                    padding: 10px;
+                    border: 1px solid #aaa;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    background: rgba(255, 255, 255, 0.7);
+                    color: #000;
+                  }
 
-				.tp-container .content .content-feature select {
-					width: 100%;
-					height: 7vh;
-					line-height: 7vh;
-					border-radius: 5px;
-					text-indent: 5%;
-					outline: none;
-					transition: 0.5s;
-					background: rgba(255, 255, 255, 1);
-					color: #000;
-				}
+                  .tp-container .content .content-layout label {
+                    font-weight: 500;
+                    display: block;
+                    margin-bottom: 5px;
+                    color: #222;
+                  }
 
-				.tp-container .content .content-feature select:hover {
-					background: rgba(255, 255, 255, 0.3);
-					transition: 0.5s;
-				}
+                  .tp-container .content .content-layout button {
+                    background: rgba(0, 123, 255, 0.7);
+                    color: white;
+                    padding: 10px 16px;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    cursor: pointer;
+                  }
 
-				.tp-container .content .content-feature select optgroup {
-					width: 100%;
-					height: auto;
-				}
+                  .tp-container .content .content-layout button:hover {
+                    background: rgba(0, 86, 179, 0.5);
+                  }
 
-				.tp-container .content .content-feature select optgroup option {
-					width: 100%;
-					height: 5vh;
-					transition: 0.5s;
-				}
+                  /* Scrollbar nhẹ */
+                  .tp-container pre::-webkit-scrollbar {
+                    width: 6px;
+                  }
+                  .tp-container pre::-webkit-scrollbar-thumb {
+                    background: #ccc;
+                    border-radius: 3px;
+                  }
+                  .resize-handle {
+                      position: absolute;
+                      width: 16px;
+                      height: 16px;
+                      right: 0;
+                      bottom: 0;
+                      background: #ccc;
+                      cursor: se-resize;
+                      border-bottom-right-radius: 16px;
+                    }
 
-				.tp-container .content .content-feature select optgroup option:hover {
-					transform: scale(1.1);
-				}
+                    .resize-handle {
+                      position: absolute;
+                      background: #ccc;
+                      cursor: pointer;
+                      opacity: 1
+                    }
 
-				.tp-container .content .content-layout {
-					width: auto;
-					height: auto;
-					margin: 2vh 0;
-				}
+                    /* Các góc resize */
+                    .top-left {
+                      width: 16px;
+                      height: 16px;
+                      left: 0;
+                      top: 0;
+                      cursor: nw-resize;
+                    }
 
-				.tp-container .content .content-layout * {
-					width: auto;
-					height: auto;
-					margin-bottom: 1vh;
-				}
+                    .top-right {
+                      width: 16px;
+                      height: 16px;
+                      right: 0;
+                      top: 0;
+                      cursor: ne-resize;
+                    }
 
-				.tp-container .content .content-layout p {
-					background: transparent;
-					color: #000;
-				}
+                    .bottom-left {
+                      width: 16px;
+                      height: 16px;
+                      left: 0;
+                      bottom: 0;
+                      cursor: sw-resize;
+                    }
 
-				.tp-container .content .content-layout input {
-					color: #000;
-					border: 1px #000 solid;
-					width: auto;
-					height: 5vh;
-					background: #fff
-				}
-
-				.tp-container .content .content-layout label {
-					color: #000;
-					background: transparent;
-				}
-
-				.tp-container .content .content-layout textarea {
-					color: #000;
-					background: #fff;
-					width: 100%;
-					height: auto;
-				}
-
-				.tp-container .content .content-layout button {
-					color: #fff;
-					background: gray;
-					width: auto;
-					height: auto;
-					padding: 1vh 0.5vw;
-				}
-
-				.tp-container .content .content-button {
-					width: 100%;
-					height: auto;
-				}
-
-				.tp-container .content .content-button button {
-					width: 100%;
-					height: 5vh;
-					line-height: 5vh;
-					background: crimson;
-					color: #fff;
-					font-weight: 800;
-					transition: 0.5s;
-				}
-
-				.tp-container .content .content-button button:hover {
-					transform: scale(1.1);
-					filter: brightness(10px);
-				}
+                    .bottom-right {
+                      width: 16px;
+                      height: 16px;
+                      right: 0;
+                      bottom: 0;
+                      cursor: se-resize;
+                    }
 			</style>
 			`);
 
@@ -418,16 +420,96 @@
 
 			// Kéo thả khung
 			$(".tp-container").draggable({
+                start: function (event, ui) {
+                  // Nếu đang resize thì không cho drag
+                  if (isResizing) return false;
+                },
 				drag: function() {
 					var offset = $(this).offset();
 					var xPos = offset.left;
 					var yPos = offset.top;
-					localStorage.setItem("positionYTP",yPos);
-					localStorage.setItem("positionXTP",xPos);
-					boxAlert(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`);
-					boxLogging(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`, [`${xPos}`, `${yPos}`], ["orange", "yellow"]);
+					//localStorage.setItem("positionYTP",yPos);
+					//localStorage.setItem("positionXTP",xPos);
+					//boxAlert(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`);
+					//boxLogging(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`, [`${xPos}`, `${yPos}`], ["orange", "yellow"]);
 				},
 			});
+
+            // Resize container (4 góc)
+            let isResizing = false, containers, startX, startY, startWidth, startHeight;
+
+            // Hàm resize góc
+            function resize(e, direction) {
+                e.preventDefault();
+                container = $(e.target).closest('.tp-container');
+
+                // Kiểm tra container có tồn tại không
+                if (!container || container.length === 0) {
+                    console.error("Container không tồn tại!");
+                    return; // Nếu không tồn tại, thoát khỏi hàm
+                }
+
+                isResizing = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                startWidth = container.width();
+                startHeight = container.height();
+
+                $(document).on('mousemove.resizeBox', function (e) {
+                    if (!isResizing) return;
+                    let newWidth = startWidth;
+                    let newHeight = startHeight;
+                    let newTop = parseInt(container.css('top'));
+                    let newLeft = parseInt(container.css('left'));
+
+                    if (direction === 'top-left') {
+                      newWidth = startWidth - (e.clientX - startX);
+                      newHeight = startHeight - (e.clientY - startY);
+                      newTop = startY + (e.clientY - startY);
+                      newLeft = startX + (e.clientX - startX);
+                    } else if (direction === 'top-right') {
+                      newWidth = startWidth + (e.clientX - startX);
+                      newHeight = startHeight - (e.clientY - startY);
+                      newTop = startY + (e.clientY - startY);
+                    } else if (direction === 'bottom-left') {
+                      newWidth = startWidth - (e.clientX - startX);
+                      newHeight = startHeight + (e.clientY - startY);
+                      newLeft = startX + (e.clientX - startX);
+                    } else if (direction === 'bottom-right') {
+                      newWidth = startWidth + (e.clientX - startX);
+                      newHeight = startHeight + (e.clientY - startY);
+                    }
+
+                    // Kiểm tra nếu container là hợp lệ
+                    if (container) {
+                      container.css({
+                        width: newWidth + 'px',
+                        height: newHeight + 'px',
+                        top: newTop + 'px',
+                        left: newLeft + 'px'
+                      });
+                    }
+                });
+
+                $(document).on('mouseup.resizeBox', function () {
+                    isResizing = false;
+                    $(document).off('.resizeBox');
+                });
+                }
+
+            // Gắn sự kiện cho các góc resize
+            $('.top-left').on('mousedown', function (e) {
+              resize(e, 'top-left');
+            });
+            $('.top-right').on('mousedown', function (e) {
+              resize(e, 'top-right');
+            });
+            $('.bottom-left').on('mousedown', function (e) {
+              resize(e, 'bottom-left');
+            });
+            $('.bottom-right').on('mousedown', function (e) {
+              resize(e, 'bottom-right');
+            });
 
 			// Ẩn hiện giao diện
 			$(".toggle-content").on("dblclick", function(){
@@ -1505,7 +1587,7 @@
             });
         }
 
-        // Thêm SKU theo tên phân loại
+        // Thêm SKU theo tên phân loại shopee
         function themSKUTheoPhanLoaiShopee(){
             var data = $(".tp-container .content-layout .layout-tab #data");
 
@@ -1943,6 +2025,36 @@
 			});
 		}
 
+        function simulateReactInput(input, text, delay) {
+            delay = delay || 100;
+            var el = input[0];
+            input.focus();
+
+            var i = 0;
+
+            function setNativeValue(element, value) {
+                var lastValue = element.value;
+                element.value = value;
+
+                // Gọi setter gốc nếu bị React override
+                var event = new Event('input', { bubbles: true });
+                var tracker = element._valueTracker;
+                if (tracker) tracker.setValue(lastValue);
+                    element.dispatchEvent(event);
+            }
+
+            function typeChar() {
+                if (i < text.length) {
+                  var newVal = input.val() + text[i];
+                  setNativeValue(el, newVal);
+                  i++;
+                  typeChar();
+                }
+            }
+
+            typeChar();
+        }
+
 		// Cập nhật giá đuôi tiktok
 		function giaDuoiTiktok(){
 			var box = $(".theme-arco-table-content-inner .theme-arco-table-body").find("div div > div");
@@ -1973,36 +2085,6 @@
                         gia = gia.replace(".", "");
                         gia = gia.replace("₫", "");
                         gia = suaGiaDuoi(gia);
-
-                        function simulateReactInput(input, text, delay) {
-                            delay = delay || 100;
-                            var el = input[0];
-                            input.focus();
-
-                            var i = 0;
-
-                            function setNativeValue(element, value) {
-                                var lastValue = element.value;
-                                element.value = value;
-
-                                // Gọi setter gốc nếu bị React override
-                                var event = new Event('input', { bubbles: true });
-                                var tracker = element._valueTracker;
-                                if (tracker) tracker.setValue(lastValue);
-                                    element.dispatchEvent(event);
-                            }
-
-                            function typeChar() {
-                                if (i < text.length) {
-                                  var newVal = input.val() + text[i];
-                                  setNativeValue(el, newVal);
-                                  i++;
-                                  typeChar();
-                                }
-                            }
-
-                            typeChar();
-                        }
 
                         promotionPrice.select().focus();
 
@@ -2230,14 +2312,22 @@
 			})
 		}
 
+        // Thêm ký tự ngẫu nhiên cho SKU lazada
+        function taoSkuMoi(skuGoc, soKyTu = 2) {
+            const kyTuNgauNhien = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let them = '';
+            for (let i = 0; i < soKyTu; i++) {
+            them += kyTuNgauNhien.charAt(Math.floor(Math.random() * kyTuNgauNhien.length));
+            }
+            return skuGoc + them;
+        }
+
 		// Thêm phân loại Lazada
-		function themPhanLoaiLazada() {
-            var group = $(".tp-container .content-layout .layout-tab #group").find("option:selected").index();
-			//var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
+        function themPhanLoaiLazada() {
 			var box = $(".sale-prop-body .next-formily-item").eq(0).find(".prop-option-list .next-form-item.form-item-prop-option-item");
 
-			var data = $(".tp-container .content-layout .layout-tab #data");
-			var array = data.val().split("\n");
+            var data = $(".tp-container .content-layout .layout-tab #data");
+            var array = data.val().split("\n");
 
             var arrayData = [], arraySku = [];
 
@@ -2248,20 +2338,106 @@
             });
 
             var currentPos = 0;
-            var inputBox = box.eq(box.length - 1).find(".prop-option-item .item-textbox input");
 
-           function writeData(){
-               simulatePaste(inputBox, arrayData[currentPos], 100, () => {
-                   console.log(arrayData[currentPos]);
-                   currentPos++;
-                   if(currentPos == arrayData.length)
-                       return;
-                   writeData();
-               });
-           }
+            function writeData() {
+                // lấy lại input mới nhất mỗi lần
+                var boxList = $(".sale-prop-body .next-formily-item").eq(0).find(".prop-option-list .next-form-item.form-item-prop-option-item");
+                var inputBox = boxList.eq(boxList.length - 1).find(".prop-option-item .item-textbox input");
+
+                if (!inputBox.length) {
+                    console.warn('Không tìm thấy input tại vị trí:', currentPos);
+                    return;
+                }
+
+                simulatePaste(inputBox, arrayData[currentPos], 0, () => {
+                    //console.log("✔ Thêm:", arrayData[currentPos]);
+
+                    currentPos++;
+
+                    if (currentPos >= arrayData.length){
+                        boxLogging(`Đã thêm phân loại, đang thêm SKU`, [`Đã thêm phân loại, đang thêm SKU`], [`lightgreen`]);
+                        setTimeout(themSKUTheoPhanLoaiLazada,1000);
+                        return;
+                    }
+
+                    // chờ ô mới xuất hiện rồi tiếp tục
+                    setTimeout(writeData, 300); // tuỳ sàn, có thể tăng lên 500ms nếu render chậm
+                });
+
+                inputBox.blur(); // để kích hoạt sự kiện thêm ô mới
+            }
 
             writeData();
-		}
+        }
+
+        // Thêm SKU theo tên phân loại lazada
+        function themSKUTheoPhanLoaiLazada(){
+            var data = $(".tp-container .content-layout .layout-tab #data");
+
+            var array = $(data).val().split("\n");
+
+            var arrayData = [], arraySku = [];
+
+            $.each(array, (index, value) => {
+                value = value.split("\t");
+                arrayData.push(value[0]);
+                arraySku.push(value[1]);
+            });
+
+            console.log(arrayData);
+
+            var currentPos = 0;
+            var box = $(".next-table-body .next-table-row");
+
+			function writeValue(){
+                if(currentPos >= box.length){
+                    boxLogging(`Đã thêm SKU`, [`Đã thêm SKU`], ["green"]);
+                    return;
+                }
+
+                var boxContent = box.eq(box.length - arrayData.length - 1 + currentPos);
+
+                var name = boxContent.find("td.next-table-cell.first span")
+                var nameProduct = name.contents()
+                    .filter(function() {
+                        return this.nodeType === 3; // chỉ lấy text thuần
+                    })[0]?.nodeValue.trim();
+                var skuBox = boxContent.find("td.next-table-cell.SellerSku input");
+                var priceBox = boxContent.find("td.next-table-cell.price input");
+                var quantity = boxContent.find("td.next-table-cell.quantity input");
+
+                console.log(nameProduct);
+
+                if(arrayData.includes(nameProduct)){
+                    var pos = arrayData.indexOf(nameProduct);
+                    skuBox.attr("modelValue", arraySku[pos]);
+                    skuBox.val(arraySku[pos]).trigger("input");
+
+                    simulateReactInput(skuBox, taoSkuMoi(arraySku[pos], Math.floor(Math.random() * 4)) + 1);
+
+                    if (window.getSelection) {
+                        window.getSelection().removeAllRanges();
+                    }else if (document.selection) {
+                        document.selection.empty();
+                    }
+
+                    if ("createEvent" in document) {
+                        var evt = document.createEvent("HTMLEvents");
+                        evt.initEvent("input", false, true);
+                        $(skuBox).get(0).dispatchEvent(evt);
+                    }
+                    else {
+                        $(skuBox).get(0).fireEvent("oninput");
+                    }
+                }
+
+                currentPos++;
+
+                setTimeout(writeValue, 10);
+            }
+            writeValue();
+        }
+
 
 		// Tự động chọn gian hàng và sản phẩm Sapo
 		function setEventAutoSelectorStoreSapo(){
