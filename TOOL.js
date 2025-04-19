@@ -1,7 +1,8 @@
+
   'use strict';
   var createUI = false;
 
-    const VERSION = "1.1.3";
+    const VERSION = "1.1.4";
   /*var Jqu = document.createElement("script");
   Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
   Jqu.setAttribute("rel", "preload");
@@ -79,6 +80,29 @@
       console.log('==> Nonce Applied:', nonce);
     }
 
+    function boxPopup(text, words = [], colors = []){
+        var log = $(".tp-popup .content");
+        log.parent().toggle("slow");
+        var data = log.empty().html();
+        if (words.length === 0) {
+            log.html(`${data}\n(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) <span style="color: black;">${text}</span>`);
+        } else {
+            // Create a copy to modify, otherwise replacements might interfere with later searches if words overlap
+            let modifiedText = text;
+            words.forEach((word, index) => {
+                // Escape the word BEFORE creating the RegExp
+                var escapedWord = escapeRegExp(word);
+                // Use the escaped word in the RegExp
+                var regex = new RegExp(`(${escapedWord})`, "gi");
+                // Perform replacement on the modifiedText
+                modifiedText = modifiedText.replace(regex, `<span style="color: ${colors[index]}; font-weight: bold;">$1</span>`);
+            });
+            // Set the final HTML
+            log.html(`${data}\n(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) ${modifiedText}`);
+        }
+        log.scrollTop(log.prop("scrollHeight"));
+    }
+
     // Ghi console log
     function boxAlert(content){
       console.log(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: yellow; font-size: 1.5rem");
@@ -110,6 +134,10 @@
                 log.html(`${data}\n(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) ${modifiedText}`);
             }
             log.scrollTop(log.prop("scrollHeight"));
+
+            log.find(".title").on("click", () => {
+                log.parent().toggle();
+            })
         }
 
     // Dựng giao diện
@@ -156,6 +184,7 @@
                                 <option data-func="tinhGiaBanShopee" data-layout="tinhGiaBanShopeeLayout">Tính Giá Bán</option>
                                 <option data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
                                 <option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
+                                <option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
                                 <option data-func="kTr5LanGiaShopee" data-layout="kTr5LanGiaShopeeLayout">Kiểm Tra 5 Lần Giá</option>
                                 <option data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option>
                                 <option data-func="themGioiTinhPhanLoaiShopee" data-layout="themGioiTinhPhanLoaiShopeeLayout">Thên Giới Tính Cho Phân Loại</option>
@@ -207,7 +236,14 @@
                     <div class="resize-handle bottom-right"></div>
         </div>
       `);
-      $("body").append(container);
+        var contentPopup = $(`
+        <div class="tp-popup">
+            <div class="content">
+            </div>
+        </div>
+        `);
+    $("body").append(container);
+    $("body").append(contentPopup);
 
       // Xác định tọa độ
       var top = 0, left = 0;
@@ -231,6 +267,16 @@
 
       var cssStyle = $(`
       <style>
+          .tp-popup{
+              position: fixed;
+              width: 100vw;
+              height: 100vh;
+              top: 0px;
+              left: 0px;
+              background: rgba(0, 0, 0, 0.7);
+              z-index: 9998;
+              display: none;
+          }
                 .tp-container {
                     top: ${top}px;
                     left: ${left}px;
@@ -431,10 +477,11 @@
 
       // Kéo thả khung
       $(".tp-container").draggable({
-                start: function (event, ui) {
-                  // Nếu đang resize thì không cho drag
-                  if (isResizing) return false;
-                },
+        start: function (event, ui) {
+          // Nếu đang resize thì không cho drag
+          if (isResizing) return false;
+        },
+
         drag: function() {
           var offset = $(this).offset();
           var xPos = offset.left;
@@ -446,90 +493,90 @@
         },
       });
 
-            // Resize container (4 góc)
-            let isResizing = false, containers, startX, startY, startWidth, startHeight;
+    // Resize container (4 góc)
+    let isResizing = false, containers, startX, startY, startWidth, startHeight;
 
-            // Hàm resize góc
-            function resize(e, direction) {
-                e.preventDefault();
-                container = $(e.target).closest('.tp-container');
+    // Hàm resize góc
+    function resize(e, direction) {
+        e.preventDefault();
+        container = $(e.target).closest('.tp-container');
 
-                // Kiểm tra container có tồn tại không
-                if (!container || container.length === 0) {
-                    console.error("Container không tồn tại!");
-                    return; // Nếu không tồn tại, thoát khỏi hàm
-                }
+        // Kiểm tra container có tồn tại không
+        if (!container || container.length === 0) {
+            console.error("Container không tồn tại!");
+            return; // Nếu không tồn tại, thoát khỏi hàm
+        }
 
-                isResizing = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                startWidth = container.width();
-                startHeight = container.height();
+        isResizing = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidth = container.width();
+        startHeight = container.height();
 
-                $(document).on('mousemove.resizeBox', function (e) {
-                    if (!isResizing) return;
-                    let newWidth = startWidth;
-                    let newHeight = startHeight;
-                    let newTop = parseInt(container.css('top'));
-                    let newLeft = parseInt(container.css('left'));
+        $(document).on('mousemove.resizeBox', function (e) {
+            if (!isResizing) return;
+            let newWidth = startWidth;
+            let newHeight = startHeight;
+            let newTop = parseInt(container.css('top'));
+            let newLeft = parseInt(container.css('left'));
 
-                    if (direction === 'top-left') {
-                      newWidth = startWidth - (e.clientX - startX);
-                      newHeight = startHeight - (e.clientY - startY);
-                      newTop = startY + (e.clientY - startY);
-                      newLeft = startX + (e.clientX - startX);
-                    } else if (direction === 'top-right') {
-                      newWidth = startWidth + (e.clientX - startX);
-                      newHeight = startHeight - (e.clientY - startY);
-                      newTop = startY + (e.clientY - startY);
-                    } else if (direction === 'bottom-left') {
-                      newWidth = startWidth - (e.clientX - startX);
-                      newHeight = startHeight + (e.clientY - startY);
-                      newLeft = startX + (e.clientX - startX);
-                    } else if (direction === 'bottom-right') {
-                      newWidth = startWidth + (e.clientX - startX);
-                      newHeight = startHeight + (e.clientY - startY);
-                    }
+            if (direction === 'top-left') {
+              newWidth = startWidth - (e.clientX - startX);
+              newHeight = startHeight - (e.clientY - startY);
+              newTop = startY + (e.clientY - startY);
+              newLeft = startX + (e.clientX - startX);
+            } else if (direction === 'top-right') {
+              newWidth = startWidth + (e.clientX - startX);
+              newHeight = startHeight - (e.clientY - startY);
+              newTop = startY + (e.clientY - startY);
+            } else if (direction === 'bottom-left') {
+              newWidth = startWidth - (e.clientX - startX);
+              newHeight = startHeight + (e.clientY - startY);
+              newLeft = startX + (e.clientX - startX);
+            } else if (direction === 'bottom-right') {
+              newWidth = startWidth + (e.clientX - startX);
+              newHeight = startHeight + (e.clientY - startY);
+            }
 
-                    // Kiểm tra nếu container là hợp lệ
-                    if (container) {
-                      container.css({
-                        width: newWidth + 'px',
-                        height: newHeight + 'px',
-                        top: newTop + 'px',
-                        left: newLeft + 'px'
-                      });
-                    }
-                });
+            // Kiểm tra nếu container là hợp lệ
+            if (container) {
+              container.css({
+                width: newWidth + 'px',
+                height: newHeight + 'px',
+                top: newTop + 'px',
+                left: newLeft + 'px'
+              });
+            }
+        });
 
-                $(document).on('mouseup.resizeBox', function () {
-                    isResizing = false;
-                    $(document).off('.resizeBox');
-                });
-                }
-
-            // Gắn sự kiện cho các góc resize
-            $('.top-left').on('mousedown', function (e) {
-              resize(e, 'top-left');
+            $(document).on('mouseup.resizeBox', function () {
+                isResizing = false;
+                $(document).off('.resizeBox');
             });
-            $('.top-right').on('mousedown', function (e) {
-              resize(e, 'top-right');
-            });
-            $('.bottom-left').on('mousedown', function (e) {
-              resize(e, 'bottom-left');
-            });
-            $('.bottom-right').on('mousedown', function (e) {
-              resize(e, 'bottom-right');
-            });
+        }
+
+        // Gắn sự kiện cho các góc resize
+        $('.top-left').on('mousedown', function (e) {
+          resize(e, 'top-left');
+        });
+        $('.top-right').on('mousedown', function (e) {
+          resize(e, 'top-right');
+        });
+        $('.bottom-left').on('mousedown', function (e) {
+          resize(e, 'bottom-left');
+        });
+        $('.bottom-right').on('mousedown', function (e) {
+          resize(e, 'bottom-right');
+        });
 
       // Ẩn hiện giao diện
       $(".toggle-content").on("dblclick", function(){
         if($(this).hasClass("active")){
-          $(".content").css("display", "none");
+          $(".tp-container .content").css("display", "none");
           $(this).removeClass("active");
           boxAlert("Ẩn Giao Diện");
         }else{
-          $(".content").css("display", "block");
+          $(".tp-container .content").css("display", "block");
           $(this).addClass("active");
           boxAlert("Hiện Giao Diện");
         }
@@ -573,10 +620,11 @@
         "flashSaleShopee": flashSaleShopee,
         "suaGiaSKUShopee": suaGiaSKUShopee,
         "kiemTraPhanLoaiShopee": kiemTraPhanLoaiShopee,
-                "themGioiTinhPhanLoaiShopee": themGioiTinhPhanLoaiShopee,
+        "themGioiTinhPhanLoaiShopee": themGioiTinhPhanLoaiShopee,
         "themPhanLoaiShopee": themPhanLoaiShopee,
-                "kiemTraMaPhanLoaiShopee": kiemTraMaPhanLoaiShopee,
-                "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
+        "kiemTraMaPhanLoaiShopee": kiemTraMaPhanLoaiShopee,
+        "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
+        "suaHinhSKUShopee": suaHinhSKUShopee,
         //"keoPhanLoaiShopee": keoPhanLoaiShopee,
         //"batKhuyenMaiShopee": batKhuyenMaiShopee,
         // --- TIKTOK
@@ -619,6 +667,32 @@
       var content = $(".content-layout");
       $(".layout-tab").remove();
       switch(layoutName){
+          case "suaHinhSKUShopeeLayout":
+              content.append($(`
+              <div class="layout-tab">
+                  <input type="file" multiple />
+                  <!--<label for="search-name">
+                      <p>Đổi Theo Tên</p>
+                      <input id="search-name" type="radio" name="searchType" />
+                  </label>
+
+                  <label for="search-sku">
+                      <p>Đổi Theo SKU</p>
+                      <input id="search-sku" type="radio" name="searchType" />
+                  </label> -->
+              </div>
+              `));
+
+                $(".layout-tab label").css({
+                    "display": "flex",
+                    "height": "3vh",
+                })
+
+                $(".layout-tab label p").css({
+                    "width": "100%",
+                })
+              setEventSuaHinhSKUShopee();
+              break;
           case "compareVoucherLayout":
               content.append($(`
               <div class="layout-tab">
@@ -939,34 +1013,202 @@
       }
     }
 
-        // So sánh voucher
-        function setEventCompareVoucher(){
-            $("#addVoucher").on("click", function(){
-                var i = 0;
-                var voucherBox = $(".voucher-box.root").eq(0).clone(true).removeClass("root").removeAttr("hidden");
-                $(".tp-container .content-layout table tbody").append(voucherBox);
+    // Clone thuộc tính
+    function cloneAttributes(source, target) {
+        $.each(source[0].attributes, function() {
+            if (this.name !== 'value' && this.name !== 'files') {
+                target.attr(this.name, this.value);
+            }
+        });
+    }
+
+    var inputMap = {};
+    // Thay hình theo SKU
+    function setEventSuaHinhSKUShopee(){
+        $(".tp-container .content-layout .layout-tab input").on("change", function () {
+            var files = this.files;
+            var container = $("#input-preview-list");
+            container.empty(); // Xoá input cũ nếu cần
+
+            for (let i = 0; i < files.length; i++) {
+                var file = files[i];
+
+                // Tạo DataTransfer chứa file
+                var dt = new DataTransfer();
+                dt.items.add(file);
+
+                // Tạo input mới
+                var newInput = $("<input type='file'>")
+                    .prop("files", dt.files)
+                    .addClass("single-file-input");
+
+                // Lưu vào object dạng "filename": input
+
+                var name = file.name.split(".")[0];
+                inputMap[name] = newInput;
+
+                // Gắn vào giao diện (nếu muốn hiển thị)
+                container.append(newInput);
+            }
+
+            //nsole.log(inputMap); // Kiểm tra kết quả
+        });
+    }
+
+    function suaHinhSKUShopee(){
+        var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+        var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+        $.each(box, (index) => {
+            var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
+            var imgInputShopee = boxLeft.eq(index).find(".table-cell").eq(0).find("input[type=file]")[0];
+
+            var sku = skuBox.val().trim().toUpperCase();
+            var found = Object.keys(inputMap).find(key => sku.includes(key) || key.includes(sku));
+
+            if (found && inputMap[found]) {
+                var fileInput = inputMap[found][0];
+                var file = fileInput.files[0];
+                var dt = new DataTransfer();
+                dt.items.add(file);
+
+                // Hợp thức hóa bằng click
+                imgInputShopee.click();
+
+                setTimeout(() => {
+                    imgInputShopee.files = dt.files;
+
+                    var evt = new Event("change", { bubbles: true });
+                    imgInputShopee.dispatchEvent(evt);
+
+                    console.log(`✅ Gán hình SKU ${sku} thành công`);
+                }, 100); // có thể tăng lên 200–300 nếu cần
+            }
+
+            return;
+
+            sku = skuBox.val().trim().toUpperCase();
+
+            found = Object.keys(inputMap).find(key => sku.includes(key) || key.includes(sku));
+
+            if (found && inputMap[found]) {
+                console.log("Gán hình cho SKU:", sku);
+
+                // Tạo input mới
+                var original = inputMap[found][0];
+                var newInput = document.createElement("input");
+
+                // Clone attributes
+                cloneAttributes(imgInput, $(newInput));
+
+                // Tạo DataTransfer mới và thêm file
+                dt = new DataTransfer();
+                dt.items.add(original.files[0]);
+                newInput.files = dt.files;
+
+                // Thay input cũ bằng input mới
+                imgInput.replaceWith($(newInput).clone(true));
+
+                // Lừa React bằng sự kiện "change"
+                var event = new Event("change", { bubbles: true });
+                newInput.dispatchEvent(event);
+            }
+
+            img.replaceWith($(data).clone(true));
+
+            console.log(img);
+
+            img.attr('multiple', 'multiple');
+
+            img.click();
+
+            img.on("change", () => {
+                 //var sku = 'SKU123';  // SKU bạn muốn tìm
+                var input = $('#fileInput')[0];  // Lấy element input file
+                var files = input.files;  // Lấy danh sách file đã chọn
+
+                // Lọc file hợp lệ
+                let validFiles = [];
+                $.each(files, function(index, file) {
+                    var fileSku = file.name.split('-')[0]; // Giả sử tên file có dạng SKU123-image.jpg
+                    if (fileSku.includes(skuBox.val())) {
+                        validFiles.push(file);  // Thêm file hợp lệ vào mảng
+                    }
+                });
+
+                // Cập nhật lại input với các file hợp lệ
+                var dataTransfer = new DataTransfer();
+                $.each(validFiles, function(index, file) {
+                    dataTransfer.items.add(file); // Thêm các file hợp lệ vào DataTransfer
+                });
+
+                // Cập nhật lại input.files bằng các file hợp lệ
+                input.files = dataTransfer.files;
+
+                console.log('Các file hợp lệ:', validFiles);
             })
 
-            $(".remove-voucher").on("click", function(){
-                $(this).parent().remove();
-            });
+          if(skuBox.val().includes(sku)){
+            var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            var gia1 = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            boxAlert(`Giá của ${sku} đã sửa từ ${priceBox1} => ${gia1}`);
+            boxLogging(`Giá của ${sku} đã sửa từ ${priceBox1} => ${gia1}`, [`${sku}`, `${priceBox1}`, `${gia1}`], ["crimson", "yellow", "yellow"]);
 
-            $(".tp-container .content-layout table tbody .voucher-box input").on("keyup", function(){
-                var cost = $(this).val();
-                cost = cost.split(",");
-                cost = cost.join("");
-                cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-                $(this).val(cost);
-            });
+            if(parseInt(priceBox.val()) < parseInt(gia)){
+              boxLogging(`SKU: ${sku} có giá mới cao hơn giá hiện tại`, [`${sku}`], ["crimson"]);
+              box.eq(index).css("background", "crimson");
+            }else
+              box.eq(index).css("background", "lightgreen");
 
-            $(".tp-container .content-layout .layout-tab #data").on("keyup", function(){
-                var cost = $(this).val();
-                cost = cost.split(",");
-                cost = cost.join("");
-                cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-                $(this).val(cost);
-            });
-        }
+            priceBox.select();
+            priceBox.val(gia);
+
+            if (window.getSelection) {
+              window.getSelection().removeAllRanges();
+            }else if (document.selection) {
+              document.selection.empty();
+            }
+
+            if ("createEvent" in document) {
+              var evt = document.createEvent("HTMLEvents");
+              evt.initEvent("change", false, true);
+              $(priceBox).get(0).dispatchEvent(evt);
+            }
+            else {
+              current.fireEvent("onchange");
+            }
+          }
+        });
+    }
+
+    // So sánh voucher
+    function setEventCompareVoucher(){
+        $("#addVoucher").on("click", function(){
+            var i = 0;
+            var voucherBox = $(".voucher-box.root").eq(0).clone(true).removeClass("root").removeAttr("hidden");
+            $(".tp-container .content-layout table tbody").append(voucherBox);
+        })
+
+        $(".remove-voucher").on("click", function(){
+            $(this).parent().remove();
+        });
+
+        $(".tp-container .content-layout table tbody .voucher-box input").on("keyup", function(){
+            var cost = $(this).val();
+            cost = cost.split(",");
+            cost = cost.join("");
+            cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            $(this).val(cost);
+        });
+
+        $(".tp-container .content-layout .layout-tab #data").on("keyup", function(){
+            var cost = $(this).val();
+            cost = cost.split(",");
+            cost = cost.join("");
+            cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            $(this).val(cost);
+        });
+    }
 
         function compareVoucher() {
             const data = $(".tp-container .content-layout .layout-tab #data");
@@ -1025,6 +1267,7 @@
                 width: 100%;
                 font-family: Arial, sans-serif;
                 text-align: center;
+                background: #fff;
             ">
                 <thead style="background: #f0f0f0;">
                     ${headers}
@@ -1035,7 +1278,7 @@
             </table>`;
 
             // In ra bảng (bạn có thể dùng .html() nếu có container hiển thị)
-            boxLogging(table);
+            boxPopup(table);
         }
 
 
@@ -1720,6 +1963,23 @@
                 buttonClick.click();
             });
     }
+
+        // Giả lập input file
+        function simulateReactInputFile(input) {
+            var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'files')?.set;
+            if (nativeInputValueSetter) {
+                nativeInputValueSetter.call(input, input.files);
+            }
+
+            // Trigger lại các sự kiện input và change để React có thể nhận diện sự thay đổi
+            var inputEvent = new Event('input', { bubbles: true });
+            var changeEvent = new Event('change', { bubbles: true });
+
+            input.dispatchEvent(inputEvent);
+            input.dispatchEvent(changeEvent);
+        }
+
+
 
         // Giả lập xóa nội dung
         function simulateClearing(inputElement, delay = 50, callback) {
@@ -3050,3 +3310,4 @@
                 })
             });
     }
+
