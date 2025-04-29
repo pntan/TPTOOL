@@ -1,7 +1,7 @@
   'use strict';
   var createUI = false;
 
-    const VERSION = "1.1.5";
+    const VERSION = "1.0.10";
   /*var Jqu = document.createElement("script");
   Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
   Jqu.setAttribute("rel", "preload");
@@ -3267,39 +3267,65 @@
       });
     }
 
-        function kiemTraMaPhanLoaiShopee(){
-            var container = $(".eds-table__main-body").eq(0).find(".eds-scrollbar__wrapper .eds-scrollbar__content table tbody tr");
 
-            //var choiceAll = container.parent().find(".shopee-fixed-top-card.product-fixed-header.edit-fixed-header label.eds-checkbox.item-selector").click().click();
+    // Hiển thị mã phân loại
+    if(window.location.pathname.includes("/portal/product/list/all")){
+        waitForElement($("body"), ".product-variation-item.product-more-models button", (el) => {
+            setTimeout(() => {
+                $(".product-variation-item.product-more-models button").click();
+            }, 3000);
+        }, {once: true});
+        waitForElement($("body"), ".eds-table__main-body table.eds-table__body", (el) => {
+            setTimeout(kiemTraMaPhanLoaiShopee, 5000);
+        }, {once: false});
+    }
+    function kiemTraMaPhanLoaiShopee(){
+        boxAlert("Hiển thị mã phân loại");
 
-            $.each(container, (index, value) => {
-                var item = container.find("td").eq(1);
-                return;
-                var productBox = container.eq(index).find(".inner-rows .inner-row");
-                $.each(productBox, (index, value) => {
-                    productBox.eq(index).css({
-                        "background": "transparent",
-                        "color": "#000"
-                    });
+        var container = $(".eds-table__main-body").eq(0).find(".eds-scrollbar__wrapper .eds-scrollbar__content table tbody tr");
 
-                    var productName = productBox.eq(index).find(".variation .ellipsis-content");
-                    var originalPrice = productBox.eq(index).find(".original-price");
-                    var currentcyPrice = productBox.eq(index).find(".currency-input input");
-                    var perPrice = productBox.eq(index).find(".discount-input input");
-                    var campaignStock = productBox.eq(index).find(".campaign-stock input");
-                    var currentStock = productBox.eq(index).find(".current-stock");
-                    var buttonSwitch = productBox.eq(index).find(".eds-switch.eds-switch--close.eds-switch--normal");
+        //var choiceAll = container.parent().find(".shopee-fixed-top-card.product-fixed-header.edit-fixed-header label.eds-checkbox.item-selector").click().click();
 
-                    productName.parent().find(".data-model-id").remove();
+        $.each(container, (index, value) => {
+            $.each($(value).find("td").eq(1).find(".view-more .model-list-item"), (index, value) => {
+                var productName = $(value).find(".product-variation-padding").eq(0);
+                var stock = $(value).find(".product-variation-padding").eq(3);
 
-                    productName.parent().append($(`
-                    <div class="data-model-id">
-                        ${productBox.eq(index).attr("data-model-id")}
-                    </div>
-                    `));
-                });
+                productName.find(".data-model-id-tp").remove();
+
+                productName.find(".variation-name-info").append($(`
+                <div class="data-model-id-tp">
+                    Mã Phân Loại: ${stock.find(".list-view-stock").attr("modelid")}
+                </div>
+                `));
             });
-        }
+            var item = container.find("td").eq(1);
+            return;
+            var productBox = container.eq(index).find(".inner-rows .inner-row");
+            $.each(productBox, (index, value) => {
+                productBox.eq(index).css({
+                    "background": "transparent",
+                    "color": "#000"
+                });
+
+                var productName = productBox.eq(index).find(".variation .ellipsis-content");
+                var originalPrice = productBox.eq(index).find(".original-price");
+                var currentcyPrice = productBox.eq(index).find(".currency-input input");
+                var perPrice = productBox.eq(index).find(".discount-input input");
+                var campaignStock = productBox.eq(index).find(".campaign-stock input");
+                var currentStock = productBox.eq(index).find(".current-stock");
+                var buttonSwitch = productBox.eq(index).find(".eds-switch.eds-switch--close.eds-switch--normal");
+
+                productName.parent().find(".data-model-id").remove();
+
+                productName.parent().append($(`
+                <div class="data-model-id">
+                    ${productBox.eq(index).attr("data-model-id")}
+                </div>
+                `));
+            });
+        });
+    }
 
     // Kiểm tra phân loại shopee
     function setEventKtraPhanloaiShopee(){
