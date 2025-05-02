@@ -1,7 +1,7 @@
   'use strict';
   var createUI = false;
 
-    const VERSION = "1.1.6";
+    const VERSION = "1.1.7";
   /*var Jqu = document.createElement("script");
   Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
   Jqu.setAttribute("rel", "preload");
@@ -166,60 +166,82 @@
                   <pre></pre>
                 </div>
 
-                <!-- Khu vực chọn chức năng -->
-                <div class="content-feature">
-                  <select id="functionSelect">
-                      <option hidden>Chọn Chức Năng</option>
-
-                      <!-- Shopee -->
-                      <optgroup label="Shopee">
-                        <option data-func="giaDuoiShopee">Cập Nhật Giá Đuôi</option>
-                        <option data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
-                        <option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
-                        <option data-func="tinhGiaBanShopee" data-layout="tinhGiaBanShopeeLayout">Tính Giá Bán</option>
-                        <option data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
-                        <option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
-                        <option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
-                        <option data-func="kTr5LanGiaShopee" data-layout="kTr5LanGiaShopeeLayout">Kiểm Tra 5 Lần Giá</option>
-                        <option data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option>
-                        <option data-func="themGioiTinhPhanLoaiShopee" data-layout="themGioiTinhPhanLoaiShopeeLayout">Thên Giới Tính Cho Phân Loại</option>
-                        <option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
-                        <option data-func="kiemTraMaPhanLoaiShopee" data-layout="kiemTraMaPhanLoaiShopeeLayout">Hiển Thị Mã Phân Loại</option>
-                        <option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
-                        <option data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại Nhiều Link</option>?
-                      </optgroup>
-
-                      <!-- Lazada -->
-                      <optgroup label="Lazada">
-                        <option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
-                        <option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
-                        <option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
-                        <option data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
-                      </optgroup>
-
-                      <!-- TikTok -->
-                      <optgroup label="TikTok">
-                        <option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
-                        <option data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
-                      </optgroup>
-
-                      <!-- Sapo -->
-                      <optgroup label="Sapo">
-                        <option data-func="kiemTraTonSapo" data-layout="kiemTraTonSapoLayout">Kiểm Tra Tồn</option>
-                      </optgroup>
-
-                      <!-- Khác -->
-                      <optgroup label="Khác">
-                        <!-- <option data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option> -->
-                        <option data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
-                        <option data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
-                      </optgroup>
-
-                  </select>
+                <!-- Tabs điều hướng -->
+                <div class="tp-tabs">
+                  <button class="tab-button active" data-tab="main-tools">🎯 Công Cụ</button>
+                  <button class="tab-button" data-tab="advanced-settings">⚙️ Tuỳ Chỉnh</button>
                 </div>
 
-                <!-- Khu vực layout động -->
-                <div class="content-layout"></div>
+                <!-- Nội dung tương ứng với từng tab -->
+                <div class="tp-tab-content" id="main-tools">
+                  <!-- Khu vực chọn chức năng -->
+                    <div class="content-feature">
+                      <select id="functionSelect">
+                          <option hidden>Chọn Chức Năng</option>
+
+                          <!-- Shopee -->
+                          <optgroup label="Shopee">
+                            <option data-func="giaDuoiShopee">Cập Nhật Giá Đuôi</option>
+                            <option data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
+                            <option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
+                            <option data-func="tinhGiaBanShopee" data-layout="tinhGiaBanShopeeLayout">Tính Giá Bán</option>
+                            <option data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
+                            <option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
+                            <option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
+                            <option data-func="kTr5LanGiaShopee" data-layout="kTr5LanGiaShopeeLayout">Kiểm Tra 5 Lần Giá</option>
+                            <option data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option>
+                            <option data-func="themGioiTinhPhanLoaiShopee" data-layout="themGioiTinhPhanLoaiShopeeLayout">Thên Giới Tính Cho Phân Loại</option>
+                            <option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
+                            <option data-func="kiemTraMaPhanLoaiShopee" data-layout="kiemTraMaPhanLoaiShopeeLayout">Hiển Thị Mã Phân Loại</option>
+                            <option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
+                            <option data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại Nhiều Link</option>?
+                          </optgroup>
+
+                          <!-- Lazada -->
+                          <optgroup label="Lazada">
+                            <option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
+                            <option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
+                            <option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
+                            <option data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
+                          </optgroup>
+
+                          <!-- TikTok -->
+                          <optgroup label="TikTok">
+                            <option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
+                            <option data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
+                          </optgroup>
+
+                          <!-- Sapo -->
+                          <optgroup label="Sapo">
+                            <option data-func="kiemTraTonSapo" data-layout="kiemTraTonSapoLayout">Kiểm Tra Tồn</option>
+                          </optgroup>
+
+                          <!-- Khác -->
+                          <optgroup label="Khác">
+                            <!-- <option data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option> -->
+                            <option data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
+                            <option data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
+                          </optgroup>
+
+                      </select>
+                    </div>
+
+                    <!-- Khu vực layout động -->
+                    <div class="content-layout"></div>
+                </div>
+
+                <div class="tp-tab-content" id="advanced-settings" style="display: none;">
+                  <div class="selectTheme">
+                    <select id="selectOption">
+                        <option hidden>Chọn Chức Năng</option>
+                        <option data-theme="general">Chung</option>
+                        <option data-theme="shopee">Shopee</option>
+                        <option data-theme="tiktok">Tiktok</option>
+                    </select>
+                  </div>
+                  <div class="optionArea">
+                  </div>
+                </div>
 
                 <!-- Nút thực thi -->
                 <div class="content-button">
@@ -331,6 +353,53 @@
             color: #333;
           }
 
+          .tp-tabs {
+              display: flex;
+              justify-content: space-around;
+              border-bottom: 1px solid rgba(180, 180, 180, 0.3);
+              background: rgba(250, 250, 250, 0.6);
+              border-radius: 0 0 8px 8px;
+              margin-top: 2vh;
+            }
+
+            .tab-button {
+              flex: 1;
+              padding: 10px;
+              font-weight: 600;
+              font-size: 14px;
+              border: none;
+              background: transparent;
+              cursor: pointer;
+              transition: all 0.3s ease;
+              color: #222;
+            }
+
+            .tab-button:hover {
+              background: rgba(220, 220, 220, 0.4);
+            }
+
+            .tab-button.active {
+              background: rgba(0, 123, 255, 0.15);
+              color: #007bff;
+              border-bottom: 2px solid #007bff;
+            }
+
+            .tp-tab-content {
+              margin-top: 15px;
+              margin-bottom: 2vh;
+            }
+
+            .tp-tab-content select{
+              width: 100%;
+              padding: 10px;
+              font-size: 14px;
+              border-radius: 8px;
+              border: 1px solid #bbb;
+              margin-bottom: 15px;
+              background: rgba(255, 255, 255, 0.7);
+              color: #000;
+            }
+
           .content-feature select {
             width: 100%;
             padding: 10px;
@@ -340,11 +409,9 @@
             margin-bottom: 15px;
             background: rgba(255, 255, 255, 0.7);
             color: #000;
-            margin-top: 2vh
           }
 
           .content-layout {
-            margin-bottom: 15px;
           }
 
           .content-button button {
@@ -490,6 +557,16 @@
         },
       });
 
+    $('.tab-button').on('click', function () {
+      var tab = $(this).data('tab');
+
+      $('.tab-button').removeClass('active');
+      $(this).addClass('active');
+
+      $('.tp-tab-content').hide();
+      $('#' + tab).show();
+    });
+
     // Resize container (4 góc)
     let isResizing = false, containers, startX, startY, startWidth, startHeight;
 
@@ -597,7 +674,7 @@
       loopbackground();
 
       //Chọn chức năng
-      $("select").on("change", function(){
+      $("select#functionSelect").on("change", function(){
         var option = $(this).find("option:selected");
         $("#excuse-command").show();
         $("#excuse-command").text("Chạy");
@@ -607,6 +684,137 @@
         createLayoutTab(option.attr("data-layout"));
         applyNonce();
       });
+
+      // Chọn giao diện để tùy chỉnh
+      $("select#selectOption").on("change", function(){
+        var option = $(this).find("option:selected");
+        createLayoutOption(option.attr("data-theme"));
+      });
+
+      function createLayoutOption(layout){
+        var content = $(".optionArea");
+        $(".layout-option").remove();
+        switch(layout){
+            case "general":
+                content.append($(`
+                <div class="layout-option">
+                    <div class="box">
+                        <p>THEME </p>
+                        <select>
+                            <option>Sáng</option>
+                            <option>Tối</option>
+                            <option>Hệ Thống</option>
+                            <option>Thời Gian Thật</option>
+                        </select>
+                    </div>
+                </div>
+                `));
+                break;
+            case "shopee":
+                content.append($(`
+                <div class="layout-option">
+                    <div class="box">
+                        <label for="scale-main-content">Mở Rộng Không Gian Chính</label>
+                        <input class="option-focus" id="scale-main-content" type="checkbox" />
+                    </div>
+                    <div class="box">
+                        <label for="show-all-modelID">Hiển Thị Mã Phân Loại</label>
+                        <input class="option-focus" id="show-all-modelID" type="checkbox" />
+                    </div>
+                </div>
+                `));
+                break;
+            case "tiktok":
+                content.append($(`
+                <div class="layout-option">
+                    <div class="box">
+                        <label for="show-full-text">Hiển Thị Đủ Chữ</label>
+                        <input class="option-focus" id="show-full-text" type="checkbox" />
+                    </div>
+                </div>
+                `));
+                break;
+        }
+          autoBindSettings(layout);
+      }
+
+
+      const effectMap = {
+          "shopee": {
+              "scale-main-content": moRongMainContentShopee,
+              "show-all-modelID": showAllModelID
+          },
+          "tiktok": {
+              "show-full-text": hienThiDuChuTiktok,
+          }
+      }
+
+        function getTPSettings(group = "global") {
+          const all = JSON.parse(localStorage.getItem("TP-settings") || "{}");
+          return all[group] || {};
+        }
+
+        function updateTPSetting(group, key, value) {
+          const all = JSON.parse(localStorage.getItem("TP-settings") || "{}");
+          all[group] = all[group] || {};
+          all[group][key] = value;
+          localStorage.setItem("TP-settings", JSON.stringify(all));
+        }
+
+      function layoutOption(){
+          var host = window.location.hostname;
+
+          if(host.includes("shopee"))
+             host = "shopee";
+          else if(host.includes("tiktok"))
+              host = "tiktok";
+
+          var settings = getTPSettings(host);
+          $.each(settings, (index, value) => {
+              var key = Object.keys(settings);
+              console.log(effectMap[host]);
+              effectMap[host][key](value);
+          });
+      }
+
+      layoutOption();
+
+      function autoBindSettings(group = "global") {
+          var settings = getTPSettings(group);
+
+          // Gán giá trị đã lưu
+          $(".option-focus").each(function () {
+            var $el = $(this);
+            var key = $el.attr("id");
+            var value = settings[key];
+
+            if (value === undefined) return;
+
+            if ($el.is(":checkbox")) {
+              $el.prop("checked", value);
+            } else {
+              $el.val(value);
+            }
+
+            // Kích hoạt xử lý nếu có hàm tương ứng
+            effectMap[group][key](value);
+          });
+
+          // Theo dõi thay đổi và xử lý
+          $(".option-focus").on("change", function () {
+            var $el = $(this);
+            var key = $el.attr("id");
+            var value = $el.is(":checkbox") ? $el.prop("checked") : $el.val();
+
+            updateTPSetting(group, key, value);
+
+            //console.log(`💾 ${group}.${key} = ${value}`);
+
+            // Gọi hàm xử lý tương ứng nếu có
+            effectMap[group][key](value);
+          });
+        }
+
 
         $(".function-btn").on("click", function(){
             var button = $("#excuse-command").show();
@@ -645,7 +853,7 @@
         // -- LAZADA
         "giaDuoiLazada": giaDuoiLazada,
         "themPhanLoaiLazada": themPhanLoaiLazada,
-                "themGiaTheoSKULazada": themGiaTheoSKULazada,
+        "themGiaTheoSKULazada": themGiaTheoSKULazada,
         "ktraGiaChuongTrinhKMLazada": ktraGiaChuongTrinhKMLazada,
         //-- KHÁC
         "splitExcelFile": splitExcelFile,
@@ -666,7 +874,7 @@
       createUI = true;
       createLayout();
       applyNonce();
-            setPreviewLink();
+      setPreviewLink();
     }
 
     // Dựng giao diện của mỗi lựa chọn
@@ -1130,6 +1338,107 @@
           setEventAutobrowser();
           break;
       }
+    }
+
+    // Hiển thị thông tin mã phân loại
+    function showAllModelID(value){
+        // Hiển thị mã phân loại
+        console.log(value);
+        if(value){
+            if(window.location.pathname.includes("/portal/product/list/all")){
+                waitForElement($("body"), ".product-more-models__content button", (el) => {
+                    $(".product-more-models__content button").click();
+                    var countingTime = setInterval(kiemTraMaPhanLoaiShopee, 3000);
+                    /*waitForElement($("body"), ".eds-table__main-body table.eds-table__body", (el) => {
+                        kiemTraMaPhanLoaiShopee();
+                    },{once: true})*/
+                }, {once: true});
+            }
+
+            //var countingTime = setInterval(kiemTraMaPhanLoaiShopee, 3000);
+        }else{
+            $(".data-model-id-tp").remove();
+            clearInterval(countingTime);
+        }
+        function kiemTraMaPhanLoaiShopee(){
+
+            var container = $(".eds-table__main-body").eq(0).find(".eds-scrollbar__wrapper .eds-scrollbar__content table tbody tr");
+
+            //var choiceAll = container.parent().find(".shopee-fixed-top-card.product-fixed-header.edit-fixed-header label.eds-checkbox.item-selector").click().click();
+
+            $.each(container, (index, value) => {
+                $.each($(value).find("td").eq(1).find(".view-more .model-list-item"), (index, value) => {
+                    var productName = $(value).find(".product-variation-padding").eq(0);
+                    var stock = $(value).find(".product-variation-padding").eq(3);
+
+                    productName.find(".data-model-id-tp").remove();
+
+                    productName.find(".variation-name-info").append($(`
+                    <div class="data-model-id-tp">
+                        Mã Phân Loại: ${stock.find(".list-view-stock").attr("modelid")}
+                    </div>
+                    `));
+                });
+                var item = container.find("td").eq(1);
+                return;
+                var productBox = container.eq(index).find(".inner-rows .inner-row");
+                $.each(productBox, (index, value) => {
+                    productBox.eq(index).css({
+                        "background": "transparent",
+                        "color": "#000"
+                    });
+
+                    var productName = productBox.eq(index).find(".variation .ellipsis-content");
+                    var originalPrice = productBox.eq(index).find(".original-price");
+                    var currentcyPrice = productBox.eq(index).find(".currency-input input");
+                    var perPrice = productBox.eq(index).find(".discount-input input");
+                    var campaignStock = productBox.eq(index).find(".campaign-stock input");
+                    var currentStock = productBox.eq(index).find(".current-stock");
+                    var buttonSwitch = productBox.eq(index).find(".eds-switch.eds-switch--close.eds-switch--normal");
+
+                    productName.parent().find(".data-model-id").remove();
+
+                    productName.parent().append($(`
+                    <div class="data-model-id">
+                        ${productBox.eq(index).attr("data-model-id")}
+                    </div>
+                    `));
+                });
+            });
+        }
+    }
+
+    // Hiển thị đầy đủ chữ tiktok
+    function hienThiDuChuTiktok(value){
+            if(value){
+                waitForElement($("body"), ".truncate", (el) => {
+                    $(".truncate").removeClass("truncate").addClass("hide-truncate");
+                    $("div[style='-webkit-line-clamp: 1;']").css("-webkit-line-clamp", "").addClass("hide-line-clamp");
+                }, {once: false})
+            }else{
+                waitForElement($("body"), ".hide-truncate", (el) => {
+                    $(".hide-truncate").removeClass("hide-truncate").addClass("truncate");
+                    $(".hide-line-clamp").css("-webkit-line-clamp", "1").removeClass("hide-line-clamp");
+                }, {once: false})
+            }
+    }
+
+    // Mở rộng main content shopee
+    function moRongMainContentShopee(value){
+        waitForElement($("body"), ".product-edit__main", (mainContent) => {
+            mainContent = $(mainContent);
+            if(value)
+                mainContent.css({
+                    "width": "100%",
+                    "position": "absolute",
+                    "top": "0",
+                    "left": "0",
+                    "margin-left": "0",
+                    "z-index": "9999",
+                });
+            else
+                mainContent.removeAttr("style");
+        });
     }
 
     // Thêm phân loại hàng loạt
@@ -3265,66 +3574,6 @@
       $.each(data, (index, value) => {
         box.append(value);
       });
-    }
-
-
-    // Hiển thị mã phân loại
-    if(window.location.pathname.includes("/portal/product/list/all")){
-        waitForElement($("body"), ".product-variation-item.product-more-models button", (el) => {
-            setTimeout(() => {
-                $(".product-variation-item.product-more-models button").click();
-            }, 3000);
-        }, {once: true});
-        waitForElement($("body"), ".eds-table__main-body table.eds-table__body", (el) => {
-            setTimeout(kiemTraMaPhanLoaiShopee, 5000);
-        }, {once: false});
-    }
-    function kiemTraMaPhanLoaiShopee(){
-        boxAlert("Hiển thị mã phân loại");
-
-        var container = $(".eds-table__main-body").eq(0).find(".eds-scrollbar__wrapper .eds-scrollbar__content table tbody tr");
-
-        //var choiceAll = container.parent().find(".shopee-fixed-top-card.product-fixed-header.edit-fixed-header label.eds-checkbox.item-selector").click().click();
-
-        $.each(container, (index, value) => {
-            $.each($(value).find("td").eq(1).find(".view-more .model-list-item"), (index, value) => {
-                var productName = $(value).find(".product-variation-padding").eq(0);
-                var stock = $(value).find(".product-variation-padding").eq(3);
-
-                productName.find(".data-model-id-tp").remove();
-
-                productName.find(".variation-name-info").append($(`
-                <div class="data-model-id-tp">
-                    Mã Phân Loại: ${stock.find(".list-view-stock").attr("modelid")}
-                </div>
-                `));
-            });
-            var item = container.find("td").eq(1);
-            return;
-            var productBox = container.eq(index).find(".inner-rows .inner-row");
-            $.each(productBox, (index, value) => {
-                productBox.eq(index).css({
-                    "background": "transparent",
-                    "color": "#000"
-                });
-
-                var productName = productBox.eq(index).find(".variation .ellipsis-content");
-                var originalPrice = productBox.eq(index).find(".original-price");
-                var currentcyPrice = productBox.eq(index).find(".currency-input input");
-                var perPrice = productBox.eq(index).find(".discount-input input");
-                var campaignStock = productBox.eq(index).find(".campaign-stock input");
-                var currentStock = productBox.eq(index).find(".current-stock");
-                var buttonSwitch = productBox.eq(index).find(".eds-switch.eds-switch--close.eds-switch--normal");
-
-                productName.parent().find(".data-model-id").remove();
-
-                productName.parent().append($(`
-                <div class="data-model-id">
-                    ${productBox.eq(index).attr("data-model-id")}
-                </div>
-                `));
-            });
-        });
     }
 
     // Kiểm tra phân loại shopee
