@@ -1,7 +1,7 @@
   'use strict';
   var createUI = false;
 
-    const VERSION = "1.1.7";
+    const VERSION = "1.1.8";
   /*var Jqu = document.createElement("script");
   Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
   Jqu.setAttribute("rel", "preload");
@@ -742,7 +742,7 @@
       const effectMap = {
           "shopee": {
               "scale-main-content": moRongMainContentShopee,
-              "show-all-modelID": showAllModelID
+              "show-all-modelID": showAllModelID,
           },
           "tiktok": {
               "show-full-text": hienThiDuChuTiktok,
@@ -772,8 +772,9 @@
           var settings = getTPSettings(host);
           $.each(settings, (index, value) => {
               var key = Object.keys(settings);
-              console.log(effectMap[host]);
-              effectMap[host][key](value);
+              $.each(key, (index, value) => {
+                  effectMap[host][value](value);
+              });
           });
       }
 
@@ -795,7 +796,6 @@
             } else {
               $el.val(value);
             }
-
             // Kích hoạt xử lý nếu có hàm tương ứng
             effectMap[group][key](value);
           });
@@ -1360,52 +1360,52 @@
             $(".data-model-id-tp").remove();
             clearInterval(countingTime);
         }
-        function kiemTraMaPhanLoaiShopee(){
+    }
+    function kiemTraMaPhanLoaiShopee(){
 
-            var container = $(".eds-table__main-body").eq(0).find(".eds-scrollbar__wrapper .eds-scrollbar__content table tbody tr");
+        var container = $(".eds-table__main-body").eq(0).find(".eds-scrollbar__wrapper .eds-scrollbar__content table tbody tr");
 
-            //var choiceAll = container.parent().find(".shopee-fixed-top-card.product-fixed-header.edit-fixed-header label.eds-checkbox.item-selector").click().click();
+        //var choiceAll = container.parent().find(".shopee-fixed-top-card.product-fixed-header.edit-fixed-header label.eds-checkbox.item-selector").click().click();
 
-            $.each(container, (index, value) => {
-                $.each($(value).find("td").eq(1).find(".view-more .model-list-item"), (index, value) => {
-                    var productName = $(value).find(".product-variation-padding").eq(0);
-                    var stock = $(value).find(".product-variation-padding").eq(3);
+        $.each(container, (index, value) => {
+            $.each($(value).find("td").eq(1).find(".view-more .model-list-item"), (index, value) => {
+                var productName = $(value).find(".product-variation-padding").eq(0);
+                var stock = $(value).find(".product-variation-padding").eq(3);
 
-                    productName.find(".data-model-id-tp").remove();
+                productName.find(".data-model-id-tp").remove();
 
-                    productName.find(".variation-name-info").append($(`
-                    <div class="data-model-id-tp">
-                        Mã Phân Loại: ${stock.find(".list-view-stock").attr("modelid")}
-                    </div>
-                    `));
-                });
-                var item = container.find("td").eq(1);
-                return;
-                var productBox = container.eq(index).find(".inner-rows .inner-row");
-                $.each(productBox, (index, value) => {
-                    productBox.eq(index).css({
-                        "background": "transparent",
-                        "color": "#000"
-                    });
-
-                    var productName = productBox.eq(index).find(".variation .ellipsis-content");
-                    var originalPrice = productBox.eq(index).find(".original-price");
-                    var currentcyPrice = productBox.eq(index).find(".currency-input input");
-                    var perPrice = productBox.eq(index).find(".discount-input input");
-                    var campaignStock = productBox.eq(index).find(".campaign-stock input");
-                    var currentStock = productBox.eq(index).find(".current-stock");
-                    var buttonSwitch = productBox.eq(index).find(".eds-switch.eds-switch--close.eds-switch--normal");
-
-                    productName.parent().find(".data-model-id").remove();
-
-                    productName.parent().append($(`
-                    <div class="data-model-id">
-                        ${productBox.eq(index).attr("data-model-id")}
-                    </div>
-                    `));
-                });
+                productName.find(".variation-name-info").append($(`
+                <div class="data-model-id-tp">
+                    Mã Phân Loại: ${stock.find(".list-view-stock").attr("modelid")}
+                </div>
+                `));
             });
-        }
+            var item = container.find("td").eq(1);
+            return;
+            var productBox = container.eq(index).find(".inner-rows .inner-row");
+            $.each(productBox, (index, value) => {
+                productBox.eq(index).css({
+                    "background": "transparent",
+                    "color": "#000"
+                });
+
+                var productName = productBox.eq(index).find(".variation .ellipsis-content");
+                var originalPrice = productBox.eq(index).find(".original-price");
+                var currentcyPrice = productBox.eq(index).find(".currency-input input");
+                var perPrice = productBox.eq(index).find(".discount-input input");
+                var campaignStock = productBox.eq(index).find(".campaign-stock input");
+                var currentStock = productBox.eq(index).find(".current-stock");
+                var buttonSwitch = productBox.eq(index).find(".eds-switch.eds-switch--close.eds-switch--normal");
+
+                productName.parent().find(".data-model-id").remove();
+
+                productName.parent().append($(`
+                <div class="data-model-id">
+                    ${productBox.eq(index).attr("data-model-id")}
+                </div>
+                `));
+            });
+        });
     }
 
     // Hiển thị đầy đủ chữ tiktok
@@ -1475,13 +1475,29 @@
     }
 
     // Encode hình ảnh
-    async function fileToBase64(file) {
+    async function fileToBase64(file, quality = 0.5) {
         return new Promise((resolve, reject) => {
-            var reader = new FileReader();
-            reader.onload = () => resolve(reader.result); // kết quả base64
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = new Image();
+          img.onload = function () {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0); // loại bỏ metadata
+
+            // Chuyển thành JPEG và giảm chất lượng
+            const base64 = canvas.toDataURL("image/jpeg", quality);
+            resolve(base64);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     }
 
     async function filesToBase64Array(files) {
