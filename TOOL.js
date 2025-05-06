@@ -1,4557 +1,2330 @@
-  'use strict';
-  var createUI = false;
-
-    const VERSION = "1.1.8";
-  /*var Jqu = document.createElement("script");
-  Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
-  Jqu.setAttribute("rel", "preload");
-  Jqu.setAttribute("async", "async");
-  document.head.appendChild(Jqu);
-
-  var JquUI = document.createElement("script");
-  JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
-  JquUI.setAttribute("rel", "preload");
-  document.head.appendChild(JquUI);*/
-
-        const libraries = [
-            'https://code.jquery.com/jquery-3.7.1.min.js',
-            'https://code.jquery.com/ui/1.14.1/jquery-ui.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js',
-            'https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js',
-
-        ];
-
-        function loadScriptsSequentially(scripts, callback) {
-            let index = 0;
-
-            function loadNext() {
-            if (index >= scripts.length) {
-              if (callback) callback();
-              return;
-            }
-
-            const script = document.createElement('script');
-            script.src = scripts[index];
-            script.onload = () => {
-              index++;
-              loadNext();
-            };
-            script.onerror = () => {
-              console.error(`Không thể tải script: ${scripts[index]}`);
-              index++;
-              loadNext(); // vẫn tiếp tục nếu lỗi
-            };
-            document.head.appendChild(script);
-            }
-
-            loadNext();
-        }
-
-        loadScriptsSequentially(libraries, () => {
-          // gọi hàm chính của bạn ở đây nếu cần
-        });
-
-    // Lấy nonce từ thẻ meta hoặc bất kỳ thẻ script nào
-    function getNonce() {
-      let nonce = $('script[nonce]').attr('nonce');
-      if (!nonce) {
-        nonce = $('meta[http-equiv="Content-Security-Policy"]').attr('content')?.match(/nonce-([\w\d]+)/)?.[1] || '';
-      }
-      return nonce || '';
-    }
-
-    // Auto patch style, iframe, script dynamic
-    function applyNonce() {
-      const nonce = getNonce();
-      if (!nonce) return console.warn('Không tìm thấy nonce');
-
-      // Style inline
-      $('style:not([nonce])').attr('nonce', nonce);
-
-      // Iframe
-      $('iframe:not([nonce])').attr('nonce', nonce);
-
-      // Script do tool tạo
-      $('script:not([nonce]):not([src])').attr('nonce', nonce);
-
-    }
-
-    function boxPopup(text, words = [], colors = []){
-        var log = $(".tp-popup .content");
-        log.parent().toggle("slow");
-        var data = log.empty().html();
-        if (words.length === 0) {
-            log.html(`${data}\n(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) <span style="color: black;">${text}</span>`);
-        } else {
-            // Create a copy to modify, otherwise replacements might interfere with later searches if words overlap
-            let modifiedText = text;
-            words.forEach((word, index) => {
-                // Escape the word BEFORE creating the RegExp
-                var escapedWord = escapeRegExp(word);
-                // Use the escaped word in the RegExp
-                var regex = new RegExp(`(${escapedWord})`, "gi");
-                // Perform replacement on the modifiedText
-                modifiedText = modifiedText.replace(regex, `<span style="color: ${colors[index]}; font-weight: bold;">$1</span>`);
-            });
-            // Set the final HTML
-            log.html(`${data}\n(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) ${modifiedText}`);
-        }
-        log.scrollTop(log.prop("scrollHeight"));
-    }
-
-    // Ghi console log
-    function boxAlert(content){
-        console.log(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: yellow; font-size: 1.5rem");
-    }
-
-    // Ghi logging
-    function escapeRegExp(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    function boxLogging(text, words = [], colors = []){
-        var log = $(".content-log pre");
-        var data = log.html();
-        if (words.length === 0) {
-            log.html(`${data}\n(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) <span style="color: black;">${text}</span>`);
-        } else {
-            // Create a copy to modify, otherwise replacements might interfere with later searches if words overlap
-            let modifiedText = text;
-            words.forEach((word, index) => {
-                // Escape the word BEFORE creating the RegExp
-                var escapedWord = escapeRegExp(word);
-                // Use the escaped word in the RegExp
-                var regex = new RegExp(`(${escapedWord})`, "gi");
-                // Perform replacement on the modifiedText
-                modifiedText = modifiedText.replace(regex, `<span style="color: ${colors[index]}; font-weight: bold;">$1</span>`);
-            });
-            // Set the final HTML
-            log.html(`${data}\n(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) ${modifiedText}`);
-        }
-        log.scrollTop(log.prop("scrollHeight"));
-
-        log.find(".title").on("click", () => {
-            log.parent().toggle();
-        })
-    }
-
-    // Dựng giao diện
-    function createLayout(){
-        if (window.parent != window.top) {
-            return;
-        }
-
-        boxAlert("Dựng Giao Diện");
-        boxLogging("Dựng Giao Diện");
-
-        // Tạo khung giao diện
-        var container = $(`
-        <div class="tp-container">
-            <!-- Nút mở rộng -->
-            <div class="toggle-content">
-                <p>Công Cụ Mở Rộng</p>
-            </div>
-
-            <!-- Nội dung chính -->
-            <div class="content">
-
-                <!-- Tiêu đề -->
-                <div class="content-header">
-                  <p>Công Cụ Hỗ Trợ <span class="version">(ver ${VERSION})</span></p>
-                </div>
-
-                <!-- Khu vực log -->
-                <div class="content-log">
-                  <pre></pre>
-                </div>
-
-                <!-- Tabs điều hướng -->
-                <div class="tp-tabs">
-                  <button class="tab-button active" data-tab="main-tools">🎯 Công Cụ</button>
-                  <button class="tab-button" data-tab="advanced-settings">⚙️ Tuỳ Chỉnh</button>
-                </div>
-
-                <!-- Nội dung tương ứng với từng tab -->
-                <div class="tp-tab-content" id="main-tools">
-                  <!-- Khu vực chọn chức năng -->
-                    <div class="content-feature">
-                      <select id="functionSelect">
-                          <option hidden>Chọn Chức Năng</option>
-
-                          <!-- Shopee -->
-                          <optgroup label="Shopee">
-                            <option data-func="giaDuoiShopee">Cập Nhật Giá Đuôi</option>
-                            <option data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
-                            <option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
-                            <option data-func="tinhGiaBanShopee" data-layout="tinhGiaBanShopeeLayout">Tính Giá Bán</option>
-                            <option data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
-                            <option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
-                            <option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
-                            <option data-func="kTr5LanGiaShopee" data-layout="kTr5LanGiaShopeeLayout">Kiểm Tra 5 Lần Giá</option>
-                            <option data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option>
-                            <option data-func="themGioiTinhPhanLoaiShopee" data-layout="themGioiTinhPhanLoaiShopeeLayout">Thên Giới Tính Cho Phân Loại</option>
-                            <option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
-                            <option data-func="kiemTraMaPhanLoaiShopee" data-layout="kiemTraMaPhanLoaiShopeeLayout">Hiển Thị Mã Phân Loại</option>
-                            <option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
-                            <option data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại Nhiều Link</option>?
-                          </optgroup>
-
-                          <!-- Lazada -->
-                          <optgroup label="Lazada">
-                            <option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
-                            <option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
-                            <option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
-                            <option data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
-                          </optgroup>
-
-                          <!-- TikTok -->
-                          <optgroup label="TikTok">
-                            <option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
-                            <option data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
-                          </optgroup>
-
-                          <!-- Sapo -->
-                          <optgroup label="Sapo">
-                            <option data-func="kiemTraTonSapo" data-layout="kiemTraTonSapoLayout">Kiểm Tra Tồn</option>
-                          </optgroup>
-
-                          <!-- Khác -->
-                          <optgroup label="Khác">
-                            <!-- <option data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option> -->
-                            <option data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
-                            <option data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
-                          </optgroup>
-
-                      </select>
-                    </div>
-
-                    <!-- Khu vực layout động -->
-                    <div class="content-layout"></div>
-                </div>
-
-                <div class="tp-tab-content" id="advanced-settings" style="display: none;">
-                  <div class="selectTheme">
-                    <select id="selectOption">
-                        <option hidden>Chọn Chức Năng</option>
-                        <option data-theme="general">Chung</option>
-                        <option data-theme="shopee">Shopee</option>
-                        <option data-theme="tiktok">Tiktok</option>
-                    </select>
-                  </div>
-                  <div class="optionArea">
-                  </div>
-                </div>
-
-                <!-- Nút thực thi -->
-                <div class="content-button">
-                  <button id="excuse-command" data-func="">Chạy</button>
-                </div>
-
-            </div>
-
-            <div class="resize-handle top-left"></div>
-            <div class="resize-handle top-right"></div>
-            <div class="resize-handle bottom-left"></div>
-            <div class="resize-handle bottom-right"></div>
-        </div>
-        `);
-        var contentPopup = $(`
-        <div class="tp-popup">
-            <div class="content"></div>
-        </div>
-        `);
-    $("body").append(container);
-    $("body").append(contentPopup);
-
-      // Xác định tọa độ
-      var top = 0, left = 0;
-            /*
-      if(localStorage.getItem("positionYTP") == null)
-        top = "0";
-      else
-        top = localStorage.getItem("positionYTP");
-      if(localStorage.getItem("positionXTP") == null)
-        left = "0";
-      else
-        left = localStorage.getItem("positionXTP");
-
-      if($("body").height() / 2 < top)
-        top = $("body").height() / 2;
-      if($("body").width() / 2 < left)
-        left = $("body").width() / 2;
-
-      boxAlert(`Tọa độ hiện tại X: ${left} - Y: ${top}`);
-            */
-
-      var cssStyle = $(`
-      <style>
-        .tp-popup{
-            position: fixed;
-            width: 100vw;
-            height: 100vh;
-            top: 0px;
-            left: 0px;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 9998;
-            display: none;
-        }
-        .tp-container {
-            top: ${top}px;
-            left: ${left}px;
-            width: auto;
-            background: rgba(255, 255, 255, 0.8); /* Nền trắng mờ */
-            backdrop-filter: blur(12px); /* Làm mờ nền phía sau */
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(200, 200, 200, 0.6);
-            border-radius: 12px;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 14px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            z-index: 9999;
-            resize: none !important; /* tránh conflict */
-            position: fixed;
-            overflow: auto; /* Hoặc hidden */
-            max-width: 100%; /* Đảm bảo container không vượt quá màn hình */
-            max-height: 100%; /* Đảm bảo container không vượt quá màn hình */
-          }
-
-          .tp-container *::-webkit-scrollbar {
-            display: none;
-          }
-
-          .tp-container .toggle-content {
-            background: rgba(245, 245, 245, 0.8);
-            padding: 10px;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            font-size: 15px;
-            border-bottom: 1px solid rgba(180, 180, 180, 0.4);
-            border-radius: 12px 12px 0 0;
-          }
-
-          .tp-container .content {
-            display: none;
-            padding: 15px;
-          }
-
-          .content-header {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #222;
-          }
-
-          .content-log pre {
-            background: rgba(250, 250, 250, 0.6);
-            border: 1px solid rgba(200, 200, 200, 0.5);
-            border-radius: 8px;
-            height: 100px;
-            overflow: auto;
-            padding: 10px;
-            font-size: 13px;
-            color: #333;
-          }
-
-          .tp-tabs {
-              display: flex;
-              justify-content: space-around;
-              border-bottom: 1px solid rgba(180, 180, 180, 0.3);
-              background: rgba(250, 250, 250, 0.6);
-              border-radius: 0 0 8px 8px;
-              margin-top: 2vh;
-            }
-
-            .tab-button {
-              flex: 1;
-              padding: 10px;
-              font-weight: 600;
-              font-size: 14px;
-              border: none;
-              background: transparent;
-              cursor: pointer;
-              transition: all 0.3s ease;
-              color: #222;
-            }
-
-            .tab-button:hover {
-              background: rgba(220, 220, 220, 0.4);
-            }
-
-            .tab-button.active {
-              background: rgba(0, 123, 255, 0.15);
-              color: #007bff;
-              border-bottom: 2px solid #007bff;
-            }
-
-            .tp-tab-content {
-              margin-top: 15px;
-              margin-bottom: 2vh;
-            }
-
-            .tp-tab-content select{
-              width: 100%;
-              padding: 10px;
-              font-size: 14px;
-              border-radius: 8px;
-              border: 1px solid #bbb;
-              margin-bottom: 15px;
-              background: rgba(255, 255, 255, 0.7);
-              color: #000;
-            }
-
-          .content-feature select {
-            width: 100%;
-            padding: 10px;
-            font-size: 14px;
-            border-radius: 8px;
-            border: 1px solid #bbb;
-            margin-bottom: 15px;
-            background: rgba(255, 255, 255, 0.7);
-            color: #000;
-          }
-
-          .content-layout {
-          }
-
-          .content-button button {
-            width: 100%;
-            padding: 12px;
-            font-size: 15px;
-            font-weight: bold;
-            background: rgba(220, 20, 60, 0.7);
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-          }
-
-          .content-button button:hover {
-            background: rgba(180, 0, 40, 0.5);
-            transform: scale(1.02);
-          }
-
-          .tp-container .content .content-layout * {
-            margin-bottom: 10px;
-          }
-
-          .tp-container .content .content-layout input,
-          .tp-container .content .content-layout textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #aaa;
-            border-radius: 8px;
-            font-size: 14px;
-            background: rgba(255, 255, 255, 0.7);
-            color: #000;
-          }
-
-          .tp-container .content .content-layout label {
-            font-weight: 500;
-            display: block;
-            margin-bottom: 5px;
-            color: #222;
-          }
-
-          .tp-container .content .content-layout button {
-            background: rgba(0, 123, 255, 0.7);
-            color: white;
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-          }
-
-          .tp-container .content .content-layout button:hover {
-            background: rgba(0, 86, 179, 0.5);
-          }
-
-          .tp-container .content .content-layout table tr{
-              margin-top: 1vh;
-          }
-
-          .tp-container .content .content-layout table tr td{
-              padding: 1vh 1vw;
-              text-align: center;
-          }
-
-          /* Scrollbar nhẹ */
-          .tp-container pre::-webkit-scrollbar {
-            width: 6px;
-          }
-          .tp-container pre::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 3px;
-          }
-          .resize-handle {
-              position: absolute;
-              width: 16px;
-              height: 16px;
-              right: 0;
-              bottom: 0;
-              background: #ccc;
-              cursor: se-resize;
-              border-bottom-right-radius: 16px;
-            }
-
-            .resize-handle {
-              position: absolute;
-              background: #ccc;
-              cursor: pointer;
-              opacity: 1
-            }
-
-            /* Các góc resize */
-            .top-left {
-              width: 16px;
-              height: 16px;
-              left: 0;
-              top: 0;
-              cursor: nw-resize;
-            }
-
-            .top-right {
-              width: 16px;
-              height: 16px;
-              right: 0;
-              top: 0;
-              cursor: ne-resize;
-            }
-
-            .bottom-left {
-              width: 16px;
-              height: 16px;
-              left: 0;
-              bottom: 0;
-              cursor: sw-resize;
-            }
-
-            .bottom-right {
-              width: 16px;
-              height: 16px;
-              right: 0;
-              bottom: 0;
-              cursor: se-resize;
-            }
-      </style>
-      `);
-
-      $(".tp-container").append(cssStyle);
-
-      // Kéo thả khung
-      $(".tp-container").draggable({
-        start: function (event, ui) {
-          // Nếu đang resize thì không cho drag
-          if (isResizing) return false;
-        },
-
-        drag: function() {
-          var offset = $(this).offset();
-          var xPos = offset.left;
-          var yPos = offset.top;
-          //localStorage.setItem("positionYTP",yPos);
-          //localStorage.setItem("positionXTP",xPos);
-          //boxAlert(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`);
-          //boxLogging(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`, [`${xPos}`, `${yPos}`], ["orange", "yellow"]);
-        },
-      });
-
-    $('.tab-button').on('click', function () {
-      var tab = $(this).data('tab');
-
-      $('.tab-button').removeClass('active');
-      $(this).addClass('active');
-
-      $('.tp-tab-content').hide();
-      $('#' + tab).show();
-    });
-
-    // Resize container (4 góc)
-    let isResizing = false, containers, startX, startY, startWidth, startHeight;
-
-    // Hàm resize góc
-    function resize(e, direction) {
-        e.preventDefault();
-        container = $(e.target).closest('.tp-container');
-
-        // Kiểm tra container có tồn tại không
-        if (!container || container.length === 0) {
-            console.error("Container không tồn tại!");
-            return; // Nếu không tồn tại, thoát khỏi hàm
-        }
-
-        isResizing = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        startWidth = container.width();
-        startHeight = container.height();
-
-        $(document).on('mousemove.resizeBox', function (e) {
-            if (!isResizing) return;
-            let newWidth = startWidth;
-            let newHeight = startHeight;
-            let newTop = parseInt(container.css('top'));
-            let newLeft = parseInt(container.css('left'));
-
-            if (direction === 'top-left') {
-              newWidth = startWidth - (e.clientX - startX);
-              newHeight = startHeight - (e.clientY - startY);
-              newTop = startY + (e.clientY - startY);
-              newLeft = startX + (e.clientX - startX);
-            } else if (direction === 'top-right') {
-              newWidth = startWidth + (e.clientX - startX);
-              newHeight = startHeight - (e.clientY - startY);
-              newTop = startY + (e.clientY - startY);
-            } else if (direction === 'bottom-left') {
-              newWidth = startWidth - (e.clientX - startX);
-              newHeight = startHeight + (e.clientY - startY);
-              newLeft = startX + (e.clientX - startX);
-            } else if (direction === 'bottom-right') {
-              newWidth = startWidth + (e.clientX - startX);
-              newHeight = startHeight + (e.clientY - startY);
-            }
-
-            // Kiểm tra nếu container là hợp lệ
-            if (container) {
-              container.css({
-                width: newWidth + 'px',
-                height: newHeight + 'px',
-                top: newTop + 'px',
-                left: newLeft + 'px'
-              });
-            }
-        });
-
-            $(document).on('mouseup.resizeBox', function () {
-                isResizing = false;
-                $(document).off('.resizeBox');
-            });
-        }
-
-        // Gắn sự kiện cho các góc resize
-        $('.top-left').on('mousedown', function (e) {
-          resize(e, 'top-left');
-        });
-        $('.top-right').on('mousedown', function (e) {
-          resize(e, 'top-right');
-        });
-        $('.bottom-left').on('mousedown', function (e) {
-          resize(e, 'bottom-left');
-        });
-        $('.bottom-right').on('mousedown', function (e) {
-          resize(e, 'bottom-right');
-        });
-
-      // Ẩn hiện giao diện
-      $(".toggle-content").on("dblclick", function(){
-        if($(this).hasClass("active")){
-          $(".tp-container .content").css("display", "none");
-          $(this).removeClass("active");
-          boxAlert("Ẩn Giao Diện");
-        }else{
-          $(".tp-container .content").css("display", "block");
-          $(this).addClass("active");
-          boxAlert("Hiện Giao Diện");
-        }
-      });
-
-      // Hiệu ứng nút điều khiển
-      var animate = $(".toggle-content");
-      function loopbackground() {
-        animate.css('background-position', '0px 0px');
-        $({position_x: 0, position_y: 0}).animate({position_x: -5000, position_y: -2500}, {
-          duration: 50000,
-          easing: 'linear',
-          step: function() {
-            animate.css('background-position', this.position_x+'px '+this.position_y+'px');
-          },
-          complete: function() {
-            loopbackground();
-          }
-        });
-      }
-      loopbackground();
-
-      //Chọn chức năng
-      $("select#functionSelect").on("change", function(){
-        var option = $(this).find("option:selected");
-        $("#excuse-command").show();
-        $("#excuse-command").text("Chạy");
-        $("#excuse-command").attr("data-func", option.attr("data-func"));
-        $(".layout-tab").remove();
-        boxLogging(`Đã chọn ${option.parent().attr("label")} > ${option.text()}`, [`${option.parent().attr("label")}`, `${option.text()}`], ["crimson", "crimson"]);
-        createLayoutTab(option.attr("data-layout"));
-        applyNonce();
-      });
-
-      // Chọn giao diện để tùy chỉnh
-      $("select#selectOption").on("change", function(){
-        var option = $(this).find("option:selected");
-        createLayoutOption(option.attr("data-theme"));
-      });
-
-      function createLayoutOption(layout){
-        var content = $(".optionArea");
-        $(".layout-option").remove();
-        switch(layout){
-            case "general":
-                content.append($(`
-                <div class="layout-option">
-                    <div class="box">
-                        <p>THEME </p>
-                        <select>
-                            <option>Sáng</option>
-                            <option>Tối</option>
-                            <option>Hệ Thống</option>
-                            <option>Thời Gian Thật</option>
-                        </select>
-                    </div>
-                </div>
-                `));
-                break;
-            case "shopee":
-                content.append($(`
-                <div class="layout-option">
-                    <div class="box">
-                        <label for="scale-main-content">Mở Rộng Không Gian Chính</label>
-                        <input class="option-focus" id="scale-main-content" type="checkbox" />
-                    </div>
-                    <div class="box">
-                        <label for="show-all-modelID">Hiển Thị Mã Phân Loại</label>
-                        <input class="option-focus" id="show-all-modelID" type="checkbox" />
-                    </div>
-                </div>
-                `));
-                break;
-            case "tiktok":
-                content.append($(`
-                <div class="layout-option">
-                    <div class="box">
-                        <label for="show-full-text">Hiển Thị Đủ Chữ</label>
-                        <input class="option-focus" id="show-full-text" type="checkbox" />
-                    </div>
-                </div>
-                `));
-                break;
-        }
-          autoBindSettings(layout);
-      }
-
-
-      const effectMap = {
-          "shopee": {
-              "scale-main-content": moRongMainContentShopee,
-              "show-all-modelID": showAllModelID,
-          },
-          "tiktok": {
-              "show-full-text": hienThiDuChuTiktok,
-          }
-      }
-
-        function getTPSettings(group = "global") {
-          const all = JSON.parse(localStorage.getItem("TP-settings") || "{}");
-          return all[group] || {};
-        }
-
-        function updateTPSetting(group, key, value) {
-          const all = JSON.parse(localStorage.getItem("TP-settings") || "{}");
-          all[group] = all[group] || {};
-          all[group][key] = value;
-          localStorage.setItem("TP-settings", JSON.stringify(all));
-        }
-
-      function layoutOption(){
-          var host = window.location.hostname;
-
-          if(host.includes("shopee"))
-             host = "shopee";
-          else if(host.includes("tiktok"))
-              host = "tiktok";
-
-          var settings = getTPSettings(host);
-          $.each(settings, (index, value) => {
-              var key = Object.keys(settings);
-              $.each(key, (index, value) => {
-                  effectMap[host][value](value);
-              });
-          });
-      }
-
-      layoutOption();
-
-      function autoBindSettings(group = "global") {
-          var settings = getTPSettings(group);
-
-          // Gán giá trị đã lưu
-          $(".option-focus").each(function () {
-            var $el = $(this);
-            var key = $el.attr("id");
-            var value = settings[key];
-
-            if (value === undefined) return;
-
-            if ($el.is(":checkbox")) {
-              $el.prop("checked", value);
-            } else {
-              $el.val(value);
-            }
-            // Kích hoạt xử lý nếu có hàm tương ứng
-            effectMap[group][key](value);
-          });
-
-          // Theo dõi thay đổi và xử lý
-          $(".option-focus").on("change", function () {
-            var $el = $(this);
-            var key = $el.attr("id");
-            var value = $el.is(":checkbox") ? $el.prop("checked") : $el.val();
-
-            updateTPSetting(group, key, value);
-
-            //console.log(`💾 ${group}.${key} = ${value}`);
-
-            // Gọi hàm xử lý tương ứng nếu có
-            effectMap[group][key](value);
-          });
-        }
-
-
-        $(".function-btn").on("click", function(){
-            var button = $("#excuse-command").show();
-            button.text("Chạy");
-            button.attr("data-func", $(this).attr("data-func"));
-            $(".layout-tab").remove();
-            $(".tp-container .function-panel").removeClass("active");
-            createLayoutTab($(this).attr("data-layout"));
-            applyNonce();
-        });
-
-      // Map các hàm tương ứng với data-func
-      const actionMap = {
-        // --- SHOPEE
-        "giaDuoiShopee": giaDuoiShopee,
-        "kTr5LanGiaShopee": kTr5LanGiaShopee,
-        "tinhGiaBanShopee": tinhGiaBanShopee,
-        "flashSaleShopee": flashSaleShopee,
-        "suaGiaSKUShopee": suaGiaSKUShopee,
-        "kiemTraPhanLoaiShopee": kiemTraPhanLoaiShopee,
-        "themGioiTinhPhanLoaiShopee": themGioiTinhPhanLoaiShopee,
-        "themPhanLoaiShopee": themPhanLoaiShopee,
-        "kiemTraMaPhanLoaiShopee": kiemTraMaPhanLoaiShopee,
-        "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
-        "suaHinhSKUShopee": suaHinhSKUShopee,
-        "comboKMShopee": comboKMShopee,
-        "themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
-        //"keoPhanLoaiShopee": keoPhanLoaiShopee,
-        //"batKhuyenMaiShopee": batKhuyenMaiShopee,
-        // --- TIKTOK
-        "tgFlashSaleTiktok": tgFlashSaleTiktok,
-        "giaDuoiTiktok": giaDuoiTiktok,
-        "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
-        // --- SAPO
-        "kiemTraTonSapo": kiemTraTonSapo,
-        // -- LAZADA
-        "giaDuoiLazada": giaDuoiLazada,
-        "themPhanLoaiLazada": themPhanLoaiLazada,
-        "themGiaTheoSKULazada": themGiaTheoSKULazada,
-        "ktraGiaChuongTrinhKMLazada": ktraGiaChuongTrinhKMLazada,
-        //-- KHÁC
-        "splitExcelFile": splitExcelFile,
-        "compareVoucher": compareVoucher,
-      };
-
-      $("#excuse-command").on("click", function() {
-        const func = $(this).attr("data-func");
-        if (actionMap[func]) actionMap[func]();
-      });
-
-      $.each($("iframe"), (index, value) => {
-        $("iframe").eq(index).remove();
-      });
-    }
-
-    if (!createUI) {
-      createUI = true;
-      createLayout();
-      applyNonce();
-      setPreviewLink();
-    }
-
-    // Dựng giao diện của mỗi lựa chọn
-    function createLayoutTab(layoutName){
-      layoutName = layoutName == undefined ? "Không có giao diện" : layoutName;
-      boxLogging(`Giao Diện: ${layoutName}`, [`${layoutName}`], ["crimson"]);
-      var content = $(".content-layout");
-      $(".layout-tab").remove();
-      switch(layoutName){
-          case "themPhanLoaiNhieuLinkShopeeLayout":
-              content.append($(`
-              <div class="layout-tab">
-                  <p>ID sản phẩm cần thêm</p>
-                  <textarea id="product-link"></textarea>
-                  <p>Thông tin phân loại</p>
-                  <textarea id="data"></textarea>
-                  <p>Hình ảnh phân loại</p>
-                  <input type="file" multiple />
-              </div>
-              `));
-              setEventThemPhanLoaiNhieuLinkShopee();
-              break;
-          case "comboKMShopeeLayout":
-              content.append($(`
-              <div class="layout-tab">
-                <div class="switch-wrapper">
-                  <span class="switch-label">Xóa</span>
-                  <label class="switch">
-                    <input type="checkbox" id="toggle-switch">
-                    <div class="slider">
-                      <div class="slider-handle"></div>
-                    </div>
-                  </label>
-                  <span class="switch-label">Thêm</span>
-                </div>
-
-                  <p>Thông tin sản phẩm</p>
-                  <label for="data">
-                      <p>SKU</p>
-                      <input type="radio" id="sku" name="type-search" checked/>
-                  </label>
-                  <label for="data">
-                      <p>Tên</p>
-                      <input type="radio" id="name" name="type-search" />
-                  </label>
-                  <textarea id="data"></textarea>
-              </div>
-              `));
-
-                // Wrapper
-                $(".switch-wrapper").css({
-                  "display": "flex",
-                  "align-items": "center",
-                  "gap": "10px",
-                  "font-family": "sans-serif"
-                });
-
-                // Label: "Thêm" / "Xóa"
-                $(".switch-label").css({
-                  "font-size": "14px",
-                  "font-weight": "bold",
-                  "color": "#444",
-                  "width": "50px",
-                  "text-align": "center"
-                });
-
-                // Container chính của switch
-                $(".switch").css({
-                  "position": "relative",
-                  "width": "60px",
-                  "height": "28px"
-                });
-
-                // Ẩn input
-                $(".switch input").css({
-                  "opacity": "0",
-                  "width": "0",
-                  "height": "0",
-                  "position": "absolute"
-                });
-
-                // Track của switch (thanh nền)
-                $(".slider").css({
-                  "position": "relative",
-                  "background-color": "#ccc",
-                  "border-radius": "34px",
-                  "width": "100%",
-                  "height": "100%",
-                  "cursor": "pointer",
-                  "transition": "background-color 0.3s"
-                });
-
-                // Nút tròn gạt (handle)
-                $(".slider-handle").css({
-                  "position": "absolute",
-                  "height": "22px",
-                  "width": "22px",
-                  "left": "3px",
-                  "top": "3px",
-                  "background-color": "white",
-                  "border-radius": "50%",
-                  "transition": "left 0.3s",
-                  "box-shadow": "0 1px 3px rgba(0,0,0,0.2)"
-                });
-
-                $("#toggle-switch").on("change", function () {
-                  if (this.checked) {
-                    $(".slider").css("background-color", "#4caf50"); // Thêm
-                    $(".slider-handle").css("left", "35px");
-                    $(this).attr("data-type", "add");
-                  } else {
-                    $(".slider").css("background-color", "#ccc"); // Xóa
-                    $(".slider-handle").css("left", "3px");
-                    $(this).attr("data-type", "del");
-                  }
-                });
-
-              setEventComboKMShopee();
-              break;
-          case "suaHinhSKUShopeeLayout":
-              content.append($(`
-              <div class="layout-tab">
-                  <input type="file" multiple />
-                  <!--<label for="search-name">
-                      <p>Đổi Theo Tên</p>
-                      <input id="search-name" type="radio" name="searchType" />
-                  </label>
-
-                  <label for="search-sku">
-                      <p>Đổi Theo SKU</p>
-                      <input id="search-sku" type="radio" name="searchType" />
-                  </label> -->
-              </div>
-              `));
-
-                $(".layout-tab label").css({
-                    "display": "flex",
-                    "height": "3vh",
-                })
-
-                $(".layout-tab label p").css({
-                    "width": "100%",
-                })
-              setEventSuaHinhSKUShopee();
-              break;
-          case "compareVoucherLayout":
-              content.append($(`
-              <div class="layout-tab">
-                  <button id="addVoucher">Thêm Voucher</button>
-                  <textarea id="data"></textarea>
-                  <div class="voucher-box">
-                      <table>
-                          <thead>
-                              <tr>
-                                  <td>Kiểm Tra</td>
-                                  <td>Tiền Giảm</td>
-                                  <td>Giảm Tối Đa</td>
-                                  <td>Đơn Tối Thiểu</td>
-                                  <td></td>
-                              </tr>
-                          </thead>
-                          <tbody>
-                              <tr class="voucher-box root" hidden>
-                                  <td class="checked-box"></td>
-                                  <td class="discount-percent" style="display: flex">
-                                      <input type="text" />
-                                      <select>
-                                          <option>%</option>
-                                          <option><u>đ</u></option>
-                                      </select>
-                                  </td>
-                                  <td class="max-discount">
-                                      <input type="text" />
-                                  </td>
-                                  <td class="condition-deal">
-                                      <input type="text" />
-                                  </td>
-                                  <td class="remove-voucher" style="cursor: pointer">Xóa Voucher</td>
-                              </tr>
-                              <tr class="voucher-box">
-                                  <td class="checked-box"></td>
-                                  <td class="discount-percent" style="display: flex">
-                                      <input type="text" />
-                                      <select>
-                                          <option>%</option>
-                                          <option><u>đ</u></option>
-                                      </select>
-                                  </td>
-                                  <td class="max-discount">
-                                      <input type="text" />
-                                  </td>
-                                  <td class="condition-deal">
-                                      <input type="text" />
-                                  </td>
-                                  <td class="remove-voucher" style="cursor: pointer">Xóa Voucher</td>
-                              </tr>
-                          </tbody>
-                      </table>
-                  </div>
-              </div>
-              `));
-              setEventCompareVoucher();
-              break
-                case "giaDuoiChuongTrinhShopeeLayout":
-                    content.append($(`
-                        <div class="layout-tab">
-                            <label for="discount">Giảm của giá đuôi</label>
-                            <label for="money"><p>Tiền Mặt</p> <input type="radio" name="discount-type" id="money" /></label>
-                            <label for="percent"><p>Phần Trăm</p> <input type="radio" name="discount-type" id="percent" /></label>
-                            <input type="text" id="tp-discount" />
-                        </div>
-                    `));
-
-                    $(".layout-tab label").css({
-                        "display": "flex",
-                        "height": "3vh",
-                    })
-
-                    $(".layout-tab label p").css({
-                        "width": "100%",
-                    })
-                    break;
-                case "themGiaTheoSKULazadaLayout":
-                    content.append($(`
-                        <div class="layout-tab">
-                        <textarea id="data"></textarea>
-                        </div>
-                    `));
-                    setEventThemGiaTheoSKULazada();
-                    break;
-                case "kiemTraTonSapoLayout":
-                    content.append($(`
-                    <div class="layout-tab">
-                        <textarea id="data"></textarea>
-                    </div>
-                    `));
-                    setEventKiemTraTonSapo();
-                    break;
-                case "splitExcelFileLayout":
-                    content.append($(`
-                    <div class="layout-tab">
-                        <input type="file" id="fileInput" accept=".xlsx, .xls">
-                        <br><br>
-                        <label>Số dòng đầu giữ lại (header + mô tả...):</label>
-                        <input type="number" id="rowsToPreserve" value="1" min="0">
-                        <br />
-                        <label>Số dòng mỗi file:</label>
-                        <input type="number" id="rowsPerFile" value="100" min="1">
-                    </div>
-                    `));
-                    break;
-                case "kiemTraMaPhanLoaiShopeeLayout":
-                    content.append($(`
-                    <div class="layout-tab">
-                    </div>
-                    `));
-                    break;
-        case "themGioiTinhPhanLoaiShopeeLayout":
-          content.append($(`
-          <div class="layout-tab">
-            <select id="group">
-              <option>Phân Loại 1</option>
-              <option>Phân Loại 2</option>
-            </select>
-            <textarea id="data"></textarea>
-          </div>
-          `));
-          setEventThemGioiTinhPhanLoaiShopee();
-                    break;
-        case "kTr5LanGiaShopeeLayout":
-          content.append($(`
-          <div class="layout-tab">
-            <p>Giá Cao Nhất: <span id="maxSku">XXX-XXX</span> <span id="maxPrice">0</span></p>
-            <p>Giá Thấp Nhất: <span id="minSku">XXX-XXX</span> <span id="minPrice">0</span></p>
-            <p>Giá Đề Xuất: <span id="suggestPrice">0</span></p>
-          </div>
-          `));
-          break;
-        case "kiemTraPhanLoaiShopeeLayout":
-          content.append($(`
-          <div class="layout-tab">
-            <select id="group">
-              <option>Phân Loại 1</option>
-              <option>Phân Loại 2</option>
-            </select>
-            <textarea id="data"></textarea>
-          </div>
-          `));
-          setEventKtraPhanloaiShopee();
-          break;
-        case "themPhanLoaiShopeeLayout":
-          content.append($(`
-          <div class="layout-tab">
-            <select id="group">
-              <option>Phân Loại 1</option>
-              <option>Phân Loại 2</option>
-            </select>
-            <textarea id="data"></textarea>
-          </div>
-          `));
-          setEventThemPhanLoaiShopee();
-          break;
-        case "keoPhanLoaiShopeeLayout":
-          $("#excuse-command").hide();
-          content.append($(`
-          <div class="layout-tab">
-            <select id="group">
-              <option>Phân Loại 1</option>
-              <option>Phân Loại 2</option>
-            </select>
-            <div class="btn-control">
-              <button id="get">Lấy Phân Loại</button>
-              <button id="set">Cập Nhật Phân Loại</button>
-            </div>
-          </div>
-          `));
-          setEventKeoPhanLoaiShopee();
-          break;
-        case "suaGiaSKUShopeeLayout":
-          content.append($(`
-          <div class="layout-tab">
-            <textarea id="data" placeholder="SKU {tab} Giá"></textarea>
-          </div>
-          `));
-          setEventSuaGiaSKUShopee();
-          break;
-        case "5langiaShopeeLayout":
-          content.append($(`<div class="layout-tab">
-                        <div>
-                          <label for="max-price">Giá cao nhất: </label>
-                          <input placeholder="Nhập giá cao nhất" type="text" id="max-price" value="" />
-                        </div>
-                        <div>
-                          <label for="min-price">Giá thấp nhất: </label>
-                          <input placeholder="Nhập giá thấp nhất" type="text" id="min-price" value="" />
-                        </div>
-                      </div>`
-                     ));
-          setEventKtra5LanGiaShopee();
-          break;
-        case "sapXepHinhAnhShopeeLayout":
-          $("#excuse-command").hide();
-          $("body").append($(`
-            <div class="layout-tab tp-popup">
-              <div class="button-control">
-                <button id="getData">Lấy Dữ Liệu</button>
-                <button id="setData">Xác Nhận</button>
-                <button id="cancelData">Hủy</button>
-              </div>
-              <div class="img-list"></div>
-            </div>
-          `));
-          $(".layout-tab").css({
-            "width": "100%",
-            "height": "auto",
-            "margin-top": "2vh",
-            "background": "white",
-          });
-          $(".tp-popup").css({
-            "position": "fixed",
-            "top": "0",
-            "left": "0",
-            "z-index": "999999999999999999999999999999999999999999",
-          });
-          $(".layout-tab .button-control").css({
-            "width": "100%",
-            "height": "auto",
-            "display": "flex",
-            "justify-content": "center",
-            "align-items": "center",
-            "gap": "2vw",
-          });
-          $(".layout-tab .button-control button").css({
-            "width": "100%",
-            "height": "5vh",
-            "line-height": "5vh",
-            "display": "flex",
-            "justify-content": "center",
-            "align-items": "center",
-            "border-radius": "5px",
-            "background": "#cdcdcd",
-          });
-          $(".layout-tab .img-list").sortable();
-          $(".layout-tab .img-list").css({
-            "width": "auto",
-            "max-width": "100%",
-            "height": "auto",
-            "max-height": "70vh",
-            "overflow": "hidden",
-            "overflowX": "scroll",
-            "display": "flex",
-            "justify-content": "center",
-            "align-items": "center",
-          });
-          $(".layout-tab .img-list .box-img").css({
-            "width": "auto",
-            "height": "calc(100% - 2vw)",
-            "aspect-ratio": "1 / 1",
-            "max-height": "20vh",
-          });
-          setEventSapXepAnhShopee();
-          break;
-        case "flashSaleShopeeLayout":
-          content.append($(`
-            <div class="layout-tab">
-              <textarea id="flahsSaleName" placeholder="Nhập Tên Cần Bật Lên"></textarea>
-            </div>
-          `));
-          setEventFlashSaleShopee();
-          break;
-        case "tinhGiaBanShopeeLayout":
-          content.append($(`
-            <div class="layout-tab">
-              <div class="input-cost">
-                <label for="cost">Nhập Giá Vốn</label>
-                <input type="text" id="cost" maxlength="15" />
-              </div>
-              <div class="output-cost">
-                <p>Giá sau Khuyễn mãi: <span id="after-price"></span></p>
-                <p>Giá trước Khuyễn mãi: <span id="before-price"></span></p>
-                <p>Giá Đăng Bán: <span id="last-price"></span></p>
-              </div>
-            </div>
-          `));
-          setEventTinhGiaBanShopee();
-          break;
-        case "themPhanLoaiLazadaLayout":
-          content.append($(`
-          <div class="layout-tab">
-            <div class="layout-tab">
-              <input id="group" placeholder="Nhóm phân loại" value="1" />
-              <textarea id="phanLoai" placeholder="Nhập phân loại \nPhân Loại A, Phân Loại B, Phận Loại C, ...">Phân Loại A, Phân Loại B, Phận Loại C</textarea>
-            </div>
-          </div>`));
-          break;
-        case "ktraGiaChuongTrinhKMLazadaLayout":
-          content.append($(`
-          <div class="layout-tab">
-            <div class="layout-tab">
-              <textarea id="group" placeholder="Nhập từ khóa của nhóm:\nSố phần trăm, key1, key2, key3,..\nSố phần trăm, key1, key2, key3,...">
-10%, massage, diện chẩn, khẩu trang, bịt mặt
-5%, áo mưa bít, bít cá, bít dù</textarea>
-            </div>
-          </div>`));
-          break;
-        case "ktraKhuyenMaiTiktokLayout":
-          content.append($(`
-          <div class="layout-tab">
-            <button id="moDSSP">Mở Danh Sách Sản Phẩm Trong Trang</button>
-            <button id="ktraKhuyenMai">Kiểm Tra Khuyến Mãi</button>
-          </div>
-          `));
-          setEventKtraKhuyeMaiTiktok();
-          break;
-        case "autobrowserLayout":
-          $("#excuse-command").hide();
-          content.append($(`<div class="layout-tab">
-                        <button id="getGeminiKey">Lấy Key Gemini</button>
-                      </div>`
-                     ));
-          setEventAutobrowser();
-          break;
-      }
-    }
-
-    // Hiển thị thông tin mã phân loại
-    function showAllModelID(value){
-        // Hiển thị mã phân loại
-        console.log(value);
-        if(value){
-            if(window.location.pathname.includes("/portal/product/list/all")){
-                waitForElement($("body"), ".product-more-models__content button", (el) => {
-                    $(".product-more-models__content button").click();
-                    var countingTime = setInterval(kiemTraMaPhanLoaiShopee, 3000);
-                    /*waitForElement($("body"), ".eds-table__main-body table.eds-table__body", (el) => {
-                        kiemTraMaPhanLoaiShopee();
-                    },{once: true})*/
-                }, {once: true});
-            }
-
-            //var countingTime = setInterval(kiemTraMaPhanLoaiShopee, 3000);
-        }else{
-            $(".data-model-id-tp").remove();
-            clearInterval(countingTime);
-        }
-    }
-    function kiemTraMaPhanLoaiShopee(){
-
-        var container = $(".eds-table__main-body").eq(0).find(".eds-scrollbar__wrapper .eds-scrollbar__content table tbody tr");
-
-        //var choiceAll = container.parent().find(".shopee-fixed-top-card.product-fixed-header.edit-fixed-header label.eds-checkbox.item-selector").click().click();
-
-        $.each(container, (index, value) => {
-            $.each($(value).find("td").eq(1).find(".view-more .model-list-item"), (index, value) => {
-                var productName = $(value).find(".product-variation-padding").eq(0);
-                var stock = $(value).find(".product-variation-padding").eq(3);
-
-                productName.find(".data-model-id-tp").remove();
-
-                productName.find(".variation-name-info").append($(`
-                <div class="data-model-id-tp">
-                    Mã Phân Loại: ${stock.find(".list-view-stock").attr("modelid")}
-                </div>
-                `));
-            });
-            var item = container.find("td").eq(1);
-            return;
-            var productBox = container.eq(index).find(".inner-rows .inner-row");
-            $.each(productBox, (index, value) => {
-                productBox.eq(index).css({
-                    "background": "transparent",
-                    "color": "#000"
-                });
-
-                var productName = productBox.eq(index).find(".variation .ellipsis-content");
-                var originalPrice = productBox.eq(index).find(".original-price");
-                var currentcyPrice = productBox.eq(index).find(".currency-input input");
-                var perPrice = productBox.eq(index).find(".discount-input input");
-                var campaignStock = productBox.eq(index).find(".campaign-stock input");
-                var currentStock = productBox.eq(index).find(".current-stock");
-                var buttonSwitch = productBox.eq(index).find(".eds-switch.eds-switch--close.eds-switch--normal");
-
-                productName.parent().find(".data-model-id").remove();
-
-                productName.parent().append($(`
-                <div class="data-model-id">
-                    ${productBox.eq(index).attr("data-model-id")}
-                </div>
-                `));
-            });
-        });
-    }
-
-    // Hiển thị đầy đủ chữ tiktok
-    function hienThiDuChuTiktok(value){
-            if(value){
-                waitForElement($("body"), ".truncate", (el) => {
-                    $(".truncate").removeClass("truncate").addClass("hide-truncate");
-                    $("div[style='-webkit-line-clamp: 1;']").css("-webkit-line-clamp", "").addClass("hide-line-clamp");
-                }, {once: false})
-            }else{
-                waitForElement($("body"), ".hide-truncate", (el) => {
-                    $(".hide-truncate").removeClass("hide-truncate").addClass("truncate");
-                    $(".hide-line-clamp").css("-webkit-line-clamp", "1").removeClass("hide-line-clamp");
-                }, {once: false})
-            }
-    }
-
-    // Mở rộng main content shopee
-    function moRongMainContentShopee(value){
-        waitForElement($("body"), ".product-edit__main", (mainContent) => {
-            mainContent = $(mainContent);
-            if(value)
-                mainContent.css({
-                    "width": "100%",
-                    "position": "absolute",
-                    "top": "0",
-                    "left": "0",
-                    "margin-left": "0",
-                    "z-index": "9999",
-                });
-            else
-                mainContent.removeAttr("style");
-        });
-    }
-
-    // Thêm phân loại hàng loạt
-    function setEventThemPhanLoaiNhieuLinkShopee(){
-        setEventTabTextarea();
-    }
-
-    async function themPhanLoaiNhieuLinkShopee(){
-        var productIds = $(".tp-container .layout-tab #product-link").val().trim().split("\n").filter(Boolean);
-        var variantLines = $(".tp-container .layout-tab #data").val().trim().split("\n").filter(Boolean);
-        var files = $(".tp-container .layout-tab input[type='file']")[0]?.files || [];
-        var inputMap = await makeInputMapFromFileNames(files);
-        files = await filesToBase64Array(files);
-
-
-        localStorage.removeItem("TP-exit");
-        saveBatchDataByParts({productIds, variantLines, files, inputMap});
-        moveToCurrentProduct();
-    }
-
-    // Map hình ảnh tải lên
-    async function makeInputMapFromFileNames(fileList) {
-      var inputMap = {};
-      for (let i = 0; i < fileList.length; i++) {
-        var file = fileList[i];
-        if (!file) continue;
-
-        var rawName = file.name.split(".")[0]; // "TS-001.jpg" → "TS-001"
-        var sku = rawName.trim().toUpperCase();
-        var base64 = await fileToBase64(file);
-        inputMap[sku] = base64;
-      }
-      return inputMap;
-    }
-
-    // Encode hình ảnh
-    async function fileToBase64(file, quality = 0.5) {
-        return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          const img = new Image();
-          img.onload = function () {
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
-
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0); // loại bỏ metadata
-
-            // Chuyển thành JPEG và giảm chất lượng
-            const base64 = canvas.toDataURL("image/jpeg", quality);
-            resolve(base64);
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    }
-
-    async function filesToBase64Array(files) {
-        var results = [];
-        for (let i = 0; i < files.length; i++) {
-            var base64 = await fileToBase64(files[i]);
-            results.push(base64);
-        }
-        return results;
-    }
-
-    async function base64ToFile(base64, filename = "image.jpg") {
-      var res = await fetch(base64);
-      var blob = await res.blob();
-      return new File([blob], filename, { type: blob.type });
-    }
-
-
-    async function saveBatchDataByParts({
-      productIds = [],
-      variantLines = [],
-      files = [],
-      inputMap = []
-    }) {
-      if(!confirm("❕Kiểm tra kỹ dữ liệu nhé.❗"))
-          return;
-
-      // 1. Lưu ID sản phẩm
-      sessionStorage.setItem("batchProductIds", JSON.stringify(productIds));
-
-      // 2. Lưu thông tin phân loại (đã parse)
-      var variants = variantLines.map(line => {
-        var [name, sku, price] = line.trim().split("\t");
-        return { name, sku, price: + price, stock: 1 };
-      });
-      sessionStorage.setItem("batchVariantData", JSON.stringify(variants));
-
-      // 3. Lưu hình ảnh (chuyển sang base64)
-      sessionStorage.setItem("batchVariantImages", JSON.stringify(files));
-
-      // 4. Reset index xử lý
-      sessionStorage.setItem("batchIndex", "0");
-
-      // 5. Map hình ảnh
-      sessionStorage.setItem("batchInputMap", JSON.stringify(inputMap));
-
-      alert("✅ Dữ liệu đã được lưu vào sessionStorage theo từng phần.");
-    }
-
-
-    function moveToCurrentProduct() {
-      var productIds = JSON.parse(sessionStorage.getItem("batchProductIds") || "[]");
-      var variants = JSON.parse(sessionStorage.getItem("batchVariantData") || "[]");
-      var images = JSON.parse(sessionStorage.getItem("batchVariantImages") || "[]");
-      var index = parseInt(sessionStorage.getItem("batchIndex") || "0");
-
-      if (productIds[index]) {
-        var id = productIds[index];
-
-        // Gắn lại ảnh vào từng variant
-        var variantsWithImage = variants.map((variant, i) => ({
-          ...variant,
-          image: images[i] || null
-        }));
-
-        var product = {
-          id,
-          variants: variantsWithImage
-        };
-
-        sessionStorage.setItem("currentBatchProduct", JSON.stringify(product));
-        var nextUrl = `https://banhang.shopee.vn/portal/product/${productIds[index]}`;
-        window.location.href = nextUrl;
-      } else {
-        alert("✅ Đã hoàn thành toàn bộ sản phẩm.");
-        sessionStorage.clear();
-      }
-    }
-
-
-    function processCurrentProduct(callback) {
-        var raw = sessionStorage.getItem("currentBatchProduct");
-        if (raw) {
-          var data = JSON.parse(raw);
-          callback(data);
-        }
-    }
-
-    function moveToNextProduct() {
-        var index = parseInt(sessionStorage.getItem("batchIndex") || "0");
-        sessionStorage.setItem("batchIndex", (index + 1).toString());
-        moveToCurrentProduct();
-    }
-
-    // Tự mở danh sách phân loại
-    waitForElement($("body"), ".variation-model-table-footer", (el) => {
-        $(el).find("button").click();
-    }, {once: true});
-
-    // Khi trang load và DOM sẵn sàng
-    waitForElement($("body"), ".options-item.virtual-options-item", (el) => {
-        processCurrentProduct((product) => {
-
-          // 👉 GỌI HÀM CỦA BẠN TẠI ĐÂY
-          // ví dụ: addVariants(product.variants);
-
-          setTimeout(kiemTraTrungTenPhanLoaiHangLoatShopee(product), 2000);
-        });
-    }, { once: true, timeout: 10000 });
-
-    // Kiểm tra các phân loại sau khi thêm phân loại hàng loạt shopee
-    function kiemTraPhanLoaiHangLoatShopee(){
-        boxAlert("Đang kiểm tra các sản phẩm");
-        kTr5LanGiaShopee();
-    }
-
-    function kiemTraTrungTenPhanLoaiHangLoatShopee(data) {
-        var arrayData = data.variants;
-
-        var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
-
-        var currentList = [];
-
-        // Thu thập các giá trị phân loại đã tồn tại
-        $.each(box, (index, value) => {
-            var name = box.eq(index).find(".variation-input-item-container.variation-input-item input");
-            currentList.push(name.val().toLowerCase());
-        });
-
-        // Kiểm tra và loại bỏ các phân loại đã tồn tại trong data.variants
-        var uniqueVariants = [];
-        var existingVariants = [];
-
-        // Lọc các phân loại, nếu đã tồn tại trong currentList thì thêm vào existingVariants, ngược lại thêm vào uniqueVariants
-        $.each(arrayData, (index, value) => {
-            if (currentList.includes(value.name.toLowerCase())) {
-                existingVariants.push(value); // Đã tồn tại, thêm vào mảng phân loại đã có
-            } else {
-                uniqueVariants.push(value); // Chưa tồn tại, thêm vào mảng phân loại mới
-            }
-        });
-
-        // Cập nhật lại data.variants để chỉ chứa các phân loại mới
-        data.variants = uniqueVariants;
-
-        // Đóng gói sản phẩm trùng vào đối tượng
-        var exitItem = {
-            id: data.id, // Lưu id sản phẩm
-            variants: existingVariants, // Lưu các variants trùng
-            note: "Tên phân loại đã tồn tại"
-        };
-
-        var uniqueItem = {
-            id: data.id,
-            variants: uniqueVariants,
-        }
-
-        // Lấy dữ liệu từ localStorage, nếu chưa có thì khởi tạo mảng rỗng
-        var storedExistingVariants = localStorage.getItem("TP-exit");
-        var existingVariantsData = storedExistingVariants ? JSON.parse(storedExistingVariants) : [];
-
-        // Thêm sản phẩm trùng vào localStorage
-        existingVariantsData.push(exitItem);
-
-        // Lưu lại vào localStorage dưới dạng chuỗi JSON
-        localStorage.setItem("TP-exit", JSON.stringify(existingVariantsData));
-
-        waitForElement($("body"), ".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper", (el) => {
-            kiemTraGiaPhanLoaiHangLoatShopee(uniqueItem);
-        }, {once: true})
-    }
-
-    // Kiểm tra giá phân loại hàng loạt shopee
-    function kiemTraGiaPhanLoaiHangLoatShopee(data) {
-        var arrayData = data.variants;
-
-        var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
-        var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
-
-        var min = Infinity;
-        var max = 0;
-
-        // Thu thập giá từ phân loại đã có
-        $.each(box, (index, value) => {
-            var priceInput = box.eq(index).find(".table-cell").eq(0).find("input");
-            var price = parseInt(priceInput.val().trim());
-            var giaDuoi = parseInt(tachGia(price).giaDuoi);
-
-            if(giaDuoi == 0)
-                return;
-
-            if(giaDuoi < min)
-                min = giaDuoi;
-        });
-
-        max = min * 5;
-
-        var errorVariants = [];
-        var dataVariants = [];
-
-        // Kiểm tra các phân loại thêm mới
-        $.each(arrayData, (index, value) => {
-            var productPrice = parseInt(value.price);
-            if (isNaN(productPrice)) return;
-
-            var tach = tachGia(productPrice);
-            var giaDuoi = parseInt(tach.giaDuoi);
-            var giaDau = parseInt(tach.giaDau);
-
-            if(giaDuoi == 0)
-                return;
-
-            // Nếu giá đuôi mới < min hiện tại
-            if (giaDuoi < min) {
-                if (giaDuoi * 5 <= max) {
-                    // Update lại min nếu hợp lệ
-                    min = giaDuoi;
-                    max = min * 5;
-                } else {
-                    errorVariants.push(value);
-                    return;
-                }
-            }
-
-            var tongGia = tach.gia;
-
-            tongGia = parseInt(tongGia);
-            max = parseInt(max);
-
-            if (tongGia > max) {
-                // Cố gắng điều chỉnh
-                var giaDauMoi = parseInt(max) - 1000;
-                var threshold = Math.max(Math.floor((giaDauMoi - giaDuoi) / giaDauMoi), 5000);
-                if ((giaDauMoi - giaDuoi) < threshold) {
-                    // Nếu sau khi giảm, giá đầu gần sát giá đuôi ➔ lỗi
-                    errorVariants.push(value);
-                    return;
-                } else {
-                    // Gộp giá mới bằng đúng hàm gopGia()
-                    var giaMoi = gopGia(giaDauMoi, giaDuoi);
-                    value.price = giaMoi; // Update giá mới
-                }
-            }
-            dataVariants.push(value);
-        });
-
-        if (errorVariants.length > 0) {
-            var errorList = {
-                id: data.id,
-                variants: errorVariants,
-                note: "Sản phẩm cần xem xét lại giá"
-            };
-
-            var errorStorage = localStorage.getItem("TP-exit");
-            var errorData = errorStorage ? JSON.parse(errorStorage) : [];
-
-            errorData.push(errorList);
-
-            try {
-                localStorage.setItem("TP-exit", JSON.stringify(errorData));
-            } catch (e) {
-                console.error("❌ Lưu TP-exit lỗi (có thể do dung lượng vượt quá):", e);
-            }
-        }
-
-        var dataItem = {
-            id: data.id,
-            variants: dataVariants
-        }
-
-        themPhanLoaiHangLoatShopee(dataItem);
-    }
-
-
-
-    // Thêm phân loại hàng loạt shopee
-    function themPhanLoaiHangLoatShopee(data){
-        var group = $(".tp-container .content-layout .layout-tab #group").find("option:selected").index();
-        //var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
-        var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item");
-
-        var array = data.variants;
-
-        var arrayData = [], arraySku = [];
-
-        $.each(array, (index, value) => {
-            arrayData.push(value.name);
-            arraySku.push(value.sku);
-        });
-
-        var currentPos = 0;
-
-        function writeValue(){
-                if(currentPos >= arrayData.length){
-                    boxLogging(`Đã thêm phân loại, đang dò SKU...`, [`Đã thêm phân loại, đang dò SKU...`], ["orange"])
-                    themSKUHangLoatTheoPhanLoaiShopee(data);
-                    return;
-                }
-
-                var inputBox = box.eq(box.length - 1).find("input").trigger("input");
-
-                inputBox.select();
-                inputBox.attr("modelValue", arrayData[currentPos]);
-                inputBox.val(arrayData[currentPos]);
-
-                if (window.getSelection) {
-                    window.getSelection().removeAllRanges();
-                }else if (document.selection) {
-                    document.selection.empty();
-                }
-
-                if ("createEvent" in document) {
-                    var evt = document.createEvent("HTMLEvents");
-                    evt.initEvent("input", false, true);
-                    $(inputBox).get(0).dispatchEvent(evt);
-                }
-                else {
-                    $(inputBox).get(0).fireEvent("oninput");
-                }
-
-                currentPos++
-
-                inputBox.blur();
-
-                setTimeout(writeValue, 2000);
-            }
-            writeValue();
-    }
-
-    // Thêm SKU hàng loạt theo tên phân loại shopee
-    function themSKUHangLoatTheoPhanLoaiShopee(data){
-        var array = data.variants;
-
-        var arrayData = [], arraySku = [];
-
-        $.each(array, (index, value) => {
-            arrayData.push(value.name);
-            arraySku.push(value.sku);
-        });
-
-        var currentPos = 0;
-        var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
-        var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
-
-        function writeValue(){
-            if(currentPos >= box.length){
-                boxLogging(`Đã thêm SKU`, [`Đã thêm SKU`], ["green"]);
-                suaGiaSKUHangLoatShopee(data);
-                return;
-            }
-
-            var name = boxLeft.eq(currentPos).find(".table-cell.first-variation-cell")
-            var nameProduct = name.contents()
-                .filter(function() {
-                    return this.nodeType === 3; // chỉ lấy text thuần
-                })[0]?.nodeValue.trim();
-            var skuBox = box.eq(currentPos).find(".table-cell").eq(2).find("textarea");
-            var priceBox = box.eq(currentPos).find(".table-cell").eq(0).find("input");
-            var stockBox = box.eq(currentPos).find(".table-cell").eq(1).find("input");
-
-            if(arrayData.includes(nameProduct)){
-
-
-                var pos = arrayData.indexOf(nameProduct);
-                skuBox.attr("modelValue", arraySku[pos]);
-                skuBox.val(arraySku[pos]).trigger("input");
-
-                if (window.getSelection) {
-                    window.getSelection().removeAllRanges();
-                }else if (document.selection) {
-                    document.selection.empty();
-                }
-
-                if ("createEvent" in document) {
-                    var evt = document.createEvent("HTMLEvents");
-                    evt.initEvent("input", false, true);
-                    $(skuBox).get(0).dispatchEvent(evt);
-                }
-                else {
-                    $(skuBox).get(0).fireEvent("oninput");
-                }
-
-                simulateReactInput(stockBox, "1");
-            }
-
-            currentPos++;
-
-            setTimeout(writeValue, 10);
-        }
-        writeValue();
-    }
-
-    // Sửa giá theo SKU hàng loạt shopee
-    function suaGiaSKUHangLoatShopee(data){
-      var array = data.variants;
-      $.each(array, (index, value) => {
-        var sku = value.sku;
-        var gia = value.price.toString();
-
-        var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
-
-        $.each(box, (index, value) => {
-          var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
-          var priceBox = box.eq(index).find(".table-cell").eq(0).find("input");
-
-          if(skuBox.val().includes(sku)){
-                        var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-                        var gia1 = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            boxAlert(`Giá của ${sku} đã sửa từ ${priceBox1} => ${gia1}`);
-            boxLogging(`Giá của ${sku} đã sửa từ ${priceBox1} => ${gia1}`, [`${sku}`, `${priceBox1}`, `${gia1}`], ["crimson", "yellow", "yellow"]);
-
-            if(parseInt(priceBox.val()) < parseInt(gia)){
-              boxLogging(`SKU: ${sku} có giá mới cao hơn giá hiện tại`, [`${sku}`], ["crimson"]);
-              box.eq(index).css("background", "crimson");
-            }else
-              box.eq(index).css("background", "lightgreen");
-
-            priceBox.select();
-            simulateReactInput(priceBox, gia);
-            priceBox.val(gia);
-
-            if (window.getSelection) {
-              window.getSelection().removeAllRanges();
-            }else if (document.selection) {
-              document.selection.empty();
-            }
-
-            if ("createEvent" in document) {
-              var evt = document.createEvent("HTMLEvents");
-              evt.initEvent("change", false, true);
-              $(priceBox).get(0).dispatchEvent(evt);
-            }
-            else {
-              $(priceBox).get(0).fireEvent("onchange");
-            }
-          }
-        });
-      });
-        themAnhPhanLoaiHangLoatShopee(data);
-    }
-
-    // Thêm ảnh phân loại hàng loạt Shopee – từ sessionStorage.batchInputMap
-    function themAnhPhanLoaiHangLoatShopee(data){
-      var inputMap = JSON.parse(sessionStorage.getItem("batchInputMap") || "{}");
-
-      var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
-      var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
-
-      var clickInput = false;
-
-      $.each(data.variants, (index, valueData) => {
-        valueData = valueData;
-
-        $.each(box, async (index, valueBox) => {
-            var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
-            var imgInputShopee = boxLeft.eq(index).find(".table-cell").eq(0).find("input[type=file]")[0];
-            var sku = skuBox.val().trim().toUpperCase();
-
-            if(sku.includes(valueData.sku.toUpperCase())){
-                var img = valueData.image;
-                var file = await base64ToFile(img, `${valueData.sku}.jpg`);("input[type=file]")[0];
-
-                var dt = new DataTransfer();
-                dt.items.add(file);
-
-                // Click input 1 lần để React ghi nhận focus
-                if (!clickInput) {
-                    imgInputShopee.click();
-                    clickInput = true;
-                }
-
-                setTimeout(() => {
-                    imgInputShopee.files = dt.files;
-
-                    var evt = new Event("change", { bubbles: true });
-                    imgInputShopee.dispatchEvent(evt);
-
-
-                }, 100);
-            } else {
-            console.warn(`⚠️ Không tìm thấy ảnh cho SKU: ${sku}`);
-            }
-        });
-      });
-
-      $(document).blur();
-      //kiemTraPhanLoaiHangLoatShopee();
-      // ✅ Khi xử lý xong:
-      setTimeout(saveProduct, 3000);
-      //moveToNextProduct();
-    }
-
-    // Lưu sản phẩm sau khi thêm phân loại
-    function saveProduct(){
-        $("body").focus();
-        var button = $(".shopee-fix-bottom-card.product-selected-fix .eds-button.eds-button--primary.eds-button--normal.eds-button--xl-large");
-        console.log(button);
-        button.trigger("click");
-
-        setTimeout(() => {
-            var box = $(".eds-modal").last();
-            box.find(".eds-modal__footer button").last().trigger("click");
-        }, 2000)
-
-        setTimeout(moveToNextProduct,3000);
-    }
-
-    // Theo dõi phần tử
-    function waitForElement(root, selector, callback, options = {}) {
-      var {
-        once = true,
-        timeout = null
-      } = options;
-
-      // Kiểm tra kỹ kiểu node
-      const rootNode =
-        (window.jQuery && root instanceof window.jQuery) ? root[0] :
-        (Array.isArray(root) && root[0] instanceof Node) ? root[0] :
-        root;
-
-      if (!(rootNode instanceof Node)) {
-        console.error("❌ waitForElement: root không phải DOM node hợp lệ:", rootNode);
-        return;
-      }
-
-      var observer = new MutationObserver(() => {
-        var el = rootNode.querySelector(selector);
-        if (el) {
-          callback(el);
-          if (once) {
-            observer.disconnect();
-            if (timer) clearTimeout(timer);
-          }
-        }
-      });
-
-      observer.observe(rootNode, {
-        childList: true,
-        subtree: true
-      });
-
-      var el = rootNode.querySelector(selector);
-      if (el) {
-        callback(el);
-        if (once) {
-          observer.disconnect();
-        }
-      }
-
-      let timer = null;
-      if (timeout) {
-        timer = setTimeout(() => {
-          observer.disconnect();
-        }, timeout);
-      }
-
-      return observer;
-    }
-
-    // Điều chỉnh combo khuyến mãi shopee
-    function setEventComboKMShopee(){
-        $(".tp-container .layout-tab label").on("click", function(){
-            $(".tp-container .layout-tab #data").select().focus();
-        });
-    }
-
-    function comboKMShopee(){
-        var data = $(".tp-container .content-layout .layout-tab #data");
-        var arrayData = data.val().split("\n").filter(i => i.trim() !== "");
-
-        var inputBox = $(".eds-react-search input");
-
-        var searchIcon = $(".eds-react-search span.eds-react-icon.eds-react-icon-search.eds-react-input__suffix-icon");
-
-        var currentItem = 0;
-
-        var type = $(".tp-container .content-layout .layout-tab #toggle-switch").attr("data-type");
-
-        if(type == "del"){
-            function nextItem(){
-                var skip = 0;
-                if(currentItem >= arrayData.length)
-                    return;
-
-                clearReactInput(inputBox);
-
-                var sku = arrayData[currentItem];
-
-                simulateReactInput(inputBox, sku);
-
-                searchIcon.click();
-
-                var box = $("tbody.eds-react-table-tbody").eq(1);
-
-                try{
-                    waitForElement(box, (".eds-react-table-row.eds-react-table-row-level-0"), (e) => {
-                        if($(e).attr("data-row-key") == sku){
-                            $(e).find("td").eq(7).find("button").click();
-                            currentItem++;
-                            nextItem();
-                        }
-                    }, {
-                        once: false,
-                    });
-                }catch(e){
-                    currentItem++;
-                    nextItem();
-                }
-            }
-            nextItem();
-        }else if(type == "add"){
-            var skuList = arrayData.join(",");
-            navigator.clipboard.writeText(skuList);
-        }
-    };
-
-    // Điều chỉnh combo khuyến mãi shopee
-    function setEventCTKMShopee(){
-        $(".tp-container .layout-tab label").on("click", function(){
-            $(".tp-container .layout-tab #data").select().focus();
-        });
-    }
-
-    function cTKMShopee(){
-        var data = $(".tp-container .content-layout .layout-tab #data");
-        var arrayData = data.val().split("\n").filter(i => i.trim() !== "");
-
-        var inputBox = $(".eds-react-search input");
-
-        var searchIcon = $(".eds-react-search span.eds-react-icon.eds-react-icon-search.eds-react-input__suffix-icon");
-
-        var currentItem = 0;
-
-        var type = $(".tp-container .content-layout .layout-tab #toggle-switch").attr("data-type");
-
-        if(type == "del"){
-            function nextItem(){
-                var skip = 0;
-                if(currentItem >= arrayData.length)
-                    return;
-
-                clearReactInput(inputBox);
-
-                var sku = arrayData[currentItem];
-
-                simulateReactInput(inputBox, sku);
-
-                searchIcon.click();
-
-                var box = $("tbody.eds-react-table-tbody").eq(1);
-
-                try{
-                    waitForElement(box, (".eds-react-table-row.eds-react-table-row-level-0"), (e) => {
-                        if($(e).attr("data-row-key") == sku){
-                            $(e).find("td").eq(7).find("button").click();
-                            currentItem++;
-                            nextItem();
-                        }
-                    }, {
-                        once: false,
-                    });
-                }catch(e){
-                    currentItem++;
-                    nextItem();
-                }
-            }
-            nextItem();
-        }else if(type == "add"){
-            var skuList = arrayData.join(",");
-            navigator.clipboard.writeText(skuList);
-        }
-    };
-
-    // Làm mượt chức năng kéo phân loại
-    function smoothDragVarianti() {
-      // Thêm CSS tối ưu vào head
-      if (!$('#shopee-drag-optimize-style').length) {
-        $('<style>', {
-          id: 'shopee-drag-optimize-style',
-          text: `
-            .drag-item {
-              will-change: transform !important;
-              transform: translateZ(0) !important;
-              transition: none !important;
-            }
-            .drag-item * {
-              transition: none !important;
-            }
-            /* Tuỳ chọn: ẩn các phần không cần thiết */
-            .shopee-sidebar, .footer, .some-popover {
-              display: none !important;
-            }
-          `
-        }).appendTo('head');
-      }
-    }
-
-    waitForElement($("body"), ".options-item.drag-item", (e) => {
-        smoothDragVarianti();
-        boxLogging(`Đã làm mượt kéo phân loại shopee`, [`Đã làm mượt kéo phân loại shopee`], ["green"]);
-    });
-
-    // Clone thuộc tính
-    function cloneAttributes(source, target) {
-        $.each(source[0].attributes, function() {
-            if (this.name !== 'value' && this.name !== 'files') {
-                target.attr(this.name, this.value);
-            }
-        });
-    }
-
-    var inputMap = {};
-    // Thay hình theo SKU
-    function setEventSuaHinhSKUShopee(){
-        $(".tp-container .content-layout .layout-tab input").on("change", function () {
-            var files = this.files;
-            var container = $("#input-preview-list");
-            container.empty(); // Xoá input cũ nếu cần
-
-            for (let i = 0; i < files.length; i++) {
-                var file = files[i];
-
-                // Tạo DataTransfer chứa file
-                var dt = new DataTransfer();
-                dt.items.add(file);
-
-                // Tạo input mới
-                var newInput = $("<input type='file'>")
-                    .prop("files", dt.files)
-                    .addClass("single-file-input");
-
-                // Lưu vào object dạng "filename": input
-
-                var name = file.name.split(".")[0];
-                inputMap[name] = newInput;
-
-                // Gắn vào giao diện (nếu muốn hiển thị)
-                container.append(newInput);
-            }
-
-            //nsole.log(inputMap); // Kiểm tra kết quả
-        });
-    }
-
-    function suaHinhSKUShopee(){
-        var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
-        var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
-
-        var clickInput = false;
-
-        $.each(box, (index) => {
-            var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
-            var imgInputShopee = boxLeft.eq(index).find(".table-cell").eq(0).find("input[type=file]")[0];
-
-            var sku = skuBox.val().trim().toUpperCase();
-            var found = Object.keys(inputMap).find(key => sku.includes(key) || key.includes(sku));
-
-            if (found && inputMap[found]) {
-                var fileInput = inputMap[found][0];
-                var file = fileInput.files[0];
-                var dt = new DataTransfer();
-                dt.items.add(file);
-
-                // Hợp thức hóa bằng click
-                if(!clickInput){
-                    imgInputShopee.click();
-                    clickInput = true;
-                }
-
-                setTimeout(() => {
-                    imgInputShopee.files = dt.files;
-
-                    var evt = new Event("change", { bubbles: true });
-                    imgInputShopee.dispatchEvent(evt);
-
-                }, 100); // có thể tăng lên 200–300 nếu cần
-            }
-
-            return;
-
-            sku = skuBox.val().trim().toUpperCase();
-
-            found = Object.keys(inputMap).find(key => sku.includes(key) || key.includes(sku));
-
-            if (found && inputMap[found]) {
-
-                // Tạo input mới
-                var original = inputMap[found][0];
-                var newInput = document.createElement("input");
-
-                // Clone attributes
-                cloneAttributes(imgInput, $(newInput));
-
-                // Tạo DataTransfer mới và thêm file
-                dt = new DataTransfer();
-                dt.items.add(original.files[0]);
-                newInput.files = dt.files;
-
-                // Thay input cũ bằng input mới
-                imgInput.replaceWith($(newInput).clone(true));
-
-                // Lừa React bằng sự kiện "change"
-                var event = new Event("change", { bubbles: true });
-                newInput.dispatchEvent(event);
-            }
-
-            img.replaceWith($(data).clone(true));
-
-
-            img.attr('multiple', 'multiple');
-
-            img.click();
-
-            img.on("change", () => {
-                 //var sku = 'SKU123';  // SKU bạn muốn tìm
-                var input = $('#fileInput')[0];  // Lấy element input file
-                var files = input.files;  // Lấy danh sách file đã chọn
-
-                // Lọc file hợp lệ
-                let validFiles = [];
-                $.each(files, function(index, file) {
-                    var fileSku = file.name.split('-')[0]; // Giả sử tên file có dạng SKU123-image.jpg
-                    if (fileSku.includes(skuBox.val())) {
-                        validFiles.push(file);  // Thêm file hợp lệ vào mảng
-                    }
-                });
-
-                // Cập nhật lại input với các file hợp lệ
-                var dataTransfer = new DataTransfer();
-                $.each(validFiles, function(index, file) {
-                    dataTransfer.items.add(file); // Thêm các file hợp lệ vào DataTransfer
-                });
-
-                // Cập nhật lại input.files bằng các file hợp lệ
-                input.files = dataTransfer.files;
-
-            })
-
-          if(skuBox.val().includes(sku)){
-            var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            var gia1 = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            boxAlert(`Giá của ${sku} đã sửa từ ${priceBox1} => ${gia1}`);
-            boxLogging(`Giá của ${sku} đã sửa từ ${priceBox1} => ${gia1}`, [`${sku}`, `${priceBox1}`, `${gia1}`], ["crimson", "yellow", "yellow"]);
-
-            if(parseInt(priceBox.val()) < parseInt(gia)){
-              boxLogging(`SKU: ${sku} có giá mới cao hơn giá hiện tại`, [`${sku}`], ["crimson"]);
-              box.eq(index).css("background", "crimson");
-            }else
-              box.eq(index).css("background", "lightgreen");
-
-            priceBox.select();
-            priceBox.val(gia);
-
-            if (window.getSelection) {
-              window.getSelection().removeAllRanges();
-            }else if (document.selection) {
-              document.selection.empty();
-            }
-
-            if ("createEvent" in document) {
-              var evt = document.createEvent("HTMLEvents");
-              evt.initEvent("change", false, true);
-              $(priceBox).get(0).dispatchEvent(evt);
-            }
-            else {
-              current.fireEvent("onchange");
-            }
-          }
-        });
-    }
-
-    // So sánh voucher
-    function setEventCompareVoucher(){
-        $("#addVoucher").on("click", function(){
-            var i = 0;
-            var voucherBox = $(".voucher-box.root").eq(0).clone(true).removeClass("root").removeAttr("hidden");
-            $(".tp-container .content-layout table tbody").append(voucherBox);
-        })
-
-        $(".remove-voucher").on("click", function(){
-            $(this).parent().remove();
-        });
-
-        $(".tp-container .content-layout table tbody .voucher-box input").on("keyup", function(){
-            var cost = $(this).val();
-            cost = cost.split(",");
-            cost = cost.join("");
-            cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            $(this).val(cost);
-        });
-
-        $(".tp-container .content-layout .layout-tab #data").on("keyup", function(){
-            var cost = $(this).val();
-            cost = cost.split(",");
-            cost = cost.join("");
-            cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            $(this).val(cost);
-        });
-    }
-
-        function compareVoucher() {
-            const data = $(".tp-container .content-layout .layout-tab #data");
-            const arrayData = data.val().split("\n").map(x => parseInt(x.replace(/,/g, "").trim())).filter(x => !isNaN(x));
-            const voucherBoxes = $(".voucher-box").slice(1);
-
-            let headers = `<tr><th>Voucher</th>`;
-            arrayData.forEach(price => {
-                headers += `<th>${price.toLocaleString()}đ</th>`;
-            });
-            headers += `</tr>`;
-
-            let rows = ``;
-
-            voucherBoxes.each((index, el) => {
-                // Bỏ qua box đầu tiên nếu là template
-                if (index === 0) return;
-
-                const box = $(el);
-                const discount = parseInt(box.find(".discount-percent input").val().replace(/,/g, "")) || 0;
-                const discountType = box.find(".discount-percent select option:selected").index(); // 0 = %, 1 = ₫
-                const maxDiscount = parseInt(box.find(".max-discount input").val().replace(/,/g, "")) || 0;
-                const conditionDeal = parseInt(box.find(".condition-deal input").val().replace(/,/g, "")) || 0;
-
-                let voucherText = `Giảm ${discount}${discountType === 0 ? "%" : "đ"}`;
-                if (maxDiscount) voucherText += `, tối đa ${maxDiscount.toLocaleString()}đ`;
-                if (conditionDeal) voucherText += `, đơn từ ${conditionDeal.toLocaleString()}đ`;
-
-                let row = `<tr><td>${voucherText}</td>`;
-
-                arrayData.forEach(price => {
-                    if (price < conditionDeal) {
-                        row += `<td style="color: red;">Không đủ điều kiện</td>`;
-                    } else {
-                        let discountPrice = 0;
-                        if (discountType === 0) {
-                            discountPrice = price * (discount / 100);
-                        } else {
-                            discountPrice = discount;
-                        }
-
-                        if (maxDiscount > 0) discountPrice = Math.min(discountPrice, maxDiscount);
-                        let finalPrice = price - discountPrice;
-
-                        row += `<td>-${discountPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}đ<br>(còn ${finalPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')})</td>`;
-                    }
-                });
-
-                row += `</tr>`;
-                rows += row;
-            });
-
-            const table = `
-            <table style="
-                border-collapse: collapse;
-                width: 100%;
-                font-family: Arial, sans-serif;
-                text-align: center;
-                background: #fff;
-            ">
-                <thead style="background: #f0f0f0;">
-                    ${headers}
-                </thead>
-                <tbody>
-                    ${rows}
-                </tbody>
-            </table>`;
-
-            // In ra bảng (bạn có thể dùng .html() nếu có container hiển thị)
-            boxPopup(table);
-        }
-
-
-        // Sửa giá của đăng ký chương trinh shopee
-        function giaDuoiChuongTrinhShopee(){
-
-      var box = $(".eds-react-table-container table.src-components-ProductTable-VirtualTable---vBody--2QBA6 tbody > div");
-
-      $.each(box, (index, value) => {
-                var parent = box.eq(index).find("tr.src-components-ProductTable-VirtualTable---vExpandedRow--375Xg table tbody.eds-react-table-tbody > tr");
-        $.each(parent, (index, value) => {
-                    if(parent.eq(index).is(".eds-react-table-row-selected")){
-                        //var checkBox = parent.eq(index).find("td").eq(0).find("label");
-                        var id = parent.eq(index).find("td").eq(1).find("div.src-components-ProductTable-VariationCol---variationCol--2pxe1 > div").eq(0);
-                        var name = parent.eq(index).find("td").eq(1).find("div.src-components-ProductTable-VariationCol---variationCol--2pxe1 > div").eq(1);
-                        var currentPrice = parent.eq(index).find("td").eq(5);
-                        var price = parent.eq(index).find("td").eq(2).find("input");
-
-                        var gia = currentPrice.text().replace("₫", "");
-                        gia = gia.replace(".", "");
-
-                        var giaKM = tachGia(gia).giaDuoi;
-
-                        var discountType = $('input[name="discount-type"]:checked');
-
-                        if(discountType.length > 0){
-                            var type = discountType.eq(0).attr("id");
-
-                            var giaGiam = $(`input[id="tp-discount"]`).val().length > 0 ? $(`input[id="tp-discount"]`).val() : 0;
-
-                            giaGiam = parseInt(giaGiam);
-
-
-                            if(type == "money"){
-                                giaKM -= giaGiam
-                            }else if(type == "percent"){
-                                giaKM *= (100 - giaGiam) / 100;
-                            }
-                        }
-
-                        giaKM = giaKM.toString().split("");
-                        giaKM[giaKM.length - 1] = "1";
-                        giaKM = giaKM.join();
-
-
-                        clearReactInput(price);
-                        simulateReactInput(price, giaKM);
-                    }
-        });
-            });
-        }
-
-        // Thêm giá theo SKU lazada
-        function setEventThemGiaTheoSKULazada(){
-            setEventTabTextarea();
-        };
-
-        function themGiaTheoSKULazada(){
-            var data = $(".tp-container .content-layout .layout-tab #data");
-            var arrayData = data.val().split("\n").filter(i => i.trim() !== "");
-
-            var box = $(".next-table-body .next-table-row");
-            $.each(arrayData, (index, value) => {
-                var data = value.split("\t");
-
-                var parentSku = data[0];
-                var parentGia = data[1];
-
-                $.each(box, (index, value) => {
-                    var sku = box.eq(index).find(".next-table-cell.SellerSku input");
-                    var price = box.eq(index).find(".next-table-cell.price input");
-
-
-                    if(sku.val().includes(parentSku)){
-                        simulateReactInput(price, parentGia);
-                    }
-                })
-            });
-        }
-
-        // Chức năng xem sản phẩm giao diện người mua
-        function setPreviewLink(){
-            var attempts = 0;
-            var maxAttempts = 20;
-            var interval = setInterval(function () {
-                if (!$(".preview-card").length) {
-                  if (++attempts >= maxAttempts) clearInterval(interval);
-                  return;
-                }else
-                    clearInterval(interval);
-
-                var html = document.documentElement.innerHTML;
-                var itemMatch = window.location.pathname.match(/\/product\/(\d+)/);
-                var shopMatch = html.match(/"shopid":(\d+)/);
-
-                if (itemMatch && shopMatch) {
-                    var itemid = itemMatch[1];
-                    var shopid = shopMatch[1];
-                    //var productURL = "https://shopee.vn/product/" + shopid + "/" + itemid;
-                    var card = $(".preview-card");
-                    var title = card.find(".preview-card-title");
-
-                    var boxName = $(".product-edit-form-item.custom-len-calc-input");
-                    var productName = boxName.find("input").val();
-                    productName = (productName.split(" ")).join("-");
-
-                    var url = `https://shopee.vn/${productName}-i.${shopid}.${itemid}`;
-
-                    var link = $("<a></a>");
-                    link.attr({
-                        "href": url,
-                        "target": "_bank"
-                    });
-                    link.text("Xem Trước").css("color", "crimson");
-
-                    title.empty().append(link);
-                }
-            },500);
-        }
-
-        // Kiểm tra tồn Sapo
-        function setEventKiemTraTonSapo(){
-            setEventTabTextarea();
-        }
-        function kiemTraTonSapo() {
-            var data = $(".tp-container .content-layout .layout-tab #data");
-            var arrayData = data.val().split("\n").filter(i => i.trim() !== "");
-
-            var currentPos = 0;
-
-            var listCanSell = [];
-
-            function searchData() {
-            if (currentPos >= arrayData.length) return;
-
-            var searchBox = $(".MuiBox-root input").eq(0);
-            if (!searchBox.length) {
-              console.warn("Không tìm thấy ô tìm kiếm.");
-              return;
-            }
-
-            var keyword = arrayData[currentPos];
-            searchBox.focus();
-            searchBox.val(arrayData[currentPos]);
-            searchBox.val(arrayData[currentPos]);
-            searchBox.attr("value", arrayData[currentPos]);
-            searchBox.trigger("change");
-            searchBox.blur();
-
-            boxLogging(`Đang kiểm tra: ${keyword}`, [`Đang kiểm tra: ${keyword}`], ["orange"]);
-
-            let retryCount = 0;
-
-            let checkReady = setInterval(() => {
-              let box = $(".sc-dWZqqJ.dRUZhp").eq(1);
-              let item = box.find("tbody tr");
-
-              if (item.length > 0 || retryCount >= 20) { // Chờ tối đa ~4s (20 x 200ms)
-                clearInterval(checkReady);
-
-                if (item.length === 0) {
-                  boxLogging("Không tìm thấy dữ liệu.", ["Không tìm thấy dữ liệu"], ["crimson"]);
-                } else {
-                  item.each((index, value) => {
-                    let name = $(value).find("td.sc-knuQbY").eq(2).find("p a");
-                    let sku = $(value).find("td.sc-knuQbY").eq(4).find("p");
-                    let canSell = $(value).find("td.sc-knuQbY").eq(5).find("p").eq(0);
-                    let storage = $(value).find("td.sc-knuQbY").eq(6).find("p").eq(0);
-
-                    let kq = parseInt(canSell.text()) > 0 ? "Có thể bán" : "Không có tồn";
-
-                    if(parseInt(canSell.text()) > 0)
-                        listCanSell.push(sku);
-
-                    boxLogging(`${name.text()} ${sku.text()} ${canSell.text()}/${storage.text()}`);
-                    boxLogging(kq, [kq], [kq === "Có thể bán" ? "lightgreen" : "crimson"]);
-                  });
-                }
-
-                currentPos++;
-                setTimeout(searchData, 500); // Chờ 0.5s rồi tiếp
-              }
-
-              retryCount++;
-            }, 200); // Kiểm tra mỗi 200ms
-            }
-
-            searchData();
-        }
-
-
-        // Tách file excel
-        async function splitExcelFile() {
-            var input = document.getElementById("fileInput");
-            var rowsPerFile = parseInt(document.getElementById("rowsPerFile").value);
-            var rowsToPreserve = parseInt(document.getElementById("rowsToPreserve").value);
-
-            if (!input.files.length) {
-                alert("Vui lòng chọn file Excel.");
-                return;
-            }
-
-            var file = input.files[0];
-            var buffer = await file.arrayBuffer();
-
-            var workbook = new ExcelJS.Workbook();
-            await workbook.xlsx.load(buffer);
-
-            var originalSheet = workbook.worksheets[0];
-            var totalRows = originalSheet.rowCount;
-
-            var zip = new JSZip();
-            var headerRows = [];
-            for (var i = 1; i <= rowsToPreserve; i++) {
-                headerRows.push(originalSheet.getRow(i));
-            }
-
-            var chunkIndex = 1;
-            for (i = rowsToPreserve + 1; i <= totalRows; i += rowsPerFile) {
-                var newWorkbook = new ExcelJS.Workbook();
-                var newSheet = newWorkbook.addWorksheet("Sheet1");
-
-                // Copy header
-                for (var h = 0; h < headerRows.length; h++) {
-                  copyRow(headerRows[h], newSheet.getRow(h + 1));
-                }
-
-                // Copy data chunk
-                var chunkEnd = Math.min(i + rowsPerFile - 1, totalRows);
-                var rowIndex = rowsToPreserve + 1;
-
-                for (var j = i; j <= chunkEnd; j++) {
-                  var originalRow = originalSheet.getRow(j);
-                  var newRow = newSheet.getRow(rowIndex++);
-                  copyRow(originalRow, newRow);
-                }
-
-                // Copy merged cells (chỉ phần header)
-                if (originalSheet._merges) {
-                  Object.keys(originalSheet._merges).forEach((mergeRange) => {
-                    const [startRow] = mergeRange.match(/\d+/g).map(Number);
-                    if (startRow <= rowsToPreserve) {
-                      newSheet.mergeCells(mergeRange);
-                    }
-                  });
-                }
-
-                var xlsxBuffer = await newWorkbook.xlsx.writeBuffer();
-                zip.file(`part_${chunkIndex++}.xlsx`, xlsxBuffer);
-            }
-
-            zip.generateAsync({ type: "blob" }).then(function (content) {
-                saveAs(content, "splitted_excel.zip");
-            });
-        }
-
-        function copyRow(sourceRow, targetRow) {
-          targetRow.height = sourceRow.height;
-
-          // Kiểm tra xem dòng có bị ẩn không và ẩn nó lại trong sheet mới
-          if (sourceRow.hidden) {
-            targetRow.hidden = true;
-          }
-
-          sourceRow.eachCell({ includeEmpty: true }, function (cell, colNumber) {
-            var targetCell = targetRow.getCell(colNumber);
-            targetCell.value = cell.value;
-
-            // Deep clone style
-            targetCell.style = JSON.parse(JSON.stringify(cell.style || {}));
-
-            if (cell.master && cell !== cell.master) {
-              targetCell.value = cell.master.value;
-            }
-          });
-        }
-
-    // Kiểm tra 5 lần giá đuôi
-    function kTr5LanGiaShopee(){
-      var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
-            var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
-      var maxPrice = 0, minPrice = 0, min, maxSku, minSku, maxPos;
-      var listSku = [], listPrice = [];
-      var error = false;
-            var first = 0;
-      box.css("background", "transparent");
-            boxLeft.css("background", "transparent");
-      for(var i = 0; i < box.length; i++){
-                var name = boxLeft.eq(i).find(".table-cell").eq(0);
-                var nameProduct = name.contents()
-                    .filter(function() {
-                        return this.nodeType === 3; // chỉ lấy text thuần
-                    })[0]?.nodeValue.trim();
-        var price = box.eq(i).find(".table-cell").eq(0).find("input");
-        var sku = box.eq(i).find(".table-cell").eq(2).find("textarea");
-
-                if("x0".includes(sku.val().trim())){
-                    boxLogging(`Đã bỏ qua sản phẩm ${nameProduct}`, [`${nameProduct}`], ["pink"]);
-                    box.eq(i).css("background", "pink");
-                    boxLeft.eq(i).css("background", "pink");
-                   continue;
-                }
-                if(first == 0){
-                    minPrice = tachGia(price.val()).giaDuoi;
-                    minSku = sku.val();
-                    first = 1;
-                    continue;
-                }
-
-                if(parseInt(tachGia(price.val()).giaDuoi) == 0){
-                    boxLogging(`Sản phẩm ${nameProduct} chưa có giá đuôi!`, [`${nameProduct}`], [`crimson`])
-                    box.eq(i).css("background", "crimson");
-                    boxLeft.eq(i).css("background","crimson");
-                    continue;
-                }
-
-                if(minPrice > parseInt(tachGia(price.val()).giaDuoi) && parseInt(tachGia(price.val()).giaDuoi) > 0){
-                    i = 0;
-                    minPrice = tachGia(price.val()).giaDuoi;
-                    minSku = sku.val();
-                    box.css("background", "transparent");
-                    boxLeft.css("background", "transparent");
-                    listSku = [];
-                    listPrice = [];
-                    continue;
-                }
-
-        maxPrice = minPrice * 5;
-
-                if(maxPrice < price.val()){
-                    box.eq(i).css("background" , "orange");
-                    boxLeft.eq(i).css("background", "orange");
-                    listSku.push(sku.val());
-                    listPrice.push(price.val());
-                }
-
-                var arr = listPrice;
-
-                const maxIndex = arr.reduce((maxIdx, currentVal, currentIdx, array) => {
-                    return currentVal > array[maxIdx] ? currentIdx : maxIdx;
-                }, 0);
-
-                maxPrice = listPrice[maxIndex];
-                min = minPrice;
-                maxSku = listSku[maxIndex];
-      }
-
-            if(listPrice.length > 0 && listSku.length > 0){
-                $(".tp-container .content .content-layout .layout-tab span#maxPrice").text(maxPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ','));
-                $(".tp-container .content .content-layout .layout-tab span#maxSku").text(maxSku);
-            }
-            $(".tp-container .content .content-layout .layout-tab span#minPrice").text(min.replace(/\B(?=(\d{3})+(?!\d))/g, ','));
-            $(".tp-container .content .content-layout .layout-tab span#minSku").text(minSku);
-            $(".tp-container .content .content-layout .layout-tab span#suggestPrice").text((parseInt(min) * 5).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
-
-      //listSku = [...listSku.reduce((map, item) => map.set(item, true), new Map()).keys()];
-      //listPrice = [...listPrice.reduce((map, item) => map.set(item, true), new Map()).keys()];
-
-      $.each(listSku, (index, value) => {
-        boxLogging(`${listSku[index]} bị 5 lần giá đuôi ${listPrice[index]}`, [`${listSku[index]}`, `${listPrice[index]}`], ["orange", "lightgreen"]);
-      });
-
-      if(!error){
-        boxLogging(`Không bị 5 lần giá`, [`Không bị 5 lần giá`], ["green"]);
-      }
-    }
-
-    function setEventKtra5LanGiaShopee(){
-      $("input#max-price").on("keyup", function (e) {
-        var cost = $("input#max-price").val();
-        cost = cost.split(",");
-        cost = cost.join("");
-        cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        $("#cost").val(cost);
-        tinhGiaBanShopee();
-      });
-      $("input#min-price").on("keyup", function (e) {
-        var cost = $("input#max-price").val();
-        cost = cost.split(",");
-        cost = cost.join("");
-        cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        $("#cost").val(cost);
-        tinhGiaBanShopee();
-      });
-    }
-
-    // Tách giá
-    function tachGia(price){
-      var gia = price.toString().replace(",", "");
-      gia = gia.replace(".", "");
-      gia = gia.trim();
-      //boxAlert(gia);
-      var mid = Math.ceil(gia.length / 2);
-      var du = Math.floor(gia.length % 2);
-
-      var giaDau = gia.slice(0, mid - du);
-      var giaDuoi = gia.slice(mid - du);
-
-      var lastDau = parseInt(giaDau);
-      var lastDuoi = parseInt(giaDuoi);
-
-      giaDau = lastDau.toString().padEnd(gia.length, "0");
-      giaDuoi = lastDuoi.toString().padEnd(gia.length, "0");
-      while(parseInt(giaDau) < parseInt(giaDuoi) && giaDau.length <= giaDau.length){
-        giaDuoi = giaDuoi.split("");
-        giaDuoi.pop();
-        giaDuoi = giaDuoi.join("");
-      }
-
-      var giaCuoi = giaDuoi;
-
-      //giaDau = giaDau.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      //giaDuoi = giaDuoi.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-      //gia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-      //boxAlert(giaDuoi);
-      //boxLogging(`Giá Gốc ${gia} => Giá Đuôi ${giaDuoi}`, [`${gia}`, `${giaDuoi}`], ["green", "yellow"]);
-
-      return {gia, giaDau, giaDuoi};
-
-
-    }
-
-    /*suaGiaDuoi(3522390);
-    suaGiaDuoi(3525390);
-    suaGiaDuoi(3525039);
-    suaGiaDuoi(3522039);
-    suaGiaDuoi(100069);
-    suaGiaDuoi(140089);
-    suaGiaDuoi(70061);*/
-
-    // Cập nhật giá đuôi sàn cam
-    function giaDuoiShopee(){
-
-      var box = $(".discount-item-component");
-
-      $.each(box, (index, value) => {
-        var parent = box.eq(index).find(".discount-edit-item-model-list .discount-edit-item-model-component");
-        $.each(parent, (index, value) => {
-          var name = parent.eq(index).find(".item-content.item-variation .ellipsis-content.single");
-          var currentPrice = parent.eq(index).find(".item-content.item-price");
-          var price = parent.eq(index).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.currency-input input");
-          var percent = parent.eq(index).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.discount-input input");
-          var stock = parent.eq(index).find(".item-content.item-stock");
-          var switcher = parent.eq(index).find(".item-content.item-enable-disable .eds-switch.eds-switch--normal");
-
-
-          var gia = currentPrice.text().replace("₫", "");
-          gia = gia.replace(".", "");
-
-          var giaKM = tachGia(gia).giaDuoi;
-
-          if(!switcher.hasClass("eds-switch--disabled")){
-            if(!switcher.hasClass("eds-switch--open")){
-              parent.eq(index).css("background", "orange");
-              switcher.trigger("click").click();
-              boxLogging(`Có sản phẩm cần kiểm tra, vui lòng xem lại những sản phẩm được đánh dấu`, ["Có sản phẩm cần kiểm tra, vui lòng xem lại những sản phẩm được đánh dấu"], ["orange"]);
-            }
-
-            if(switcher.hasClass("eds-switch--open")){
-              if(parseInt(giaKM) <= 0){
-                parent.eq(index).css("background", "crimson");
-                boxLogging(`Sản phẩm ${name.text()} không có giá đuôi, vui lòng kiểm tra những khung được đánh dấu`, [`${name.text()}`], ["crimson"]);
-              }else{
-                $(price).select();
-                $(price).val(giaKM);
-                $(price).focus();
-
-
-                if (window.getSelection) {
-                  window.getSelection().removeAllRanges();
-                }else if (document.selection) {
-                  document.selection.empty();
-                }
-
-                if ("createEvent" in document) {
-                  var evt = document.createEvent("HTMLEvents");
-                  evt.initEvent("change", false, true);
-                  $(price).get(0).dispatchEvent(evt);
-                }
-                else {
-                  $(price).get(0).fireEvent("onchange");
-                }
-
-                parent.eq(index).css("background", "green");
-              }
-            }
-          }
-        });
-      });
-
-      /*var tien = document.querySelectorAll(".currency-input .eds-input__input");
-      var phanTram = document.querySelectorAll(".discount-input .eds-input__input");
-
-      tien.forEach((current, index) => {
-        var parent = current.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement;
-        if(parent.querySelectorAll(".discount-item-selector input")[0].checked){
-          var gia = $(current).parent().parent().parent().parent().parent().parent().parent().parent().parent().find(".item-content.item-price").text();
-          gia = gia.replace("₫", "");
-          gia = gia.replace(".", "");
-          var giaKM = tachGia(gia).giaDuoi;
-          if(giaKM >= 0){
-            var phamTramGiam = (giaKM / gia) * 100;
-            current.select();
-            current.value = giaKM;
-
-            if (window.getSelection) {
-              window.getSelection().removeAllRanges();
-            }else if (document.selection) {
-              document.selection.empty();
-            }
-
-            if ("createEvent" in document) {
-              var evt = document.createEvent("HTMLEvents");
-              evt.initEvent("change", false, true);
-              current.dispatchEvent(evt);
-            }
-            else {
-              current.fireEvent("onchange");
-            }
-            $(parent).css("background", "green");
-
-
-          }else{
-            $(parent).css("background", "crimson");
-          }
-        }
-      });*/
-    }
-
-    // Gộp giá
-    function gopGia(beforePrice, afterPrice){
-        afterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        beforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-        var len = beforePrice.split(",").length;
-        var dong = 0, arrayTien = [], tienTruoc = 0, tienSau = 0;
-        arrayTien = beforePrice.split(",");
-        dong = arrayTien[arrayTien.length - 1];
-        for(var i = 0; i < arrayTien.length - 1; i++){
-          tienTruoc += arrayTien[i];
-        }
-
-        tienTruoc = parseInt(tienTruoc);
-        if(parseInt(dong) > 0)
-          tienTruoc += 1;
-
-        arrayTien = afterPrice.split(",");
-        dong = arrayTien[arrayTien.length - 1];
-        for(i = 0; i < arrayTien.length - 1; i++){
-          tienSau += arrayTien[i];
-        }
-
-        tienSau = parseInt(tienSau);
-        if(parseInt(dong) > 0)
-          tienSau += 1;
-
-        afterPrice = tienSau + "000";
-        beforePrice = tienTruoc + "000";
-
-        var arrayBefore = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
-        var arrayAfter = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
-
-        var lastPrice = [], giaDau, giaDuoi;
-
-        for(i = 0; i < arrayBefore.length - 1; i++){
-          giaDau += arrayBefore[i];
-        }
-
-        for(i = 0; i < arrayAfter.length - 1; i++){
-          giaDuoi += arrayAfter[i];
-        }
-
-        giaDau = giaDau.substring(9);
-        giaDuoi = giaDuoi.substring(9);
-
-        lastPrice = beforePrice.split("");
-
-        $.each(lastPrice, (index, value) => {
-          lastPrice[index] = 0;
-        })
-
-        var flagDau, flagCuoi;
-
-        $.each(giaDau.split(""), (index, value) => {
-          lastPrice[index] = giaDau[index];
-          flagDau = index;
-        })
-
-        $.each(giaDuoi.split(""), (index, value) => {
-          if(lastPrice.length - giaDuoi.length + index == flagDau){
-            lastPrice[flagDau - 1] = parseInt(lastPrice[flagDau - 1]) + 1;
-          }
-          lastPrice[lastPrice.length - giaDuoi.length + index] = giaDuoi[index];
-        })
-
-        lastPrice = lastPrice.join("");
-
-        return lastPrice;
-    }
-
-    // Tính giá bán sàn cam
-    function tinhGiaBanShopee(){
-      var cost = $("#cost").val().split(",");
-      cost = cost.join("");
-      var afterPrice, beforePrice;
-      if(!cost == "" && cost.length > 0){
-        afterPrice = parseInt((cost / 0.45).toFixed(0));
-        beforePrice = afterPrice + parseInt((afterPrice * 0.3).toFixed(0));
-
-        afterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        beforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-
-        var len = beforePrice.split(",").length;
-        var dong = 0, arrayTien = [], tienTruoc = 0, tienSau = 0;
-        arrayTien = beforePrice.split(",");
-        dong = arrayTien[arrayTien.length - 1];
-        for(var i = 0; i < arrayTien.length - 1; i++){
-          tienTruoc += arrayTien[i];
-        }
-
-        tienTruoc = parseInt(tienTruoc);
-        if(parseInt(dong) > 0)
-          tienTruoc += 1;
-
-        arrayTien = afterPrice.split(",");
-        dong = arrayTien[arrayTien.length - 1];
-        for(i = 0; i < arrayTien.length - 1; i++){
-          tienSau += arrayTien[i];
-        }
-
-        tienSau = parseInt(tienSau);
-        if(parseInt(dong) > 0)
-          tienSau += 1;
-
-        afterPrice = tienSau + "000";
-        beforePrice = tienTruoc + "000";
-
-        $("#after-price").text(afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
-        $("#before-price").text(beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','));
-
-        var arrayBefore = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
-        var arrayAfter = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
-
-        var lastPrice = [], giaDau, giaDuoi;
-
-        for(i = 0; i < arrayBefore.length - 1; i++){
-          giaDau += arrayBefore[i];
-        }
-
-        for(i = 0; i < arrayAfter.length - 1; i++){
-          giaDuoi += arrayAfter[i];
-        }
-
-        giaDau = giaDau.substring(9);
-        giaDuoi = giaDuoi.substring(9);
-
-        lastPrice = beforePrice.split("");
-
-        $.each(lastPrice, (index, value) => {
-          lastPrice[index] = 0;
-        })
-
-        var flagDau, flagCuoi;
-
-        $.each(giaDau.split(""), (index, value) => {
-          lastPrice[index] = giaDau[index];
-          flagDau = index;
-        })
-
-        $.each(giaDuoi.split(""), (index, value) => {
-          if(lastPrice.length - giaDuoi.length + index == flagDau){
-            lastPrice[flagDau - 1] = parseInt(lastPrice[flagDau - 1]) + 1;
-          }
-          lastPrice[lastPrice.length - giaDuoi.length + index] = giaDuoi[index];
-        })
-
-        lastPrice = lastPrice.join("");
-        $("#last-price").text(lastPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(","));
-      }
-    }
-
-    function setEventTinhGiaBanShopee(){
-      $("#after-price").parent().on("click", function(){
-        navigator.clipboard.writeText($(this).find("span").text().replace(",", ""));
-      });
-      $("#before-price").parent().on("click", function(){
-        navigator.clipboard.writeText($(this).find("span").text().replace(",", ""));
-      });
-      $("#last-price").parent().on("click", function(){
-        navigator.clipboard.writeText($(this).find("span").text().replace(",", ""));
-      });
-
-      $("#cost").on("keyup", function (e) {
-        var cost = $("#cost").val();
-        cost = cost.split(",");
-        cost = cost.join("");
-        cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        $("#cost").val(cost);
-        tinhGiaBanShopee();
-      });
-    }
-
-    // Cập nhật giá đuôi Lazada
-    function giaDuoiLazada(){
-      var row = $(".next-table-row");
-      var price = [];
-
-      var i = 0;
-      $.each(row, (index, value) => {
-        var gia = $(value).find("input").val();
-        var giaKM = tachGia(gia).giaDuoi;
-                if($(value).find("td.special_price").has("button.next-btn").length > 0){
-                    if(parseInt(giaKM) == 0)
-                        giaKM = gia;
-                    price.push(giaKM);
-                    $(value).find("td.special_price button.next-btn").click();
-
-                    row.eq(index).css("background", "lightgreen");
-
-                    boxLogging(`Sản phẩm đã được cập nhất giá`, [`Sản phẩm đã được cập nhất giá`], ["lightgreen"]);
-                }
-      })
-
-            var balloon = $(".next-overlay-wrapper");
-
-            $.each(balloon, (index, value) => {
-                var inputPrice = balloon.eq(index).find(".next-balloon-content .next-input.next-medium input");
-                var buttonClick = balloon.eq(index).find(".action-wrapper button.next-btn.next-medium.next-btn-primary")
-
-
-                inputPrice.select();
-                inputPrice.attr("value", price[index]);
-
-                inputPrice.val(price[index]);
-
-                buttonClick.click();
-            });
-    }
-
-        function simulateReactEvent(input, type, options = {}) {
-            var el = input[0];
-
-            function pressKey(keyName) {
-                var keyMap = {
-                    enter:      { key: 'Enter', code: 'Enter' },
-                    tab:        { key: 'Tab', code: 'Tab' },
-                    escape:     { key: 'Escape', code: 'Escape' },
-                    arrowup:    { key: 'ArrowUp', code: 'ArrowUp' },
-                    arrowdown:  { key: 'ArrowDown', code: 'ArrowDown' },
-                    arrowleft:  { key: 'ArrowLeft', code: 'ArrowLeft' },
-                    arrowright: { key: 'ArrowRight', code: 'ArrowRight' }
-                };
-
-                var keyData = keyMap[keyName.toLowerCase()] || { key: keyName, code: keyName };
-
-                ['keydown', 'keypress', 'keyup'].forEach(eventType => {
-                    var event = new KeyboardEvent(eventType, {
-                        key: keyData.key,
-                        code: keyData.code,
-                        bubbles: true,
-                        cancelable: true
-                    });
-                    el.dispatchEvent(event);
-                });
-            }
-
-            // Nếu là phím đặc biệt → dùng hàm con
-            var knownKeys = ['enter', 'tab', 'escape', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
-            if (knownKeys.includes(type.toLowerCase())) {
-                pressKey(type);
-            }
-            // Nếu là sự kiện bàn phím tự do
-            else if (['keydown', 'keypress', 'keyup'].includes(type)) {
-                var event = new KeyboardEvent(type, {
-                    key: options.key || '',
-                    code: options.code || '',
-                    bubbles: true,
-                    cancelable: true
-                });
-                el.dispatchEvent(event);
-            }
-            // Các loại sự kiện khác (click, input, blur,...)
-            else {
-                event = new Event(type, { bubbles: true, cancelable: true });
-                el.dispatchEvent(event);
-            }
-        }
-
-        // Giả lập input file
-        function simulateReactInputFile(input) {
-            var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'files')?.set;
-            if (nativeInputValueSetter) {
-                nativeInputValueSetter.call(input, input.files);
-            }
-
-            // Trigger lại các sự kiện input và change để React có thể nhận diện sự thay đổi
-            var inputEvent = new Event('input', { bubbles: true });
-            var changeEvent = new Event('change', { bubbles: true });
-
-            input.dispatchEvent(inputEvent);
-            input.dispatchEvent(changeEvent);
-        }
-
-
-
-        // Giả lập xóa nội dung
-        function simulateClearing(inputElement, delay = 50, callback) {
-            let text = inputElement.val();
-            let index = text.length;
-
-            function deleteNext() {
-                if (index > 0) {
-                    inputElement.val(text.slice(0, --index)); // Xóa ký tự cuối cùng
-                    inputElement.trigger($.Event("keydown", { key: "Backspace", keyCode: 8 }));
-                    setTimeout(deleteNext, delay);
-                } else if (callback) {
-                    callback(); // Gọi callback sau khi xóa xong
-                }
-            }
-
-            deleteNext();
-        }
-
-        // Giả lập gõ nội dung
-        function simulateTyping(inputElement, text, event = "input", delay = 100, callback = null) {
-            let index = 0;
-
-            function typeNext() {
-                if (index < text.length) {
-                    let char = text[index];
-                    inputElement.val(inputElement.val() + char);
-                    inputElement.trigger($.Event(event, { key: char, keyCode: char.charCodeAt(0), bubbles: true }));
-                    inputElement.trigger($.Event(event, { key: char, keyCode: char.charCodeAt(0), bubbles: true }));
-                    index++;
-                    setTimeout(typeNext, delay);
-                } else {
-                    // Giả lập xóa khoảng trắng cuối cùng
-                    inputElement.trigger($.Event(event, { key: "Backspace", keyCode: 8, bubbles: true }));
-                    inputElement.trigger(event);
-                    inputElement.select();
-
-                    if (window.getSelection) {
-                        window.getSelection().removeAllRanges();
-                    }else if (document.selection) {
-                        document.selection.empty();
-                    }
-
-                    if ("createEvent" in document) {
-                        var evt = document.createEvent("HTMLEvents");
-                        evt.initEvent(event, false, true);
-                        $(inputElement).get(0).dispatchEvent(evt);
-                    }
-                    else {
-                        $(inputElement).get(0).fireEvent(`on${event}`);
-                    }
-
-                    if (typeof callback === "function") {
-                        callback();
-                    }
-                }
-            }
-
-            typeNext();
-        }
-
-        // Giả lập dán nội dung
-        function simulatePaste(inputElement, pastedText, event = "input", callback = null) {
-            // Đặt giá trị như người dùng dán
-            const el = inputElement[0];
-
-            // Gán trực tiếp thông qua setter gốc (để React nhận biết)
-            const nativeSetter = Object.getOwnPropertyDescriptor(el.__proto__, 'value')?.set;
-            nativeSetter ? nativeSetter.call(el, pastedText) : inputElement.val(pastedText);
-
-            // Tạo clipboardData giả để gửi sự kiện paste
-            const pasteEvent = new ClipboardEvent('paste', {
-                bubbles: true,
-                cancelable: true,
-                clipboardData: new DataTransfer()
-            });
-
-            pasteEvent.clipboardData.setData('text/plain', pastedText);
-
-            // Gửi sự kiện paste
-            el.dispatchEvent(pasteEvent);
-
-            // Gửi sự kiện input để đảm bảo state được cập nhật
-            el.dispatchEvent(new InputEvent(event, { bubbles: true }));
-
-            // Gửi sự kiện change nếu cần (để framework bắt được)
-            el.dispatchEvent(new Event('change', { bubbles: true }));
-
-            // Gọi callback nếu có
-            if (typeof callback === "function") {
-                callback();
-            }
-        }
-
-
-        // Thêm ký tự giới tính vào tên phân loại shopee
-        function setEventThemGioiTinhPhanLoaiShopee(){
-            setEventTabTextarea()
-        }
-
-        function themGioiTinhPhanLoaiShopee() {
-            var data = $(".tp-container .content-layout .layout-tab #data");
-            var arrayData = data.val().split("\n");
-
-            var charSex = [], nameProduct = [];
-
-            $.each(arrayData, (index, value) => {
-                charSex.push(value.slice(0, 1).trim());
-                nameProduct.push(value.slice(1).trim());
-            });
-
-            var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
-
-            $.each(box, (index, value) => {
-                var name = box.eq(index).find(".variation-input-item-container.variation-input-item input");
-
-                var pos = nameProduct.indexOf(name.val());
-                if (pos !== -1) {
-                    name.parent().click();
-                    name.focus();
-                    name.select();
-
-                    // **Xóa toàn bộ nội dung trước khi nhập lại**
-                    simulateClearing(name, 50, function () {
-                        let newValue = (`${charSex[pos]} ${nameProduct[pos]}`).trim();
-
-                        // Gọi hàm giả lập nhập từng ký tự
-                        simulateTyping(name, newValue);
-
-                        if (newValue.length > 20) {
-                            boxLogging(`${newValue} vượt quá ký tự (${newValue.length}/20)`, [`${newValue}`, `${newValue.length}/20`], ["orange", "crimson"]);
-                            name.css({
-                                "background": "crimson",
-                                "color": "#fff"
-                            });
-                        } else {
-                            boxLogging(`Đã sửa ${nameProduct[pos]} thành ${newValue}`, [`${nameProduct[pos]}`, `${newValue}`], ["orange", "yellow"]);
-                            name.css({
-                                "background": "lightgreen",
-                                "color": "#ff"
-                            });
-                        }
-                    });
-                }
-            });
-        }
-
-        // Thêm SKU theo tên phân loại shopee
-        function themSKUTheoPhanLoaiShopee(){
-            var data = $(".tp-container .content-layout .layout-tab #data");
-
-            var array = $(data).val().split("\n");
-
-            var arrayData = [], arraySku = [];
-
-            $.each(array, (index, value) => {
-                value = value.split("\t");
-                arrayData.push(value[0]);
-                arraySku.push(value[1]);
-            });
-
-            var currentPos = 0;
-            var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
-            var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
-
-      function writeValue(){
-                if(currentPos >= box.length){
-                    boxLogging(`Đã thêm SKU`, [`Đã thêm SKU`], ["green"]);
-                    return;
-                }
-
-                var name = boxLeft.eq(currentPos).find(".table-cell.first-variation-cell")
-                var nameProduct = name.contents()
-                    .filter(function() {
-                        return this.nodeType === 3; // chỉ lấy text thuần
-                    })[0]?.nodeValue.trim();
-                var skuBox = box.eq(currentPos).find(".table-cell").eq(2).find("textarea");
-                var priceBox = box.eq(currentPos).find(".table-cell").eq(0).find("input");
-
-
-                if(arrayData.includes(nameProduct)){
-                    var pos = arrayData.indexOf(nameProduct);
-                    skuBox.attr("modelValue", arraySku[pos]);
-                    skuBox.val(arraySku[pos]).trigger("input");
-
-                    if (window.getSelection) {
-                        window.getSelection().removeAllRanges();
-                    }else if (document.selection) {
-                        document.selection.empty();
-                    }
-
-                    if ("createEvent" in document) {
-                        var evt = document.createEvent("HTMLEvents");
-                        evt.initEvent("input", false, true);
-                        $(skuBox).get(0).dispatchEvent(evt);
-                    }
-                    else {
-                        $(skuBox).get(0).fireEvent("oninput");
-                    }
-                }
-
-                currentPos++;
-
-                setTimeout(writeValue, 10);
-            }
-            writeValue();
-        }
-
-    // Thêm phân loại shopee
-    function setEventThemPhanLoaiShopee(){
-      setEventTabTextarea();
-    }
-
-    function themPhanLoaiShopee(){
-      var group = $(".tp-container .content-layout .layout-tab #group").find("option:selected").index();
-      //var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
-      var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item");
-
-      var data = $(".tp-container .content-layout .layout-tab #data");
-      var array = data.val().split("\n");
-
-            var arrayData = [], arraySku = [];
-
-            $.each(array, (index, value) => {
-                value = value.split("\t");
-                arrayData.push(value[0]);
-                arraySku.push(value[1]);
-            });
-
-            var currentPos = 0;
-
-      function writeValue(){
-                if(currentPos >= arrayData.length){
-                    boxLogging(`Đã thêm phân loại, đang dò SKU...`, [`Đã thêm phân loại, đang dò SKU...`], ["orange"])
-                    themSKUTheoPhanLoaiShopee(data);
-                    return;
-                }
-
-                var inputBox = box.eq(box.length - 1).find("input").trigger("input");
-
-                inputBox.select();
-                inputBox.attr("modelValue", arrayData[currentPos]);
-                inputBox.val(arrayData[currentPos]);
-
-                if (window.getSelection) {
-                    window.getSelection().removeAllRanges();
-                }else if (document.selection) {
-                    document.selection.empty();
-                }
-
-                if ("createEvent" in document) {
-                    var evt = document.createEvent("HTMLEvents");
-                    evt.initEvent("input", false, true);
-                    $(inputBox).get(0).dispatchEvent(evt);
-                }
-                else {
-                    $(inputBox).get(0).fireEvent("oninput");
-                }
-
-                currentPos++;
-
-                setTimeout(writeValue, 500);
-            }
-            writeValue();
-    }
-
-    // Kéo Phân Loại shopee
-    function setEventKeoPhanLoaiShopee(){
-      $(".tp-container .content-layout .layout-tab button#get").on("click", () => {
-        boxAlert("Đang lấy danh sách phân loại");
-        boxLogging("Đang lấy danh sách phân loại");
-        layPhanLoaiShopee();
-      });
-      $(".tp-container .content-layout .layout-tab button#set").on("click", () => {
-        boxAlert("Đang cập nhật danh sách phân loại");
-        boxLogging("Đang cập nhật danh sách phân loại");
-        capNhatLoaiShopee();
-      });
-    }
-
-    function layPhanLoaiShopee(){
-      var group = $(".tp-container .content-layout .layout-tab #group").find("option:selected").index();
-      var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
-      $(".tp-container .content-layout .layout-tab").append($(`<ul class="option-sortable"></ul>`));
-
-      $(".tp-container .layout-tab .option-sortable").css({
-        "display": "flex",
-        "max-height": "30vh",
-        "max-width": "60vw",
-        "flex-wrap": "wrap",
-        "overflow": "scroll",
-        "justify-content": "space-around",
-      });
-
-      $(".tp-container .layout-tab .option-sortable .ui-state-default").css({
-        "width": "50%",
-        "background": "red",
-      });
-
-      $(".tp-container .layout-tab .option-sortable").sortable();
-
-      $(".tp-container .layout-tab .option-sortable").disableSelection();
-
-      $.each(box, (index, value) => {
-        var content = $(".tp-container .layout-tab .option-sortable");
-        content.append($(box).eq(index).clone());
-      });
-    }
-
-    function capNhatLoaiShopee(){
-      var group = $(".tp-container .content-layout .layout-tab #group").find("option:selected").index();
-      var box = $(".variation-edit-item.version-a").eq(group).find(".option-container");
-
-      var data = $(".tp-container .content-layout .layout-tab .option-sortable .options-item.drag-item");
-
-      $.each(data, (index, value) => {
-        box.append(value);
-      });
-    }
-
-    // Kiểm tra phân loại shopee
-    function setEventKtraPhanloaiShopee(){
-      setEventTabTextarea();
-    }
-
-    function kiemTraPhanLoaiShopee(){
-      var data = $(".tp-container .content-layout .layout-tab #data");
-      var arrayData = data.val().split("\n");
-
-      var regex = /(\d{1,2}\/\d{1,2})/;
-
-      var result = arrayData.filter(arrayData => !regex.test(arrayData));
-
-      arrayData = result
-
-
-      var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
-
-      var currentList = [];
-
-      $.each(box, (index, value) => {
-        var name = box.eq(index).find(".variation-input-item-container.variation-input-item input");
-        currentList.push(name.val());
-      });
-
-      var unique = arrayData.filter(item => !currentList.some(keyword => item.toLowerCase().includes(keyword.toLowerCase())));
-
-      if(unique.length > 0){
-        var ten = unique.join("\n");
-        navigator.clipboard.writeText(ten);
-        $.each(unique, (index, value) => {
-          boxLogging(`Phân loại bị thiếu trong link: ${value}`, [`${value}`], ["orange"]);
-        });
-      }else{
-        var mess = "Đã đủ sản phẩm trong danh sách";
-        boxLogging(`${mess}`, [`${mess}`], ["green"]);
-      }
-    }
-
-    // Kiểm tra giá chương trình khuyến mãi
-    function ktraGiaChuongTrinhKMLazada(){
-      var box = $(".next-table-row.next--table-row-level-1");
-      $.each(box, (index, value) => {
-        var clicker = box.eq(index).find("td .next-checkbox .next-checkbox-inner");
-        var name = box.eq(index).find("td[name='name'] .right-cell .product-title .product-title-text .two-line-clamp");
-        var currentPrice = box.eq(index).find("td[name='currentPrice'] .currency-text-scope .number-text-scope");
-        var suggestPrice = box.eq(index).find("td[name='suggestPrice'] div div span").eq(5);
-        var price = box.eq(index).find("td[name='suggestPrice'] div div input");
-        var data = $(".tp-container #group").text();
-
-        var lines = data.trim().split('\n');
-
-        var discounts = {};
-        lines.forEach(function(line) {
-          var parts = line.split(',');
-          var percentage = parts.shift().trim();
-          var keywords = parts.map(function(keyword) { return keyword.trim(); });
-          if (!discounts[percentage]) {
-          discounts[percentage] = [];
-          }
-          discounts[percentage] = discounts[percentage].concat(keywords);
-        });
-
-        for (const [discount, keywords] of Object.entries(discounts)) {
-          if (keywords.some(keyword => name.text().toLowerCase().includes(keyword.toLowerCase()))) {
-            var maxDiscount = parseInt(currentPrice.text().replace(",", "")) - (parseInt(currentPrice.text().replace(",", "")) * parseInt(discount) / 100);
-            var suggest = parseInt(suggestPrice.text().replace("<=", ""));
-            if(suggest >= maxDiscount){
-              box.eq(index).css("background", "#6eff9e");
-              return;
-            }else if(suggest + 2000 >= maxDiscount){
-              box.eq(index).css("background", "#ffbb00");
-              return;
-            }else{
-              clicker.click();
-              box.eq(index).css("background", "crimson");
-              return;
-            }
-          }else{
-            maxDiscount = parseInt(currentPrice.text().replace(",", "")) - (parseInt(currentPrice.text().replace(",", "")) * parseInt(discount) / 100);
-            suggest = parseInt(suggestPrice.text().replace("<=", ""));
-            if(suggest >= maxDiscount){
-              box.eq(index).css("background", "#6eff9e");
-              return;
-            }else if(suggest + 2000 >= maxDiscount){
-              box.eq(index).css("background", "#ffbb00");
-              return;
-            }else{
-              clicker.click();
-              box.eq(index).css("background", "crimson");
-              return;
-            }
-          }
-        }
-      });
-    }
-
-    // Tám chuyện với AI
-    function setEventAiReq(){
-      $(".user-input button").on("click", function(e){
-        var req = $("#ai-req-content").val();
-        //aiChat(ques);
-        sendMess("user", req);
-        sendMess("bot", "Tèo vẫn đang được phát triển, mọi người đợi Tèo vài bữa nghen <3 <|:>");
-      });
-
-      $("#ai-req-content").on("keyup", function(e){
-        if (e.keyCode == 13) {
-          var req = $(this).val();
-          sendMess("user", req);
-          sendMess("bot", "Tèo vẫn đang được phát triển, mọi người đợi Tèo vài bữa nghen <3 <|:>");
-        }
-      });
-    }
-
-    function sendMess(role, content){
-      $("#ai-req-content").val("");
-      $(".respon-content").animate({ scrollTop: $(document).height() }, 1000);
-      if(!content.length <= 0){
-        switch (role){
-          case "user":
-            $(".respon-content").append($("<p></p>").addClass("user-chat").text(content).css({
-              "width": "auto",
-              "max-width": "70%",
-              "height": "auto",
-              "max-height": "30vh",
-              "margin-right": "5%",
-              "float": "right",
-              "clear": "both",
-              "background": "pink",
-              "padding": "0.5vh 1vw",
-              "border-radius": "100px",
-            }));
-            break;
-          case "bot":
-            $(".respon-content").append($("<p></p>").addClass("bot-chat").text(content).css({
-              "width": "auto",
-              "max-width": "70%",
-              "height": "auto",
-              "max-height": "30vh",
-              "margin-left": "5%",
-              "float": "left",
-              "clear": "both",
-              "background": "#a3a3a3",
-              "padding": "0.5vh 1vw",
-              "border-radius": "100px",
-            }));
-            break;
-        }
-      }
-    }
-
-    function aiChat(question){
-      var chatGPTKey = "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";
-      $.ajax({
-        url: "https://api.openai.com/v1/chat/completions",
-        type: "POST",
-        beforeSend: function(xhr) {
-          xhr.setRequestHeader("Authorization", "Bearer " + chatGPTKey);
-          xhr.setRequestHeader("Content-Type", "application/json");
-          xhr.setRequestHeader("Content-Security-Policy", "connect-src 'self' https://api.openai.com typesense.jquery.com");
-        },
-        data: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [{ role: "user", content: question }]
-        }),
-        success: function(response) {
-          // Handle successful response here
-          $(".response-content").append($(`<p class="user-chat">${response}</p>`));
-        },
-        error: function(error) {
-          // Handle error here
-          console.error(error);
-        }
-      });
-    }
-
-    // Sửa giá theo SKU Shopee
-    function setEventSuaGiaSKUShopee(){
-      setEventTabTextarea();
-    }
-
-    function suaGiaSKUShopee(...data){
-      if(data.length > 0){
-          return;
-      }
-      var data = $(".tp-container .content-layout .layout-tab #data");
-      var arrayData = data.val().split("\n");
-      $.each(arrayData, (index, value) => {
-        var listData = value.toString().split("\t");
-        var sku = listData[0];
-        var gia = listData[1];
-
-        var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
-
-        $.each(box, (index, value) => {
-          var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
-          var priceBox = box.eq(index).find(".table-cell").eq(0).find("input");
-
-          if(skuBox.val().includes(sku)){
-            var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            var gia1 = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-            boxAlert(`Giá của ${sku} đã sửa từ ${priceBox1} => ${gia1}`);
-            boxLogging(`Giá của ${sku} đã sửa từ ${priceBox1} thành ${gia1}`, [`${sku}`, `${priceBox1}`, `${gia1}`], ["crimson", "yellow", "yellow"]);
-
-            if(parseInt(priceBox.val()) < parseInt(gia)){
-              boxLogging(`SKU: ${sku} có giá mới cao hơn giá hiện tại`, [`${sku}`], ["crimson"]);
-              box.eq(index).css("background", "crimson");
-            }else
-              box.eq(index).css("background", "lightgreen");
-
-            priceBox.select();
-            priceBox.val(gia);
-
-            if (window.getSelection) {
-              window.getSelection().removeAllRanges();
-            }else if (document.selection) {
-              document.selection.empty();
-            }
-
-            if ("createEvent" in document) {
-              var evt = document.createEvent("HTMLEvents");
-              evt.initEvent("change", false, true);
-              $(priceBox).get(0).dispatchEvent(evt);
-            }
-            else {
-              current.fireEvent("onchange");
-            }
-          }
-        });
-      });
-    }
-
-        function simulateReactInput(input, text, delay) {
-            delay = delay || 100;
-            var el = input[0];
-            input.focus();
-
-            var i = 0;
-
-            function setNativeValue(element, value) {
-                var lastValue = element.value;
-                element.value = value;
-
-                // Gọi setter gốc nếu bị React override
-                var event = new Event('input', { bubbles: true });
-                var tracker = element._valueTracker;
-                if (tracker) tracker.setValue(lastValue);
-                    element.dispatchEvent(event);
-            }
-
-            function typeChar() {
-                if (i < text.length) {
-                  var newVal = input.val() + text[i];
-                  setNativeValue(el, newVal);
-                  i++;
-                  typeChar();
-                }
-            }
-
-            typeChar();
-        }
-
-        function clearReactInput(input) {
-            var el = input[0];
-
-            function setNativeValue(element, value) {
-                var lastValue = element.value;
-                element.value = value;
-
-                var event = new Event('input', { bubbles: true });
-                var tracker = element._valueTracker;
-                if (tracker) tracker.setValue(lastValue);
-                element.dispatchEvent(event);
-            }
-
-            input.focus();
-            setNativeValue(el, '');
-        }
-
-    // Cập nhật giá đuôi tiktok
-    function giaDuoiTiktok(){
-      var box = $(".theme-arco-table-content-inner .theme-arco-table-body").find("div div > div");
-
-      var countProduct = 0;
-      var currentProduct = 0;
-
-      $.each(box, (index, value) => {
-        if($(box).eq(index).hasClass("theme-arco-table-tr-custom-expand-row")){
-          // Số lượng phân loại
-          var checked = box.eq(index).find("div").find(".theme-arco-checkbox-mask").parent().parent();
-
-          if(checked.hasClass("theme-arco-checkbox-checked")){
-            var countProduct = box.eq(index).find("div").eq(39).find(".p-12").text();
-            countProduct = countProduct.match(/\d+/);
-          }
-        }else if($(box).eq(index).is(".theme-arco-table-tr, .theme-arco-table-row-custom-expand, .styled")){
-                    currentProduct += 1;
-                    var parent = $(box).eq(index);
-                    var name = parent.find(".theme-arco-table-td").eq(1).find("span");
-                    var currentPrice = parent.find(".theme-arco-table-td").eq(2).find("span p");
-                    var promotionPrice = parent.find(".theme-arco-table-td").eq(3).find("input");
-
-                    if(promotionPrice.length > 0){
-                        if(promotionPrice.val().length > 0)
-                            return;
-                        var gia = currentPrice.text().replace(",", "");
-                        gia = gia.replace(".", "");
-                        gia = gia.replace("₫", "");
-                        gia = tachGia(gia).giaDuoi;
-
-                        promotionPrice.select().focus();
-
-                        promotionPrice.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                        simulateReactInput(promotionPrice, gia);
-
-                        /*
-
-                        navigator.clipboard.writeText(gia);
-
-                        var pasteEvent = new $.Event('paste', {
-                            originalEvent: new ClipboardEvent('paste', {
-                                dataType: 'text/plain',
-                                data: gia
-                            })
-                        });
-
-                        // Giả lập sự kiện keydown (Nhấn Ctrl + V)
-                        var keydownEvent = new $.Event('keydowns', { ctrlKey: true, key: "v", keyCode: 86 });
-
-                        promotionPrice.select();
-                        promotionPrice.attr("aria-valuenow", gia);
-                        //promotionPrice.trigger(pasteEvent);
-                        //simulateTyping(promotionPrice, gia, "paste");
-                        promotionPrice.trigger(keydownEvent);
-                        //promotionPrice.val(gia);
-
-                        */
-                    }
-                }
-      });
-
-      /*
-
-      //var box = $(".theme-arco-table-body").find("div div");
-      var sp = $(box).find("div");3).find("input"));
-
-      var gia = sp.find("p");
-      var giaKM = sp.find("input");
-
-      var lastFocus = sp.find(".tp-change").length || 0;
-
-
-      if(giaKM.eq(lastFocus).val() == "0")
-        return;
-
-      gia = suaGiaDuoiTiktok(gia.eq(lastFocus).text());
-      giaKM.eq(lastFocus).val(gia).addClass("tp-change").select().attr("aria-valuenow", gia);
-
-      */
-    }
-
-    function suaGiaDuoiTiktok(price){
-      var gia = price;
-      gia = gia.replace("₫", "");
-      gia = gia.replace(".", "");
-      var arrayGia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
-      var giaDau;
-      var giaDuoi;
-      var flag;
-      if(parseInt(arrayGia[arrayGia.length - 1]) != 0){
-        for(var i = 0; i < arrayGia.length - 1; i++){
-          giaDau += arrayGia[i];
-        }
-        giaDau = giaDau.substring(9);
-        giaDau = giaDau.substring(0, giaDau.length - (arrayGia.length - 2))
-        for(i = 0; i <= gia.length; i++){
-          if(parseInt(gia.substring(i, 2)) == 0){
-            flag = i;
-            break;
-          }
-          giaDuoi = parseInt(gia.substring(giaDau.length)).toString();
-        }
-
-
-        while((giaDau).length < (gia).length){
-          giaDau = giaDau + "0";
-        }
-
-        while((giaDuoi).length < (gia).length){
-          giaDuoi = giaDuoi + "0";
-        }
-
-        while(parseInt(giaDau) < parseInt(giaDuoi)){
-          giaDuoi = giaDuoi.substring(0, giaDuoi.length - 1);
-        }
-      }
-      if(giaDuoi == undefined)
-        return -1;
-      return giaDuoi;
-    }
-
-    // Chia thời gian khuyến mãi
-    function tgFlashSaleTiktok(){
-      var frame = $("#frame-count").val();
-      var secDay = 86400;
-      var day = parseInt(secDay / frame);
-      var hours = parseInt(day / (60 * 60));
-      var startTime = 0, endTime = hours;
-      var setTime, stop = false;
-      var arrayTime = [];
-      $(".box-frame p").remove();
-      while(true){
-        setTime = startTime + " - " + endTime;
-        arrayTime.push(setTime);
-
-        startTime = endTime;
-        endTime += hours;
-        if(endTime >= 24){
-          endTime = 24;
-          arrayTime.push(startTime + "-" +endTime);
-          stop = true;
-        }
-
-        if(stop == true){
-          break;
-        }
-      }
-      $.each(arrayTime, (index, value) => {
-        var time = value.split("-"), startTime = time[0], endTime = time[1];
-        if(parseInt(startTime) < 10){
-          startTime = "0" + startTime;
-        }
-
-        if(parseInt(endTime) < 10){
-          endTime = "0" + parseInt(endTime);
-        }
-
-        $(".box-frame").append($("<p></p>").text(`Khung giờ bắt đầu từ ${startTime} kết thúc lúc ${endTime}`));
-      });
-    }
-
-    // Sắp xếp hình ảnh sản phẩm
-    function setEventSapXepAnhShopee(){
-      $(".layout-tab #getData").on("click", function(){
-        var parentBox = $(".image-manager-wrapper .shopee-image-manager:nth-child(1) .container");
-        var item = parentBox.find(".shopee-image-manager__itembox");
-        var phanLoai = $(".options-item.drag-item");
-        var len = item.length - phanLoai.length * 2 - 1
-        var imgList = [];
-        for(var i = 0; i < len; i++){
-          imgList.push(item.eq(i).find("img").attr("src"));
-        }
-        $(".img-list").find("*").remove();
-        $.each(imgList, (index, value) => {
-          $(".img-list").append(`
-          <div class="box-img" data-pos="${index}"><img src="${value}" /></div>
-          `);
-        });
-
-        var dataIn4 = $("div.image-manager-wrapper").attr("images-info");
-      });
-
-      $(".layout-tab #setData").on("click", function(){
-        var parentBox = $(".image-manager-wrapper .shopee-image-manager:nth-child(1) .container");
-        var item = parentBox.find(".shopee-image-manager__itembox");
-        var phanLoai = $(".options-item.drag-item");
-        var len = item.length - phanLoai.length * 2 - 1
-        var img = $(".layout-tab .box-img img");
-        var imgList = [];
-        var posList = [];
-        var box = $("div[data-v-145c0745].shopee-image-manager .container");
-        $.each(img, (index, value) => {
-          imgList.push(img.eq(index).attr("src"));
-          posList.push(img.eq(index).parent().attr("data-pos"));
-        });
-        box.find("*").remove();
-        $.each(posList, (index, value) => {
-          /*
-          document.querySelector("div[data-v-6101bd68].shopee-file-upload").dispatchEvent(new Event ("click", { bubble: true}));
-          $("div[data-v-6101bd68].shopee-file-upload").eq(0).find(".eds-upload input.eds-upload__input").trigger("click");
-          item.eq(index).find("img").attr("src", value);
-          */
-          box.append($(`
-          <div data-v-145c0745="" class="can-drag shopee-image-manager__itembox" data-draggable="true" style="width: 80px; max-width: 80px; height: 80px; max-height: 80px;">
-            <div data-v-452090d4="" data-v-145c0745="" class="popover-wrap"><div data-v-145c0745="" class="shopee-image-manager__content content-fill">
-              <img data-v-145c0745="" src="${imgList[value]}" class="shopee-image-manager__image">
-              <div data-v-145c0745="" class="shopee-image-manager__tools" style="display: none;">
-                <span data-v-145c0745="" class="shopee-image-manager__icon shopee-image-manager__icon--crop">
-                  <i data-v-ef5019c0="" data-v-145c0745="" class="eds-icon">
-                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 32 32" xml:space="preserve">
-                      <path d="M29.9,26.2h-2.8V7.9l3.2-3.2c0.4-0.4,0.4-1,0-1.4s-1-0.4-1.4,0l-3.1,3.1H7.7V4c0-0.6-0.4-1-1-1s-1,0.4-1,1v2.4H2.9 c-0.6,0-1,0.4-1,1s0.4,1,1,1h2.8v18.8c0,0.6,0.4,1,1,1h18.4v2.4c0,0.6,0.4,1,1,1s1-0.4,1-1v-2.4h2.8c0.6,0,1-0.4,1-1 S30.5,26.2,29.9,26.2z M23.8,8.4L7.7,24.5V8.4H23.8z M8.9,26.2L25.1,9.9v16.3H8.9z"></path>
-                    </svg>
-                  </i>
-                </span>
-                <span data-v-145c0745="" class="decollator"></span>
-                <span data-v-145c0745="" class="shopee-image-manager__icon shopee-image-manager__icon--delete">
-                  <i data-v-ef5019c0="" data-v-145c0745="" class="eds-icon">
-                    <svg viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g stroke-width="1" fill-rule="evenodd"><g fill-rule="nonzero"><g transform="translate(1.015625, 1.015625)"><path d="M13.5,2 L9.5,2 L9.5,1 C9.5,0.8640625 9.471875,0.73125 9.421875,0.6109375 C9.3453125,0.43125 9.21875,0.278125 9.059375,0.171875 C8.9796875,0.11875 8.890625,0.075 8.796875,0.0453125 C8.703125,0.015625 8.6015625,0 8.5,0 L5.5,0 C5.3640625,0 5.23125,0.028125 5.1109375,0.078125 C4.93125,0.1546875 4.778125,0.28125 4.671875,0.440625 C4.61875,0.5203125 4.575,0.609375 4.5453125,0.703125 C4.515625,0.796875 4.5,0.8984375 4.5,1 L4.5,2 L0.5,2 C0.2234375,2 0,2.2234375 0,2.5 C0,2.7765625 0.2234375,3 0.5,3 L1.5,3 L1.5,13 C1.5,13.1359375 1.528125,13.26875 1.578125,13.3890625 C1.6546875,13.56875 1.78125,13.721875 1.940625,13.828125 C2.0203125,13.88125 2.109375,13.925 2.203125,13.9546875 C2.296875,13.984375 2.3984375,14 2.5,14 L11.5,14 C11.6359375,14 11.76875,13.971875 11.8890625,13.921875 C12.06875,13.8453125 12.221875,13.71875 12.328125,13.559375 C12.38125,13.4796875 12.425,13.390625 12.4546875,13.296875 C12.484375,13.203125 12.5,13.1015625 12.5,13 L12.5,3 L13.5,3 C13.7765625,3 14,2.7765625 14,2.5 C14,2.2234375 13.7765625,2 13.5,2 Z M5.5,1 L8.5,1 L8.5,2 L5.5,2 L5.5,1 Z M11.5,13 L2.5,13 L2.5,3 L11.5,3 L11.5,13 Z"></path><path d="M4.5,11 C4.7765625,11 5,10.7765625 5,10.5 L5,6.5 C5,6.2234375 4.7765625,6 4.5,6 C4.2234375,6 4,6.2234375 4,6.5 L4,10.5 C4,10.7765625 4.2234375,11 4.5,11 Z"></path><path d="M7,11 C7.2765625,11 7.5,10.7765625 7.5,10.5 L7.5,5.5 C7.5,5.2234375 7.2765625,5 7,5 C6.7234375,5 6.5,5.2234375 6.5,5.5 L6.5,10.5 C6.5,10.7765625 6.7234375,11 7,11 Z"></path><path d="M9.5,11 C9.7765625,11 10,10.7765625 10,10.5 L10,6.5 C10,6.2234375 9.7765625,6 9.5,6 C9.2234375,6 9,6.2234375 9,6.5 L9,10.5 C9,10.7765625 9.2234375,11 9.5,11 Z"></path></g><path opacity="0" d="M0 0H16V16H0z"></path></g></g></svg>
-                  </i>
-                </span>
-              </div>
-              <div data-v-145c0745="" class="shopee-image-manager__tools flex-center" style="">
-                <span data-v-145c0745="" class="mandatory-icon">*</span>
-                <span data-v-145c0745="" class="shopee-image-manager__text">Ảnh bìa</span>
-              </div>
-            </div>
-          </div>
-        </div>
-          `));
-        });
-        $(".layout-tab").remove();
-      });
-
-      $(".layout-tab #cancelData").on("click", function(){
-        $(".layout-tab").remove();
-      });
-    }
-
-    // Lấy Key
-    function setEventAutobrowser(){
-      $("#getGeminiKey").on("click", () => {
-        navigator.clipboard.writeText(GEMINIKEY);
-      })
-    }
-
-        // Thêm ký tự ngẫu nhiên cho SKU lazada
-        function taoSkuMoi(skuGoc, soKyTu = 2) {
-            const kyTuNgauNhien = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            let them = '';
-            for (let i = 0; i < soKyTu; i++) {
-            them += kyTuNgauNhien.charAt(Math.floor(Math.random() * kyTuNgauNhien.length));
-            }
-            return skuGoc + them;
-        }
-
-    // Thêm phân loại Lazada
-        function themPhanLoaiLazada() {
-      var box = $(".sale-prop-body .next-formily-item").eq(0).find(".prop-option-list .next-form-item.form-item-prop-option-item");
-
-            var data = $(".tp-container .content-layout .layout-tab #data");
-            var array = data.val().split("\n");
-
-            var arrayData = [], arraySku = [];
-
-            $.each(array, (index, value) => {
-                value = value.split("\t");
-                arrayData.push(value[0]);
-                arraySku.push(value[1]);
-            });
-
-            var currentPos = 0;
-
-            function writeData() {
-                // lấy lại input mới nhất mỗi lần
-                var boxList = $(".sale-prop-body .next-formily-item").eq(0).find(".prop-option-list .next-form-item.form-item-prop-option-item");
-                var inputBox = boxList.eq(boxList.length - 1).find(".prop-option-item .item-textbox input");
-
-                if (!inputBox.length) {
-                    console.warn('Không tìm thấy input tại vị trí:', currentPos);
-                    return;
-                }
-
-                simulatePaste(inputBox, arrayData[currentPos], 0, () => {
-
-
-                    currentPos++;
-
-                    if (currentPos >= arrayData.length){
-                        boxLogging(`Đã thêm phân loại, đang thêm SKU`, [`Đã thêm phân loại, đang thêm SKU`], [`lightgreen`]);
-                        setTimeout(themSKUTheoPhanLoaiLazada,1000);
-                        return;
-                    }
-
-                    // chờ ô mới xuất hiện rồi tiếp tục
-                    setTimeout(writeData, 300); // tuỳ sàn, có thể tăng lên 500ms nếu render chậm
-                });
-
-                inputBox.blur(); // để kích hoạt sự kiện thêm ô mới
-            }
-
-            writeData();
-        }
-
-        // Thêm SKU theo tên phân loại lazada
-        function themSKUTheoPhanLoaiLazada(){
-            var data = $(".tp-container .content-layout .layout-tab #data");
-
-            var array = $(data).val().split("\n");
-
-            var arrayData = [], arraySku = [];
-
-            $.each(array, (index, value) => {
-                value = value.split("\t");
-                arrayData.push(value[0]);
-                arraySku.push(value[1]);
-            });
-
-
-            var currentPos = 0;
-            var box = $(".next-table-body .next-table-row");
-
-      function writeValue(){
-                if(currentPos >= box.length){
-                    boxLogging(`Đã thêm SKU`, [`Đã thêm SKU`], ["green"]);
-                    return;
-                }
-
-                var boxContent = box.eq(box.length - arrayData.length - 1 + currentPos);
-
-                var name = boxContent.find("td.next-table-cell.first span")
-                var nameProduct = name.contents()
-                    .filter(function() {
-                        return this.nodeType === 3; // chỉ lấy text thuần
-                    })[0]?.nodeValue.trim();
-                var skuBox = boxContent.find("td.next-table-cell.SellerSku input");
-                var priceBox = boxContent.find("td.next-table-cell.price input");
-                var quantity = boxContent.find("td.next-table-cell.quantity input");
-
-
-                if(arrayData.includes(nameProduct)){
-                    var pos = arrayData.indexOf(nameProduct);
-                    skuBox.attr("modelValue", arraySku[pos]);
-                    skuBox.val(arraySku[pos]).trigger("input");
-
-                    simulateReactInput(skuBox, taoSkuMoi(arraySku[pos], Math.floor(Math.random() * 4)) + 1);
-
-                    if (window.getSelection) {
-                        window.getSelection().removeAllRanges();
-                    }else if (document.selection) {
-                        document.selection.empty();
-                    }
-
-                    if ("createEvent" in document) {
-                        var evt = document.createEvent("HTMLEvents");
-                        evt.initEvent("input", false, true);
-                        $(skuBox).get(0).dispatchEvent(evt);
-                    }
-                    else {
-                        $(skuBox).get(0).fireEvent("oninput");
-                    }
-                }
-
-                currentPos++;
-
-                setTimeout(writeValue, 10);
-            }
-            writeValue();
-        }
-
-
-    // Tự động chọn gian hàng và sản phẩm Sapo
-    function setEventAutoSelectorStoreSapo(){
-      $(".hIhsai").on("click", function(){
-        var itemName = $(".current-item-selected .item-title").text();
-        localStorage.setItem("shopName", itemName);
-      });
-    }
-
-    function autoSelectStoreSapo(){
-      var shopName = localStorage.getItem("shopName");
-      if(shopName == null)
-        shopName = "Không có Dữ Liệu";
-      var itemName = navigator.clipboard.readText()
-        .then((text) => {
-          return text;
-        })
-
-      $("#sapo .shop-name").text(shopName);
-      $("#sapo .item-name").text(itemName);
-    }
-
-    function setEventKtraKhuyeMaiTiktok(){
-      $("#moDSSP").on("click", moDSSPTT);
-      $("#ktraKhuyenMai").on("click", ktraKhuyenMaiTiktok);
-    }
-
-    // Kiểm tra khuyến mãi tiktok
-    var productPerPageTT = 0;
-    function moDSSPTT(){
-      var sanpham = $(".expandContainer-qifQJp");
-      productPerPageTT = sanpham.length;
-      sanpham.trigger("click");
-      /*$.each(sanpham, (index, value) => {
-        sanpham.trigger("click");
-      });*/
-    }
-
-    var listProduct = [];
-    function ktraKhuyenMaiTiktok(){
-      var dsPhanLoai = $(".skuContainer-B4RoDW").has(".item-gEBAXO");
-      if(dsPhanLoai.length < productPerPageTT)
-        confirm(`Có sản phẩm chưa load xong, vui lòng đợi ${dsPhanLoai.length} / ${productPerPageTT}`);
-      else{
-        var sanpham = $(".core-table-row-expanded");
-        dsPhanLoai = $(".core-table-expand-content");
-
-        $.each(dsPhanLoai.find("div.item-gEBAXO"), (index, value) => {
-          if(!$(value).has(".salePrice-HkKDz1")){
-            var name = sanpham.eq(index).find(".content-Woa6mM").text();
-            var id = sanpham.eq(index).find(".product.manage.table.columns.id").text() + "\t";
-            listProduct.push(name);
-            listProduct.push(id);
-          };
-        });
-
-      }
-    }
-
-    function setEventTabTextarea(){
-      boxAlert("Gắn sự kiện nhấn tab cho textarea");
-      $(".tp-container .content-layout .layout-tab textarea").on("keydown", function(event){
-        if (event.keyCode === 9) { // keyCode 9 là mã ASCII của phím Tab
-          event.preventDefault();
-
-          const start = this.selectionStart;
-          const end = this.selectionEnd;
-
-          $(this).val($(this).val().substring(0, start) + '\t' + $(this).val().substring(end));
-
-          this.selectionStart = this.selectionEnd = start + 1;
-        }
-      })
-    }
-
-    // Sự kiện flash sale shopee
-    function setEventFlashSaleShopee(){
-      setEventTabTextarea();
-    }
-
-    // Bật flash sale shopee theo tên
-    function flashSaleShopee(){
-      var data = $("#flahsSaleName").val().split("\n");
-            var nameList = [], countList = [];
-      $.each(data, (index, value) => {
-        value = value.split("\t");
-        nameList.push(value[0]);
-        countList.push(value[1] || -1);
-            });
-
-            var container = $(".products-container-content form.product-table .table-card");
-
-            var choiceAll = container.parent().find(".shopee-fixed-top-card.product-fixed-header.edit-fixed-header label.eds-checkbox.item-selector").click().click();
-
-            $.each(container, (index, value) => {
-                var productBox = container.eq(index).find(".inner-rows .inner-row");
-                $.each(productBox, (index, value) => {
-                    productBox.eq(index).css({
-                        "background": "transparent",
-                        "color": "#000"
-                    });
-
-                    var productName = productBox.eq(index).find(".variation .ellipsis-content");
-                    var originalPrice = productBox.eq(index).find(".original-price");
-                    var currentcyPrice = productBox.eq(index).find(".currency-input input");
-                    var perPrice = productBox.eq(index).find(".discount-input input");
-                    var campaignStock = productBox.eq(index).find(".campaign-stock input");
-                    var currentStock = productBox.eq(index).find(".current-stock");
-                    var buttonSwitch = productBox.eq(index).find(".eds-switch.eds-switch--close.eds-switch--normal");
-
-                    var productText = productName.text()?.replace(/\s+/g, ' ').normalize("NFKC").trim().toLowerCase() || "";
-
-                    /*var pos = nameList.findIndex(item => item.replace(/\s+/g, ' ')
-                            .normalize("NFKC")
-                            .toLowerCase()
-                            .includes(productText.replace(/\s+/g, ' ').normalize("NFKC").toLowerCase())
-                    );*/
-
-                    var pos = -1;
-
-                    $.each(nameList, (index, value) => {
-                        if(productText.includes(value.toLowerCase()))
-                            pos = index;
-                    });
-
-                    if(pos != -1){
-                        var name = nameList[pos], count = countList[pos];
-
-                        /*var gia = originalPrice.text().replace("₫", "")
-                        gia = gia.replace(".", "");
-                        gia = parseInt(suaGiaDuoi(gia));
-
-                        if(gia >= 0){
-                            gia -= 1000;
-                            gia = gia.toString().split("");
-                            gia[gia.length - 1] = "1";
-                            gia = gia.join("");
-
-                            currentcyPrice.select();
-                            currentcyPrice.val(gia);
-                            currentcyPrice.attr("modelvalue", gia);
-
-                            if (window.getSelection) {
-                                window.getSelection().removeAllRanges();
-                            }else if (document.selection) {
-                                document.selection.empty();
-                            }
-
-                            if ("createEvent" in document) {
-                                var evt = document.createEvent("HTMLEvents");
-                                evt.initEvent("change", false, true);
-                                $(currentcyPrice).get(0).dispatchEvent(evt);
-                            }
-                            else {
-                                value.fireEvent("onchange");
-                            }
-                        }*/
-
-                        if(count == -1)
-                            count = parseInt(currentStock.text());
-
-                        if(parseInt(currentStock.text()) >= parseInt(count)){
-                            // Xử lý số lượng
-                            campaignStock.select();
-                            //let nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-                            //nativeInputValueSetter.call($(campaignStock).get(0), count);
-
-                            campaignStock.val(count);
-
-                            if (window.getSelection) {
-                                window.getSelection().removeAllRanges();
-                            }else if (document.selection) {
-                                document.selection.empty();
-                            }
-
-                            if ("createEvent" in document) {
-                                var evt = document.createEvent("HTMLEvents");
-                                evt.initEvent("change", false, true);
-                                $(campaignStock).get(0).dispatchEvent(evt);
-                            }
-                            else {
-                                value.fireEvent("onchange");
-                            }
-
-                            if(!buttonSwitch.hasClass("eds-switch--open")){
-                                buttonSwitch.click();
-                                buttonSwitch.parent().parent().parent().trigger("click");
-
-                                productBox.eq(index).find(".item-selector").trigger("click");
-                                productBox.eq(index).find(".item-selector input.eds-checkbox__input").val("true");
-                            }
-                        }
-
-                        boxLogging(`Đã chọn: ${productName.text()}\n\tGiá: ${originalPrice.text()}\n\tSố Lượng: ${count}/${campaignStock.val()}\n`, [`${productName.text()}`, `${originalPrice.text()}`, `${count}`, `${campaignStock.val()}`], ["crimson", "green", "blue", "blue"]);
-                    }else{
-                        boxLogging(`Sản phẩm ${productName.text()} không có trong danh sách`, [`${productName.text()}`], ["crimson"]);
-                    }
-                });
-            });
-
-            return;
-
-            $.each(container, (index, value) => {
-                var productBox = container.eq(index).find(".inner-rows .inner-row");
-                $.each(productBox, (index, value) => {
-                    productBox.eq(index).css({
-                        "background": "transparent",
-                        "color": "#000"
-                    });
-                    var productName = productBox.eq(index).find(".variation .ellipsis-content");
-                    var originalPrice = productBox.eq(index).find(".original-price");
-                    var currentcyPrice = productBox.eq(index).find(".currency-input input");
-                    var perPrice = productBox.eq(index).find(".discount-input input");
-                    var campaignStock = productBox.eq(index).find(".campaign-stock input");
-                    var currentStock = productBox.eq(index).find(".current-stock");
-                    var buttonSwitch = productBox.eq(index).find(".enable-disable .eds-switch");
-                    if($(productName).text().includes(name)){
-                        // Xử lý giá
-                        var gia = originalPrice.text().replace("₫", "")
-                        gia = gia.replace(".", "");
-                        gia = parseInt(tachGia(gia).giaDuoi);
-
-                        if(!gia <= 0){
-                            gia -= 1000;
-
-                            gia = gia.toString().split("");
-                            gia[gia.length - 1] = "1";
-                            gia = gia.join("");
-
-                            currentcyPrice.select();
-                            currentcyPrice.val(gia);
-                            currentcyPrice.attr("modelvalue", gia);
-                        }else{
-                            productBox.eq(index).css({
-                                "background": "crimson",
-                                "color": "#fff"
-                            });
-                        }
-
-                        if (window.getSelection) {
-                            window.getSelection().removeAllRanges();
-                        }else if (document.selection) {
-                            document.selection.empty();
-                        }
-
-                        if ("createEvent" in document) {
-                            var evt = document.createEvent("HTMLEvents");
-                            evt.initEvent("change", false, true);
-                            $(currentcyPrice).get(0).dispatchEvent(evt);
-                        }
-                        else {
-                            value.fireEvent("onchange");
-                        }
-
-                        if(count == -1)
-                            count = parseInt(currentStock.text());
-
-                        if(parseInt(currentStock.text()) >= parseInt(count)){
-                            // Xử lý số lượng
-                            campaignStock.select();
-                            //let nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-                            //nativeInputValueSetter.call($(campaignStock).get(0), count);
-                            campaignStock.val(count);
-                            campaignStock.attr("modelvalue", count);
-
-                            if (window.getSelection) {
-                                window.getSelection().removeAllRanges();
-                            }else if (document.selection) {
-                                document.selection.empty();
-                            }
-
-                            if ("createEvent" in document) {
-                                evt = document.createEvent("HTMLEvents");
-                                evt.initEvent("change", false, true);
-                                $(campaignStock).get(0).dispatchEvent(evt);
-                            }
-                            else {
-                                value.fireEvent("onchange");
-                            }
-
-                            // Xử lý chọn
-                            productBox.eq(index).find(".item-selector").trigger("click");
-                            productBox.eq(index).find(".item-selector input.eds-checkbox__input").val("true");
-
-                            boxLogging(`Đã chọn: ${$(productName).text()}\nt\tGiá: ${gia}\n\tSố Lượng: ${count}\n`, [`${$(productName).text()}`, `${gia}`, `${count}`], ["crimson", "green", "blue"]);
-                        }
-
-                        /*navigator.clipboard.writeText(`
-                        $.each($("input.changeValueTP"), (index, value) => {
-                            $(this).select();
-                            $("input.changeValueTP").eq(index).val($("input.changeValueTP").eq(index).attr("data-value-TP"));
-                            $(this).removeClass("changeValueTP");
-                            if (window.getSelection) {
-                                window.getSelection().removeAllRanges();
-                            }else if (document.selection) {
-                                document.selection.empty();
-                            }
-
-                            if ("createEvent" in document) {
-                                var evt = document.createEvent("HTMLEvents");
-                                evt.initEvent("change", false, true);
-                                value.dispatchEvent(evt);
-                            }
-                            else {
-                                value.fireEvent("onchange");
-                            }
-                        });
-                        `);*/
-                    }
-                })
-            });
-    }
+	'use strict';
+
+	// Trạng thái hiển thị của giao diện
+	var createUI = false;
+
+	// Phiên bản của chương trình
+	const VERSION = "2.0.0";
+
+	/*var Jqu = document.createElement("script");
+	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
+	Jqu.setAttribute("rel", "preload");
+	Jqu.setAttribute("async", "async");
+	document.head.appendChild(Jqu);
+
+	var JquUI = document.createElement("script");
+	JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
+	JquUI.setAttribute("rel", "preload");
+	document.head.appendChild(JquUI);*/
+
+	window.onload = function(){
+		// Danh sách thư viện cần thêm
+		const LIBRARIES = [
+			"https://code.jquery.com/jquery-3.7.1.min.js",
+			"https://code.jquery.com/ui/1.14.1/jquery-ui.js",
+			"https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js",
+			"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
+			"https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js",
+			"https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js",
+		];
+
+		const actionMap = {
+			// --- SHOPEE
+			"giaDuoiShopee": giaDuoiShopee,
+			"kTr5LanGiaShopee": kTr5LanGiaShopee,
+			"tinhGiaBanShopee": tinhGiaBanShopee,
+			"flashSaleShopee": flashSaleShopee,
+			"kiemTraMaPhanLoaiShopee": kiemTraMaPhanLoaiShopee,
+			"suaGiaSKUShopee": suaGiaSKUShopee,
+			"suaHinhSKUShopee": suaHinhSKUShopee,
+			"themKyTuPhanLoaiShopee": themKyTuPhanLoaiShopee,
+			// "kiemTraPhanLoaiShopee": kiemTraPhanLoaiShopee,
+			// "themPhanLoaiShopee": themPhanLoaiShopee,
+			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
+			// "comboKMShopee": comboKMShopee,
+			// "themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
+			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
+			// //"batKhuyenMaiShopee": batKhuyenMaiShopee,
+			// // --- TIKTOK
+			// "tgFlashSaleTiktok": tgFlashSaleTiktok,
+			// "giaDuoiTiktok": giaDuoiTiktok,
+			// "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
+			// // --- SAPO
+			// "kiemTraTonSapo": kiemTraTonSapo,
+			// // -- LAZADA
+			"giaDuoiLazada": giaDuoiLazada,
+			// "themPhanLoaiLazada": themPhanLoaiLazada,
+			// "themGiaTheoSKULazada": themGiaTheoSKULazada,
+			// "ktraGiaChuongTrinhKMLazada": ktraGiaChuongTrinhKMLazada,
+			// //-- KHÁC
+			// "splitExcelFile": splitExcelFile,
+			// "compareVoucher": compareVoucher,
+		};
+
+		// Thêm thư viện
+		function loadLibrary(scripts, callback){
+			let index = 0;
+
+			function loadNext(){
+				if (index >= scripts.length){
+					if (callback)
+						callback();
+					return;
+				}
+
+				let script = document.createElement("script");
+				script.src = scripts[index];
+
+				script.onload = () => {
+					boxAlert(`Đã thêm ${scripts[index]}`);
+					index++;
+					loadNext();
+				}
+
+				script.onerror = (e) => {
+					boxAlert(`Có lỗi khi thêm ${scripts[index]} (${e})`, "error");
+					index++;
+					loadNext();
+				}
+
+				document.head.appendChild(script);
+			}
+			loadNext();
+		}
+
+		// lấy nonce từ tag có sẵn trong trang
+		function getNonce(){
+			let nonce = $('script[nonce]').attr('nonce');
+
+			if (!nonce)
+				nonce = $('meta[http-equiv="Content-Security-Policy"]').attr('content')?.match(/nonce-([\w\d]+)/)?.[1] || '';
+
+			return nonce || '';
+		}
+
+		// Áp dụng nonce
+		function applyNonce() {
+			const nonce = getNonce();
+			if (!nonce) return console.warn('Không tìm thấy nonce');
+
+			// Style inline
+			$('style:not([nonce])').attr('nonce', nonce);
+
+			// Iframe
+			$('iframe:not([nonce])').attr('nonce', nonce);
+
+			// Script do tool tạo
+			$('script:not([nonce]):not([src])').attr('nonce', nonce);
+		}
+
+		// Giao diện nổi
+		function boxPopup(text, words = [], colors = []){
+			var log = $(".tp-popup .content");
+			log.parent().toggle("slow");
+			var data = log.empty().html();
+			if (words.length === 0) {
+				log.html(`${data}\n(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) <span style="color: black;">${text}</span>`);
+			} else {
+				// Create a copy to modify, otherwise replacements might interfere with later searches if words overlap
+				let modifiedText = text;
+				words.forEach((word, index) => {
+					// Escape the word BEFORE creating the RegExp
+					var escapedWord = escapeRegExp(word);
+					// Use the escaped word in the RegExp
+					var regex = new RegExp(`(${escapedWord})`, "gi");
+					// Perform replacement on the modifiedText
+					modifiedText = modifiedText.replace(regex, `<span style="color: ${colors[index]}; font-weight: bold;">$1</span>`);
+				});
+				// Set the final HTML
+				log.html(`${data}\n(${new Date().getHours()}:${new Date().getMinutes()}:${new Date().getSeconds()}) ${modifiedText}`);
+			}
+			log.scrollTop(log.prop("scrollHeight"));
+		}
+
+		// Nhấn để sao chép nội dung đã được đánh dấu
+		$("body").on("click", ".copyable", function(){
+			navigator.clipboard.writeText($(this).text().trim());
+			boxToast(`Đã sao chép nội dung <u>${$(this).text().trim()}`);
+		})
+
+		// Sự kiện nhấn tab cho textarea
+		waitForElement($("body"), ".tp-container.tp-content textarea", (el) => {
+			boxAlert("Đang theo dõi sự kiện nhấn tab của textarea")
+			$(el).on("keydown", function(event){
+				if (event.keyCode === 9) { // keyCode 9 là mã ASCII của phím Tab
+				event.preventDefault();
+
+				const start = this.selectionStart;
+				const end = this.selectionEnd;
+
+				$(this).val($(this).val().substring(0, start) + '\t' + $(this).val().substring(end));
+
+				this.selectionStart = this.selectionEnd = start + 1;
+				}
+			})
+		}, {once: false})
+
+		// Ghi log
+		function boxLogging(text, words = [], colors = []){
+			var log = $(".program-log pre.logging");
+			var data = log.html();
+			var now = new Date();
+			var h = now.getHours() < 10 ? "0" + now.getHours() : now.getHours();
+			var m = now.getMinutes() < 10 ? "0" + now.getMinutes() : now.getMinutes();
+			var s = now.getSeconds() < 10 ? "0" + now.getSeconds() : now.getSeconds();
+			var time = `${h}:${m}:${s}`;
+
+			// Tìm đoạn cần đánh dấu sao chép trong text: [copy]...[/copy]
+			text = text.replace(/\[copy\](.*?)\[\/copy\]/g, `<span class="copyable">$1</span>`);
+
+			if (words.length === 0) {
+				log.html(`${data}\n(${time}) <span style="color: black;">${text}</span>`);
+			} else {
+				// Create a copy to modify, otherwise replacements might interfere with later searches if words overlap
+				let modifiedText = text;
+				words.forEach((word, index) => {
+					// Escape the word BEFORE creating the RegExp
+					var escapedWord = escapeRegExp(word);
+					// Use the escaped word in the RegExp
+					var regex = new RegExp(`(${escapedWord})`, "gi");
+					// Perform replacement on the modifiedText
+					modifiedText = modifiedText.replace(regex, `<span style="color: ${colors[index]}; font-weight: bold;">$1</span>`);
+				});
+				// Set the final HTML
+				log.html(`${data}\n(${time}) ${modifiedText}`);
+			}
+			log.scrollTop(log.prop("scrollHeight"));
+
+			log.find(".title").on("click", () => {
+				log.parent().toggle();
+			})
+		}
+
+		function escapeRegExp(string) {
+			return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		}
+
+		// Ghi console log
+		function boxAlert(content, type = "log"){
+			switch(type){
+				case "log":
+					console.log(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: yellow; font-size: 1.5rem");
+				break;
+				case "error":
+					console.error(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: yellow; font-size: 1.5rem")
+				break;
+				case "warn":
+					console.warn(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: yellow; font-size: 1.5rem");
+				break;
+			}
+		}
+
+		// Tạo thông báo bằng taast
+		function boxToast(message, type = "info", duration = 3000) {
+			const toast = $(`<div class="toast ${type}">${message}</div>`);
+			$("#toast-container").append(toast);
+
+			// Bắt đầu animation
+			setTimeout(() => toast.addClass("show"), 10);
+
+			// Tự động ẩn
+			setTimeout(() => {
+				toast.removeClass("show");
+				setTimeout(() => toast.remove(), 300);
+			}, duration);
+		}
+
+		// Hàm giả lập thao tác người dùng
+		function simulateReactEvent(input, type, options = {}) {
+			var el = input[0];
+
+			function pressKey(keyName) {
+				var keyMap = {
+					enter:      { key: 'Enter', code: 'Enter' },
+					tab:        { key: 'Tab', code: 'Tab' },
+					escape:     { key: 'Escape', code: 'Escape' },
+					arrowup:    { key: 'ArrowUp', code: 'ArrowUp' },
+					arrowdown:  { key: 'ArrowDown', code: 'ArrowDown' },
+					arrowleft:  { key: 'ArrowLeft', code: 'ArrowLeft' },
+					arrowright: { key: 'ArrowRight', code: 'ArrowRight' }
+				};
+
+				var keyData = keyMap[keyName.toLowerCase()] || { key: keyName, code: keyName };
+
+				['keydown', 'keypress', 'keyup'].forEach(eventType => {
+					var event = new KeyboardEvent(eventType, {
+							key: keyData.key,
+							code: keyData.code,
+							bubbles: true,
+							cancelable: true
+					});
+					el.dispatchEvent(event);
+				});
+			}
+
+			// Nếu là phím đặc biệt → dùng hàm con
+			var knownKeys = ['enter', 'tab', 'escape', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+			if (knownKeys.includes(type.toLowerCase())) {
+				pressKey(type);
+			}
+			// Nếu là sự kiện bàn phím tự do
+			else if (['keydown', 'keypress', 'keyup'].includes(type)) {
+				var event = new KeyboardEvent(type, {
+					key: options.key || '',
+					code: options.code || '',
+					bubbles: true,
+					cancelable: true
+				});
+				el.dispatchEvent(event);
+			}
+			// Các loại sự kiện khác (click, input, blur,...)
+			else {
+				event = new Event(type, { bubbles: true, cancelable: true });
+				el.dispatchEvent(event);
+			}
+		}
+
+		// Giả lập input file
+		function simulateReactInputFile(input) {
+			var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'files')?.set;
+			if (nativeInputValueSetter) {
+				nativeInputValueSetter.call(input, input.files);
+			}
+
+			// Trigger lại các sự kiện input và change để React có thể nhận diện sự thay đổi
+			var inputEvent = new Event('input', { bubbles: true });
+			var changeEvent = new Event('change', { bubbles: true });
+
+			input.dispatchEvent(inputEvent);
+			input.dispatchEvent(changeEvent);
+		}
+
+
+
+		// Giả lập xóa nội dung
+		function simulateClearing(inputElement, delay = 50, callback) {
+			let text = inputElement.val();
+			let index = text.length;
+
+			function deleteNext() {
+				if (index > 0) {
+					inputElement.val(text.slice(0, --index)); // Xóa ký tự cuối cùng
+					inputElement.trigger($.Event("keydown", { key: "Backspace", keyCode: 8 }));
+					setTimeout(deleteNext, delay);
+				} else if (callback) {
+					callback(); // Gọi callback sau khi xóa xong
+				}
+			}
+
+			deleteNext();
+		}
+
+		// Giả lập gõ nội dung
+		function simulateTyping(inputElement, text, event = "input", delay = 100, callback = null) {
+			let index = 0;
+
+			function typeNext() {
+				if (index < text.length) {
+					let char = text[index];
+					inputElement.val(inputElement.val() + char);
+					inputElement.trigger($.Event(event, { key: char, keyCode: char.charCodeAt(0), bubbles: true }));
+					inputElement.trigger($.Event(event, { key: char, keyCode: char.charCodeAt(0), bubbles: true }));
+					index++;
+					setTimeout(typeNext, delay);
+				} else {
+					// Giả lập xóa khoảng trắng cuối cùng
+					inputElement.trigger($.Event(event, { key: "Backspace", keyCode: 8, bubbles: true }));
+					inputElement.trigger(event);
+					inputElement.select();
+
+					if (window.getSelection) {
+							window.getSelection().removeAllRanges();
+					}else if (document.selection) {
+							document.selection.empty();
+					}
+
+					if ("createEvent" in document) {
+							var evt = document.createEvent("HTMLEvents");
+							evt.initEvent(event, false, true);
+							$(inputElement).get(0).dispatchEvent(evt);
+					}
+					else {
+							$(inputElement).get(0).fireEvent(`on${event}`);
+					}
+
+					if (typeof callback === "function") {
+							callback();
+					}
+				}
+			}
+
+			typeNext();
+		}
+
+		// Giả lập dán nội dung
+		function simulatePaste(inputElement, pastedText, event = "input", callback = null) {
+			// Đặt giá trị như người dùng dán
+			const el = inputElement[0];
+
+			// Gán trực tiếp thông qua setter gốc (để React nhận biết)
+			const nativeSetter = Object.getOwnPropertyDescriptor(el.__proto__, 'value')?.set;
+			nativeSetter ? nativeSetter.call(el, pastedText) : inputElement.val(pastedText);
+
+			// Tạo clipboardData giả để gửi sự kiện paste
+			const pasteEvent = new ClipboardEvent('paste', {
+				bubbles: true,
+				cancelable: true,
+				clipboardData: new DataTransfer()
+			});
+
+			pasteEvent.clipboardData.setData('text/plain', pastedText);
+
+			// Gửi sự kiện paste
+			el.dispatchEvent(pasteEvent);
+
+			// Gửi sự kiện input để đảm bảo state được cập nhật
+			el.dispatchEvent(new InputEvent(event, { bubbles: true }));
+
+			// Gửi sự kiện change nếu cần (để framework bắt được)
+			el.dispatchEvent(new Event('change', { bubbles: true }));
+
+			// Gọi callback nếu có
+			if (typeof callback === "function") {
+				callback();
+			}
+		}
+
+		// Giả lập input file
+		function simulateReactInput(input, text, delay) {
+			delay = delay || 100;
+			var el = input[0];
+			input.focus();
+
+			var i = 0;
+
+			function setNativeValue(element, value) {
+				var lastValue = element.value;
+				element.value = value;
+
+				// Gọi setter gốc nếu bị React override
+				var event = new Event('input', { bubbles: true });
+				var tracker = element._valueTracker;
+				if (tracker) tracker.setValue(lastValue);
+					element.dispatchEvent(event);
+			}
+
+			function typeChar() {
+				if (i < text.length) {
+					var newVal = input.val() + text[i];
+					setNativeValue(el, newVal);
+					i++;
+					typeChar();
+				}
+			}
+
+			typeChar();
+		}
+
+		// Theo dõi phần tử
+		function waitForElement(root, selector, callback, options = {}) {
+			var {
+				once = true,
+				timeout = null
+			} = options;
+
+			// Kiểm tra kỹ kiểu node
+			const rootNode = (window.jQuery && root instanceof window.jQuery) ? root[0] : (Array.isArray(root) && root[0] instanceof Node) ? root[0] : root;
+
+			if (!(rootNode instanceof Node)) {
+				console.error("❌ waitForElement: root không phải DOM node hợp lệ:", rootNode);
+				return;
+			}
+
+			var observer = new MutationObserver(() => {
+				var el = rootNode.querySelector(selector);
+				if (el) {
+					callback(el);
+					if (once) {
+						observer.disconnect();
+						if (timer) clearTimeout(timer);
+					}
+				}
+			});
+
+			observer.observe(rootNode, {
+				childList: true,
+				subtree: true
+			});
+
+			var el = rootNode.querySelector(selector);
+				if (el) {
+				callback(el);
+				if (once) {
+					observer.disconnect();
+				}
+			}
+
+			let timer = null;
+				if (timeout) {
+				timer = setTimeout(() => {
+					observer.disconnect();
+				}, timeout);
+			}
+
+			return observer;
+		}
+
+		// Tách giá
+		function tachGia(price){
+			var gia = price.toString().replace(",", "");
+			gia = gia.replace(".", "");
+			gia = gia.trim();
+			//boxAlert(gia);
+			var mid = Math.ceil(gia.length / 2);
+			var du = Math.floor(gia.length % 2);
+
+			var giaDau = gia.slice(0, mid - du);
+			var giaDuoi = gia.slice(mid - du);
+
+			var lastDau = parseInt(giaDau);
+			var lastDuoi = parseInt(giaDuoi);
+
+			giaDau = lastDau.toString().padEnd(gia.length, "0");
+			giaDuoi = lastDuoi.toString().padEnd(gia.length, "0");
+			while(parseInt(giaDau) < parseInt(giaDuoi) && giaDau.length <= giaDau.length){
+				giaDuoi = giaDuoi.split("");
+				giaDuoi.pop();
+				giaDuoi = giaDuoi.join("");
+			}
+
+			var giaCuoi = giaDuoi;
+
+			//giaDau = giaDau.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			//giaDuoi = giaDuoi.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			//gia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+			//boxAlert(giaDuoi);
+			//boxLogging(`Giá Gốc ${gia} => Giá Đuôi ${giaDuoi}`, [`${gia}`, `${giaDuoi}`], ["green", "yellow"]);
+
+			return {gia, giaDau, giaDuoi};
+		}
+
+		// Gộp giá
+		function gopGia(beforePrice, afterPrice){
+			afterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			beforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			
+			var giaTruoc = beforePrice, giaSau = afterPrice;
+
+			var len = beforePrice.split(",").length;
+			var dong = 0, arrayTien = [], tienTruoc = 0, tienSau = 0;
+			arrayTien = beforePrice.split(",");
+			dong = arrayTien[arrayTien.length - 1];
+			for(var i = 0; i < arrayTien.length - 1; i++){
+				tienTruoc += arrayTien[i];
+			}
+
+			tienTruoc = parseInt(tienTruoc);
+			if(parseInt(dong) > 0)
+				tienTruoc += 1;
+
+			arrayTien = afterPrice.split(",");
+			dong = arrayTien[arrayTien.length - 1];
+			for(i = 0; i < arrayTien.length - 1; i++){
+				tienSau += arrayTien[i];
+			}
+
+			tienSau = parseInt(tienSau);
+			if(parseInt(dong) > 0)
+				tienSau += 1;
+
+			afterPrice = tienSau + "000";
+			beforePrice = tienTruoc + "000";
+
+			var arrayBefore = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
+			var arrayAfter = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
+
+			var lastPrice = [], giaDau, giaDuoi;
+
+			for(i = 0; i < arrayBefore.length - 1; i++){
+				giaDau += arrayBefore[i];
+			}
+
+			for(i = 0; i < arrayAfter.length - 1; i++){
+				giaDuoi += arrayAfter[i];
+			}
+
+			giaDau = giaDau.substring(9);
+			giaDuoi = giaDuoi.substring(9);
+
+			lastPrice = beforePrice.split("");
+
+			$.each(lastPrice, (index, value) => {
+				lastPrice[index] = 0;
+			})
+
+			var flagDau, flagCuoi;
+
+			$.each(giaDau.split(""), (index, value) => {
+				lastPrice[index] = giaDau[index];
+				flagDau = index;
+			})
+
+			$.each(giaDuoi.split(""), (index, value) => {
+				if(lastPrice.length - giaDuoi.length + index == flagDau){
+					lastPrice[flagDau - 1] = parseInt(lastPrice[flagDau - 1]) + 1;
+				}
+				lastPrice[lastPrice.length - giaDuoi.length + index] = giaDuoi[index];
+			})
+
+			lastPrice = lastPrice.join("");
+
+			return {giaTruoc, giaSau, lastPrice};
+		}
+
+		// Kiểm tra tự động mở các danh sách...
+		function checkPage(){
+			var domain = window.location;
+			var host = domain.host, pathName = domain.pathname, port = domain.port, protocol = domain.protocol;
+
+			if(pathName.includes("portal/product/")){
+				if(pathName.includes("list")){
+					waitForElement($("body"), ".product-variation-item.product-more-models", (el) => {
+						$(".product-variation-item.product-more-models").click();
+					})
+				}else{
+					waitForElement($("body"), ".variation-model-table-footer button.eds-button.eds-button--link.eds-button--normal", (el) => {
+						simulateReactEvent($(el), "click");
+						boxToast("Đã mở rộng danh sách phân loại");
+					});
+				}
+			}
+		}
+
+		// Khải tạo chương trình
+		function INITCONFIG(){
+			boxAlert("ĐANG KHỞI TẠO");
+			loadLibrary(LIBRARIES, () => {
+				if (createUI)
+					return;
+				createUI = true;
+				createLayout();
+				applyNonce();
+
+				// Kiểm tra tự động mở các danh sách
+				checkPage();
+			});
+		}
+
+		INITCONFIG();
+
+		function createLayout(){
+			if(window.parent != window.top){
+				boxAlert(`Đã bỏ qua một lần thêm giao diện`);
+				return;
+			}
+
+			boxAlert(`Đang dựng giao diện`);
+
+			
+			// Giao diện HTML
+			$("body").append($(`
+				<!-- GIAO DIỆN CHƯƠNG TRÌNH -->
+				<div id="toast-container"></div>
+				<div class="tp-container tp-button-toggle">
+					<p>Chuẩn Mua</p>
+				</div>
+
+				<div class="tp-container tp-content">
+					<div class="program-title">
+						<p>Công Cụ Hỗ Trợ</p>
+						<p>Ver ${VERSION}</p>
+					</div>
+
+					<div class="program-log">
+						<pre class="logging"></pre>
+					</div>
+
+					<div class="program-tab">
+						<div class="tab-title">
+							<div class="tab-box" data-tab="tab-function">
+								<p>Chức Năng</p>
+							</div>
+							<div class="tab-box" data-tab="tab-custom">
+								<p>Tùy Chỉnh</p>
+							</div>
+						</div>
+					</div>
+
+					<div id="tab-function" class="tab-content program-future active">
+						<select id="functionSelect">
+							<option hidden>Chọn Chức Năng</option>
+
+							<!-- Shopee -->
+							<optgroup label="Shopee">
+								<option data-func="giaDuoiShopee">Cập Nhật Giá Đuôi</option>
+								<option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
+								<option data-func="tinhGiaBanShopee" data-layout="tinhGiaBanShopeeLayout">Tính Giá Bán</option>
+								<option data-func="kTr5LanGiaShopee" data-layout="kTr5LanGiaShopeeLayout">Kiểm Tra 5 Lần Giá</option>
+								<option data-func="kiemTraMaPhanLoaiShopee">Hiển Thị Mã Phân Loại</option>
+								<option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
+								<option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
+								<option data-func="themKyTuPhanLoaiShopee" data-layout="themKyTuPhanLoaiShopeeLayout">Sửa Tên Phân Loại</option>
+								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
+								<option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
+								<option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option>
+								<option disabled data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
+								<option disabled data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
+								<option disabled data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại Nhiều Link</option>?
+							</optgroup>
+
+							<!-- Lazada -->
+							<optgroup label="Lazada">
+								<option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
+								<option disabled data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
+								<option disabled data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
+								<option disabled data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
+							</optgroup>
+
+							<!-- TikTok -->
+							<optgroup label="TikTok">
+								<option disabled data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
+								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
+							</optgroup>
+
+							<!-- Sapo -->
+							<optgroup label="Sapo">
+								<option disabled data-func="kiemTraTonSapo" data-layout="kiemTraTonSapoLayout">Kiểm Tra Tồn</option>
+							</optgroup>
+
+							<!-- Khác -->
+							<optgroup label="Khác">
+								<!-- <option disabled data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option> -->
+								<option disabled data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
+								<option disabled data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
+							</optgroup>
+
+						</select>
+
+						<div class="layout-future">
+						</div>
+					</div>
+
+					<div id="tab-custom" class="tab-content">
+					</div>
+
+					<div class="button-control">
+						<button id="excute-command" data-func="">Chạy</button
+					</div>
+					<div class="resize-handle top-left"></div>
+					<div class="resize-handle top-right"></div>
+					<div class="resize-handle bottom-left"></div>
+					<div class="resize-handle bottom-right"></div>
+				</div>
+			`));
+
+			$("body").append($(`
+				<style class="tp-style">
+					#toast-container {
+						position: fixed;
+						bottom: 20px;
+						right: 20px;
+						display: flex;
+						flex-direction: column-reverse;
+						gap: 10px;
+						z-index: 9999;
+					}
+
+					.toast {
+						min-width: 220px;
+						max-width: 300px;
+						padding: 12px 16px;
+						border-radius: 6px;
+						color: white;
+						font-size: 14px;
+						box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+						opacity: 0;
+						transform: translateY(20px);
+						transition: all 0.3s ease;
+						position: relative;
+					}
+
+					/* Show animation */
+					.toast.show {
+						opacity: 1;
+						transform: translateY(0);
+					}
+
+					/* Type styles */
+					.toast.success { background-color: #28a745; }   /* xanh lá */
+					.toast.error   { background-color: #dc3545; }   /* đỏ */
+					.toast.warning { background-color: #ffc107; color: #212529; } /* vàng */
+					.toast.info    { background-color: #17a2b8; }   /* xanh biển */
+
+					.tp-container{
+						position: fixed;
+						z-index: 9999999;
+						user-select: none;
+					}
+
+					.tp-container *::-webkit-scrollbar {
+						display: none;
+					}
+
+					.tp-button-toggle{
+						left: calc(100% - 7%);
+						top: calc(100% - 20%);
+						width: auto;
+						height: auto;
+						aspect-ratio: 1 / 1;
+						border-radius: 100px;
+						background: rgba(255, 255, 255, 0.6);
+						box-shadow: -5px 5px 10px #000;
+						padding: 0.5vw 0.5vw;
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						font-size: 1.5rem;
+						font-weight: 700;
+						opacity: 0.6;
+					}
+
+					.tp-button-toggle:hover{
+						opacity: 1;
+					}
+
+					.tp-content{
+						width: auto;
+						height: auto;
+						left: 0;
+						top: 0;
+						// transform: translate(-50%, -50%);
+						background: 0 4px 20px rgba(255, 255, 255, 0.4), 0 4px 30px rgba(0, 0, 0, 0.2);
+						color: #000;
+						// box-shadow: -5px 5px 5px #fff;
+						border-radius: 10px;
+						padding: 1vh 1vw;
+						backdrop-filter: blur(10px);
+						-webkit-backdrop-filter: blur(10px);
+						border: 1px solid rgba(255, 255, 255, 0.3);
+					}
+
+					.tp-content > div{
+						margin: 1vh 0;
+					}
+
+					.tp-content .copyable{
+						user-select: text;
+						text-decoration: underline;
+						cursor: pointer;
+					}
+
+					.tp-content .program-title{
+						width: 100%;
+						text-align: center;
+						font-size: 2rem;
+						font-weight: 700;
+						padding: 1vh 0;
+					}
+
+					.tp-content .program-title p:nth-child(1){
+						font-size: 1.25em;
+					}
+
+					.tp-content .program-title p:nth-child(2){
+						font-size: 0.75em;
+					}
+
+					.tp-content .program-log{
+						width: 100%;
+						height: auto;
+						max-height: 20vh;
+						overflow: hidden;
+						overflow-y: scroll;
+						background: #fff;
+						border-radius: 10px;
+					}
+
+					.tp-content .program-log pre{
+						width: 100%;
+						height: 100%;
+						text-indent: 3%;
+						white-space: pre-wrap;
+						word-wrap: break-word;
+						overflow-wrap: break-word;
+						padding: 2vh 2vw;
+					}
+
+					.tab-title {
+						display: flex;
+						gap: 1vw;
+						justify-content: center;
+						margin: 1vh 0;
+					}
+
+					.tab-box {
+						cursor: pointer;
+						padding: 0.5vh 1vw;
+						background: rgba(255,255,255,0.6);
+						border-radius: 5px;
+						box-shadow: 0 0 5px #00000030;
+						font-weight: 600;
+						transition: 0.2s;
+						user-select: none;
+					}
+
+					.tab-box.active {
+						background: #fff;
+						color: #000;
+						box-shadow: 0 0 10px #00000040;
+					}
+
+					.tab-content {
+						display: none;
+					}
+
+					.tab-content.active {
+						display: block;
+					}
+
+					.tp-content .program-future{
+						width: 100%;
+						height: auto;
+					}
+
+					.tp-content .program-future select{
+						width: 100%;
+						height: 5vh;
+						line-height: 5vh;
+						border-radius: 10px;
+						text-indent: 10px;
+						margin-bottom: 2vh;
+					}
+
+					.tp-content .program-future select optgroup{
+						font-size: 1.5em;
+						text-indent: 5%;
+					}
+
+					.tp-content .program-future select optgroup option{
+						font-size: 1em;
+					}
+
+					.tp-content .layout-future{
+						width: 100%;
+						height: auto;
+					}
+
+					.tp-content .layout-future * {
+						margin-bottom: 10px;
+					}
+
+					.tp-content .layout-future input,
+					.tp-content .layout-future textarea {
+						width: 100%;
+						padding: 10px;
+						border: 1px solid #aaa;
+						border-radius: 8px;
+						font-size: 14px;
+						background: rgba(255, 255, 255, 0.7);
+						color: #000;
+						resize: both;
+					}
+
+					.tp-content .layout-future label {
+						font-weight: 500;
+						display: flex;
+						justify-content: center;
+						margin-bottom: 5px;
+						color: #222;
+					}
+
+					.tp-content .layout-future button {
+						background: rgba(0, 123, 255, 0.7);
+						color: white;
+						padding: 10px 16px;
+						border: none;
+						border-radius: 8px;
+						font-size: 14px;
+						cursor: pointer;
+					}
+
+					.tp-content .layout-future button:hover {
+						background: rgba(0, 86, 179, 0.5);
+					}
+
+					.tp-content .layout-future table tr{
+						margin-top: 1vh;
+					}
+
+					.tp-content .layout-future table tr td{
+						padding: 1vh 1vw;
+						text-align: center;
+					}
+
+					.tp-content .button-control{
+						width: 100%;
+						height: 4vh;
+						line-height: 4vh;
+					}
+
+					.tp-content .button-control button{
+						width: 100%;
+						height: 100%;
+						background: crimson;
+						color: #fff;
+						font-weight: 700;
+					}
+
+					.resize-handle {
+						position: absolute;
+						width: 16px;
+						height: 16px;
+						right: 0;
+						bottom: 0;
+						background: #ccc;
+						cursor: se-resize;
+						border-bottom-right-radius: 16px;
+					}
+
+					.resize-handle {
+						position: absolute;
+						background: #ccc;
+						cursor: pointer;
+						opacity: 0
+					}
+
+					/* Các góc resize */
+					.top-left {
+						width: 16px;
+						height: 16px;
+						left: 0;
+						top: 0;
+						cursor: nw-resize;
+					}
+
+					.top-right {
+						width: 16px;
+						height: 16px;
+						right: 0;
+						top: 0;
+						cursor: ne-resize;
+					}
+
+					.bottom-left {
+						width: 16px;
+						height: 16px;
+						left: 0;
+						bottom: 0;
+						cursor: sw-resize;
+					}
+
+					.bottom-right {
+						width: 16px;
+						height: 16px;
+						right: 0;
+						bottom: 0;
+						cursor: se-resize;
+					}
+				</style>
+			`))
+
+			// Chọn tab
+			$('.tab-box').click(function () {
+				var tabToShow = $(this).data('tab');
+
+				// Bỏ active các tab khác
+				$('.tab-box').removeClass('active');
+				$(this).addClass('active');
+
+				// Ẩn tất cả nội dung
+				$('.tab-content').hide();
+
+				// Hiện tab được chọn
+				$('#' + tabToShow).show();
+			});
+
+			// Kéo vị trí của giao diện chính
+			$(".tp-container").draggable({
+				start: function (event, ui) {
+					// Nếu đang resize thì không cho drag
+					if (isResizing) return false;
+					// var width = $(this).outerWidth();
+					// var height = $(this).outerHeight();
+					// $(this).draggable('option', 'cursorAt', { left: Math.floor(width / 2), top: Math.floor(height / 2) });
+				},
+
+				drag: function() {
+					var offset = $(this).offset();
+					var xPos = offset.left;
+					var yPos = offset.top;
+					//localStorage.setItem("positionYTP",yPos);
+					//localStorage.setItem("positionXTP",xPos);
+					//boxAlert(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`);
+					//boxLogging(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`, [`${xPos}`, `${yPos}`], ["orange", "yellow"]);
+				},
+			});
+
+			// Thay đổi kích thước (4 góc)
+			let isResizing = false, containers, startX, startY, startWidth, startHeight;
+
+			function resize(e, direction) {
+				e.preventDefault();
+				container = $(e.target).closest('.tp-container.tp-content');
+
+				// Kiểm tra container có tồn tại không
+				if (!container || container.length === 0) {
+						console.error("Container không tồn tại!");
+						return; // Nếu không tồn tại, thoát khỏi hàm
+				}
+
+				isResizing = true;
+				startX = e.clientX;
+				startY = e.clientY;
+				startWidth = container.width();
+				startHeight = container.height();
+
+				$(document).on('mousemove.resizeBox', function (e) {
+					if (!isResizing) return;
+					let newWidth = startWidth;
+					let newHeight = startHeight;
+					let newTop = parseInt(container.css('top'));
+					let newLeft = parseInt(container.css('left'));
+
+					if (direction === 'top-left') {
+						newWidth = startWidth - (e.clientX - startX);
+						newHeight = startHeight - (e.clientY - startY);
+						newTop = startY + (e.clientY - startY);
+						newLeft = startX + (e.clientX - startX);
+					} else if (direction === 'top-right') {
+						newWidth = startWidth + (e.clientX - startX);
+						newHeight = startHeight - (e.clientY - startY);
+						newTop = startY + (e.clientY - startY);
+					} else if (direction === 'bottom-left') {
+						newWidth = startWidth - (e.clientX - startX);
+						newHeight = startHeight + (e.clientY - startY);
+						newLeft = startX + (e.clientX - startX);
+					} else if (direction === 'bottom-right') {
+						newWidth = startWidth + (e.clientX - startX);
+						newHeight = startHeight + (e.clientY - startY);
+					}
+
+					// Kiểm tra nếu container là hợp lệ
+					if (container) {
+						container.css({
+							width: newWidth + 'px',
+							height: newHeight + 'px',
+							top: newTop + 'px',
+							left: newLeft + 'px'
+						});
+					}
+				});
+
+				$(document).on('mouseup.resizeBox', function () {
+					isResizing = false;
+					$(document).off('.resizeBox');
+				});
+			}
+
+			// Gắn sự kiện cho các góc resize
+			$('.top-left').on('mousedown', function (e) {
+				resize(e, 'top-left');
+			});
+			$('.top-right').on('mousedown', function (e) {
+				resize(e, 'top-right');
+			});
+			$('.bottom-left').on('mousedown', function (e) {
+				resize(e, 'bottom-left');
+			});
+			$('.bottom-right').on('mousedown', function (e) {
+				resize(e, 'bottom-right');
+			});
+
+			// Ẩn hiện giao diện
+			$(".tp-container.tp-button-toggle").on("dblclick", function(){
+				if($(this).hasClass("active")){
+					$(".tp-container.tp-content").css("display", "none");
+					$(this).removeClass("active");
+					boxAlert("Ẩn Giao Diện");
+				}else{
+					$(".tp-container.tp-content").css("display", "block");
+					$(this).addClass("active");
+					boxAlert("Hiện Giao Diện");
+				}
+			});
+
+			//Chọn chức năng
+			$("select#functionSelect").on("change", function(){
+				var option = $(this).find("option:selected");
+				$("#excute-command").show();
+				$("#excute-command").text("Chạy");
+				$("#excute-command").attr("data-func", option.attr("data-func"));
+				$(".layout-tab").remove();
+				boxLogging(`Đã chọn ${option.parent().attr("label")} > ${option.text()}`, [`${option.parent().attr("label")}`, `${option.text()}`], ["crimson", "crimson"]);
+				createLayoutTab(option.attr("data-layout"));
+				applyNonce();
+			});
+
+			$("#excute-command").on("click", function() {
+				const func = $(this).attr("data-func");
+				if (actionMap[func]) actionMap[func]();
+			});
+
+			$.each($("iframe"), (index, value) => {
+				$("iframe").eq(index).remove();
+			});
+		}
+
+		// Dựng giao diện của mỗi lựa chọn
+		function createLayoutTab(layoutName){
+		layoutName = layoutName == undefined ? "Không có giao diện" : layoutName;
+		boxLogging(`Giao Diện: ${layoutName}`, [`${layoutName}`], ["crimson"]);
+		var content = $(".layout-future");
+		$(".layout-tab").remove();
+		switch(layoutName){
+			case "themPhanLoaiNhieuLinkShopeeLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<p>ID sản phẩm cần thêm</p>
+						<textarea id="product-link"></textarea>
+						<p>Thông tin phân loại</p>
+						<textarea id="data"></textarea>
+						<p>Hình ảnh phân loại</p>
+						<input type="file" multiple />
+					</div>
+				`));
+				// setEventThemPhanLoaiNhieuLinkShopee();
+				break;
+			case "comboKMShopeeLayout":
+				content.append($(`
+				<div class="layout-tab">
+					<div class="switch-wrapper">
+					<span class="switch-label">Xóa</span>
+					<label class="switch">
+						<input type="checkbox" id="toggle-switch">
+						<div class="slider">
+							<div class="slider-handle"></div>
+						</div>
+					</label>
+					<span class="switch-label">Thêm</span>
+					</div>
+
+					<p>Thông tin sản phẩm</p>
+					<label for="data">
+							<p>SKU</p>
+							<input type="radio" id="sku" name="type-search" checked/>
+					</label>
+					<label for="data">
+							<p>Tên</p>
+							<input type="radio" id="name" name="type-search" />
+					</label>
+					<textarea id="data"></textarea>
+				</div>
+				`));
+
+				// Wrapper
+				$(".switch-wrapper").css({
+				"display": "flex",
+				"align-items": "center",
+				"gap": "10px",
+				"font-family": "sans-serif"
+				});
+
+				// Label: "Thêm" / "Xóa"
+				$(".switch-label").css({
+				"font-size": "14px",
+				"font-weight": "bold",
+				"color": "#444",
+				"width": "50px",
+				"text-align": "center"
+				});
+
+				// Container chính của switch
+				$(".switch").css({
+				"position": "relative",
+				"width": "60px",
+				"height": "28px"
+				});
+
+				// Ẩn input
+				$(".switch input").css({
+				"opacity": "0",
+				"width": "0",
+				"height": "0",
+				"position": "absolute"
+				});
+
+				// Track của switch (thanh nền)
+				$(".slider").css({
+				"position": "relative",
+				"background-color": "#ccc",
+				"border-radius": "34px",
+				"width": "100%",
+				"height": "100%",
+				"cursor": "pointer",
+				"transition": "background-color 0.3s"
+				});
+
+				// Nút tròn gạt (handle)
+				$(".slider-handle").css({
+				"position": "absolute",
+				"height": "22px",
+				"width": "22px",
+				"left": "3px",
+				"top": "3px",
+				"background-color": "white",
+				"border-radius": "50%",
+				"transition": "left 0.3s",
+				"box-shadow": "0 1px 3px rgba(0,0,0,0.2)"
+				});
+
+				$("#toggle-switch").on("change", function () {
+				if (this.checked) {
+					$(".slider").css("background-color", "#4caf50"); // Thêm
+					$(".slider-handle").css("left", "35px");
+					$(this).attr("data-type", "add");
+				} else {
+					$(".slider").css("background-color", "#ccc"); // Xóa
+					$(".slider-handle").css("left", "3px");
+					$(this).attr("data-type", "del");
+				}
+				});
+				// setEventComboKMShopee();
+				break;
+			case "suaHinhSKUShopeeLayout":
+				content.append($(`
+				<div class="layout-tab">
+					<input type="file" webkitdirectory directory multiple />
+
+					<!--<label for="search-name">
+							<p>Đổi Theo Tên</p>
+							<input id="search-name" type="radio" name="searchType" />
+					</label>
+
+					<label for="search-sku">
+							<p>Đổi Theo SKU</p>
+							<input id="search-sku" type="radio" name="searchType" />
+					</label> -->
+				</div>
+				`));
+
+					$(".layout-tab label").css({
+						"display": "flex",
+						"height": "3vh",
+					})
+
+					$(".layout-tab label p").css({
+						"width": "100%",
+					})
+				setEventSuaHinhSKUShopee();
+				break;
+			case "compareVoucherLayout":
+				content.append($(`
+				<div class="layout-tab">
+					<button id="addVoucher">Thêm Voucher</button>
+					<textarea id="data"></textarea>
+					<div class="voucher-box">
+						<table>
+							<thead>
+								<tr>
+									<td>Kiểm Tra</td>
+									<td>Tiền Giảm</td>
+									<td>Giảm Tối Đa</td>
+									<td>Đơn Tối Thiểu</td>
+									<td></td>
+							</tr>
+							</thead>
+							<tbody>
+								<tr class="voucher-box root" hidden>
+									<td class="checked-box"></td>
+									<td class="discount-percent" style="display: flex">
+										<input type="text" />
+										<select>
+											<option>%</option>
+											<option><u>đ</u></option>
+										</select>
+									</td>
+									<td class="max-discount">
+										<input type="text" />
+									</td>
+									<td class="condition-deal">
+										<input type="text" />
+									</td>
+									<td class="remove-voucher" style="cursor: pointer">Xóa Voucher</td>
+								</tr>
+								<tr class="voucher-box">
+									<td class="checked-box"></td>
+									<td class="discount-percent" style="display: flex">
+										<input type="text" />
+										<select>
+											<option>%</option>
+											<option><u>đ</u></option>
+										</select>
+									</td>
+									<td class="max-discount">
+										<input type="text" />
+									</td>
+									<td class="condition-deal">
+										<input type="text" />
+									</td>
+									<td class="remove-voucher" style="cursor: pointer">Xóa Voucher</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+				`));
+				// setEventCompareVoucher();
+					break
+				case "giaDuoiChuongTrinhShopeeLayout":
+					content.append($(`
+						<div class="layout-tab">
+							<label for="discount">Giảm của giá đuôi</label>
+							<label for="money"><p>Tiền Mặt</p> <input type="radio" name="discount-type" id="money" /></label>
+							<label for="percent"><p>Phần Trăm</p> <input type="radio" name="discount-type" id="percent" /></label>
+							<input type="text" id="tp-discount" />
+						</div>
+					`));
+
+					$(".layout-tab label").css({
+						"display": "flex",
+						"height": "3vh",
+					})
+
+					$(".layout-tab label p").css({
+						"width": "100%",
+					})
+					break;
+				case "themGiaTheoSKULazadaLayout":
+					content.append($(`
+						<div class="layout-tab">
+						<textarea id="data"></textarea>
+						</div>
+					`));
+					// setEventThemGiaTheoSKULazada();
+					break;
+				case "kiemTraTonSapoLayout":
+					content.append($(`
+					<div class="layout-tab">
+						<textarea id="data"></textarea>
+					</div>
+					`));
+					// setEventKiemTraTonSapo();
+					break;
+				case "splitExcelFileLayout":
+					content.append($(`
+					<div class="layout-tab">
+						<input type="file" id="fileInput" accept=".xlsx, .xls">
+						<br><br>
+						<label>Số dòng đầu giữ lại (header + mô tả...):</label>
+						<input type="number" id="rowsToPreserve" value="1" min="0">
+						<br />
+						<label>Số dòng mỗi file:</label>
+						<input type="number" id="rowsPerFile" value="100" min="1">
+					</div>
+					`));
+					break;
+				case "themKyTuPhanLoaiShopeeLayout":
+					content.append($(`
+					<div class="layout-tab">
+						<select id="group">
+							<option>Phân Loại 1</option>
+							<option>Phân Loại 2</option>
+						</select>
+						<p>Kiểu Thêm</p>
+						<select id="type">
+							<optgroup label="Thêm">
+								<option data-count="0">Thêm Vào Đầu</option>
+								<option data-count="1">Thêm Vào Đuôi</option>
+								<option data-count="2">Thêm Vào Trước Từ Khóa</option>
+								<option data-count="3">Thêm Vào Sau Từ Khóa</option>
+							</optgroup>
+							<optgroup label="Xóa">
+								<option data-count="4">Xóa Từ Đầu</option>
+								<option data-count="5">Xóa Từ Đuôi</option>
+								<option data-count="6">Xóa Trước Từ Khóa</option>
+								<option data-count="7">Xóa Sau Từ Khóa</option>
+							</optgroup>
+							<optgroup label="Thay Thế">
+								<option data-count="8">Thay Thế Từ Khóa</option>
+								<option disabled data-count="9">Thay Thế Trước Từ Khóa</option>
+								<option disabled data-count="10">Thay Thế Sau Từ Khóa</option>
+							</optgroup>
+						</select>
+						<p>Từ khóa/Số Ký Tự</p>
+						<textarea id="keyword"></textarea>
+						<p>Nội Dung</p>
+						<textarea id="data"></textarea>
+					</div>
+					`));
+					// setEventThemKyTuPhanLoaiShopee();
+					break;
+				case "kTr5LanGiaShopeeLayout":
+					content.append($(`
+					<div class="layout-tab">
+						<p>Giá Cao Nhất: <span id="maxSku">XXX-XXX</span> <span id="maxPrice">0</span></p>
+						<p>Giá Thấp Nhất: <span id="minSku">XXX-XXX</span> <span id="minPrice">0</span></p>
+						<p>Giá Đề Xuất: <span id="suggestPrice">0</span></p>
+					</div>
+					`));
+					break;
+				case "kiemTraPhanLoaiShopeeLayout":
+					content.append($(`
+					<div class="layout-tab">
+					<select id="group">
+						<option>Phân Loại 1</option>
+						<option>Phân Loại 2</option>
+					</select>
+					<textarea id="data"></textarea>
+					</div>
+					`));
+					// setEventKtraPhanloaiShopee();
+					break;
+				case "themPhanLoaiShopeeLayout":
+					content.append($(`
+					<div class="layout-tab">
+					<select id="group">
+						<option>Phân Loại 1</option>
+						<option>Phân Loại 2</option>
+					</select>
+					<textarea id="data"></textarea>
+					</div>
+					`));
+					// setEventThemPhanLoaiShopee();
+				break;
+			case "keoPhanLoaiShopeeLayout":
+				$("#excuse-command").hide();
+				content.append($(`
+				<div class="layout-tab">
+				<select id="group">
+					<option>Phân Loại 1</option>
+					<option>Phân Loại 2</option>
+				</select>
+				<div class="btn-control">
+					<button id="get">Lấy Phân Loại</button>
+					<button id="set">Cập Nhật Phân Loại</button>
+				</div>
+				</div>
+				`));
+				// setEventKeoPhanLoaiShopee();
+				break;
+			case "suaGiaSKUShopeeLayout":
+				content.append($(`
+				<div class="layout-tab">
+					<textarea id="data" placeholder="SKU {tab} Giá"></textarea>
+				</div>
+				`));
+				// setEventSuaGiaSKUShopee();
+				break;
+			case "5langiaShopeeLayout":
+				content.append($(`<div class="layout-tab">
+					<div>
+						<label for="max-price">Giá cao nhất: </label>
+						<input placeholder="Nhập giá cao nhất" type="text" id="max-price" value="" />
+					</div>
+					<div>
+						<label for="min-price">Giá thấp nhất: </label>
+						<input placeholder="Nhập giá thấp nhất" type="text" id="min-price" value="" />
+					</div>
+					</div>`
+				));
+				// setEventKtra5LanGiaShopee();
+				break;
+			case "sapXepHinhAnhShopeeLayout":
+				$("#excuse-command").hide();
+				$("body").append($(`
+				<div class="layout-tab tp-popup">
+					<div class="button-control">
+						<button id="getData">Lấy Dữ Liệu</button>
+						<button id="setData">Xác Nhận</button>
+						<button id="cancelData">Hủy</button>
+					</div>
+					<div class="img-list"></div>
+				</div>
+				`));
+				$(".layout-tab").css({
+				"width": "100%",
+				"height": "auto",
+				"margin-top": "2vh",
+				"background": "white",
+				});
+				$(".tp-popup").css({
+				"position": "fixed",
+				"top": "0",
+				"left": "0",
+				"z-index": "999999999999999999999999999999999999999999",
+				});
+				$(".layout-tab .button-control").css({
+				"width": "100%",
+				"height": "auto",
+				"display": "flex",
+				"justify-content": "center",
+				"align-items": "center",
+				"gap": "2vw",
+				});
+				$(".layout-tab .button-control button").css({
+				"width": "100%",
+				"height": "5vh",
+				"line-height": "5vh",
+				"display": "flex",
+				"justify-content": "center",
+				"align-items": "center",
+				"border-radius": "5px",
+				"background": "#cdcdcd",
+				});
+				$(".layout-tab .img-list").sortable();
+				$(".layout-tab .img-list").css({
+				"width": "auto",
+				"max-width": "100%",
+				"height": "auto",
+				"max-height": "70vh",
+				"overflow": "hidden",
+				"overflowX": "scroll",
+				"display": "flex",
+				"justify-content": "center",
+				"align-items": "center",
+				});
+				$(".layout-tab .img-list .box-img").css({
+				"width": "auto",
+				"height": "calc(100% - 2vw)",
+				"aspect-ratio": "1 / 1",
+				"max-height": "20vh",
+				});
+				// setEventSapXepAnhShopee();
+				break;
+			case "flashSaleShopeeLayout":
+				content.append($(`
+				<div class="layout-tab">
+					<label for="gia">Cật nhật giá đuôi: <input id="gia" type="checkbox" /></label>
+					<textarea id="flahsSaleName" placeholder="Nhập Tên Cần Bật Lên"></textarea>
+				</div>
+				`));
+				break;
+			case "tinhGiaBanShopeeLayout":
+				content.append($(`
+				<div class="layout-tab">
+					<div class="input-cost">
+						<label for="cost">Nhập Giá Vốn</label>
+						<input type="text" id="cost" maxlength="15" />
+					</div>
+					<div class="output-cost">
+						<p>Giá sau Khuyễn mãi: <span id="after-price"></span></p>
+						<p>Giá trước Khuyễn mãi: <span id="before-price"></span></p>
+						<p>Giá Đăng Bán: <span id="last-price"></span></p>
+					</div>
+				</div>
+				`));
+				setEventTinhGiaBanShopee();
+				break;
+			case "themPhanLoaiLazadaLayout":
+				content.append($(`
+				<div class="layout-tab">
+				<div class="layout-tab">
+					<input id="group" placeholder="Nhóm phân loại" value="1" />
+					<textarea id="phanLoai" placeholder="Nhập phân loại \nPhân Loại A, Phân Loại B, Phận Loại C, ...">Phân Loại A, Phân Loại B, Phận Loại C</textarea>
+				</div>
+				</div>`));
+				break;
+			case "ktraGiaChuongTrinhKMLazadaLayout":
+				content.append($(`
+				<div class="layout-tab">
+				<div class="layout-tab">
+					<textarea id="group" placeholder="Nhập từ khóa của nhóm:\nSố phần trăm, key1, key2, key3,..\nSố phần trăm, key1, key2, key3,...">
+	10%, massage, diện chẩn, khẩu trang, bịt mặt
+	5%, áo mưa bít, bít cá, bít dù</textarea>
+				</div>
+				</div>`));
+				break;
+			case "ktraKhuyenMaiTiktokLayout":
+				content.append($(`
+				<div class="layout-tab">
+				<button id="moDSSP">Mở Danh Sách Sản Phẩm Trong Trang</button>
+				<button id="ktraKhuyenMai">Kiểm Tra Khuyến Mãi</button>
+				</div>
+				`));
+				// setEventKtraKhuyeMaiTiktok();
+				break;
+			case "autobrowserLayout":
+				$("#excuse-command").hide();
+				content.append($(`<div class="layout-tab">
+								<button id="getGeminiKey">Lấy Key Gemini</button>
+								</div>`
+							));
+				// setEventAutobrowser();
+				break;
+			}
+		}
+
+		// Cập nhật giá đuôi sàn cam
+		function giaDuoiShopee(){
+			var box = $(".discount-item-component");
+
+			$.each(box, (index, value) => {
+				var parent = box.eq(index).find(".discount-edit-item-model-list .discount-edit-item-model-component");
+				$.each(parent, (index, value) => {
+					var name = parent.eq(index).find(".item-content.item-variation .ellipsis-content.single");
+					var currentPrice = parent.eq(index).find(".item-content.item-price");
+					var price = parent.eq(index).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.currency-input input");
+					var percent = parent.eq(index).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.discount-input input");
+					var stock = parent.eq(index).find(".item-content.item-stock");
+					var switcher = parent.eq(index).find(".item-content.item-enable-disable .eds-switch.eds-switch--normal");
+
+
+					var gia = currentPrice.text().replace("₫", "");
+					gia = gia.replace(".", "");
+
+					var giaKM = tachGia(gia).giaDuoi;
+
+					console.log(giaKM);
+
+					if(!switcher.hasClass("eds-switch--disabled")){
+						if(!switcher.hasClass("eds-switch--open")){
+							parent.eq(index).css({
+								"background": "orange",
+								"color": "#fff"
+							});
+							switcher.trigger("click").click();
+							boxLogging(`Sản phẩm ${name.text()} vừa được Bật`, [`${name.text()}`, "Bật"], ["orange", "green"]);
+						}
+
+						if(switcher.hasClass("eds-switch--open")){
+							if(parseInt(giaKM) <= 0){
+								parent.eq(index).css({
+									"background": "crimson",
+									"color": "#fff"
+								});
+								boxLogging(`Sản phẩm [copy]${name.text()}[/copy] không có giá đuôi`, [`${name.text()}`], ["crimson"]);
+							}else{
+								simulateClearing($(price), 0, () => {
+									$(price).val(giaKM);
+									simulateReactEvent($(price), "change");
+								})
+
+								parent.eq(index).css({
+									"background": "green",
+									"color": "white"
+								});
+							}
+						}
+					}
+				});
+			});
+		}
+
+		// Tính giá bán sàn cam
+		function tinhGiaBanShopee(){
+			var cost = $("#cost").val().split(",");
+			cost = cost.join("");
+			var afterPrice, beforePrice;
+			if(!cost == "" && cost.length > 0){
+				afterPrice = parseInt((cost / 0.45).toFixed(0));
+				beforePrice = afterPrice + parseInt((afterPrice * 0.3).toFixed(0));
+
+				afterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+				beforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+				var len = beforePrice.split(",").length;
+				var dong = 0, arrayTien = [], tienTruoc = 0, tienSau = 0;
+				arrayTien = beforePrice.split(",");
+				dong = arrayTien[arrayTien.length - 1];
+				for(var i = 0; i < arrayTien.length - 1; i++){
+					tienTruoc += arrayTien[i];
+				}
+
+				tienTruoc = parseInt(tienTruoc);
+				if(parseInt(dong) > 0)
+					tienTruoc += 1;
+
+				arrayTien = afterPrice.split(",");
+				dong = arrayTien[arrayTien.length - 1];
+				for(i = 0; i < arrayTien.length - 1; i++){
+					tienSau += arrayTien[i];
+				}
+
+				tienSau = parseInt(tienSau);
+				if(parseInt(dong) > 0)
+					tienSau += 1;
+
+				afterPrice = tienSau + "000";
+				beforePrice = tienTruoc + "000";
+
+				$("#after-price").html(`${afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} (<span class="copyable">${afterPrice.toString()}</span>)`);
+				$("#before-price").html(`${beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} (<span class="copyable">${beforePrice.toString()}</span>)`);
+
+				var arrayBefore = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
+				var arrayAfter = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
+
+				var lastPrice = [], giaDau, giaDuoi;
+
+				for(i = 0; i < arrayBefore.length - 1; i++){
+					giaDau += arrayBefore[i];
+				}
+
+				for(i = 0; i < arrayAfter.length - 1; i++){
+					giaDuoi += arrayAfter[i];
+				}
+
+				giaDau = giaDau.substring(9);
+				giaDuoi = giaDuoi.substring(9);
+
+				lastPrice = beforePrice.split("");
+
+				$.each(lastPrice, (index, value) => {
+					lastPrice[index] = 0;
+				})
+
+				var flagDau, flagCuoi;
+
+				$.each(giaDau.split(""), (index, value) => {
+					lastPrice[index] = giaDau[index];
+					flagDau = index;
+				})
+
+				$.each(giaDuoi.split(""), (index, value) => {
+					if(lastPrice.length - giaDuoi.length + index == flagDau){
+						lastPrice[flagDau - 1] = parseInt(lastPrice[flagDau - 1]) + 1;
+					}
+
+					lastPrice[lastPrice.length - giaDuoi.length + index] = giaDuoi[index];
+				})
+
+				lastPrice = lastPrice.join("");
+				$("#last-price").html(`${lastPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} (<span class="copyable">${lastPrice.toString()}</span>)`);
+			}
+		}
+
+		function setEventTinhGiaBanShopee(){
+			// $("#after-price").parent().on("click", function(){
+			// 	navigator.clipboard.writeText($(this).find("span").text().replace(",", ""));
+			// });
+			// $("#before-price").parent().on("click", function(){
+			// 	navigator.clipboard.writeText($(this).find("span").text().replace(",", ""));
+			// });
+			// $("#last-price").parent().on("click", function(){
+			// 	navigator.clipboard.writeText($(this).find("span").text().replace(",", ""));
+			// });
+
+			$("#cost").on("keyup", function (e) {
+				var cost = $("#cost").val();
+				cost = cost.split(",");
+				cost = cost.join("");
+				cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+				$("#cost").val(cost);
+				tinhGiaBanShopee();
+			});
+		}
+
+		// Bật flash sale shopee theo tên
+		function flashSaleShopee(){
+			var data = $("#flahsSaleName").val().split("\n");
+			var nameList = [], countList = [], priceList = [];
+			var capNhatGia = $(".tp-container.tp-content .layout-future input#gia").prop("checked");
+			$.each(data, (index, value) => {
+				value = value.split("\t");
+				nameList.push(value[0]);
+				countList.push(value[1] || -1);
+				priceList.push(value[2] || -1)
+			});
+
+			var container = $(".products-container-content form.product-table .table-card");
+
+			// var choiceAll = container.parent().find(".shopee-fixed-top-card.product-fixed-header.edit-fixed-header label.eds-checkbox.item-selector").click().click();
+
+			$.each(container, (index, value) => {
+				var productBox = container.eq(index).find(".inner-rows .inner-row");
+				$.each(productBox, (index, value) => {
+					productBox.eq(index).css({
+						"background": "transparent",
+						"color": "#000"
+					});
+
+					var productName = productBox.eq(index).find(".variation .ellipsis-content");
+					var originalPrice = productBox.eq(index).find(".original-price");
+					var currentcyPrice = productBox.eq(index).find(".currency-input input");
+					var perPrice = productBox.eq(index).find(".discount-input input");
+					var campaignStock = productBox.eq(index).find(".campaign-stock input");
+					var currentStock = productBox.eq(index).find(".current-stock");
+					var buttonSwitch = productBox.eq(index).find(".eds-switch.eds-switch--close.eds-switch--normal");
+
+					var productText = productName.text()?.replace(/\s+/g, ' ').normalize("NFKC").trim().toLowerCase() || "";
+
+					/*var pos = nameList.findIndex(item => item.replace(/\s+/g, ' ')
+							.normalize("NFKC")
+							.toLowerCase()
+							.includes(productText.replace(/\s+/g, ' ').normalize("NFKC").toLowerCase())
+					);*/
+
+					var pos = -1;
+
+					$.each(nameList, (index, value) => {
+						if(productText.includes(value.toLowerCase()))
+							pos = index;
+					});
+
+					if(pos != -1){
+						var name = nameList[pos], count = countList[pos];
+
+						if(count == -1)
+							count = parseInt(currentStock.text());
+
+						if(parseInt(currentStock.text()) >= parseInt(count)){
+							// Xử lý số lượng
+
+							simulateClearing($(campaignStock), 50, () => {
+								$(campaignStock).val(count);
+								simulateReactEvent($(campaignStock), "input");
+							})
+
+							if(capNhatGia){
+								simulateClearing($(currentcyPrice), 50, () => {
+									var giaKM = tachGia((originalPrice.text().replace(".", "")).replace("₫", "")).giaDuoi;
+									giaKM = parseInt(giaKM) - 1000;
+									giaKM = giaKM.toString().split("");
+									giaKM[giaKM.length - 1] = "1";
+									giaKM = giaKM.join("");
+									$(currentcyPrice).val(giaKM);
+									simulateReactEvent($(currentcyPrice), "input");
+								})
+							}
+
+							if(!buttonSwitch.hasClass("eds-switch--open")){
+								console.log(buttonSwitch);
+								console.log(productBox.eq(index).find(".item-selector"));
+
+								// simulateReactEvent($(buttonSwitch), "click");
+								// buttonSwitch.click();
+								// buttonSwitch.parent().parent().parent().trigger("click");
+
+								// simulateReactEvent($(productBox).eq(index).find(".item-selector"), "click");
+								productBox.eq(index).find(".item-selector").trigger("click");
+								productBox.eq(index).find(".item-selector input.eds-checkbox__input").val("true");
+							}
+
+							boxLogging(`Đã chọn: [copy]${productName.text()}[/copy]\n\tGiá: ${originalPrice.text()}\n\tSố Lượng: ${count}/${campaignStock.val()}\n`, [`${productName.text()}`, `${originalPrice.text()}`, `${count}`, `${campaignStock.val()}`], ["crimson", "green", "blue", "blue"]);
+						}
+
+						// boxLogging(`${productName.text()} không đủ số lượng\n\tGiá: ${originalPrice.text()}\n\tSố Lượng: ${count}/${campaignStock.val()}\n`, [`${productName.text()}`, `${originalPrice.text()}`, `${count}`, `${campaignStock.val()}`], ["crimson", "green", "blue", "blue"]);
+					}else{
+						// boxLogging(`Sản phẩm ${productName.text()} không có trong danh sách`, [`${productName.text()}`], ["crimson"]);
+					}
+				});
+			});
+		}
+
+		// Kiểm tra 5 lần giá shopee
+		function kTr5LanGiaShopee(){
+			var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+			var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+			var maxPrice = 0, minPrice = 0, min, maxSku, minSku, maxPos;
+			var listSku = [], listPrice = [];
+			var error = false;
+			var first = 0;
+			box.css("background", "transparent");
+			boxLeft.css("background", "transparent");
+			for(var i = 0; i < box.length; i++){
+				var name = boxLeft.eq(i).find(".table-cell").eq(0);
+				var nameProduct = name.contents().filter(function() {
+							return this.nodeType === 3; // chỉ lấy text thuần
+					})[0]?.nodeValue.trim();
+				var price = box.eq(i).find(".table-cell").eq(0).find("input");
+				var sku = box.eq(i).find(".table-cell").eq(2).find("textarea");
+
+				if("x0".includes(sku.val().trim())){
+					boxLogging(`Đã bỏ qua sản phẩm [copy]${nameProduct}[/copy]`, [`${nameProduct}`], ["pink"]);
+					box.eq(i).css("background", "pink");
+					boxLeft.eq(i).css("background", "pink");
+					continue;
+				}
+
+				if(first == 0){
+					minPrice = tachGia(price.val()).giaDuoi;
+					minSku = sku.val();
+					first = 1;
+					continue;
+				}
+
+				if(parseInt(tachGia(price.val()).giaDuoi) == 0){
+					boxLogging(`Sản phẩm [copy]${nameProduct}[/copy] chưa có giá đuôi!`, [`${nameProduct}`], [`crimson`])
+					box.eq(i).css("background", "crimson");
+					boxLeft.eq(i).css("background","crimson");
+					continue;
+				}
+
+				if(minPrice > parseInt(tachGia(price.val()).giaDuoi) && parseInt(tachGia(price.val()).giaDuoi) > 0){
+					i = 0;
+					minPrice = tachGia(price.val()).giaDuoi;
+					minSku = sku.val();
+					box.css("background", "transparent");
+					boxLeft.css("background", "transparent");
+					listSku = [];
+					listPrice = [];
+					continue;
+				}
+
+				maxPrice = minPrice * 5;
+
+				if(maxPrice < price.val()){
+					box.eq(i).css("background" , "orange");
+					boxLeft.eq(i).css("background", "orange");
+					listSku.push(sku.val());
+					listPrice.push(price.val());
+				}
+
+				var arr = listPrice;
+
+				const maxIndex = arr.reduce((maxIdx, currentVal, currentIdx, array) => {
+					return currentVal > array[maxIdx] ? currentIdx : maxIdx;
+				}, 0);
+
+				maxPrice = listPrice[maxIndex];
+				min = minPrice;
+				maxSku = listSku[maxIndex];
+			}
+
+			if(listPrice.length > 0 && listSku.length > 0){
+				$(".tp-container.tp-content .program-future .layout-future span#maxPrice").html(`${maxPrice.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} (<span class="copyable">${maxPrice}</span>)`);
+				$(".tp-container.tp-content .program-future .layout-future span#maxSku").html(`<span class="copyable">${maxSku}</span>`);
+			}
+
+			$(".tp-container.tp-content .program-future .layout-future span#minPrice").html(`${min.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} (<span class="copyable">${min}</span>)`);
+			$(".tp-container.tp-content .program-future .layout-future span#minSku").html(`<span class="copyable">${minSku}</span>`);
+			$(".tp-container.tp-content .program-future .layout-future span#suggestPrice").html(`${(parseInt(min) * 5).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} (<span class="copyable">${parseInt(min) * 5}</span>)`);
+
+			//listSku = [...listSku.reduce((map, item) => map.set(item, true), new Map()).keys()];
+			//listPrice = [...listPrice.reduce((map, item) => map.set(item, true), new Map()).keys()];
+
+			$.each(listSku, (index, value) => {
+				error = true;
+				boxLogging(`[copy]${listSku[index]}</copy> bị 5 lần giá đuôi ${listPrice[index].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`, [`${listSku[index]}`, `${listPrice[index].toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`], ["orange", "lightgreen"]);
+			});
+
+			if(!error){
+				boxLogging(`Không bị 5 lần giá`, [`Không bị 5 lần giá`], ["green"]);
+			}
+		}
+
+		// Kiểm tra mã phân loại shopee
+		function kiemTraMaPhanLoaiShopee(){
+			var container = $(".eds-table__main-body").eq(0).find(".eds-scrollbar__wrapper .eds-scrollbar__content table tbody tr");
+
+			//var choiceAll = container.parent().find(".shopee-fixed-top-card.product-fixed-header.edit-fixed-header label.eds-checkbox.item-selector").click().click();
+
+			$.each(container, (index, value) => {
+				$.each($(value).find("td").eq(1).find(".view-more .model-list-item"), (index, value) => {
+					var productName = $(value).find(".product-variation-padding").eq(0);
+					var stock = $(value).find(".product-variation-padding").eq(3);
+
+					productName.find(".data-model-id-tp").remove();
+
+					productName.find(".variation-name-info").append($(`
+					<div class="data-model-id-tp">
+						Mã Phân Loại: ${stock.find(".list-view-stock").attr("modelid")}
+					</div>
+					`));
+				});
+				var item = container.find("td").eq(1);
+				return;
+				var productBox = container.eq(index).find(".inner-rows .inner-row");
+				$.each(productBox, (index, value) => {
+					productBox.eq(index).css({
+						"background": "transparent",
+						"color": "#000"
+					});
+
+					var productName = productBox.eq(index).find(".variation .ellipsis-content");
+					var originalPrice = productBox.eq(index).find(".original-price");
+					var currentcyPrice = productBox.eq(index).find(".currency-input input");
+					var perPrice = productBox.eq(index).find(".discount-input input");
+					var campaignStock = productBox.eq(index).find(".campaign-stock input");
+					var currentStock = productBox.eq(index).find(".current-stock");
+					var buttonSwitch = productBox.eq(index).find(".eds-switch.eds-switch--close.eds-switch--normal");
+
+					productName.parent().find(".data-model-id").remove();
+
+					productName.parent().append($(`
+					<div class="data-model-id">
+						${productBox.eq(index).attr("data-model-id")}
+					</div>
+					`));
+				});
+			});
+		}
+
+		// Sửa giá theo SKU sản phẩm
+		function suaGiaSKUShopee(){
+			var data = $(".tp-container.tp-content .layout-future textarea#data");
+			var arrayData = data.val().split("\n");
+			$.each(arrayData, (index, value) => {
+				var listData = value.toString().split("\t");
+				var sku = listData[0];
+				var gia = listData[1];
+
+				var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+
+				$.each(box, (index, value) => {
+					var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
+					var priceBox = box.eq(index).find(".table-cell").eq(0).find("input");
+
+					if(skuBox.val().includes(sku)){
+						var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+						var gia1 = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+						if(parseInt(priceBox.val()) < parseInt(gia)){
+							boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${gia1} > ${priceBox1})`, [`${skuBox.val()}`], ["crimson"]);
+							box.eq(index).css("background", "crimson");
+						}else{
+							priceBox.val(gia);
+							simulateReactEvent($(priceBox), "change");
+							box.eq(index).css("background", "lightgreen");
+							boxLogging(`Giá của ${skuBox.val()} đã sửa từ ${priceBox1} thành ${gia1}`, [`${skuBox.val()}`, `${priceBox1}`, `${gia1}`], ["lightgreen", "orange", "orange"]);
+						}
+					}
+				});
+			});
+		}
+
+		var inputMap = {};
+		// Thay hình theo SKU
+		function setEventSuaHinhSKUShopee(){
+			// Gắn sự kiện và cho phép chọn thư mục
+			$(".tp-container.tp-content .layout-future .layout-tab input")
+				.attr({
+				webkitdirectory: true,
+				directory: true,
+				multiple: true
+				})
+				.on("change", function () {
+				var files = this.files;
+
+				// Xóa map cũ
+				inputMap = {};
+
+				for (let i = 0; i < files.length; i++) {
+					var file = files[i];
+
+					// Lấy tên file không có đuôi mở rộng
+					var fileNameOnly = file.name.split(".")[0].trim().toUpperCase();
+
+					// Tạo DataTransfer chứa file
+					var dt = new DataTransfer();
+					dt.items.add(file);
+
+					// Tạo input giả (để nạp file vào ô của Shopee)
+					var newInput = $("<input type='file'>").prop("files", dt.files).addClass("single-file-input");
+
+					// Gán theo SKU
+					inputMap[fileNameOnly] = newInput;
+				}
+			});
+		}
+
+		function suaHinhSKUShopee(){
+			var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+			var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+			var clickInput = false;
+
+			$.each(box, (index) => {
+				var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
+				var sku = skuBox.val().trim().toUpperCase();
+
+				if(boxLeft.eq(index).find(".table-cell img.shopee-image-manager__image").length > 0){
+					boxLogging(`Phân Loại ${sku} đã có ảnh`, [`${sku}`], ["crimson"])
+					return;
+				}
+
+				var imgInputShopee = boxLeft.eq(index).find(".table-cell").eq(0).find("input[type=file]")[0];
+
+				// Tìm SKU tương ứng trong inputMap
+				// var found = Object.keys(inputMap).find(key => 
+				// 	sku.includes(key.toUpperCase()) || key.toUpperCase().includes(sku)
+				// );
+
+				if (inputMap[sku]) {
+					// inputMap[found] là jQuery object, cần lấy phần tử gốc
+					var fileInputEl = inputMap[sku].get(0);
+					if (!fileInputEl || !fileInputEl.files || fileInputEl.files.length === 0) return;
+
+					var file = fileInputEl.files[0];
+					var dt = new DataTransfer();
+					dt.items.add(file);
+
+					// Click input đầu tiên để kích hoạt UI React
+					if(!clickInput){
+						imgInputShopee.click();
+						clickInput = true;
+					}
+
+					setTimeout(() => {
+						imgInputShopee.files = dt.files;
+
+						// Tạo sự kiện change để Shopee nhận diện file mới
+						var evt = new Event("change", { bubbles: true });
+						imgInputShopee.dispatchEvent(evt);
+						boxLogging(`Đã sửa ảnh cho SKU [copy]${sku}[/copy]`, [`${sku}`], ["green"])
+					}, 100); // có thể chỉnh tăng lên nếu chưa kịp load
+				}else{
+					boxLogging(`SKU [copy]${sku}[/copy] không có ảnh`, [`${sku}`], ["crimson"])
+				}
+
+			});
+		}
+
+		// Thêm ký tự giới tính vào tên phân loại shopee
+		function setEventThemKyTuPhanLoaiShopee(){
+			setEventTabTextarea()
+		}
+
+		function themKyTuPhanLoaiShopee() {
+			var group = $(".tp-container.tp-content .layout-future .layout-tab #group").find("option:selected").index();
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data");
+			var keyword = $(".tp-container.tp-content .layout-future .layout-tab #keyword");
+			var arrayData = data.val().split("\n");
+			var type = $(".tp-container.tp-content .layout-future #type").find("option:selected").attr("data-count");
+
+			var box = $(".variation-edit-item.version-a").eq(group).find(".option-container .options-item.drag-item");
+
+			$.each(box, (index, value) => {
+				var name = box.eq(index).find(".variation-input-item-container.variation-input-item input");
+
+				var newValue = null;
+				type = parseInt(type);
+				switch (type){
+					// Thêm ký tự vào đầu
+					case 0:
+						newValue = (`${data.val()} ${name.val()}`)
+						break;
+					// Thêm ký tự vào cuối
+					case 1:
+						newValue = (`${name.val()} ${data.val()}`)
+						break;
+					// Thêm ký tự trước từ khóa
+					case 2:
+						var pos = name.val().indexOf(keyword.val());
+						var before = name.val().slice(0, pos);
+						var after = name.val().slice(pos, name.val().length);
+
+						if(pos < 0)
+							return;
+						newValue = (`${before} ${data.val()} ${after}`);
+						break;
+					// Thêm ký tự sau từ khóa
+					case 3:
+						pos = name.val().indexOf(keyword.val());
+						before = name.val().slice(0, (pos + keyword.val().length));
+						after = name.val().slice(before.length, name.val().length);
+
+						if(pos < 0)
+							return;
+
+						newValue = (`${before} ${data.val()} ${after}`);
+						break;
+					// Xóa ký tự từ đầu
+					case 4:
+						newValue = name.val().slice(keyword.val(), name.val().length);
+						break;
+					// Xóa ký tự từ cuối
+					case 5:
+						newValue = name.val().slice(0, name.val().length - keyword.val());
+						break;
+					// Xóa ký tự trước từ khóa
+					case 6:
+						pos = name.val().indexOf(keyword.val());
+
+						if(pos < 0)
+							return;
+						
+						newValue = name.val().slice(pos, name.val().length);
+						break;
+					// Xóa ký tự sau từ khóa
+					case 7:
+						pos = name.val().indexOf(keyword.val());
+
+						if(pos < 0)
+							return;
+						
+						newValue = name.val().slice(0, pos + keyword.val().length);
+						break;
+					case 8:
+						pos = name.val().indexOf(keyword.val());
+
+						if(pos < 0)
+							return;
+
+						newValue = name.val().replace(keyword.val(), data.val());
+						break;
+				}
+
+				newValue = newValue.trim();
+
+				if(newValue.length > 20){
+					boxLogging(`Số ký tự ${name.val()} vượt quá mức cho phép (${newValue.length}/20)`, [`${name.val()}`, `${newValue.length}/20`], ["crimson", "crimson"])
+					name.css({
+						"background": "crimson",
+						"color": "#fff"
+					});
+				}else{
+					var oldName = name.val();
+					name.val(newValue.trim() || name.val().trim());
+					simulateReactEvent(name, "input");
+					boxLogging(`Đã đổi ${oldName} thành ${newValue}`, [`${oldName}`, `${newValue}`], ["green", "green"])
+					name.css({
+						"background": "green",
+						"color": "#fff"
+					});					
+				}
+			});
+		}
+
+		// Cập nhật giá đuôi Lazada
+		function giaDuoiLazada(){
+			var row = $(".next-table-row");
+			var price = [];
+
+			var i = 0;
+			$.each(row, (index, value) => {
+				var gia = $(value).find("input").val();
+				var giaKM = tachGia(gia).giaDuoi;
+
+				var name = row.eq(index).find("td").eq(0).find("button span.next-btn-helper");
+
+				console.log(name.text());
+
+				if($(value).find("td.special_price").has("button.next-btn").length > 0){
+					if(parseInt(giaKM) == 0)
+						giaKM = gia;
+					price.push(giaKM);
+					$(value).find("td.special_price button.next-btn").click();
+
+					row.eq(index).css("background", "lightgreen");
+
+					waitForElement($("body"), ".next-overlay-wrapper", (el) => {
+						var inputPrice = $(el).find(".next-balloon-content .next-input.next-medium input");
+						var buttonClick = $(el).find(".action-wrapper button.next-btn.next-medium.next-btn-primary")
+						
+						inputPrice.val(giaKM);
+						simulateReactEvent(inputPrice, "input")
+
+						buttonClick.click();
+						simulateReactEvent(buttonClick, "click");
+					}, {once: false})
+
+					boxLogging(`Sản phẩm [copy]${name.text()}[/copy] đã được cập nhất giá`, [`${name.text()}`], ["green"]);
+				}
+			})
+
+			// var balloon = $(".next-overlay-wrapper");
+
+			// $.each(balloon, (index, value) => {
+			// 	var inputPrice = balloon.eq(index).find(".next-balloon-content .next-input.next-medium input");
+			// 	var buttonClick = balloon.eq(index).find(".action-wrapper button.next-btn.next-medium.next-btn-primary")
+
+
+			// 	inputPrice.select();
+			// 	inputPrice.attr("value", price[index]);
+
+			// 	inputPrice.val(price[index]);
+
+			// 	buttonClick.click();
+			// });
+		}
