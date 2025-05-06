@@ -17,7 +17,6 @@
 	JquUI.setAttribute("rel", "preload");
 	document.head.appendChild(JquUI);*/
 
-	window.onload = function(){
 		// Danh sách thư viện cần thêm
 		const LIBRARIES = [
 			"https://code.jquery.com/jquery-3.7.1.min.js",
