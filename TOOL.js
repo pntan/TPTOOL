@@ -631,7 +631,7 @@
 				<!-- GIAO DIỆN CHƯƠNG TRÌNH -->
 				<div id="toast-container"></div>
 				<div class="tp-container tp-button-toggle">
-					<p>Chuẩn Mua</p>
+					<p>ChuẩnMua</p>
 				</div>
 
 				<div class="tp-container tp-content">
@@ -792,6 +792,12 @@
 						opacity: 1;
 					}
 
+					.tp-button-toggle.active{
+						background: lightgreen;
+						color: #000;
+						opacity: 1;
+					}
+
 					.tp-content{
 						width: auto;
 						height: auto;
@@ -806,6 +812,7 @@
 						backdrop-filter: blur(10px);
 						-webkit-backdrop-filter: blur(10px);
 						border: 1px solid rgba(255, 255, 255, 0.3);
+						display: none;
 					}
 
 					.tp-content > div{
@@ -1140,7 +1147,7 @@
 			});
 
 			// Ẩn hiện giao diện
-			$(".tp-container.tp-button-toggle").on("dblclick", function(){
+			$(".tp-container.tp-button-toggle").on("click", function(){
 				if($(this).hasClass("active")){
 					$(".tp-container.tp-content").css("display", "none");
 					$(this).removeClass("active");
@@ -2285,9 +2292,7 @@
 				var gia = $(value).find("input").val();
 				var giaKM = tachGia(gia).giaDuoi;
 
-				var name = row.eq(index).find("td").eq(0).find("button span.next-btn-helper");
-
-				console.log(name.text());
+				var name = $(row).eq(index).find("td").eq(0).find("button span").text();
 
 				if($(value).find("td.special_price").has("button.next-btn").length > 0){
 					if(parseInt(giaKM) == 0)
@@ -2297,33 +2302,22 @@
 
 					row.eq(index).css("background", "lightgreen");
 
-					waitForElement($("body"), ".next-overlay-wrapper", (el) => {
-						var inputPrice = $(el).find(".next-balloon-content .next-input.next-medium input");
-						var buttonClick = $(el).find(".action-wrapper button.next-btn.next-medium.next-btn-primary")
-						
-						inputPrice.val(giaKM);
-						simulateReactEvent(inputPrice, "input")
-
-						buttonClick.click();
-						simulateReactEvent(buttonClick, "click");
-					}, {once: false})
-
-					boxLogging(`Sản phẩm [copy]${name.text()}[/copy] đã được cập nhất giá`, [`${name.text()}`], ["green"]);
+					boxLogging(`Sản phẩm ${name} đã được cập nhất giá`, [`${name}`], ["green"]);
 				}
 			})
 
-			// var balloon = $(".next-overlay-wrapper");
+			var balloon = $(".next-overlay-wrapper");
 
-			// $.each(balloon, (index, value) => {
-			// 	var inputPrice = balloon.eq(index).find(".next-balloon-content .next-input.next-medium input");
-			// 	var buttonClick = balloon.eq(index).find(".action-wrapper button.next-btn.next-medium.next-btn-primary")
+			$.each(balloon, (index, value) => {
+				var inputPrice = balloon.eq(index).find(".next-balloon-content .next-input.next-medium input");
+				var buttonClick = balloon.eq(index).find(".action-wrapper button.next-btn.next-medium.next-btn-primary")
 
 
-			// 	inputPrice.select();
-			// 	inputPrice.attr("value", price[index]);
+				inputPrice.select();
+				inputPrice.attr("value", price[index]);
 
-			// 	inputPrice.val(price[index]);
+				inputPrice.val(price[index]);
 
-			// 	buttonClick.click();
-			// });
+				buttonClick.click();
+			});
 		}
