@@ -37,11 +37,11 @@
 			"suaGiaSKUShopee": suaGiaSKUShopee,
 			"suaHinhSKUShopee": suaHinhSKUShopee,
 			"themKyTuPhanLoaiShopee": themKyTuPhanLoaiShopee,
-			// "kiemTraPhanLoaiShopee": kiemTraPhanLoaiShopee,
+			"comboKMShopee": comboKMShopee,
+			"kiemTraPhanLoaiShopee": kiemTraPhanLoaiShopee,
+			// "themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
 			// "themPhanLoaiShopee": themPhanLoaiShopee,
 			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
-			// "comboKMShopee": comboKMShopee,
-			// "themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
 			// //"batKhuyenMaiShopee": batKhuyenMaiShopee,
 			// // --- TIKTOK
@@ -56,7 +56,7 @@
 			// "themGiaTheoSKULazada": themGiaTheoSKULazada,
 			// "ktraGiaChuongTrinhKMLazada": ktraGiaChuongTrinhKMLazada,
 			// //-- KHÁC
-			// "splitExcelFile": splitExcelFile,
+			"splitExcelFile": splitExcelFile,
 			// "compareVoucher": compareVoucher,
 		};
 
@@ -218,19 +218,32 @@
 			}
 		}
 
-		// Tạo thông báo bằng taast
 		function boxToast(message, type = "info", duration = 3000) {
 			const toast = $(`<div class="toast ${type}">${message}</div>`);
 			$("#toast-container").append(toast);
 
-			// Bắt đầu animation
 			setTimeout(() => toast.addClass("show"), 10);
 
-			// Tự động ẩn
-			setTimeout(() => {
-				toast.removeClass("show");
-				setTimeout(() => toast.remove(), 300);
-			}, duration);
+			let hideTimeout;
+
+			const startAutoHide = () => {
+				hideTimeout = setTimeout(() => {
+					toast.removeClass("show");
+					setTimeout(() => toast.remove(), 300);
+				}, duration);
+			};
+
+			const stopAutoHide = () => {
+				clearTimeout(hideTimeout);
+			};
+
+			toast.on("mouseenter", stopAutoHide);
+			toast.on("mouseleave", () => {
+				stopAutoHide(); // clear lại nếu người dùng hover nhiều lần
+				startAutoHide(); // reset lại thời gian
+			});
+
+			startAutoHide(); // bắt đầu đếm thời gian
 		}
 
 		// Hàm giả lập thao tác người dùng
@@ -424,49 +437,84 @@
 			typeChar();
 		}
 
+		// Giả lập làm trống input
+		function simulateClearReactInput(input) {
+			var el = input[0];
+
+			function setNativeValue(element, value) {
+				var lastValue = element.value;
+				element.value = value;
+
+				var event = new Event('input', { bubbles: true });
+				var tracker = element._valueTracker;
+				if (tracker) tracker.setValue(lastValue);
+				element.dispatchEvent(event);
+			}
+
+			input.focus();
+			setNativeValue(el, '');
+		}
+
 		// Theo dõi phần tử
 		function waitForElement(root, selector, callback, options = {}) {
-			var {
+			const {
 				once = true,
-				timeout = null
+				timeout = null,
+				waitForLastChange = false,
+				delay = 300
 			} = options;
 
-			// Kiểm tra kỹ kiểu node
-			const rootNode = (window.jQuery && root instanceof window.jQuery) ? root[0] : (Array.isArray(root) && root[0] instanceof Node) ? root[0] : root;
+			const rootNode = (window.jQuery && root instanceof window.jQuery) ? root[0]
+				: (Array.isArray(root) && root[0] instanceof Node) ? root[0]
+				: root;
 
 			if (!(rootNode instanceof Node)) {
 				console.error("❌ waitForElement: root không phải DOM node hợp lệ:", rootNode);
 				return;
 			}
 
-			var observer = new MutationObserver(() => {
-				var el = rootNode.querySelector(selector);
-				if (el) {
-					callback(el);
-					if (once) {
-						observer.disconnect();
-						if (timer) clearTimeout(timer);
+			let observer = null;
+			let timeoutId = null;
+			let delayTimer = null;
+			let lastMatchedElement = null;
+
+			function runCallback(el) {
+				callback(el);
+				if (once) {
+					observer.disconnect();
+					if (timeoutId) clearTimeout(timeoutId);
+					if (delayTimer) clearTimeout(delayTimer);
+				}
+			}
+
+			const initial = rootNode.querySelector(selector);
+			if (initial && !waitForLastChange) {
+				callback(initial);
+				if (once) return;
+			}
+
+			observer = new MutationObserver(() => {
+				const found = rootNode.querySelector(selector);
+				if (found) {
+					lastMatchedElement = found;
+
+					if (waitForLastChange) {
+						clearTimeout(delayTimer);
+						delayTimer = setTimeout(() => runCallback(lastMatchedElement), delay);
+					} else {
+						runCallback(found);
 					}
 				}
 			});
 
-			observer.observe(rootNode, {
-				childList: true,
-				subtree: true
-			});
+			observer.observe(rootNode, { childList: true, subtree: true });
 
-			var el = rootNode.querySelector(selector);
-				if (el) {
-				callback(el);
-				if (once) {
+			if (timeout) {
+				timeoutId = setTimeout(() => {
 					observer.disconnect();
-				}
-			}
-
-			let timer = null;
-				if (timeout) {
-				timer = setTimeout(() => {
-					observer.disconnect();
+					if (waitForLastChange && lastMatchedElement) {
+						runCallback(lastMatchedElement);
+					}
 				}, timeout);
 			}
 
@@ -512,7 +560,7 @@
 		function gopGia(beforePrice, afterPrice){
 			afterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 			beforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-			
+
 			var giaTruoc = beforePrice, giaSau = afterPrice;
 
 			var len = beforePrice.split(",").length;
@@ -581,6 +629,31 @@
 			return {giaTruoc, giaSau, lastPrice};
 		}
 
+		// Gộp các obj
+		function deepMergeByKey(targetObj, key, newData) {
+			if (!targetObj[key]) {
+				targetObj[key] = {};
+			}
+
+			function deepMerge(target, source) {
+				for (const k in source) {
+					if (source[k] && typeof source[k] === "object" && !Array.isArray(source[k])) {
+						if (!target[k] || typeof target[k] !== "object") {
+							target[k] = {};
+						}
+
+						deepMerge(target[k], source[k]);
+
+						} else {
+						target[k] = source[k]; // Ghi đè nếu không phải object
+					}
+				}
+			}
+
+			deepMerge(targetObj[key], newData);
+		}
+
+
 		// Kiểm tra tự động mở các danh sách...
 		function checkPage(){
 			var domain = window.location;
@@ -625,7 +698,7 @@
 
 			boxAlert(`Đang dựng giao diện`);
 
-			
+
 			// Giao diện HTML
 			$("body").append($(`
 				<!-- GIAO DIỆN CHƯƠNG TRÌNH -->
@@ -669,12 +742,12 @@
 								<option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
 								<option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
 								<option data-func="themKyTuPhanLoaiShopee" data-layout="themKyTuPhanLoaiShopeeLayout">Sửa Tên Phân Loại</option>
+								<option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
+								<option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
+								<option disabled data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại Nhiều Link</option>
 								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
 								<option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
 								<option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option>
-								<option disabled data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
-								<option disabled data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
-								<option disabled data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại Nhiều Link</option>?
 							</optgroup>
 
 							<!-- Lazada -->
@@ -698,8 +771,8 @@
 
 							<!-- Khác -->
 							<optgroup label="Khác">
+								<option data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
 								<!-- <option disabled data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option> -->
-								<option disabled data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
 								<option disabled data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
 							</optgroup>
 
@@ -1214,16 +1287,8 @@
 					</label>
 					<span class="switch-label">Thêm</span>
 					</div>
-
-					<p>Thông tin sản phẩm</p>
-					<label for="data">
-							<p>SKU</p>
-							<input type="radio" id="sku" name="type-search" checked/>
-					</label>
-					<label for="data">
-							<p>Tên</p>
-							<input type="radio" id="name" name="type-search" />
-					</label>
+					<button style="width: 100%" id="skip">Bỏ Qua Sản Phẩm</button>
+					<!-- <button style="width: 100%" id="continue">Tiếp Tục</button> -->
 					<textarea id="data"></textarea>
 				</div>
 				`));
@@ -1477,11 +1542,12 @@
 				case "kiemTraPhanLoaiShopeeLayout":
 					content.append($(`
 					<div class="layout-tab">
-					<select id="group">
-						<option>Phân Loại 1</option>
-						<option>Phân Loại 2</option>
-					</select>
-					<textarea id="data"></textarea>
+						<select id="group">
+							<option>Phân Loại 1</option>
+							<option>Phân Loại 2</option>
+						</select>
+						<label for="type">Dò Chính Xác <input id="type" type="checkbox" /></label>
+						<textarea id="data"></textarea>
 					</div>
 					`));
 					// setEventKtraPhanloaiShopee();
@@ -1715,6 +1781,8 @@
 					}
 				});
 			});
+
+			boxToast("Hoàn thành cập nhật giá đuôi", "success")
 		}
 
 		// Tính giá bán sàn cam
@@ -1915,6 +1983,8 @@
 					}
 				});
 			});
+
+			boxToast("Hoàn thành đánh dấu sản phẩm", "success")
 		}
 
 		// Kiểm tra 5 lần giá shopee
@@ -2007,6 +2077,8 @@
 			if(!error){
 				boxLogging(`Không bị 5 lần giá`, [`Không bị 5 lần giá`], ["green"]);
 			}
+
+			boxToast("Đã kiểm tra 5 lần giá", "success")
 		}
 
 		// Kiểm tra mã phân loại shopee
@@ -2054,6 +2126,8 @@
 					`));
 				});
 			});
+
+			boxToast("Hoàn thành kiểm tra tên phân loại", "success")
 		}
 
 		// Sửa giá theo SKU sản phẩm
@@ -2087,6 +2161,8 @@
 					}
 				});
 			});
+
+			boxToast("Đã sửa giá các SKU được chọn", "success")
 		}
 
 		var inputMap = {};
@@ -2142,7 +2218,7 @@
 				var imgInputShopee = boxLeft.eq(index).find(".table-cell").eq(0).find("input[type=file]")[0];
 
 				// Tìm SKU tương ứng trong inputMap
-				// var found = Object.keys(inputMap).find(key => 
+				// var found = Object.keys(inputMap).find(key =>
 				// 	sku.includes(key.toUpperCase()) || key.toUpperCase().includes(sku)
 				// );
 
@@ -2174,6 +2250,8 @@
 				}
 
 			});
+
+			boxToast("Đã sửa hình ảnh của những SKU đã tải lên", "success")
 		}
 
 		// Thêm ký tự giới tính vào tên phân loại shopee
@@ -2239,7 +2317,7 @@
 
 						if(pos < 0)
 							return;
-						
+
 						newValue = name.val().slice(pos, name.val().length);
 						break;
 					// Xóa ký tự sau từ khóa
@@ -2248,7 +2326,7 @@
 
 						if(pos < 0)
 							return;
-						
+
 						newValue = name.val().slice(0, pos + keyword.val().length);
 						break;
 					case 8:
@@ -2277,9 +2355,11 @@
 					name.css({
 						"background": "green",
 						"color": "#fff"
-					});					
+					});
 				}
 			});
+
+			boxToast("Đã sửa lại tên phân loại", "success")
 		}
 
 		// Cập nhật giá đuôi Lazada
@@ -2320,4 +2400,768 @@
 
 				buttonClick.click();
 			});
+
+			boxToast("Đã cập nhật giá đuôi", "success")
+		}
+
+		// Điều chỉnh combo khuyến mãi shopee
+		function setEventComboKMShopee(){
+			$(".tp-container .layout-tab label").on("click", function(){
+				$(".tp-container .layout-tab #data").select().focus();
+			});
+		}
+
+		function comboKMShopee(){
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data");
+			var arrayData = data.val().split("\n").filter(i => i.trim() !== "");
+
+			var inputBox = $(".eds-react-search input");
+
+			var searchIcon = $(".eds-react-search span.eds-react-icon.eds-react-icon-search.eds-react-input__suffix-icon");
+
+			var currentItem = 0;
+
+			var type = $(".tp-container.tp-content .layout-future .layout-tab #toggle-switch").attr("data-type") || "del";
+
+			if(type == "del"){
+				function nextItem(){
+					console.log(currentItem);
+					var skip = 0;
+					if(currentItem >= arrayData.length){
+						boxToast("Đã xóa các ID sản phẩm khỏi combo khuyến mãi", "success")
+						return;
+					}
+
+					simulateClearReactInput(inputBox);
+
+					var sku = arrayData[currentItem];
+
+					// inputBox.val(sku);
+
+					// simulateReactEvent(inputBox, "change")
+
+					simulateReactInput(inputBox, sku)
+
+					searchIcon.click();
+
+					var box = $("tbody.eds-react-table-tbody").eq(1);
+
+					waitForElement(box, (".eds-react-table-row.eds-react-table-row-level-0"), (e) => {
+						if($(e).attr("data-row-key") == sku){
+
+							$(e).find("td").eq(6).find("button").on("click", (e) => {
+								boxLogging(`Đã xóa [copy]${sku}[/copy]`, [`${sku}`], ["green"])
+								currentItem++;
+								nextItem();
+							})
+
+							$(e).find("td").eq(6).find("button").click();
+						}
+					}, {once: false, waitForLastChange: 1000})
+
+					$(".tp-container.tp-content .layout-future .layout-tab #skip").click(() => {
+						boxLogging(`Đã bỏ qua [copy]${sku}[/copy]`, [`${sku}`], ["orange"])
+						currentItem++;
+						nextItem();
+					})
+				}
+				nextItem();
+			}else if(type == "add"){
+				boxToast("Đã sao chép các ID sản phẩm theo định dạng", "success")
+				var skuList = arrayData.join(",");
+				navigator.clipboard.writeText(skuList);
+			}
+		};
+
+		// Kiểm tra tên phân loại đã tồn tại trong sản phẩm chưa
+		function kiemTraPhanLoaiShopee(){
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data");
+			var arrayData = data.val().split("\n");
+
+			var type = $(".tp-container.tp-content .layout-future .layout-tab #type").prop("checked");
+
+			var group = $(".tp-container.tp-content .layout-future .layout-tab #group").find("option:selected").index();
+
+			var box = $(".variation-edit-item.version-a").eq(group).find(".option-container .options-item.drag-item");
+			
+
+			if(type){
+				var regex = /(\d{1,2}\/\d{1,2})/;
+
+				var result = arrayData.filter(arrayData => !regex.test(arrayData));
+
+				arrayData = result
+
+				var currentList = [];
+
+				$.each(box, (index, value) => {
+					var name = box.eq(index).find(".variation-input-item-container.variation-input-item input");
+					currentList.push(name.val());
+				});
+
+				var unique = arrayData.filter(item => !currentList.some(keyword => item.toLowerCase().includes(keyword.toLowerCase())));
+
+				if(unique.length > 0){
+					var ten = unique.join("\n");
+					navigator.clipboard.writeText(ten);
+					$.each(unique, (index, value) => {
+						boxLogging(`Phân loại bị thiếu trong link: ${value}`, [`${value}`], ["orange"]);
+					});
+				}else{
+					var mess = "Đã đủ sản phẩm trong danh sách";
+					boxLogging(`${mess}`, [`${mess}`], ["green"]);
+				}
+			}else{
+				$.each(arrayData, (index, value) => {
+					var count = 0;
+					var keyword = arrayData[index];
+					boxLogging(`${keyword}:`, [`${keyword}`], ["crimson"])
+					$.each(box, (index, value) => {
+						var name = box.eq(index).find(".variation-input-item-container.variation-input-item input");
+						if(name.val().includes(keyword)){
+							count++;
+							boxLogging(`\t${name.val()} (${count})`, [`${name.val()}`], ["green"]);
+						}
+					})
+				})
+			}
+
+			boxToast(`Hoàn thành kiểm tra tên phân loại`, "success");
+		}
+
+		// // Thêm phân loại hàng loạt
+		// function setEventThemPhanLoaiNhieuLinkShopee(){
+		// 	setEventTabTextarea();
+		// }
+
+		// async function themPhanLoaiNhieuLinkShopee(){
+		// 	var productIds = $(".tp-container.tp-content .layout-future .layout-tab #product-link").val().trim().split("\n").filter(Boolean);
+		// 	var variantLines = $(".tp-container.tp-content .layout-future .layout-tab #data").val().trim().split("\n").filter(Boolean);
+		// 	var files = $(".tp-container.tp-content .layout-future .layout-tab input[type='file']")[0]?.files || [];
+		// 	var inputMap = await makeInputMapFromFileNames(files);
+		// 	files = await filesToBase64Array(files);
+
+
+		// 	localStorage.removeItem("TP-exit");
+		// 	saveBatchDataByParts({productIds, variantLines, files, inputMap});
+		// 	moveToCurrentProduct();
+		// }
+
+		// // Map hình ảnh tải lên
+		// async function makeInputMapFromFileNames(fileList) {
+		// 	var inputMap = {};
+		// 	for (let i = 0; i < fileList.length; i++) {
+		// 		var file = fileList[i];
+		// 		if (!file) continue;
+
+		// 		var rawName = file.name.split(".")[0]; // "TS-001.jpg" → "TS-001"
+		// 		var sku = rawName.trim().toUpperCase();
+		// 		var base64 = await fileToBase64(file);
+		// 		inputMap[sku] = base64;
+		// 	}
+		// 	return inputMap;
+		// }
+
+		// // Encode hình ảnh
+		// async function fileToBase64(file, quality = 0.5) {
+		// 	return new Promise((resolve, reject) => {
+		// 		const reader = new FileReader();
+		// 		reader.onload = function (e) {
+		// 			const img = new Image();
+		// 			img.onload = function () {
+		// 				const canvas = document.createElement("canvas");
+		// 				canvas.width = img.width;
+		// 				canvas.height = img.height;
+
+		// 				const ctx = canvas.getContext("2d");
+		// 				ctx.drawImage(img, 0, 0); // loại bỏ metadata
+
+		// 				// Chuyển thành JPEG và giảm chất lượng
+		// 				const base64 = canvas.toDataURL("image/jpeg", quality);
+		// 				resolve(base64);
+		// 			};
+		// 			img.onerror = reject;
+		// 			img.src = e.target.result;
+		// 		};
+
+		// 		reader.onerror = reject;
+		// 		reader.readAsDataURL(file);
+		// 	});
+		// }
+
+		// async function filesToBase64Array(files) {
+		// 	var results = [];
+		// 	for (let i = 0; i < files.length; i++) {
+		// 		var base64 = await fileToBase64(files[i]);
+		// 		results.push(base64);
+		// 	}
+		// 	return results;
+		// }
+
+		// async function base64ToFile(base64, filename = "image.jpg") {
+		// 	var res = await fetch(base64);
+		// 	var blob = await res.blob();
+		// 	return new File([blob], filename, { type: blob.type });
+		// }
+
+
+		// async function saveBatchDataByParts({
+		// 	productIds = [],
+		// 	variantLines = [],
+		// 	files = [],
+		// 	inputMap = []
+		// }) {
+		// 	// 1. Lưu ID sản phẩm
+		// 	sessionStorage.setItem("batchProductIds", JSON.stringify(productIds));
+
+		// 	// 2. Lưu thông tin phân loại (đã parse)
+		// 	var variants = variantLines.map(line => {
+		// 		var [name, sku, price] = line.trim().split("\t");
+		// 		return { name, sku, price: + price, stock: 1 };
+		// 	});
+		// 	sessionStorage.setItem("batchVariantData", JSON.stringify(variants));
+
+		// 	// 3. Lưu hình ảnh (chuyển sang base64)
+		// 	sessionStorage.setItem("batchVariantImages", JSON.stringify(files));
+
+		// 	// 4. Reset index xử lý
+		// 	sessionStorage.setItem("batchIndex", "0");
+
+		// 	// 5. Map hình ảnh
+		// 	sessionStorage.setItem("batchInputMap", JSON.stringify(inputMap));
+
+		// 	boxToast("✅ Dữ liệu đã được lưu và đang được xử lý", "success");
+		// }
+
+
+		// function moveToCurrentProduct() {
+		// 	var productIds = JSON.parse(sessionStorage.getItem("batchProductIds") || "[]");
+		// 	var variants = JSON.parse(sessionStorage.getItem("batchVariantData") || "[]");
+		// 	var images = JSON.parse(sessionStorage.getItem("batchVariantImages") || "[]");
+		// 	var index = parseInt(sessionStorage.getItem("batchIndex") || "0");
+
+		// 	if (productIds[index]) {
+		// 		var id = productIds[index];
+
+		// 		// Gắn lại ảnh vào từng variant
+		// 		var variantsWithImage = variants.map((variant, i) => ({
+		// 			...variant,
+		// 			image: images[i] || null
+		// 		}));
+
+		// 		var product = {
+		// 			id,
+		// 			variants: variantsWithImage
+		// 		};
+
+		// 		sessionStorage.setItem("currentBatchProduct", JSON.stringify(product));
+		// 		var nextUrl = `https://banhang.shopee.vn/portal/product/${productIds[index]}`;
+		// 		window.location.href = nextUrl;
+		// 	} else {
+		// 		boxToast(`Đã thêm xong`, "success");
+		// 		$(".tp-container.tp-button-toggle").on("click", () => {
+		// 			baoCaoThemPhanLoai();
+		// 			// sessionStorage.clear();
+		// 		});
+
+		// 		$(".tp-container.tp-button-toggle").click();
+		// 	}
+		// }
+
+
+		// function processCurrentProduct(callback) {
+		// 	var raw = sessionStorage.getItem("currentBatchProduct");
+		// 	if (raw) {
+		// 		var data = JSON.parse(raw);
+		// 		callback(data);
+		// 	}
+		// }
+
+		// function moveToNextProduct() {
+		// 	var index = parseInt(sessionStorage.getItem("batchIndex") || "0");
+		// 	sessionStorage.setItem("batchIndex", (index + 1).toString());
+		// 	moveToCurrentProduct();
+		// }
+
+		// // Tự mở danh sách phân loại
+		// // waitForElement($("body"), ".variation-model-table-footer", (el) => {
+		// // 	$(el).find("button").click();
+		// // }, {once: true});
+
+		// // Khi trang load và DOM sẵn sàng
+		// waitForElement($("body"), ".options-item.virtual-options-item", (el) => {
+		// 	processCurrentProduct((product) => {
+
+		// 		// 👉 GỌI HÀM CỦA BẠN TẠI ĐÂY
+		// 		// ví dụ: addVariants(product.variants);
+
+		// 		setTimeout(kiemTraTrungTenPhanLoaiHangLoatShopee(product), 2000);
+		// 	});
+		// }, { once: true, timeout: 10000 });
+
+		// // Kiểm tra các phân loại trước khi thêm phân loại hàng loạt shopee
+		// function kiemTraTrungTenPhanLoaiHangLoatShopee(data) {
+		// 	const arrayData = data.variants;
+
+		// 	const box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
+
+		// 	const currentList = [];
+
+		// 	// Thu thập các tên phân loại đang hiển thị trên giao diện
+		// 	box.each((_, el) => {
+		// 		const name = $(el).find(".variation-input-item-container.variation-input-item input").val();
+		// 		currentList.push(name.toLowerCase());
+		// 	});
+
+		// 	// Phân loại: trùng và chưa trùng
+		// 	const uniqueVariants = [];
+		// 	const existingVariants = [];
+
+		// 	arrayData.forEach(variant => {
+		// 		if (currentList.includes(variant.name.toLowerCase())) {
+		// 			existingVariants.push(variant);
+		// 		} else {
+		// 			uniqueVariants.push(variant);
+		// 		}
+		// 	});
+
+		// 	// Cập nhật lại chỉ giữ các phân loại mới
+		// 	data.variants = uniqueVariants;
+
+		// 	// Gộp phần phân loại trùng
+		// 	const exitItem = {
+		// 		[data.id]: {
+		// 			variants: existingVariants,
+		// 			note: "Tên phân loại đã tồn tại"
+		// 		}
+		// 	};
+
+		// 	const uniqueItem = {
+		// 		id: data.id,
+		// 		variants: uniqueVariants,
+		// 	};
+
+		// 	// Lấy object từ localStorage
+		// 	const stored = localStorage.getItem("TP-exit");
+		// 	const existing = stored ? JSON.parse(stored) : {};
+
+		// 	// Gộp dữ liệu mới vào
+		// 	deepMergeByKey(existing, data.id, exitItem[data.id]);
+
+		// 	// Lưu lại
+		// 	localStorage.setItem("TP-exit", JSON.stringify(existing));
+
+		// 	// Gọi kiểm tra tiếp với phần phân loại chưa trùng
+		// 	waitForElement($("body"), ".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper", (el) => {
+		// 		kiemTraGiaPhanLoaiHangLoatShopee(uniqueItem);
+		// 	}, {once: true});
+		// }
+
+		// // Kiểm tra giá phân loại hàng loạt
+		// function kiemTraGiaPhanLoaiHangLoatShopee(data) {
+		// 	if (!data || !data.id || !Array.isArray(data.variants)) return;
+
+		// 	const arrayData = data.variants;
+
+		// 	const box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+		// 	const minMax = { min: Infinity, max: 0 };
+
+		// 	box.each((i, el) => {
+		// 		const priceInput = $(el).find(".table-cell").eq(0).find("input");
+		// 		const price = parseInt(priceInput.val().trim());
+		// 		if (isNaN(price)) return;
+
+		// 		const { giaDuoi } = tachGia(price);
+		// 		if (!giaDuoi || giaDuoi === 0) return;
+
+		// 		if (giaDuoi < minMax.min) minMax.min = giaDuoi;
+		// 	});
+
+		// 	if (!isFinite(minMax.min)) minMax.min = 1000;
+		// 	minMax.max = minMax.min * 5;
+
+		// 	const errorVariants = [];
+		// 	const dataVariants = [];
+
+		// 	arrayData.forEach(variant => {
+		// 		let productPrice = parseInt(variant.price);
+		// 		if (isNaN(productPrice)) return;
+
+		// 		const { giaDuoi, giaDau, gia } = tachGia(productPrice);
+		// 		if (!giaDuoi || giaDuoi === 0) return;
+
+		// 		// Nếu giá đuôi mới < min hiện tại
+		// 		if (giaDuoi < minMax.min) {
+		// 			if (giaDuoi * 5 <= minMax.max) {
+		// 				minMax.min = giaDuoi;
+		// 				minMax.max = giaDuoi * 5;
+		// 			} else {
+		// 				errorVariants.push(variant);
+		// 				return;
+		// 			}
+		// 		}
+
+		// 		if (gia > minMax.max) {
+		// 			const giaDauMoi = minMax.max - 1000;
+		// 			const threshold = Math.max(Math.floor((giaDauMoi - giaDuoi) / giaDauMoi), 5000);
+
+		// 			if ((giaDauMoi - giaDuoi) < threshold) {
+		// 				errorVariants.push(variant);
+		// 				return;
+		// 			} else {
+		// 				var giaMoi = gopGia(giaDauMoi, giaDuoi);
+		// 				variant.price = giaMoi;
+		// 			}
+		// 		}
+
+		// 		dataVariants.push(variant);
+		// 	});
+
+		// 	// Nếu có lỗi, lưu lại vào localStorage
+		// 	if (errorVariants.length > 0) {
+		// 		const errorList = {
+		// 			[data.id]: {
+		// 				variants: errorVariants,
+		// 				note: "Sản phẩm cần xem xét lại giá"
+		// 			}
+		// 		};
+
+		// 		try {
+		// 			let errorStorage = localStorage.getItem("TP-exit");
+		// 			let errorData = errorStorage ? JSON.parse(errorStorage) : {};
+
+		// 			errorData = deepMergeByKey(errorData, data.id, errorList[data.id]);
+		// 			localStorage.setItem("TP-exit", JSON.stringify(errorData));
+		// 		} catch (e) {
+		// 			console.error("❌ Lưu TP-exit lỗi:", e);
+		// 		}
+		// 	}
+
+		// 	// Gọi tiếp tục xử lý với dữ liệu hợp lệ
+		// 	const dataItem = {
+		// 		id: data.id,
+		// 		variants: dataVariants
+		// 	};
+
+		// 	themPhanLoaiHangLoatShopee(dataItem);
+		// }
+
+		// // Thêm phân loại hàng loạt shopee
+		// function themPhanLoaiHangLoatShopee(data){
+		// 	var group = $(".tp-container .content-layout .layout-tab #group").find("option:selected").index();
+		// 	//var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
+		// 	var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item");
+
+		// 	var array = data.variants;
+
+		// 	var arrayData = [], arraySku = [];
+
+		// 	$.each(array, (index, value) => {
+		// 		arrayData.push(value.name);
+		// 		arraySku.push(value.sku);
+		// 	});
+
+		// 	var currentPos = 0;
+
+		// 	function writeValue(){
+		// 			if(currentPos >= arrayData.length){
+		// 				boxLogging(`Đã thêm phân loại, đang dò SKU...`, [`Đã thêm phân loại, đang dò SKU...`], ["orange"])
+		// 				themSKUHangLoatTheoPhanLoaiShopee(data);
+		// 				return;
+		// 			}
+
+		// 			var inputBox = box.eq(box.length - 1).find("input").trigger("input");
+
+		// 			inputBox.select();
+		// 			inputBox.attr("modelValue", arrayData[currentPos]);
+		// 			inputBox.val(arrayData[currentPos]);
+
+		// 			if (window.getSelection) {
+		// 				window.getSelection().removeAllRanges();
+		// 			}else if (document.selection) {
+		// 				document.selection.empty();
+		// 			}
+
+		// 			if ("createEvent" in document) {
+		// 				var evt = document.createEvent("HTMLEvents");
+		// 				evt.initEvent("input", false, true);
+		// 				$(inputBox).get(0).dispatchEvent(evt);
+		// 			}
+		// 			else {
+		// 				$(inputBox).get(0).fireEvent("oninput");
+		// 			}
+
+		// 			currentPos++
+
+		// 			inputBox.blur();
+
+		// 			setTimeout(writeValue, 2000);
+		// 		}
+		// 		writeValue();
+		// }
+
+		// // Thêm SKU hàng loạt theo tên phân loại shopee
+		// function themSKUHangLoatTheoPhanLoaiShopee(data){
+		// 	var array = data.variants;
+
+		// 	var arrayData = [], arraySku = [];
+
+		// 	$.each(array, (index, value) => {
+		// 		arrayData.push(value.name);
+		// 		arraySku.push(value.sku);
+		// 	});
+
+		// 	var currentPos = 0;
+		// 	var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+		// 	var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+		// 	function writeValue(){
+		// 		if(currentPos >= box.length){
+		// 			boxLogging(`Đã thêm SKU`, [`Đã thêm SKU`], ["green"]);
+		// 			suaGiaSKUHangLoatShopee(data);
+		// 			return;
+		// 		}
+
+		// 		var name = boxLeft.eq(currentPos).find(".table-cell.first-variation-cell")
+		// 		var nameProduct = name.contents()
+		// 			.filter(function() {
+		// 				return this.nodeType === 3; // chỉ lấy text thuần
+		// 			})[0]?.nodeValue.trim();
+		// 		var skuBox = box.eq(currentPos).find(".table-cell").eq(2).find("textarea");
+		// 		var priceBox = box.eq(currentPos).find(".table-cell").eq(0).find("input");
+		// 		var stockBox = box.eq(currentPos).find(".table-cell").eq(1).find("input");
+
+		// 		if(arrayData.includes(nameProduct)){
+
+
+		// 			var pos = arrayData.indexOf(nameProduct);
+		// 			skuBox.attr("modelValue", arraySku[pos]);
+		// 			skuBox.val(arraySku[pos]).trigger("input");
+
+		// 			if (window.getSelection) {
+		// 				window.getSelection().removeAllRanges();
+		// 			}else if (document.selection) {
+		// 				document.selection.empty();
+		// 			}
+
+		// 			if ("createEvent" in document) {
+		// 				var evt = document.createEvent("HTMLEvents");
+		// 				evt.initEvent("input", false, true);
+		// 				$(skuBox).get(0).dispatchEvent(evt);
+		// 			}
+		// 			else {
+		// 				$(skuBox).get(0).fireEvent("oninput");
+		// 			}
+
+		// 			simulateReactInput(stockBox, "1");
+		// 		}
+
+		// 		currentPos++;
+
+		// 		setTimeout(writeValue, 10);
+		// 	}
+		// 	writeValue();
+		// }
+
+		// // Sửa giá theo SKU hàng loạt shopee
+		// function suaGiaSKUHangLoatShopee(data){
+		// 	var array = data.variants;
+		// 	$.each(array, (index, value) => {
+		// 	var sku = value.sku;
+		// 	var gia = value.price.toString();
+
+		// 	var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+
+		// 	$.each(box, (index, value) => {
+		// 		var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
+		// 		var priceBox = box.eq(index).find(".table-cell").eq(0).find("input");
+
+		// 		if(skuBox.val().includes(sku)){
+		// 					var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+		// 					var gia1 = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+		// 		boxAlert(`Giá của ${sku} đã sửa từ ${priceBox1} => ${gia1}`);
+		// 		boxLogging(`Giá của ${sku} đã sửa từ ${priceBox1} => ${gia1}`, [`${sku}`, `${priceBox1}`, `${gia1}`], ["crimson", "yellow", "yellow"]);
+
+		// 		if(parseInt(priceBox.val()) < parseInt(gia)){
+		// 			boxLogging(`SKU: ${sku} có giá mới cao hơn giá hiện tại`, [`${sku}`], ["crimson"]);
+		// 			box.eq(index).css("background", "crimson");
+		// 		}else
+		// 			box.eq(index).css("background", "lightgreen");
+
+		// 		priceBox.select();
+		// 		simulateReactInput(priceBox, gia);
+		// 		priceBox.val(gia);
+
+		// 		if (window.getSelection) {
+		// 			window.getSelection().removeAllRanges();
+		// 		}else if (document.selection) {
+		// 			document.selection.empty();
+		// 		}
+
+		// 		if ("createEvent" in document) {
+		// 			var evt = document.createEvent("HTMLEvents");
+		// 			evt.initEvent("change", false, true);
+		// 			$(priceBox).get(0).dispatchEvent(evt);
+		// 		}
+		// 		else {
+		// 			$(priceBox).get(0).fireEvent("onchange");
+		// 		}
+		// 		}
+		// 	});
+		// 	});
+		// 	themAnhPhanLoaiHangLoatShopee(data);
+		// }
+
+		// // Thêm ảnh phân loại hàng loạt Shopee – từ sessionStorage.batchInputMap
+		// function themAnhPhanLoaiHangLoatShopee(data){
+		// 	var inputMap = JSON.parse(sessionStorage.getItem("batchInputMap") || "{}");
+
+		// 	var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+		// 	var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+		// 	var clickInput = false;
+
+		// 	$.each(data.variants, (index, valueData) => {
+		// 		valueData = valueData;
+
+		// 		$.each(box, async (index, valueBox) => {
+		// 			var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
+		// 			var imgInputShopee = boxLeft.eq(index).find(".table-cell").eq(0).find("input[type=file]")[0];
+		// 			var sku = skuBox.val().trim().toUpperCase();
+
+		// 			if(sku.includes(valueData.sku.toUpperCase())){
+		// 				var img = valueData.image;
+		// 				var file = await base64ToFile(img, `${valueData.sku}.jpg`);("input[type=file]")[0];
+
+		// 				var dt = new DataTransfer();
+		// 				dt.items.add(file);
+
+		// 				// Click input 1 lần để React ghi nhận focus
+		// 				if (!clickInput) {
+		// 					imgInputShopee.click();
+		// 					clickInput = true;
+		// 				}
+
+		// 				setTimeout(() => {
+		// 					imgInputShopee.files = dt.files;
+
+		// 					var evt = new Event("change", { bubbles: true });
+		// 					imgInputShopee.dispatchEvent(evt);
+
+
+		// 				}, 100);
+		// 			} else {
+		// 				console.warn(`⚠️ Không tìm thấy ảnh cho SKU: ${sku}`);
+		// 			};
+		// 		});
+		// 	});
+
+		// 	$(document).blur();
+		// 	//kiemTraPhanLoaiHangLoatShopee();
+		// 	// ✅ Khi xử lý xong:
+		// 	//setTimeout(saveProduct, 3000);
+		// 	//moveToNextProduct();
+		// }
+
+		// // Lưu sản phẩm sau khi thêm phân loại
+		// function saveProduct(){
+		// 	$("body").focus();
+		// 	var button = $(".shopee-fix-bottom-card.product-selected-fix .eds-button.eds-button--primary.eds-button--normal.eds-button--xl-large");
+		// 	console.log(button);
+		// 	button.trigger("click");
+
+		// 	setTimeout(() => {
+		// 		var box = $(".eds-modal").last();
+		// 		box.find(".eds-modal__footer button").last().trigger("click");
+		// 	}, 2000)
+
+		// 	setTimeout(moveToNextProduct,3000);
+		// }
+
+		// Tách file excel
+		async function splitExcelFile() {
+			var input = document.getElementById("fileInput");
+			var rowsPerFile = parseInt(document.getElementById("rowsPerFile").value);
+			var rowsToPreserve = parseInt(document.getElementById("rowsToPreserve").value);
+
+			if (!input.files.length) {
+				alert("Vui lòng chọn file Excel.");
+				return;
+			}
+
+			var file = input.files[0];
+			var buffer = await file.arrayBuffer();
+
+			var workbook = new ExcelJS.Workbook();
+			await workbook.xlsx.load(buffer);
+
+			var originalSheet = workbook.worksheets[0];
+			var totalRows = originalSheet.rowCount;
+
+			var zip = new JSZip();
+			var headerRows = [];
+			for (var i = 1; i <= rowsToPreserve; i++) {
+				headerRows.push(originalSheet.getRow(i));
+			}
+
+			var chunkIndex = 1;
+			for (i = rowsToPreserve + 1; i <= totalRows; i += rowsPerFile) {
+				var newWorkbook = new ExcelJS.Workbook();
+				var newSheet = newWorkbook.addWorksheet("Sheet1");
+
+				// Copy header
+				for (var h = 0; h < headerRows.length; h++) {
+				  copyRow(headerRows[h], newSheet.getRow(h + 1));
+				}
+
+				// Copy data chunk
+				var chunkEnd = Math.min(i + rowsPerFile - 1, totalRows);
+				var rowIndex = rowsToPreserve + 1;
+
+				for (var j = i; j <= chunkEnd; j++) {
+				  var originalRow = originalSheet.getRow(j);
+				  var newRow = newSheet.getRow(rowIndex++);
+				  copyRow(originalRow, newRow);
+				}
+
+				// Copy merged cells (chỉ phần header)
+				if (originalSheet._merges) {
+				  Object.keys(originalSheet._merges).forEach((mergeRange) => {
+					const [startRow] = mergeRange.match(/\d+/g).map(Number);
+					if (startRow <= rowsToPreserve) {
+					  newSheet.mergeCells(mergeRange);
+					}
+				  });
+				}
+
+				var xlsxBuffer = await newWorkbook.xlsx.writeBuffer();
+				zip.file(`part_${chunkIndex++}.xlsx`, xlsxBuffer);
+			}
+
+			zip.generateAsync({ type: "blob" }).then(function (content) {
+				saveAs(content, "splitted_excel.zip");
+			});
+
+			boxToast(`Đã chia nhỏ file excel thành công`, "success");
+		}
+
+		function copyRow(sourceRow, targetRow) {
+		  targetRow.height = sourceRow.height;
+
+		  // Kiểm tra xem dòng có bị ẩn không và ẩn nó lại trong sheet mới
+		  if (sourceRow.hidden) {
+			targetRow.hidden = true;
+		  }
+
+		  sourceRow.eachCell({ includeEmpty: true }, function (cell, colNumber) {
+			var targetCell = targetRow.getCell(colNumber);
+			targetCell.value = cell.value;
+
+			// Deep clone style
+			targetCell.style = JSON.parse(JSON.stringify(cell.style || {}));
+
+			if (cell.master && cell !== cell.master) {
+			  targetCell.value = cell.master.value;
+			}
+		  });
 		}
