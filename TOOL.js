@@ -1,4 +1,3 @@
-
 	'use strict';
 
 	// Trạng thái hiển thị của giao diện
@@ -47,14 +46,15 @@
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
 			// //"batKhuyenMaiShopee": batKhuyenMaiShopee,
 			// // --- TIKTOK
+			"giaDuoiTiktok": giaDuoiTiktok,
 			// "tgFlashSaleTiktok": tgFlashSaleTiktok,
-			// "giaDuoiTiktok": giaDuoiTiktok,
 			// "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
 			// // --- SAPO
 			// "kiemTraTonSapo": kiemTraTonSapo,
 			// // -- LAZADA
 			"giaDuoiLazada": giaDuoiLazada,
-			// "themPhanLoaiLazada": themPhanLoaiLazada,
+			"themPhanLoaiLazada": themPhanLoaiLazada,
+			// "themAnhPhanLoaiLazada": themAnhPhanLoaiLazada,
 			// "themGiaTheoSKULazada": themGiaTheoSKULazada,
 			// "ktraGiaChuongTrinhKMLazada": ktraGiaChuongTrinhKMLazada,
 			// //-- KHÁC
@@ -796,14 +796,15 @@
 							<!-- Lazada -->
 							<optgroup label="Lazada">
 								<option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
-								<option disabled data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
+								<option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
+								<option data-func="themAnhPhanLoaiLazada" data-layout="themAnhPhanLoaiLazadaLayout">Thêm Ảnh Phân Loại</option>
 								<option disabled data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
 								<option disabled data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
 							</optgroup>
 
 							<!-- TikTok -->
 							<optgroup label="TikTok">
-								<option disabled data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
+								<option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
 								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
@@ -1032,7 +1033,7 @@
 						backdrop-filter: blur(10px);
 						-webkit-backdrop-filter: blur(10px);
 						border: 1px solid rgba(255, 255, 255, 0.3);
-						display: none;
+						// display: none;
 					}
 
 					.tp-content > div{
@@ -1484,6 +1485,13 @@
 		var content = $(".layout-future");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "themAnhPhanLoaiLazadaLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<input type="file" />
+					</div>
+					`))
+				break;
 			case "themPhanLoaiNhieuLinkShopeeLayout":
 				content.append($(`
 					<div class="layout-tab">
@@ -1971,8 +1979,6 @@
 
 					var giaKM = tachGia(gia).giaDuoi;
 
-					console.log(giaKM);
-
 					if(!switcher.hasClass("eds-switch--disabled")){
 						if(!switcher.hasClass("eds-switch--open")){
 							parent.eq(index).css({
@@ -1993,7 +1999,7 @@
 							}else{
 								simulateClearing($(price), 0, () => {
 									$(price).val(giaKM);
-									simulateReactEvent($(price), "change");
+									simulateReactEvent($(price), "input");
 								})
 
 								parent.eq(index).css({
@@ -2707,7 +2713,7 @@
 			var group = $(".tp-container.tp-content .layout-future .layout-tab #group").find("option:selected").index();
 
 			var box = $(".variation-edit-item.version-a").eq(group).find(".option-container .options-item.drag-item");
-
+			
 
 			if(type){
 				var regex = /(\d{1,2}\/\d{1,2})/;
@@ -3516,9 +3522,10 @@
 
 		// Thêm phân loại Lazada
 		function themPhanLoaiLazada() {
-			var box = $(".sale-prop-body .next-formily-item").eq(0).find(".prop-option-list .next-form-item.form-item-prop-option-item");
+			var group = $(".tp-container.tp-content .layout-future .layout-tab #group").index();
+			var box = $(".sale-prop-body .next-formily-item").eq(group).find(".prop-option-list .next-form-item.form-item-prop-option-item");
 
-			var data = $(".tp-container .content-layout .layout-tab #data");
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data");
 			var array = data.val().split("\n");
 
 			var arrayData = [], arraySku = [];
@@ -3560,4 +3567,46 @@
 			}
 
 			writeData();
+		}
+
+		// Thay hình ảnh theo SKU
+		function themAnhPhanLoaiLazada(){
+			boxAlert("THEMANH");
+			// 1. Tạo file giả lập dạng PNG (binary chuẩn)
+			var pngBytes = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]); // Header PNG
+			var blob = new Blob([pngBytes], { type: 'image/png' });
+			var fakeFile = new File([blob], 'fake.png', { type: 'image/png' });
+
+			var file = $(".tp-container.tp-content .layout-future .layout-tab input");
+			console.log(file);
+
+			// 2. Tạo payload FormData giống Lazada
+			var formData = new FormData();
+			formData.append('bizCode', 'LAZADA_VN_ITEM_UTILITY');
+			formData.append('tenantId', 'LAZADA_VN');
+			formData.append('name', file.name);
+			formData.append('file', file);
+
+			// 3. Gửi bằng jQuery AJAX
+			$.ajax({
+				url: 'https://sellercenter.lazada.vn/apps/product/upload', // thay URL nếu bạn có URL cụ thể hơn
+				method: 'POST',
+				data: formData,
+				// processData: false,
+				// contentType: false,
+				// xhrFields: {
+				// withCredentials: true // giữ cookie đăng nhập nếu cần
+				// },
+				success: function (res) {
+					console.log('✅ Upload thành công:', res);
+				},
+				error: function (xhr, status, error) {
+					console.error('❌ Lỗi upload:', status, error);
+				}
+			});
+		}
+
+		function giaDuoiTiktok(){
+
+
 		}
