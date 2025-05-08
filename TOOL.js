@@ -1,4 +1,3 @@
-
 	'use strict';
 
 	// Trạng thái hiển thị của giao diện
@@ -1032,7 +1031,7 @@
 						backdrop-filter: blur(10px);
 						-webkit-backdrop-filter: blur(10px);
 						border: 1px solid rgba(255, 255, 255, 0.3);
-						display: none;
+						// display: none;
 					}
 
 					.tp-content > div{
@@ -1271,18 +1270,24 @@
 
 			// Context menu
 			$(document).on("contextmenu", (e) => {
-				var ignoreTags = ["img", "a", "input", "textarea", "button", "select", "span"]
+				// var ignoreTags = ["img", "a", "input", "textarea", "button", "select", "span"];
+				// var $target = $(e.target);
 
-				var target = e.target;
+				// // Kiểm tra nếu phần tử hoặc tổ tiên của nó là các tag bị bỏ qua
+				// var isIgnoredTag = ignoreTags.some(tag => $target.closest(tag).length > 0);
 
-				console.log(target.tagName + " " +ignoreTags.includes(target.tagName))
+				// // Kiểm tra nếu pseudo-element có thể tương tác
+				// var targetEl = $target[0];
+				// var before = window.getComputedStyle(targetEl, "::before");
+				// var after = window.getComputedStyle(targetEl, "::after");
+				// var hasPointerBefore = before && before.getPropertyValue("pointer-events") !== "none";
+				// var hasPointerAfter = after && after.getPropertyValue("pointer-events") !== "none";
 
-				// Nếu nhấn chuột phải vào các thẻ đặc biệt (img, a, input...)
-				if (ignoreTags.includes(target.tagName.toString().toLowerCase())) {
-					return true; // Cho phép context menu mặc định
-				}
+				// if (isIgnoredTag || hasPointerBefore || hasPointerAfter) {
+				// 	return true; // Cho phép context menu mặc định
+				// }
 
-				e.preventDefault();
+				// e.preventDefault();
 
 				$("#custom-context-menu")
 				.css({
@@ -1296,7 +1301,7 @@
 				$("#custom-context-menu").fadeOut(100);
 			});
 
-			$("#custom-context-menu .menu-item").on("click", function () {
+			$("#custom-context-menu .menu-item").on("click", function (e) {
 				const action = $(this).data("action");
 
 				if (action == "toggle-program"){
@@ -1308,6 +1313,15 @@
 						$(".tp-container.tp-content").css("display", "block");
 						$($(".tp-container.tp-content")).addClass("active");
 						boxAlert("Hiện Giao Diện");
+						var content = $(".tp-container.tp-content");
+
+						var width = content.width();
+						var height = content.height();
+
+						$(".tp-container.tp-content").css({
+							top: (e.pageY - (width / 2)),
+							left: (e.pageX - (height / 2))
+						})
 					}
 				}else if(action == "connect-server"){
 					if (socket && socket.connected) {
@@ -3506,4 +3520,52 @@
 				targetCell.value = cell.master.value;
 			}
 			});
+		}
+
+		// Thêm phân loại Lazada
+		function themPhanLoaiLazada() {
+			var box = $(".sale-prop-body .next-formily-item").eq(0).find(".prop-option-list .next-form-item.form-item-prop-option-item");
+
+			var data = $(".tp-container .content-layout .layout-tab #data");
+			var array = data.val().split("\n");
+
+			var arrayData = [], arraySku = [];
+
+			$.each(array, (index, value) => {
+				value = value.split("\t");
+				arrayData.push(value[0]);
+				arraySku.push(value[1]);
+			});
+
+			var currentPos = 0;
+
+			function writeData() {
+				// lấy lại input mới nhất mỗi lần
+				var boxList = $(".sale-prop-body .next-formily-item").eq(0).find(".prop-option-list .next-form-item.form-item-prop-option-item");
+				var inputBox = boxList.eq(boxList.length - 1).find(".prop-option-item .item-textbox input");
+
+				if (!inputBox.length) {
+					console.warn('Không tìm thấy input tại vị trí:', currentPos);
+					return;
+				}
+
+				simulatePaste(inputBox, arrayData[currentPos], 0, () => {
+					//console.log("✔ Thêm:", arrayData[currentPos]);
+
+					currentPos++;
+
+					if (currentPos >= arrayData.length){
+						boxLogging(`Đã thêm phân loại, đang thêm SKU`, [`Đã thêm phân loại, đang thêm SKU`], [`lightgreen`]);
+						setTimeout(themSKUTheoPhanLoaiLazada,1000);
+						return;
+					}
+
+					// chờ ô mới xuất hiện rồi tiếp tục
+					setTimeout(writeData, 300); // tuỳ sàn, có thể tăng lên 500ms nếu render chậm
+				});
+
+				inputBox.blur(); // để kích hoạt sự kiện thêm ô mới
+			}
+
+			writeData();
 		}
