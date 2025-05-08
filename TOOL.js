@@ -1032,7 +1032,7 @@
 						backdrop-filter: blur(10px);
 						-webkit-backdrop-filter: blur(10px);
 						border: 1px solid rgba(255, 255, 255, 0.3);
-						// display: none;
+						display: none;
 					}
 
 					.tp-content > div{
