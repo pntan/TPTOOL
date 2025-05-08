@@ -1,3 +1,4 @@
+
 	'use strict';
 
 	// Trạng thái hiển thị của giao diện
@@ -742,7 +743,7 @@
 				</div>
 
 				<div id="custom-context-menu" style="display:none; position:absolute; z-index:9999;">
-					<ul style="list-style:none; margin:0; padding:5px; background:#fff; border:1px solid #ccc; box-shadow: 0 2px 6px rgba(0,0,0,0.2); border-radius:4px;">
+					<ul>
 					<li class="menu-item" data-action="toggle-program">Ẩn/Hiện chương trình</li>
 					<li class="menu-item" data-action="connect-server">Kết nối máy chủ</li>
 					</ul>
@@ -952,11 +953,11 @@
 
 					#custom-context-menu .menu-item:hover {
 						background-color: #f0f4f8;
-						color: #000;
+						color: #fff;
 					}
 
 					#custom-context-menu .menu-item:active {
-						// background-color: #d9e5f1;
+						background: rgba(255, 255, 255, 0.6);
 					}
 
 					@keyframes fadeIn {
@@ -967,7 +968,7 @@
 					/* Optional dark mode */
 					@media (prefers-color-scheme: dark) {
 						#custom-context-menu {
-							background: rgba(45, 45, 45, 0.2);
+							background: rgba(0, 0, 0, 0.6);
 							border: 1px solid #333;
 						}
 						#custom-context-menu .menu-item {
@@ -1270,29 +1271,20 @@
 
 			// Context menu
 			$(document).on("contextmenu", (e) => {
-				// var ignoreTags = ["img", "a", "input", "textarea", "button", "select", "span"];
-				// var $target = $(e.target);
+				var ignoreTags = ["img", "a", "input", "textarea", "button", "select"];
+				var isIgnored = ignoreTags.includes(e.target.tagName.toLowerCase());
 
-				// // Kiểm tra nếu phần tử hoặc tổ tiên của nó là các tag bị bỏ qua
-				// var isIgnoredTag = ignoreTags.some(tag => $target.closest(tag).length > 0);
+				// Nếu không giữ Ctrl hoặc đang nhấn vào thẻ đặc biệt thì cho context mặc định
+				if (e.ctrlKey || isIgnored) return true;
 
-				// // Kiểm tra nếu pseudo-element có thể tương tác
-				// var targetEl = $target[0];
-				// var before = window.getComputedStyle(targetEl, "::before");
-				// var after = window.getComputedStyle(targetEl, "::after");
-				// var hasPointerBefore = before && before.getPropertyValue("pointer-events") !== "none";
-				// var hasPointerAfter = after && after.getPropertyValue("pointer-events") !== "none";
+				e.preventDefault();
 
-				// if (isIgnoredTag || hasPointerBefore || hasPointerAfter) {
-				// 	return true; // Cho phép context menu mặc định
-				// }
-
-				// e.preventDefault();
+				var offset = 10;
 
 				$("#custom-context-menu")
 				.css({
-					top: e.pageY + "px",
-					left: e.pageX + "px"
+					top: e.pageY + offset + "px",
+					left: e.pageX + offset + "px"
 				})
 				.fadeIn(100);
 			});
@@ -1302,7 +1294,7 @@
 			});
 
 			$("#custom-context-menu .menu-item").on("click", function (e) {
-				const action = $(this).data("action");
+				var action = $(this).data("action");
 
 				if (action == "toggle-program"){
 					if($($(".tp-container.tp-content")).hasClass("active")){
@@ -2715,7 +2707,7 @@
 			var group = $(".tp-container.tp-content .layout-future .layout-tab #group").find("option:selected").index();
 
 			var box = $(".variation-edit-item.version-a").eq(group).find(".option-container .options-item.drag-item");
-			
+
 
 			if(type){
 				var regex = /(\d{1,2}\/\d{1,2})/;
