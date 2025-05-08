@@ -1,3 +1,4 @@
+
 	'use strict';
 
 	// Trạng thái hiển thị của giao diện
@@ -19,12 +20,13 @@
 
 		// Danh sách thư viện cần thêm
 		const LIBRARIES = [
-			"https://code.jquery.com/jquery-3.7.1.min.js",
-			"https://code.jquery.com/ui/1.14.1/jquery-ui.js",
-			"https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js",
-			"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
-			"https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js",
-			"https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js",
+			"https://code.jquery.com/jquery-3.7.1.min.js", // JQYERY
+			"https://code.jquery.com/ui/1.14.1/jquery-ui.js", // JQUERY UI
+			"https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js", // EXCEL
+			"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js", // ZIP FILE
+			"https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js", // SAVE FILE
+			"https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js", // BOOTSTRAP
+			"https://cdn.socket.io/4.8.1/socket.io.min.js", // SOCKET IO
 		];
 
 		const actionMap = {
@@ -655,6 +657,46 @@
 			}
 		}
 
+		var socket = null;
+
+		$("")
+
+		// Kết nối tới máy chủ
+		function serverConnect(PORT = 2105){
+			const socket = io(`http://127.0.0.1:${PORT}`, {
+				reconnection: true,               // Tự động thử lại
+				reconnectionAttempts: 2,          // Tối đa 5 lần
+				reconnectionDelay: 2000,          // Mỗi lần cách nhau 2s
+				timeout: 5000                     // Timeout mỗi lần thử
+			});
+
+			socket.on("connect", () => {
+				boxAlert("✅ Đã kết nối tới máy chủ");
+				$("#server-status").text("ONLINE").removeAttr("class").addClass("online");
+				boxToast(`✅ Máy chủ trực tuyến`);
+			})
+
+			socket.on("disconnect", () => {
+				boxAlert(`⚠️ Mất kết nối với máy chủ`, "error");
+				$("#server-status").text("OFFLINE").removeAttr("class");
+				boxToast(`⚠️ Máy chủ ngoại tuyến`);
+			})
+
+			socket.on("connect_error", (err) => {
+				boxAlert(`🔁 Sự cố khi kết nối với máy chủ ${err.message}`, "error");
+				$("#server-status").text("CONNECTING...").removeAttr("class").addClass("connect");
+				boxToast(`🔁 Đang thử kết nối lại`);
+			})
+
+			socket.on("reconnect_failed", () => {
+				boxAlert("❌ Kết nối lại thất bại sau nhiều lần thử", "error");
+				$("#server-status").text("OFFLINE").removeAttr("class");
+				boxToast("❌ Không thể kết nối lại", "error");
+			})
+
+			return socket;
+		}
+
 		// Khải tạo chương trình
 		function INITCONFIG(){
 			boxAlert("ĐANG KHỞI TẠO");
@@ -664,6 +706,9 @@
 				createUI = true;
 				createLayout();
 				applyNonce();
+
+				// Kết nối máy chủ
+				socket = serverConnect(2105);
 
 				// Kiểm tra tự động mở các danh sách
 				checkPage();
@@ -697,10 +742,18 @@
 					<p>ChuẩnMua</p>
 				</div>
 
+				<div id="custom-context-menu" style="display:none; position:absolute; z-index:9999;">
+					<ul style="list-style:none; margin:0; padding:5px; background:#fff; border:1px solid #ccc; box-shadow: 0 2px 6px rgba(0,0,0,0.2); border-radius:4px;">
+					<li class="menu-item" data-action="toggle-program">Ẩn/Hiện chương trình</li>
+					<li class="menu-item" data-action="connect-server">Kết nối máy chủ</li>
+					</ul>
+				</div>
+
 				<div class="tp-container tp-content">
 					<div class="program-title">
 						<p>Công Cụ Hỗ Trợ</p>
 						<p>Ver ${VERSION}</p>
+						<p id="server-status">OFFLINE</p>
 					</div>
 
 					<div class="program-log">
@@ -866,6 +919,66 @@
 					.toast.warning { background-color: #ffc107; color: #212529; } /* vàng */
 					.toast.info    { background-color: #17a2b8; }   /* xanh biển */
 
+					#custom-context-menu {
+						display: none;
+						position: absolute;
+						z-index: 9999;
+						min-width: 180px;
+						background: rgba(255, 255, 255, 0.6);
+						border-radius: 8px;
+						box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+						font-family: "Segoe UI", sans-serif;
+						animation: fadeIn 0.15s ease-in-out;
+						overflow: hidden;
+						border: 1px solid #ddd;
+						border-radius: 10px;
+					}
+
+					#custom-context-menu ul {
+						list-style: none;
+						margin: 0;
+						padding: 0;
+					}
+
+					#custom-context-menu .menu-item {
+						display: flex;
+						align-items: center;
+						gap: 8px;
+						padding: 10px 16px;
+						cursor: pointer;
+						font-size: 14px;
+						color: #333;
+						transition: background 0.2s;
+					}
+
+					#custom-context-menu .menu-item:hover {
+						background-color: #f0f4f8;
+						color: #000;
+					}
+
+					#custom-context-menu .menu-item:active {
+						// background-color: #d9e5f1;
+					}
+
+					@keyframes fadeIn {
+						from { opacity: 0; transform: scale(0.98); }
+						to { opacity: 1; transform: scale(1); }
+					}
+
+					/* Optional dark mode */
+					@media (prefers-color-scheme: dark) {
+						#custom-context-menu {
+							background: rgba(45, 45, 45, 0.2);
+							border: 1px solid #333;
+						}
+						#custom-context-menu .menu-item {
+							color: #eee;
+						}
+						#custom-context-menu .menu-item:hover {
+							background-color: #333;
+						}
+					}
+
 					.tp-container{
 						position: fixed;
 						z-index: 9999999;
@@ -892,6 +1005,7 @@
 						font-size: 1.5rem;
 						font-weight: 700;
 						opacity: 0.6;
+						display: none;
 					}
 
 					.tp-button-toggle:hover{
@@ -918,7 +1032,7 @@
 						backdrop-filter: blur(10px);
 						-webkit-backdrop-filter: blur(10px);
 						border: 1px solid rgba(255, 255, 255, 0.3);
-						// display: none;
+						display: none;
 					}
 
 					.tp-content > div{
@@ -934,7 +1048,6 @@
 					.tp-content .program-title{
 						width: 100%;
 						text-align: center;
-						font-size: 2rem;
 						font-weight: 700;
 						padding: 1vh 0;
 					}
@@ -945,6 +1058,21 @@
 
 					.tp-content .program-title p:nth-child(2){
 						font-size: 0.75em;
+					}
+
+					.tp-content .program-title p:nth-child(3){
+						font-size: 0.75em;
+						color: #000;
+					}
+
+					.tp-content .program-title p:nth-child(3).online{
+						font-size: 0.75em;
+						color: lightgreen;
+					}
+
+					.tp-content .program-title p:nth-child(3).connect{
+						font-size: 0.75em;
+						color: #f7ad00;
 					}
 
 					.tp-content .program-log{
@@ -1140,6 +1268,58 @@
 					}
 				</style>
 			`))
+
+			// Context menu
+			$(document).on("contextmenu", (e) => {
+				var ignoreTags = ["img", "a", "input", "textarea", "button", "select", "span"]
+
+				var target = e.target;
+
+				console.log(target.tagName + " " +ignoreTags.includes(target.tagName))
+
+				// Nếu nhấn chuột phải vào các thẻ đặc biệt (img, a, input...)
+				if (ignoreTags.includes(target.tagName.toString().toLowerCase())) {
+					return true; // Cho phép context menu mặc định
+				}
+
+				e.preventDefault();
+
+				$("#custom-context-menu")
+				.css({
+					top: e.pageY + "px",
+					left: e.pageX + "px"
+				})
+				.fadeIn(100);
+			});
+
+			$(document).on("click", () => {
+				$("#custom-context-menu").fadeOut(100);
+			});
+
+			$("#custom-context-menu .menu-item").on("click", function () {
+				const action = $(this).data("action");
+
+				if (action == "toggle-program"){
+					if($($(".tp-container.tp-content")).hasClass("active")){
+						$(".tp-container.tp-content").css("display", "none");
+						$($(".tp-container.tp-content")).removeClass("active");
+						boxAlert("Ẩn Giao Diện");
+					}else{
+						$(".tp-container.tp-content").css("display", "block");
+						$($(".tp-container.tp-content")).addClass("active");
+						boxAlert("Hiện Giao Diện");
+					}
+				}else if(action == "connect-server"){
+					if (socket && socket.connected) {
+						boxToast("🟢 Đã kết nối với máy chủ", "info");
+						return;
+					}
+
+					// Gọi kết nối mới
+					socket = serverConnect(2105);
+				}
+				$("#custom-context-menu").fadeOut(100);
+			});
 
 			$(".tp-popup .popup-overlay").on("click", function () {
 				$(".tp-popup").hide();
@@ -3273,7 +3453,7 @@
 
 				// Copy header
 				for (var h = 0; h < headerRows.length; h++) {
-				  copyRow(headerRows[h], newSheet.getRow(h + 1));
+					copyRow(headerRows[h], newSheet.getRow(h + 1));
 				}
 
 				// Copy data chunk
@@ -3281,19 +3461,19 @@
 				var rowIndex = rowsToPreserve + 1;
 
 				for (var j = i; j <= chunkEnd; j++) {
-				  var originalRow = originalSheet.getRow(j);
-				  var newRow = newSheet.getRow(rowIndex++);
-				  copyRow(originalRow, newRow);
+					var originalRow = originalSheet.getRow(j);
+					var newRow = newSheet.getRow(rowIndex++);
+					copyRow(originalRow, newRow);
 				}
 
 				// Copy merged cells (chỉ phần header)
 				if (originalSheet._merges) {
-				  Object.keys(originalSheet._merges).forEach((mergeRange) => {
+					Object.keys(originalSheet._merges).forEach((mergeRange) => {
 					var [startRow] = mergeRange.match(/\d+/g).map(Number);
 					if (startRow <= rowsToPreserve) {
-					  newSheet.mergeCells(mergeRange);
+						newSheet.mergeCells(mergeRange);
 					}
-				  });
+					});
 				}
 
 				var xlsxBuffer = await newWorkbook.xlsx.writeBuffer();
@@ -3308,14 +3488,14 @@
 		}
 
 		function copyRow(sourceRow, targetRow) {
-		  targetRow.height = sourceRow.height;
+			targetRow.height = sourceRow.height;
 
-		  // Kiểm tra xem dòng có bị ẩn không và ẩn nó lại trong sheet mới
-		  if (sourceRow.hidden) {
+			// Kiểm tra xem dòng có bị ẩn không và ẩn nó lại trong sheet mới
+			if (sourceRow.hidden) {
 			targetRow.hidden = true;
-		  }
+			}
 
-		  sourceRow.eachCell({ includeEmpty: true }, function (cell, colNumber) {
+			sourceRow.eachCell({ includeEmpty: true }, function (cell, colNumber) {
 			var targetCell = targetRow.getCell(colNumber);
 			targetCell.value = cell.value;
 
@@ -3323,7 +3503,7 @@
 			targetCell.style = JSON.parse(JSON.stringify(cell.style || {}));
 
 			if (cell.master && cell !== cell.master) {
-			  targetCell.value = cell.master.value;
+				targetCell.value = cell.master.value;
 			}
-		  });
+			});
 		}
