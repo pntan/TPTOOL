@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.0.0";
+	const VERSION = "2.0.1";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -65,32 +65,37 @@
 		// Thêm thư viện
 		function loadLibrary(scripts, callback){
 			let index = 0;
+			try{
 
-			function loadNext(){
-				if (index >= scripts.length){
-					if (callback)
-						callback();
-					return;
+				function loadNext(){
+					if (index >= scripts.length){
+						if (callback)
+							callback();
+						return;
+					}
+
+					let script = document.createElement("script");
+					script.src = scripts[index];
+
+					script.onload = () => {
+						boxAlert(`Đã thêm ${scripts[index]}`);
+						index++;
+						loadNext();
+					}
+
+					script.onerror = (e) => {
+						boxAlert(`Có lỗi khi thêm ${scripts[index]}`, "error");
+						console.log(e);
+						index++;
+						loadNext();
+					}
+
+					document.head.appendChild(script);
 				}
-
-				let script = document.createElement("script");
-				script.src = scripts[index];
-
-				script.onload = () => {
-					boxAlert(`Đã thêm ${scripts[index]}`);
-					index++;
-					loadNext();
-				}
-
-				script.onerror = (e) => {
-					boxAlert(`Có lỗi khi thêm ${scripts[index]} (${e})`, "error");
-					index++;
-					loadNext();
-				}
-
-				document.head.appendChild(script);
-			}
-			loadNext();
+				loadNext();
+			}catch (e){
+				boxAlert(`Không thể load ${scripts[index]}`, "error");
+			}				
 		}
 
 		// lấy nonce từ tag có sẵn trong trang
@@ -796,7 +801,7 @@
 							<!-- TikTok -->
 							<optgroup label="TikTok">
 								<option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
-								<option disabled data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chéo Chương Trình Flash Sale</option>
+								<option data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chéo Chương Trình Flash Sale</option>
 								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
@@ -881,7 +886,13 @@
 						overflow-y: auto;
 						font-family: monospace;
 						font-size: 14px;
-						color: #333;
+						padding: 1vh;
+						overflow-y: auto;
+						background: #fdfdfd;
+						border-radius: 8px;
+						box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+						line-height: 1.5;
+						color: #222;
 					}
 
 					#toast-container {
@@ -895,9 +906,8 @@
 					}
 
 					.toast {
-						min-width: 220px;
-						max-width: 300px;
-						padding: 12px 16px;
+						width: auto;
+						max-width: 20vw;
 						border-radius: 6px;
 						color: white;
 						font-size: 14px;
@@ -906,6 +916,9 @@
 						transform: translateY(20px);
 						transition: all 0.3s ease;
 						position: relative;
+						background: #333;
+						padding: 10px 15px;
+						animation: slideIn 0.3s ease forwards;
 					}
 
 					/* Show animation */
@@ -984,6 +997,17 @@
 						position: fixed;
 						z-index: 9999999;
 						user-select: none;
+						max-height: 90vh;
+						max-width: 70vw;
+						overflow: hidden;
+						display: flex;
+						flex-direction: column;
+						background: rgba(255, 255, 255, 0.8);
+						border-radius: 10px;
+						backdrop-filter: blur(10px);
+						box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+						border: 1px solid rgba(255, 255, 255, 0.3);
+						padding: 1vh 1vw;
 					}
 
 					.tp-container *::-webkit-scrollbar {
@@ -1020,6 +1044,7 @@
 					}
 
 					.tp-content{
+						// display: none;
 						width: auto;
 						height: auto;
 						left: 0;
@@ -1033,7 +1058,10 @@
 						backdrop-filter: blur(10px);
 						-webkit-backdrop-filter: blur(10px);
 						border: 1px solid rgba(255, 255, 255, 0.3);
-						display: none;
+						flex-grow: 1;
+						overflow: hidden;
+						display: flex;
+						flex-direction: column;
 					}
 
 					.tp-content > div{
@@ -1050,29 +1078,30 @@
 						width: 100%;
 						text-align: center;
 						font-weight: 700;
-						padding: 1vh 0;
+						margin-bottom: 1vh;
 					}
 
 					.tp-content .program-title p:nth-child(1){
-						font-size: 1.25em;
+						font-size: 1.6em;
+						font-weight: bold;
+
+						color: #555;
 					}
 
 					.tp-content .program-title p:nth-child(2){
-						font-size: 0.75em;
+						font-size: 0.9em;
 					}
 
 					.tp-content .program-title p:nth-child(3){
-						font-size: 0.75em;
+						font-size: 1.1em;
 						color: #000;
 					}
 
 					.tp-content .program-title p:nth-child(3).online{
-						font-size: 0.75em;
 						color: lightgreen;
 					}
 
 					.tp-content .program-title p:nth-child(3).connect{
-						font-size: 0.75em;
 						color: #f7ad00;
 					}
 
@@ -1080,24 +1109,24 @@
 						width: 100%;
 						height: auto;
 						max-height: 20vh;
-						overflow: hidden;
-						overflow-y: scroll;
+						overflow-y: auto;
 						background: #fff;
-						border-radius: 10px;
+						border-radius: 8px;
+						padding: 1vh 1vw;
+						margin-bottom: 1vh;
+						box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
 					}
 
 					.tp-content .program-log pre{
-						width: 100%;
-						height: 100%;
-						text-indent: 3%;
 						white-space: pre-wrap;
 						word-wrap: break-word;
-						overflow-wrap: break-word;
-						padding: 2vh 2vw;
+						font-family: monospace;
+						font-size: 13px;
 					}
 
 					.tab-title {
 						display: flex;
+						flex-wrap: wrap;
 						gap: 1vw;
 						justify-content: center;
 						margin: 1vh 0;
@@ -1112,16 +1141,19 @@
 						font-weight: 600;
 						transition: 0.2s;
 						user-select: none;
+						transition: all 0.3s ease;
 					}
 
 					.tab-box.active {
 						background: #fff;
-						color: #000;
 						box-shadow: 0 0 10px #00000040;
 					}
 
 					.tab-content {
 						display: none;
+						flex-grow: 1;
+						overflow-y: auto;
+						padding: 1vh;
 					}
 
 					.tab-content.active {
@@ -1135,11 +1167,14 @@
 
 					.tp-content .program-future select{
 						width: 100%;
-						height: 5vh;
-						line-height: 5vh;
-						border-radius: 10px;
+						height: 4vh;
+						line-height: 4vh;
 						text-indent: 10px;
-						margin-bottom: 2vh;
+						border-radius: 10px;
+						border: 1px solid #aaa;
+						font-size: 14px;
+						margin-bottom: 1vh;
+						background: #f9f9f9;
 					}
 
 					.tp-content .program-future select optgroup{
@@ -1149,6 +1184,9 @@
 					.tp-content .layout-future{
 						width: 100%;
 						height: auto;
+						flex-grow: 1;
+						overflow-y: auto;
+						padding-bottom: 1vh;
 					}
 
 					.tp-content .layout-future * {
@@ -1200,16 +1238,27 @@
 
 					.tp-content .button-control{
 						width: 100%;
-						height: 4vh;
-						line-height: 4vh;
+						margin-top: auto;
 					}
 
 					.tp-content .button-control button{
 						width: 100%;
-						height: 100%;
 						background: crimson;
 						color: #fff;
 						font-weight: 700;
+						width: 100%;
+						padding: 12px;
+						background: #dc3545;
+						color: white;
+						font-weight: bold;
+						font-size: 15px;
+						border: none;
+						border-radius: 8px;
+						transition: all 0.3s ease;
+					}
+
+					.tp-content .button-control button:hover {
+						background: #bd2130;
 					}
 
 					.resize-handle {
@@ -1483,19 +1532,41 @@
 			case "saoChepFlashSaleTiktokLayout":
 				content.append($(`
 					<div class="layout-tab">
-						<input type="text" placeholder="Link để sao chép" />
+						<input class="copy-link" type="text" placeholder="Link để sao chép" />
 						<div class="button-control-promotion">
 							<button class="add-promotion">Thêm Chương Trình Mới</button>
 						</div>
 						<div class="area-promotion">
-							<div style="display: flex; justify-content: center; align-items: center" class="box-promotion">
-								<input type="text" placeholder="Tên chương trình" />
-								<input type="datetime-local" placeholder="Bắt đầu"/>
-								<input type="datetime-local" placeholder="Kết thúc"/>
+							<div style="display: none; justify-content: center; align-items: center; gap: 2vw" class="box-promotion root">
+								<input class="name" type="text" placeholder="Tên chương trình" /><span class="count-character">0/50</span>
+								<input class="time-start" type="datetime-local" placeholder="Bắt đầu"/>
+								<input class="time-end" type="datetime-local" placeholder="Kết thúc"/>
+								<button class="remove-promotion" style="background: crimson; color: #fff; font-weight: 700">Xóa</button>
 							</div>
+
+							<!-- DATA MẪU 
+							<div style="display: flex; justify-content: center; align-items: center; gap: 2vw" class="box-promotion">
+								<input class="name" type="text" placeholder="Tên chương trình" value="Chương Trình 1" /><span class="count-character">0/50</span>
+								<input class="time-start" type="datetime-local" placeholder="Bắt đầu" value="05/28/2025 09:00 AM" />
+								<input class="time-end" type="datetime-local" placeholder="Kết thúc" value="05/29/2025 09:00 AM"/>
+								<button class="remove-promotion" style="background: crimson; color: #fff; font-weight: 700">Xóa</button>
+							</div>
+							<div style="display: flex; justify-content: center; align-items: center; gap: 2vw" class="box-promotion">
+								<input class="name" type="text" placeholder="Tên chương trình" value="Chương Trình 2" /><span class="count-character">0/50</span>
+								<input class="time-start" type="datetime-local" placeholder="Bắt đầu" value="05/29/2025 09:00 AM"/>
+								<input class="time-end" type="datetime-local" placeholder="Kết thúc" value="05/30/2025 09:00 AM"/>
+								<button class="remove-promotion" style="background: crimson; color: #fff; font-weight: 700">Xóa</button>
+							</div>
+							<div style="display: flex; justify-content: center; align-items: center; gap: 2vw" class="box-promotion">
+								<input class="name" type="text" placeholder="Tên chương trình" value="Chương Trình 3" /><span class="count-character">0/50</span>
+								<input class="time-start" type="datetime-local" placeholder="Bắt đầu" value="05/30/2025 09:00 AM"/>
+								<input class="time-end" type="datetime-local" placeholder="Kết thúc" value="05/31/2025 09:00 AM"/>
+								<button class="remove-promotion" style="background: crimson; color: #fff; font-weight: 700">Xóa</button>
+							</div> -->
 						</div>
 					</div>
-				`))
+				`));
+				setEventSaoChepFlashSaleTiktok();
 				break;
 			case "themPhanLoaiNhieuLinkShopeeLayout":
 				content.append($(`
@@ -2718,7 +2789,7 @@
 			var group = $(".tp-container.tp-content .layout-future .layout-tab #group").find("option:selected").index();
 
 			var box = $(".variation-edit-item.version-a").eq(group).find(".option-container .options-item.drag-item");
-			
+
 
 			if(type){
 				var regex = /(\d{1,2}\/\d{1,2})/;
@@ -3620,6 +3691,291 @@
 		}
 
 		// Sao chép chương trình flash sale
-		function saoChepFlashSaleTiktok(){
+		function setEventSaoChepFlashSaleTiktok(){
+			$(".add-promotion").on("click", () => {
+				var box = $(".area-promotion").append($(".box-promotion.root").clone(true).removeClass("root").css("display", "flex"));
+				var timeStartInput = box.find(".time-start");
+				var timeEndInput = box.find(".time-end"); // Thêm selector cho input end time
 
+				// Lấy thời gian hiện tại theo định dạng YYYY-MM-DDTHH:mm
+				var now = new Date();
+				var year = now.getFullYear();
+				var month = String(now.getMonth() + 1).padStart(2, '0');
+				var day = String(now.getDate()).padStart(2, '0');
+				var hours = String(now.getHours()).padStart(2, '0');
+				var minutes = String(parseInt(now.getMinutes()) + 5).padStart(2, '0');
+
+				var currentTimeFormatted = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+				// Gán giá trị hiện tại cho input time-start
+				timeStartInput.val(currentTimeFormatted);
+
+				// Nếu bạn muốn gán một giá trị mặc định khác cho time-end, bạn có thể làm tương tự
+				// Ví dụ: đặt thời gian kết thúc sau 1 tiếng
+				var oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+				var endYear = oneHourLater.getFullYear();
+				var endMonth = String(oneHourLater.getMonth() + 1).padStart(2, '0');
+				var endDay = String(oneHourLater.getDate()).padStart(2, '0');
+				var endHours = String(parseInt(oneHourLater.getHours()) + 2).padStart(2, '0');
+				var endMinutes = String(oneHourLater.getMinutes()).padStart(2, '0');
+				var endTimeFormatted = `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}`;
+
+				timeEndInput.val(endTimeFormatted);
+
+				var name = box.find(".name");
+				var index = $(".box-promotion");
+
+				var currentName = `Flash sale 07 khung hằng ngày ${(index.length - 1).toString().padStart(2, "0")} ${day}/${month}/${year}`;
+				name.eq(index.length - 1).val(currentName);
+			})
+
+			$(".remove-promotion").on("click", function(){
+				$(this).parent().remove();
+			})
+
+			$(".box-promotion .name").on("keyup", function(){
+				var charLen = $(this).val().length;
+				$(this).parent().find(".count-character").text(`${charLen}/50`);
+			})
+
+			$(".box-promotion .name").on("keypress", function(){
+				var charLen = $(this).val().length;
+				$(this).parent().find(".count-character").text(`${charLen}/50`);
+			})
+
+			$(".box-promotion .name").on("change", function(){
+				var charLen = $(this).val().length;
+				$(this).parent().find(".count-character").text(`${charLen}/50`);
+			})
+		}
+
+		function saoChepFlashSaleTiktok(){
+			boxAlert("SAOCHEP");
+			var copyLink = $(".tp-container.tp-content .layout-future .layout-tab .copy-link");
+
+			if (copyLink.val().length  <= 10){
+				boxToast(`Đường dẫn chương trình gốc bị để trống`, "error");
+				return;
+			}
+
+			var promotionBox = $(".box-promotion");
+
+			var name, start, end;
+
+			localStorage.removeItem("TP-exit");
+
+			var promotionData = [];
+
+			$.each(promotionBox, (index, value) => {
+				if(index == 0)
+					return;
+				do{
+					name = $(promotionBox).eq(index).find(".name");
+					start = $(promotionBox).eq(index).find(".time-start");
+					start = formatDateStringTiktok(start.val());
+					end = $(promotionBox).eq(index).find(".time-end");
+					end = formatDateStringTiktok(end.val());
+				}while(name.val().length == 0);
+
+				promotionData.push({
+					name: name.val(),
+					start: start,
+					end: end
+				})
+			})
+
+			var totalPromotion = parseInt(promotionData.length) - 1;
+
+			sessionStorage.clear();
+
+			sessionStorage.setItem("TP-promotion", JSON.stringify(promotionData));
+			sessionStorage.setItem("TP-promotion-index", JSON.stringify(totalPromotion));
+			sessionStorage.setItem("TP-promotion-copylink", JSON.stringify(copyLink.val()));
+
+			checkCopyPromotion();
+		}
+
+		function checkCopyPromotion() {
+			boxAlert("KIEMTRA")
+			try {
+				var promotion = JSON.parse(sessionStorage.getItem("TP-promotion") || "[]");
+				var promotionIndex = JSON.parse(parseInt(sessionStorage.getItem("TP-promotion-index")));
+				var promotionLink = JSON.parse(sessionStorage.getItem("TP-promotion-copylink"));
+
+				// Nếu hết dữ liệu thì thông báo
+				if (!promotion || !promotion[promotionIndex]) {
+					boxToast("🎉 Đã hoàn tất sao chép chương trình khuyến mãi", "success");
+					sessionStorage.clear();
+					return;
+				}
+
+				// Nếu chưa đúng trang thì chuyển hướng
+				if (!window.location.href.includes(promotionLink)) {
+					window.location.href = promotionLink;
+					return;
+				}
+
+				var { name, start, end } = promotion[promotionIndex];
+
+				waitForElement($("body"), ".theme-arco-form-item-control#name input#name_input", async (el) => {
+					var nameBox = $(el);
+
+					// Điền tên
+					simulateClearReactInput(nameBox);
+					simulateReactInput(nameBox, name);
+
+					waitForElement($("body"), ".theme-arco-form-item-control#period input", async (el) => {
+						var time = $(".theme-arco-form-item-control#period input");
+						time.removeAttr("readonly");
+
+						var timeStart = time.eq(0);
+						var timeEnd = time.eq(1);
+
+						// Chọn ngày + xác nhận
+						await dateTimeChoiceTiktok(timeStart, start);
+						await dateTimeChoiceTiktok(timeEnd, end);
+						confirmPromotionTiktok(promotionIndex);
+						await confirmPromotionTiktok(promotionIndex);
+
+						setTimeout(checkCopyPromotion, 3000); // đợi nhẹ 1s cho ổn định
+					});
+				})
+			} catch (e) {
+				boxAlert("❌ Lỗi khi kiểm tra chương trình: " + e.message, "error");
+			}
+		}
+		checkCopyPromotion();
+
+		// Xác Nhận
+		function confirmPromotionTiktok(index){
+			if(index >= 0){
+				sessionStorage.setItem("TP-promotion-index", JSON.stringify(parseInt(index - 1)));
+			}
+			var confirmButton = $(".theme-arco-btn.theme-arco-btn-primary.theme-arco-btn-size-default.theme-arco-btn-shape-square.theme-m4b-button.ml-16");
+			confirmButton.eq(0).click();
+		}
+
+		// Chọn ngày từ bảng của tiktok
+		function dateTimeChoiceTiktok(selector, dateTime){
+			return new Promise((resolve) => {
+				simulateReactEvent(selector, "click");
+
+				dateTime = dateTime.split(" ");
+				var date = dateTime[0];
+				var time = dateTime[1];
+
+				var [dayRoot, monthRoot, yearRoot] = date.split("/");
+
+				time = time.replace("(GMT+7)", "");
+				var [hoursRoot, minutesRoot] = time.split(":")
+
+				waitForElement($("body"), ".theme-arco-picker-container", (el) => {
+
+					function checkHeader(value){
+						var header = $(el).find(".theme-arco-picker-header");
+						var preYear = header.find("div").eq(0);
+						var preMonth = header.find("div").eq(1);
+						var value = header.find("div").eq(2);
+						var nextMonth = header.find("div").eq(3);
+						var nextYear = header.find("div").eq(4);
+
+						value = value.toString().split("-");
+						var year = value[0];
+						var month = value[1];
+
+						if(year != yearRoot){
+							var len = Math.abs(year - yearRoot);
+							if(parseInt(year) - parseInt(yearRoot) < 0){
+								while(len > 0){
+									nextYear.click();
+									len--;
+								}
+							}else{
+								while(len > 0){
+									preYear.click();
+									len--;
+								}
+							}
+						}
+
+						if(month != monthRoot){
+							len = Math.abs(month - monthRoot);
+							if(parseInt(month) - parseInt(monthRoot) < 0){
+								while(len > 0){
+									nextMonth.click();
+									len--;
+								}
+							}else{
+								while(len > 0){
+									preMonth.click();
+									len--;
+								}
+							}
+						}
+					}
+
+					checkHeader();
+
+					function checkBody(){
+						var body = $(el).find(".theme-arco-picker-body");
+						var row = body.find(".theme-arco-picker-row");
+
+						$.each(row, (indexRow, valueRow) => {
+							var cell = $(valueRow).find(".theme-arco-picker-cell");
+
+							$.each(cell, (indexCell, valueCell) => {
+								if($(valueCell).not(".theme-arco-picker-cell-disabled")){
+									if(parseInt($(valueCell).text()) == parseInt(dayRoot)){
+										$(valueCell).click();
+									}
+								}
+							})
+						})
+					}
+
+					checkBody();
+
+					function checkTime(){
+						var footer = $(el).find(".theme-arco-picker-footer");
+						footer.find("button.theme-arco-picker-btn-select-time").click();
+
+						waitForElement($(el), ".theme-arco-panel-date-timepicker", (el) => {
+							var timePicker = $(el).find(".theme-arco-timepicker");
+							var list = timePicker.find(".theme-arco-timepicker-list");
+
+							var hours = list.eq(0);
+							var minute = list.eq(1);
+
+							$.each(hours.find("ul li"), (index, value) => {
+								if(parseInt($(value).text()) == hoursRoot){
+									$(value).click();
+								}
+							})
+
+							$.each(minute.find("ul li"), (index, value) => {
+								if(parseInt($(value).text()) == minutesRoot){
+									$(value).click();
+								}
+							})
+						})
+					}
+
+					checkTime();
+
+					$(el).find("button.theme-arco-picker-btn-confirm").click();
+					setTimeout(resolve, 1000);
+				})
+			});
+		}
+
+		// Chỉnh định dạng ngày của tiktok
+		function formatDateStringTiktok(value){
+			value = value.toString().split("T");
+			var date = value[0];
+			var time = value[1];
+
+			var [year, month, day] = date.split("-");
+			date = `${day}/${month}/${year}`;
+
+			return (`${date} ${time}(GMT+7)`);
 		}
