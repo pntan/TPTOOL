@@ -4,15 +4,15 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.0.1";
+	const VERSION = "2.1.0";
 
-	/*var Jqu = document.createElement("script");
+	/*const Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
 	Jqu.setAttribute("rel", "preload");
 	Jqu.setAttribute("async", "async");
 	document.head.appendChild(Jqu);
 
-	var JquUI = document.createElement("script");
+	const JquUI = document.createElement("script");
 	JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
 	JquUI.setAttribute("rel", "preload");
 	document.head.appendChild(JquUI);*/
@@ -664,11 +664,37 @@
 
 		var socket = null;
 
-		$("")
+		async function getUrlServer(){
+			var owner = 'pntan';
+			var repo = 'TPTOOL';
+			var path = 'urlNgrok'; // tên file chứa URL
+			var branch = 'main';
+
+			try {
+				// Lấy file từ GitHub API
+				const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?_=${Date.now()}`);
+				var json = await res.json();
+				var content = atob(json.content); // Giải mã base64
+				var url = content.trim();
+
+				if (socket && socket.connect){
+					boxToast(`Đã kết nối tới máy chủ rồi`, "info");
+					retủn;
+				}
+
+				serverConnect(url);
+			} catch (e) {
+				console.error("Không thể lấy URL từ GitHub:", e.message);
+				serverConnect(`https://127.0.0.1:2105`);
+			}
+		}
 
 		// Kết nối tới máy chủ
-		function serverConnect(PORT = 2105){
-			const socket = io(`http://127.0.0.1:${PORT}`, {
+		function serverConnect(url){
+			boxAlert("KETNOIMAYCHU");
+			console.log(url);
+			var socket = io(url, {
+				transports: ["websocket"],        // ⛔️ tránh lỗi polling
 				reconnection: true,               // Tự động thử lại
 				reconnectionAttempts: 2,          // Tối đa 5 lần
 				reconnectionDelay: 2000,          // Mỗi lần cách nhau 2s
@@ -679,24 +705,28 @@
 				boxAlert("✅ Đã kết nối tới máy chủ");
 				$("#server-status").text("ONLINE").removeAttr("class").addClass("online");
 				boxToast(`✅ Máy chủ trực tuyến`);
+				$(".tab-box[data-tab='tab-online-function'").removeClass("disabled");
 			})
 
 			socket.on("disconnect", () => {
 				boxAlert(`⚠️ Mất kết nối với máy chủ`, "error");
 				$("#server-status").text("OFFLINE").removeAttr("class");
 				boxToast(`⚠️ Máy chủ ngoại tuyến`);
+				$(".tab-box[data-tab='tab-online-function'").addClass("disabled");
 			})
 
 			socket.on("connect_error", (err) => {
 				boxAlert(`🔁 Sự cố khi kết nối với máy chủ ${err.message}`, "error");
 				$("#server-status").text("CONNECTING...").removeAttr("class").addClass("connect");
 				boxToast(`🔁 Đang thử kết nối lại`);
+				$(".tab-box[data-tab='tab-online-function'").addClass("disabled");
 			})
 
 			socket.on("reconnect_failed", () => {
 				boxAlert("❌ Kết nối lại thất bại sau nhiều lần thử", "error");
 				$("#server-status").text("OFFLINE").removeAttr("class");
 				boxToast("❌ Không thể kết nối lại", "error");
+				$(".tab-box[data-tab='tab-online-function'").addClass("disabled");
 			})
 
 			return socket;
@@ -713,7 +743,7 @@
 				applyNonce();
 
 				// Kết nối máy chủ
-				socket = serverConnect(2105);
+				socket = getUrlServer();
 
 				// Kiểm tra tự động mở các danh sách
 				checkPage();
@@ -773,6 +803,9 @@
 							<div class="tab-box" data-tab="tab-custom">
 								<p>Tùy Chỉnh</p>
 							</div>
+							<div class="tab-box disabled" data-tab="tab-online-function">
+								<p>Chức Năng Online</p>
+							</div>
 						</div>
 					</div>
 
@@ -801,7 +834,8 @@
 							<!-- TikTok -->
 							<optgroup label="TikTok">
 								<option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
-								<option data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chéo Chương Trình Flash Sale</option>
+								<option data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chép Chương Trình Flash Sale</option>
+								<option data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
 								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
@@ -832,6 +866,17 @@
 					</div>
 
 					<div id="tab-custom" class="tab-content">
+						<select id="optionSelect">
+							<option>Chung</option>
+							<option>Shopee</option>
+							<option>Tiktok</option>
+							<option>Lazada</option>
+							<option>Sapo</option>
+							<option>Khác</option>
+						</select>
+					</div>
+
+					<div id="tab-online-function" class="tab-content">
 					</div>
 
 					<div class="button-control">
@@ -1060,7 +1105,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						display: none;
+						display: flex;
 						flex-direction: column;
 					}
 
@@ -1144,6 +1189,11 @@
 						transition: all 0.3s ease;
 					}
 
+					.tab-box.disabled{
+						cursor: not-allowed;
+						background: whitesmoke;
+					}
+
 					.tab-box.active {
 						background: #fff;
 						box-shadow: 0 0 10px #00000040;
@@ -1165,7 +1215,7 @@
 						height: auto;
 					}
 
-					.tp-content .program-future select{
+					.tp-content .tab-content select{
 						width: 100%;
 						height: 4vh;
 						line-height: 4vh;
@@ -1177,7 +1227,7 @@
 						background: #f9f9f9;
 					}
 
-					.tp-content .program-future select optgroup{
+					.tp-content .tab-content select optgroup{
 						text-indent: 5%;
 					}
 
@@ -1367,7 +1417,7 @@
 					}
 
 					// Gọi kết nối mới
-					socket = serverConnect(2105);
+					socket = getUrlServer();
 				}
 				$("#custom-context-menu").fadeOut(100);
 			});
@@ -1378,6 +1428,8 @@
 
 			// Chọn tab
 			$('.tab-box').click(function () {
+				if($(this).is(".disabled"))
+					return;
 				var tabToShow = $(this).data('tab');
 
 				// Bỏ active các tab khác
@@ -1529,6 +1581,12 @@
 		var content = $(".layout-future");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "chinhSuaKhuyenMaiTiktokLayout":
+				content.append($(`
+					<div class="layout-tab">
+					</div>
+				`));
+					break;
 			case "saoChepFlashSaleTiktokLayout":
 				content.append($(`
 					<div class="layout-tab">
@@ -2977,7 +3035,7 @@
 
 		// Tạo báo cáo lỗi
 		function baoCaoThemPhanLoai() {
-			const raw = localStorage.getItem("TP-exit");
+			var raw = localStorage.getItem("TP-exit");
 			if (!raw) {
 				boxLogging("Không tìm thấy dữ liệu trong localStorage.TP-exit", ["localStorage.TP-exit"], ["red"]);
 				return;
@@ -2991,14 +3049,14 @@
 				return;
 			}
 
-			const items = Object.values(allData);
+			var items = Object.values(allData);
 			if (!items.length) {
 				boxLogging("Không có mục nào để báo cáo", ["báo cáo"], ["orange"]);
 				return;
 			}
 
 			// Tạo bảng với style đẹp
-			const table = $(`
+			var table = $(`
 				<table style="
 					border-collapse: separate;
 					border-spacing: 0;
@@ -3032,7 +3090,7 @@
 				if (!item.variants) return;
 
 				item.variants.forEach((v, index) => {
-					const row = $(`
+					var row = $(`
 						<tr style="background-color: ${stt % 2 === 0 ? '#fafafa' : '#ffffff'};">
 							<td style="text-align:center; padding: 8px; border-bottom: 1px solid #eee;">${stt++}</td>
 							<td style="text-align:left; padding: 8px; border-bottom: 1px solid #eee;">${v.name}</td>
@@ -3051,7 +3109,7 @@
 
 			boxPopup(table);
 
-			const totalVariants = items.reduce((sum, item) => sum + (item.variants?.length || 0), 0);
+			var totalVariants = items.reduce((sum, item) => sum + (item.variants?.length || 0), 0);
 			boxLogging(`Tạo báo cáo với tổng ${totalVariants} biến thể.`, [], ["green"]);
 		}
 
