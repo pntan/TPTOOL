@@ -1,10 +1,29 @@
+// ==UserScript==
+// @name         Công Cụ Hỗ Trợ Mới
+// @namespace    http://tampermonkey.net/
+// @version      2025-01-02
+// @description  Bộ công cụ tích hợp các chức năng hỗ trợ cho sàn TMĐT
+// @author       TanPhan
+// @match        https://*/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=http://anonymouse.org/
+// @grant        none
+// @require      https://code.jquery.com/jquery-3.7.1.min.js
+// @require      https://code.jquery.com/ui/1.14.1/jquery-ui.js
+// @require      https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js
+// @require      https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js
+// ==/UserScript==
+/* globals       jQuery, $, waitForKeyElements */
+
+(function() {
 	'use strict';
 
 	// Trạng thái hiển thị của giao diện
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.1";
+	const VERSION = "2.0.0";
 
 	/*const Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -17,6 +36,7 @@
 	JquUI.setAttribute("rel", "preload");
 	document.head.appendChild(JquUI);*/
 
+	window.onload = function(){
 		// Danh sách thư viện cần thêm
 		const LIBRARIES = [
 			"https://code.jquery.com/jquery-3.7.1.min.js", // JQYERY
@@ -1119,7 +1139,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						display: flex;
+						display: none;
 						flex-direction: column;
 					}
 
@@ -1614,6 +1634,12 @@
 					content.append($(`
 						<div class="layout-tab">
 							<div class="message-content">
+								<div class="ai-message">
+									<p>Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI</p>
+								</div>
+								<div class="user-message">
+									<p>Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng</p>
+								</div>
 							</div>
 							<div class="typing-content">
 								<input type="text" />
@@ -1629,6 +1655,22 @@
 					$(".layout-tab .message-content").css({
 						"width": "100%",
 						"height": "auto",
+					})
+
+					$(".layout-tab .message-content .ai-message").css({
+						"width": "auto",
+						"max-width": "80%",
+						"height": "auto",
+						"float": "left",
+						"clear": "both",
+					})
+
+					$(".layout-tab .message-content .user-message").css({
+						"width": "auto",
+						"max-width": "80%",
+						"height": "auto",
+						"float": "right",
+						"clear": "both",
 					})
 
 					$(".layout-tab	.typing-content").css({
@@ -2208,10 +2250,10 @@
 									simulateReactEvent($(price), "input");
 								})
 
-								parent.eq(index).css({
-									"background": "green",
-									"color": "white"
-								});
+								// parent.eq(index).css({
+								// 	"background": "green",
+								// 	"color": "white"
+								// });
 							}
 						}
 					}
@@ -4142,8 +4184,12 @@
 		function aiChat(){
 			$(".tp-container.tp-content .layout-future .layout-tab .typing-content input").on("keypress", function(e){
 				if(e.keyCode == 13){
-					socket.emit("aichat", $(this).val());
+					//socket.emit("aichat", $(this).val());
 					console.log($(this).val());
 				}
+			})
+
+			socket.on("ai_error", (res) => {
+				$("")
 			})
 		}
