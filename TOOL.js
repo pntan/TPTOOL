@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.0";
+	const VERSION = "2.1.1";
 
 	/*const Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -48,6 +48,7 @@
 			// // --- TIKTOK
 			"giaDuoiTiktok": giaDuoiTiktok,
 			"saoChepFlashSaleTiktok": saoChepFlashSaleTiktok,
+			"kiemTraMaPhanLoaiTiktok": kiemTraMaPhanLoaiTiktok,
 			// "tgFlashSaleTiktok": tgFlashSaleTiktok,
 			// "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
 			// // --- SAPO
@@ -61,6 +62,10 @@
 			"splitExcelFile": splitExcelFile,
 			// "compareVoucher": compareVoucher,
 		};
+
+		const actionOnlineMap = {
+			"aiChat": aiChat,
+		}
 
 		// Thêm thư viện
 		function loadLibrary(scripts, callback){
@@ -679,7 +684,7 @@
 
 				if (socket && socket.connect){
 					boxToast(`Đã kết nối tới máy chủ rồi`, "info");
-					retủn;
+					return;
 				}
 
 				serverConnect(url);
@@ -693,7 +698,7 @@
 		function serverConnect(url){
 			boxAlert("KETNOIMAYCHU");
 			console.log(url);
-			var socket = io(url, {
+			socket = io(url, {
 				transports: ["websocket"],        // ⛔️ tránh lỗi polling
 				reconnection: true,               // Tự động thử lại
 				reconnectionAttempts: 2,          // Tối đa 5 lần
@@ -835,7 +840,8 @@
 							<optgroup label="TikTok">
 								<option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
 								<option data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chép Chương Trình Flash Sale</option>
-								<option data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
+								<option data-func="kiemTraMaPhanLoaiTiktok">Hiển Thị Mã Phân Loại</option>
+								<option disabled data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
 								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
@@ -861,12 +867,13 @@
 
 						</select>
 
-						<div class="layout-future">
+						<div class="layout-future functionSelect">
 						</div>
 					</div>
 
 					<div id="tab-custom" class="tab-content">
 						<select id="optionSelect">
+							<option>Chọn Chức Năng</option>
 							<option>Chung</option>
 							<option>Shopee</option>
 							<option>Tiktok</option>
@@ -877,6 +884,13 @@
 					</div>
 
 					<div id="tab-online-function" class="tab-content">
+						<select id="onlineSelect">
+							<option hidden>Chọn Chức Năng</option>
+							<option data-func="aiChat" data-layout="aiChatLayout">Veritas</option>
+						</select>
+
+						<div class="layout-future onlineSelect">
+						</div>
 					</div>
 
 					<div class="button-control">
@@ -1089,7 +1103,7 @@
 					}
 
 					.tp-content{
-						display: none;
+						// display: none;
 						width: auto;
 						height: auto;
 						left: 0;
@@ -1105,7 +1119,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						// display: flex;
+						display: flex;
 						flex-direction: column;
 					}
 
@@ -1432,6 +1446,12 @@
 					return;
 				var tabToShow = $(this).data('tab');
 
+				if(tabToShow.includes("tab-online-function")){
+					$(".button-control").css("display", "none");
+				}else{
+					$(".button-control").css("display", "block");
+				}
+
 				// Bỏ active các tab khác
 				$('.tab-box').removeClass('active');
 				$(this).addClass('active');
@@ -1552,7 +1572,7 @@
 				}
 			});
 
-			//Chọn chức năng
+			// Chọn chức năng cho sàn
 			$("select#functionSelect").on("change", function(){
 				var option = $(this).find("option:selected");
 				$("#excute-command").show();
@@ -1572,13 +1592,65 @@
 			$.each($("iframe"), (index, value) => {
 				$("iframe").eq(index).remove();
 			});
+
+			// Chọn chức năng online
+			$("select#onlineSelect").on("change", function(){
+				var option = $(this).find("option:selected");
+
+				createLayoutOnline(option.data("layout"));
+
+				if(actionOnlineMap[option.data("func")])
+					actionOnlineMap[option.data("func")]();
+			})
+		}
+
+		// Dựng giao diện cho lựa chọn chức năng online
+		function createLayoutOnline(layoutName){
+			layoutName = layoutName == undefined ? "Không có giao diện" : layoutName;
+
+			var content = $(".layout-future.onlineSelect");
+			switch(layoutName) {
+				case "aiChatLayout":
+					content.append($(`
+						<div class="layout-tab">
+							<div class="message-content">
+							</div>
+							<div class="typing-content">
+								<input type="text" />
+							</div>
+						</div>
+					`))
+
+					$(".layout-tab").css({
+						"width": "100%",
+						"height": "auto",
+					})
+
+					$(".layout-tab .message-content").css({
+						"width": "100%",
+						"height": "auto",
+					})
+
+					$(".layout-tab	.typing-content").css({
+						"width": "100%",
+						"height:": "5vh",
+					})
+
+					$(".layout-tab	.typing-content input").css({
+						"width": "100%",
+						"height": "100%",
+						"background": "grey",
+						"color": "#fff",
+					})
+					break;
+			}
 		}
 
 		// Dựng giao diện của mỗi lựa chọn
 		function createLayoutTab(layoutName){
 		layoutName = layoutName == undefined ? "Không có giao diện" : layoutName;
 		boxLogging(`Giao Diện: ${layoutName}`, [`${layoutName}`], ["crimson"]);
-		var content = $(".layout-future");
+		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
 			case "chinhSuaKhuyenMaiTiktokLayout":
@@ -4036,4 +4108,42 @@
 			date = `${day}/${month}/${year}`;
 
 			return (`${date} ${time}(GMT+7)`);
+		}
+
+		if(window.location.href.includes("https://seller-vn.tiktok.com/product/edit")){
+			waitForElement($("body"), ".core-table-content-inner", kiemTraMaPhanLoaiTiktok);
+		}
+
+		// Kiểm tra mã phân loại tiktok
+		function kiemTraMaPhanLoaiTiktok(){
+			var table = $(".core-table-content-inner tbody");
+
+			var row = table.find("tr.core-table-tr");
+
+			row.find(".tp-model-id").remove();
+
+			$.each(row, (index, value) => {
+				var name = row.eq(index).find("td.core-table-td").eq(0);
+				var price = row.eq(index).find("td.core-table-td").eq(1);
+				var stock = row.eq(index).find("td.core-table-td").eq(2);
+				var sku = row.eq(index).find("td.core-table-td").eq(3);
+
+				var productID = price.find("#skus").data("id");
+				productID = productID.split(".");
+				productID = productID[productID.length - 1];
+
+				name.find(".core-table-cell-wrap-value").append($(`
+					<p class="tp-model-id">ID phân loại: <span class="copyable" style="cursor: pointer;">${productID}</span></p>
+				`))
+			})
+		}
+
+		// Chat với AI
+		function aiChat(){
+			$(".tp-container.tp-content .layout-future .layout-tab .typing-content input").on("keypress", function(e){
+				if(e.keyCode == 13){
+					socket.emit("aichat", $(this).val());
+					console.log($(this).val());
+				}
+			})
 		}
