@@ -1134,7 +1134,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						display: none;
+						display: flex;
 						flex-direction: column;
 					}
 
@@ -4362,42 +4362,50 @@
 
 		// Tự động thêm preview link
 		if(window.location.toString().includes("https://banhang.shopee.vn/portal/product/")){
-			waitForElement($("body"), ".preview-card .preview-card-title", setPreviewLink);
+			//waitForElement($("body"), ".preview-card .preview-card-title", setPreviewLink);
+			waitForElement($("body"), ".product-edit-form-item.custom-len-calc-input input", setPreviewLink);
 		}
 
 		// Chức năng xem sản phẩm giao diện người mua
 		function setPreviewLink(){
 			var attempts = 0;
 			var maxAttempts = 20;
+			var interval = setInterval(function () {
+				if (!$(".preview-card").length) {
+					if (++attempts >= maxAttempts) clearInterval(interval);
+					return;
+				}else
+					clearInterval(interval);
 
-			var html = document.documentElement.innerHTML;
-			var itemMatch = window.location.pathname.match(/\/product\/(\d+)/);
-			var shopMatch = html.match(/"shopid":(\d+)/);
+				var html = document.documentElement.innerHTML;
+				var itemMatch = window.location.pathname.match(/\/product\/(\d+)/);
+				var shopMatch = html.match(/"shopid":(\d+)/);
 
-			if (itemMatch && shopMatch) {
-				var itemid = itemMatch[1];
-				var shopid = shopMatch[1];
-				//var productURL = "https://shopee.vn/product/" + shopid + "/" + itemid;
-				var card = $(".preview-card");
-				var title = card.find(".preview-card-title");
+				if (itemMatch && shopMatch) {
+					var itemid = itemMatch[1];
+					var shopid = shopMatch[1];
+					//var productURL = "https://shopee.vn/product/" + shopid + "/" + itemid;
+					var card = $(".preview-card");
+					var title = card.find(".preview-card-title");
 
-				var boxName = $(".product-edit-form-item.custom-len-calc-input");
-				var productName = boxName.find("input").val();
-				productName = (productName.split(" ")).join("-");
+					var boxName = $(".product-edit-form-item.custom-len-calc-input");
+					var productName = boxName.find("input").val();
+					productName = (productName.split(" ")).join("-");
 
-				var url = `https://shopee.vn/${productName}-i.${shopid}.${itemid}`;
+					var url = `https://shopee.vn/${productName}-i.${shopid}.${itemid}`;
 
-				var link = $("<a></a>");
-				link.attr({
-					"href": url,
-					"target": "_bank"
-				});
-				link.text("Xem Trước").css("color", "crimson");
+					var link = $("<a></a>");
+					link.attr({
+						"href": url,
+						"target": "_bank"
+					});
+					link.text("Xem Trước").css("color", "crimson");
 
-				title.empty().append(link);
+					title.empty().append(link);
 
-				boxToast(`Đã thêm link xem trước`);
-			}
+					boxToast(`Đã thêm link xem trước cho sản phẩm`);
+				}
+			},500);
 		}
 
 		// Chat với AI
