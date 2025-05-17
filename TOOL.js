@@ -1,11 +1,10 @@
-
 	'use strict';
 
 	// Trạng thái hiển thị của giao diện
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.1";
+	const VERSION = "2.1.2";
 
 	/*const Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -42,6 +41,7 @@
 			"comboKMShopee": comboKMShopee,
 			"kiemTraPhanLoaiShopee": kiemTraPhanLoaiShopee,
 			"themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
+			"layTenPhanLoaiShopee": layTenPhanLoaiShopee,
 			// "themPhanLoaiShopee": themPhanLoaiShopee,
 			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
@@ -50,6 +50,7 @@
 			"giaDuoiTiktok": giaDuoiTiktok,
 			"saoChepFlashSaleTiktok": saoChepFlashSaleTiktok,
 			"kiemTraMaPhanLoaiTiktok": kiemTraMaPhanLoaiTiktok,
+			"chinhSuaKhuyenMaiTiktok": chinhSuaKhuyenMaiTiktok,
 			// "tgFlashSaleTiktok": tgFlashSaleTiktok,
 			// "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
 			// // --- SAPO
@@ -144,17 +145,24 @@
 		// Sự kiện nhấn tab cho textarea
 		waitForElement($("body"), ".tp-container.tp-content textarea", (el) => {
 			boxAlert("Đang theo dõi sự kiện nhấn tab của textarea")
-			$(el).on("keydown", function(event){
-				if (event.keyCode === 9) { // keyCode 9 là mã ASCII của phím Tab
-				event.preventDefault();
+			console.log(el);
+			$.each($(".tp-container.tp-content textarea"), (index, value) => {
+				if($(value).data(".focus-tab"))
+					return;
 
-				var start = this.selectionStart;
-				var end = this.selectionEnd;
+				$($(value)).on("keydown", function(event){
+					$(value).data("focus-tab", "true");
+					if (event.keyCode == 9) { // keyCode 9 là mã ASCII của phím Tab
+						event.preventDefault();
 
-				$(this).val($(this).val().substring(0, start) + '\t' + $(this).val().substring(end));
+						var start = this.selectionStart;
+						var end = this.selectionEnd;
 
-				this.selectionStart = this.selectionEnd = start + 1;
-				}
+						$(this).val($(this).val().substring(0, start) + '\t' + $(this).val().substring(end));
+
+						this.selectionStart = this.selectionEnd = start + 1;
+					}
+				})
 			})
 		}, {once: false})
 
@@ -678,8 +686,13 @@
 
 			try {
 				// Lấy file từ GitHub API
-				const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?_=${Date.now()}`);
+				const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?_=${Date.now()}`, {
+					headers: {
+						Authorization: `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`,
+					}
+				});
 				var json = await res.json();
+				console.log(json);
 				var content = atob(json.content); // Giải mã base64
 				var url = content.trim();
 
@@ -832,6 +845,7 @@
 								<option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
 								<option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
 								<option data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại</option>
+								<option data-func="layTenPhanLoaiShopee">Lấy Tên Phân Loại</option>
 								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
 								<!-- <option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option> -->
 								<!-- <option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option> -->
@@ -842,7 +856,7 @@
 								<option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
 								<option data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chép Chương Trình Flash Sale</option>
 								<option data-func="kiemTraMaPhanLoaiTiktok">Hiển Thị Mã Phân Loại</option>
-								<option disabled data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
+								<option data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
 								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
@@ -850,7 +864,7 @@
 							<optgroup label="Lazada">
 								<option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
 								<option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
-								<option disabled data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
+								<option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
 								<option disabled data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
 							</optgroup>
 
@@ -1615,15 +1629,9 @@
 					content.append($(`
 						<div class="layout-tab">
 							<div class="message-content">
-								<div class="ai-message">
-									<p>Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI Đây là tin nhắn của AI</p>
-								</div>
-								<div class="user-message">
-									<p>Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng Đây là tin nhắn của người dùng</p>
-								</div>
 							</div>
 							<div class="typing-content">
-								<input type="text" />
+								<input type="text" placeholder="Nhập tin nhắn..." />
 							</div>
 						</div>
 					`))
@@ -1631,41 +1639,67 @@
 					$(".layout-tab").css({
 						"width": "100%",
 						"height": "auto",
+						"display": "flex",
+						"flex-direction": "column",
 					})
 
 					$(".layout-tab .message-content").css({
 						"width": "100%",
 						"height": "auto",
+						"overflow-y": "auto", /* Thêm thanh cuộn khi nội dung dài */
+						"padding": "10px",
 					})
 
 					$(".layout-tab .message-content .ai-message").css({
-						"width": "auto",
+						"background-color": "#f0f0f0",
+						"color": "#333",
+						"border-radius": "5px",
+						"padding": "10px",
+						"margin-bottom": "10px",
+						"width": "fit-content",
 						"max-width": "80%",
-						"height": "auto",
 						"float": "left",
 						"clear": "both",
 					})
 
+					$(".layout-tab .message-content .ai-message.error").css({
+						"font-weight": "700",
+						"background-color": "#ffe0e0",
+						"color": "#ff0000",
+					})
+
 					$(".layout-tab .message-content .user-message").css({
-						"width": "auto",
+						"background-color": "#e0f7fa",
+						"color": "#00796b",
+						"border-radius": "5px",
+						"padding": "10px",
+						"margin-bottom": "10px",
+						"width": "fit-content",
 						"max-width": "80%",
-						"height": "auto",
 						"float": "right",
 						"clear": "both",
 					})
 
-					$(".layout-tab	.typing-content").css({
-						"width": "100%",
-						"height:": "5vh",
+					$(".layout-tab .message-content .clear-message").css({
+						"clear": "both",
 					})
 
-					$(".layout-tab	.typing-content input").css({
+					$(".layout-tab .typing-content").css({
 						"width": "100%",
-						"height": "100%",
-						"background": "grey",
-						"color": "#fff",
+						"height": "auto", /* Điều chỉnh chiều cao tự động */
+						"padding": "10px",
+						"display": "flex",
 					})
-					break;
+
+					$(".layout-tab .typing-content input").css({
+						"flex-grow": "1", /* Cho phép input chiếm phần lớn chiều rộng */
+						"height": "40px",
+						"padding": "10px",
+						"border": "1px solid #ccc",
+						"border-radius": "5px",
+						"font-size": "16px",
+					})
+				break;
 			}
 		}
 
@@ -1677,10 +1711,98 @@
 		$(".layout-tab").remove();
 		switch(layoutName){
 			case "chinhSuaKhuyenMaiTiktokLayout":
+				$("#excute-command").hide();
 				content.append($(`
 					<div class="layout-tab">
+						<div class="switch-wrapper">
+						<span class="switch-label">Xóa</span>
+						<label class="switch">
+							<input type="checkbox" id="toggle-switch">
+							<div class="slider">
+								<div class="slider-handle"></div>
+							</div>
+						</label>
+						<span class="switch-label">Thêm</span>
+						</div>
+						<div class="button-control-promotion" style="display: flex; gap: 1vw;">
+							<button style="width: 100%" id="prev">Sản Phẩm Trước</button>
+							<button style="width: 100%; background: crimson;" id="remo">Xóa</button>
+							<button style="width: 100%" id="next">Sản Phẩm Kế</button>
+						</div>
+						<p><span id="currentItem">0</span>/<span id="totalItem">0</span></p>
+						<!-- <button style="width: 100%" id="continue">Tiếp Tục</button> -->
+						<textarea id="data"></textarea>
 					</div>
-				`));
+					`));
+
+					// Wrapper
+					$(".switch-wrapper").css({
+					"display": "flex",
+					"align-items": "center",
+					"gap": "10px",
+					"font-family": "sans-serif"
+					});
+
+					// Label: "Thêm" / "Xóa"
+					$(".switch-label").css({
+					"font-size": "14px",
+					"font-weight": "bold",
+					"color": "#444",
+					"width": "50px",
+					"text-align": "center"
+					});
+
+					// Container chính của switch
+					$(".switch").css({
+					"position": "relative",
+					"width": "60px",
+					"height": "28px"
+					});
+
+					// Ẩn input
+					$(".switch input").css({
+					"opacity": "0",
+					"width": "0",
+					"height": "0",
+					"position": "absolute"
+					});
+
+					// Track của switch (thanh nền)
+					$(".slider").css({
+					"position": "relative",
+					"background-color": "#ccc",
+					"border-radius": "34px",
+					"width": "100%",
+					"height": "100%",
+					"cursor": "pointer",
+					"transition": "background-color 0.3s"
+					});
+
+					// Nút tròn gạt (handle)
+					$(".slider-handle").css({
+					"position": "absolute",
+					"height": "22px",
+					"width": "22px",
+					"left": "3px",
+					"top": "3px",
+					"background-color": "white",
+					"border-radius": "50%",
+					"transition": "left 0.3s",
+					"box-shadow": "0 1px 3px rgba(0,0,0,0.2)"
+					});
+
+					$("#toggle-switch").on("change", function () {
+					if (this.checked) {
+						$(".slider").css("background-color", "#4caf50"); // Thêm
+						$(".slider-handle").css("left", "35px");
+						$(this).attr("data-type", "add");
+					} else {
+						$(".slider").css("background-color", "#ccc"); // Xóa
+						$(".slider-handle").css("left", "3px");
+						$(this).attr("data-type", "del");
+					}
+					});
+					setEventChinhSuaKhuyenMaiTiktok();
 					break;
 			case "saoChepFlashSaleTiktokLayout":
 				content.append($(`
@@ -4161,16 +4283,199 @@
 			})
 		}
 
+		// Chỉnh sữa chương trình khuyến mãi Tiktok
+		function setEventChinhSuaKhuyenMaiTiktok(){
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data").val().split("\n").length;
+			$(".tp-container.tp-content .layout-future .layout-tab #prev").on("click", function(){
+				var index = sessionStorage.getItem("currentRemove");
+				index = parseInt(index);
+				if(index > 0){
+					sessionStorage.setItem("currentRemove", index - 1);
+					chinhSuaKhuyenMaiTiktok();
+				}
+			});
+
+			$(".tp-container.tp-content .layout-future .layout-tab #next").on("click", function(){
+				var index = sessionStorage.getItem("currentRemove");
+				index = parseInt(index);
+				if(index <= data){
+					sessionStorage.setItem("currentRemove", index + 1);
+					chinhSuaKhuyenMaiTiktok();
+				}
+			});
+
+			$(".tp-container.tp-content .layout-future .layout-tab #remo").on("click", function(){
+				if($("button[data-uid='deletecolumnui:button:0d701']")){
+					$("button[data-uid='deletecolumnui:button:0d701']").click().click();
+					var message = "Đã xóa";
+					boxLogging(message, [message], ["green"]);
+				}else{
+					boxLogging("Không có gì để xóa");
+				}
+			});
+
+			$(".tp-container.tp-content .layout-future .layout-tab #data").on("input", function(){
+				sessionStorage.setItem("currentRemove", 0);
+				chinhSuaKhuyenMaiTiktok();
+			});
+		}
+		
+		function chinhSuaKhuyenMaiTiktok(){
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data")
+			data = data.val().split("\n");
+			var searchBox = $("div[data-uid='productsearch:div_onclicksearchicon:27e8f']");
+			searchBox.click();
+
+			var index = sessionStorage.getItem("currentRemove");
+
+			var input = searchBox.find("input");
+			simulateClearReactInput(input);
+			simulateReactInput(input, data[index]);
+
+			console.log($(".tp-container.tp-content .layout-future .layout-tab > p #currentItem"));
+
+			$(".tp-container.tp-content .layout-future .layout-tab > p #currentItem").val(index + 1);
+
+			$(".tp-container.tp-content .layout-future .layout-tab > p #totalItem").val(data.length + ` ( ${data[index]} )`);
+
+			// $("button[data-uid='deletecolumnui:button:0d701']").click();
+		}
+
+		// Lấy tên phân loại shopee
+		function layTenPhanLoaiShopee(){
+			var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
+
+			var currentList = [];
+
+			// Thu thập các tên phân loại đang hiển thị trên giao diện
+			box.each((_, el) => {
+				var name = $(el).find(".variation-input-item-container.variation-input-item input").val();
+				currentList.push(name.toLowerCase());
+			});
+
+			boxToast(`Đã sao chép tên ${currentList.length} phân loại`, "success");
+
+			currentList = currentList.join("\n");
+
+			navigator.clipboard.writeText(currentList);
+		}
+
+		// Tự động thêm preview link
+		if(window.location.toString().includes("https://banhang.shopee.vn/portal/product/")){
+			waitForElement($("body"), ".preview-card .preview-card-title", setPreviewLink);
+		}
+
+		// Chức năng xem sản phẩm giao diện người mua
+		function setPreviewLink(){
+			var attempts = 0;
+			var maxAttempts = 20;
+
+			var html = document.documentElement.innerHTML;
+			var itemMatch = window.location.pathname.match(/\/product\/(\d+)/);
+			var shopMatch = html.match(/"shopid":(\d+)/);
+
+			if (itemMatch && shopMatch) {
+				var itemid = itemMatch[1];
+				var shopid = shopMatch[1];
+				//var productURL = "https://shopee.vn/product/" + shopid + "/" + itemid;
+				var card = $(".preview-card");
+				var title = card.find(".preview-card-title");
+
+				var boxName = $(".product-edit-form-item.custom-len-calc-input");
+				var productName = boxName.find("input").val();
+				productName = (productName.split(" ")).join("-");
+
+				var url = `https://shopee.vn/${productName}-i.${shopid}.${itemid}`;
+
+				var link = $("<a></a>");
+				link.attr({
+					"href": url,
+					"target": "_bank"
+				});
+				link.text("Xem Trước").css("color", "crimson");
+
+				title.empty().append(link);
+
+				boxToast(`Đã thêm link xem trước`);
+			}
+		}
+
 		// Chat với AI
 		function aiChat(){
 			$(".tp-container.tp-content .layout-future .layout-tab .typing-content input").on("keypress", function(e){
 				if(e.keyCode == 13){
-					//socket.emit("aichat", $(this).val());
-					console.log($(this).val());
+					var prompt = $(this).val();
+					$(this).val("");
+					$(".tp-container.tp-content .layout-future .layout-tab .message-content").append($(`
+						<div class="user-message">
+							<p>${prompt}<p>
+						</div>
+					`))
+
+					$(".layout-tab .message-content .user-message").css({
+						"border-radius": "5px",
+						"padding": "10px",
+						"margin-bottom": "10px",
+						"width": "fit-content",
+						"max-width": "80%",
+						"float": "right",
+						"clear": "both",
+					})
+
+					$(".tab-content#tab-online-function").scrollTop($(".tab-content#tab-online-function").prop("scrollHeight"));
+
+					socket.emit("aichat", prompt);
 				}
 			})
 
 			socket.on("ai_error", (res) => {
-				$("")
+				$(".tp-container.tp-content .layout-future .layout-tab .message-content").append($(`
+					<div class="ai-message error">
+						<p>${res}<p>
+					</div>
+				`))
+
+				$(".layout-tab .message-content .ai-message").css({
+					"border-radius": "5px",
+					"padding": "10px",
+					"margin-bottom": "10px",
+					"width": "fit-content",
+					"max-width": "80%",
+					"float": "left",
+					"clear": "both",
+					"word-wrap": "break-word",
+					"overflow-wrap": "break-word",
+				})
+
+				$(".layout-tab .message-content .ai-message.error").css({
+					"font-weight": "700",
+					"color": "#ff0000",
+					"word-wrap": "break-word",
+					"overflow-wrap": "break-word",
+				})
+
+				$(".tab-content#tab-online-function").scrollTop($(".tab-content#tab-online-function").prop("scrollHeight"));
+			})
+
+			socket.on("ai_response", (res) => {
+				$(".tp-container.tp-content .layout-future .layout-tab .message-content").append($(`
+					<div class="ai-message">
+						<p>${res}<p>
+					</div>
+				`))
+
+				$(".layout-tab .message-content .ai-message").css({
+					"border-radius": "5px",
+					"padding": "10px",
+					"margin-bottom": "10px",
+					"width": "fit-content",
+					"max-width": "80%",
+					"float": "left",
+					"clear": "both",
+					"word-wrap": "break-word",
+					"overflow-wrap": "break-word",
+				})
+
+				$(".tab-content#tab-online-function").scrollTop($(".tab-content#tab-online-function").prop("scrollHeight"));
 			})
 		}
