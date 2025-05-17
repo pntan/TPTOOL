@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.2";
+	const VERSION = "2.0.0";
 
 	/*const Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -143,28 +143,19 @@
 		})
 
 		// Sự kiện nhấn tab cho textarea
-		waitForElement($("body"), ".tp-container.tp-content textarea", (el) => {
+		$(document).on("keydown", ".tp-container.tp-content textarea", function(event) {
 			boxAlert("Đang theo dõi sự kiện nhấn tab của textarea")
-			console.log(el);
-			$.each($(".tp-container.tp-content textarea"), (index, value) => {
-				if($(value).data(".focus-tab"))
-					return;
+			if (event.keyCode == 9) { // keyCode 9 là mã ASCII của phím Tab
+				event.preventDefault();
 
-				$($(value)).on("keydown", function(event){
-					$(value).data("focus-tab", "true");
-					if (event.keyCode == 9) { // keyCode 9 là mã ASCII của phím Tab
-						event.preventDefault();
+				var start = this.selectionStart;
+				var end = this.selectionEnd;
 
-						var start = this.selectionStart;
-						var end = this.selectionEnd;
+				$(this).val($(this).val().substring(0, start) + '\t' + $(this).val().substring(end));
 
-						$(this).val($(this).val().substring(0, start) + '\t' + $(this).val().substring(end));
-
-						this.selectionStart = this.selectionEnd = start + 1;
-					}
-				})
-			})
-		}, {once: false})
+				this.selectionStart = this.selectionEnd = start + 1;
+			}
+		})
 
 		// Ghi log
 		function boxLogging(text, words = [], colors = []){
@@ -1949,6 +1940,8 @@
 				content.append($(`
 				<div class="layout-tab">
 					<input type="file" webkitdirectory directory multiple />
+					<p>Tải lên thư mục có chứa hình ảnh, không cần tải lên từng hình</p>
+					<p style="font-weight:700; color: crimson">*Tên hình ảnh phải là SKU của sản phẩm</p>
 
 					<!--<label for="search-name">
 							<p>Đổi Theo Tên</p>
@@ -2166,7 +2159,7 @@
 			case "suaGiaSKUShopeeLayout":
 				content.append($(`
 				<div class="layout-tab">
-					<textarea id="data" placeholder="SKU {tab} Giá"></textarea>
+					<textarea id="data" placeholder="Mỗi SKU là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-SKU: Bắt buộc (ABC123-DEF456 hoặc ABC123)\n-Giá: Bắt buộc"></textarea>
 				</div>
 				`));
 				// setEventSuaGiaSKUShopee();
@@ -2251,7 +2244,7 @@
 				content.append($(`
 				<div class="layout-tab">
 					<label for="gia">Cật nhật giá đuôi: <input id="gia" type="checkbox" /></label>
-					<textarea id="flahsSaleName" placeholder="Nhập Tên Cần Bật Lên"></textarea>
+					<textarea id="flahsSaleName" placeholder="Mỗi phân loại là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-Tên phân loại: bắt buộc\n-Số Lượng: Nếu để trống sẽ bỏ qua\n-Giá: Nếu để trống sẽ bỏ qua"></textarea>
 				</div>
 				`));
 				break;
@@ -2260,7 +2253,7 @@
 				<div class="layout-tab">
 					<div class="input-cost">
 						<label for="cost">Nhập Giá Vốn</label>
-						<input type="text" id="cost" maxlength="15" />
+						<input type="text" id="cost" maxlength="15" placeholder="Nhập giá vốn (đầy đủ số)" />
 					</div>
 					<div class="output-cost">
 						<p>Giá sau Khuyễn mãi: <span id="after-price"></span></p>
@@ -2843,104 +2836,104 @@
 		function themKyTuPhanLoaiShopee() {
 			var group = $(".tp-container.tp-content .layout-future .layout-tab #group").find("option:selected").index();
 			var data = $(".tp-container.tp-content .layout-future .layout-tab #data");
-			var keyword = $(".tp-container.tp-content .layout-future .layout-tab #keyword");
-			var arrayData = data.val().split("\n");
-			var type = $(".tp-container.tp-content .layout-future #type").find("option:selected").attr("data-count");
+			var keywordInput = $(".tp-container.tp-content .layout-future .layout-tab #keyword");
+			var arrayData = data.val().split("\n").map(line => line.trim()).filter(line => line !== "");
+			var arrayKeyword = keywordInput.val().split("\n").map(line => line.trim()).filter(line => line !== "");
+			var type = parseInt($(".tp-container.tp-content .layout-future #type").find("option:selected").attr("data-count"));
+
+			if(arrayData.length.toString() != arrayKeyword.length.toString()){
+				boxLogging("Dữ liệu không khớp", ["Dữ liệu không khớp"], ["crimson"]);
+				boxToast(`Dữ liệu không khớp`, "error");
+				return;
+			}
 
 			var box = $(".variation-edit-item.version-a").eq(group).find(".option-container .options-item.drag-item");
 
-			$.each(box, (index, value) => {
-				var name = box.eq(index).find(".variation-input-item-container.variation-input-item input");
-
+			$.each(arrayKeyword, (index, value) => {
+				var nameInput = box.eq(index).find(".variation-input-item-container.variation-input-item input");
+				var currentName = nameInput.val();
 				var newValue = null;
-				type = parseInt(type);
-				switch (type){
+				var dataItem = arrayData[index];
+				var keywordItem = arrayKeyword[index]; // Lấy keyword tương ứng
+
+				switch (type) {
 					// Thêm ký tự vào đầu
 					case 0:
-						newValue = (`${data.val()} ${name.val()}`)
+						newValue = (`${dataItem} ${currentName}`).trim();
 						break;
 					// Thêm ký tự vào cuối
 					case 1:
-						newValue = (`${name.val()} ${data.val()}`)
+						newValue = (`${currentName} ${dataItem}`).trim();
 						break;
 					// Thêm ký tự trước từ khóa
 					case 2:
-						var pos = name.val().indexOf(keyword.val());
-						var before = name.val().slice(0, pos);
-						var after = name.val().slice(pos, name.val().length);
-
-						if(pos < 0)
-							return;
-						newValue = (`${before} ${data.val()} ${after}`);
+						var pos = currentName.indexOf(keywordItem);
+						if (pos < 0) {
+							return; // Bỏ qua nếu không tìm thấy từ khóa
+						}
+						var before = currentName.slice(0, pos).trim();
+						var after = currentName.slice(pos).trim();
+						newValue = (`${before} ${dataItem} ${after}`).trim();
 						break;
 					// Thêm ký tự sau từ khóa
 					case 3:
-						pos = name.val().indexOf(keyword.val());
-						before = name.val().slice(0, (pos + keyword.val().length));
-						after = name.val().slice(before.length, name.val().length);
-
-						if(pos < 0)
-							return;
-
-						newValue = (`${before} ${data.val()} ${after}`);
+						var pos = currentName.indexOf(keywordItem);
+						if (pos < 0) {
+							return; // Bỏ qua nếu không tìm thấy từ khóa
+						}
+						var before = currentName.slice(0, pos + keywordItem.length).trim();
+						var after = currentName.slice(before.length).trim();
+						newValue = (`${before} ${dataItem} ${after}`).trim();
 						break;
 					// Xóa ký tự từ đầu
 					case 4:
-						newValue = name.val().slice(keyword.val(), name.val().length);
+						newValue = currentName.slice(keywordItem.length).trim();
 						break;
 					// Xóa ký tự từ cuối
 					case 5:
-						newValue = name.val().slice(0, name.val().length - keyword.val());
+						newValue = currentName.slice(0, currentName.length - keywordItem.length).trim();
 						break;
 					// Xóa ký tự trước từ khóa
 					case 6:
-						pos = name.val().indexOf(keyword.val());
-
-						if(pos < 0)
-							return;
-
-						newValue = name.val().slice(pos, name.val().length);
+						var pos = currentName.indexOf(keywordItem);
+						if (pos < 0) {
+							return; // Bỏ qua nếu không tìm thấy từ khóa
+						}
+						newValue = currentName.slice(pos).trim();
 						break;
 					// Xóa ký tự sau từ khóa
 					case 7:
-						pos = name.val().indexOf(keyword.val());
-
-						if(pos < 0)
-							return;
-
-						newValue = name.val().slice(0, pos + keyword.val().length);
+						var pos = currentName.indexOf(keywordItem);
+						if (pos < 0) {
+							return; // Bỏ qua nếu không tìm thấy từ khóa
+						}
+						newValue = currentName.slice(0, pos + keywordItem.length).trim();
 						break;
 					case 8:
-						pos = name.val().indexOf(keyword.val());
-
-						if(pos < 0)
-							return;
-
-						newValue = name.val().replace(keyword.val(), data.val());
+						newValue = currentName.replace(keywordItem, dataItem).trim();
 						break;
 				}
 
-				newValue = newValue.trim();
-
-				if(newValue.length > 20){
-					boxLogging(`Số ký tự ${name.val()} vượt quá mức cho phép (${newValue.length}/20)`, [`${name.val()}`, `${newValue.length}/20`], ["crimson", "crimson"])
-					name.css({
-						"background": "crimson",
-						"color": "#fff"
-					});
-				}else{
-					var oldName = name.val();
-					name.val(newValue.trim() || name.val().trim());
-					simulateReactEvent(name, "input");
-					boxLogging(`Đã đổi ${oldName} thành ${newValue}`, [`${oldName}`, `${newValue}`], ["green", "green"])
-					name.css({
-						"background": "green",
-						"color": "#fff"
-					});
+				if (newValue !== null) {
+					if (newValue.length > 20) {
+						boxLogging(`Số ký tự ${currentName} vượt quá mức cho phép (${newValue.length}/20)`, [`${currentName}`, `${newValue.length}/20`], ["crimson", "crimson"]);
+						nameInput.css({
+							"background": "crimson",
+							"color": "#fff"
+						});
+					} else {
+						nameInput.val(newValue);
+						simulateReactEvent(nameInput, "input");
+						boxLogging(`Đã đổi ${currentName} thành ${newValue}`, [`${currentName}`, `${newValue}`], ["green", "green"]);
+						nameInput.css({
+							"background": "green",
+							"color": "#fff"
+						});
+					}
 				}
 			});
 
-			boxToast("Đã sửa lại tên phân loại", "success")
+			boxToast("Đã sửa lại tên phân loại", "success");
 		}
 
 		// Cập nhật giá đuôi Lazada
