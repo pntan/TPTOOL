@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.2";
+	const VERSION = "2.1.3";
 
 	/*const Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -1125,7 +1125,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						display: none;
+						display: flex;
 						flex-direction: column;
 					}
 
@@ -1133,7 +1133,7 @@
 						margin: 1vh 0;
 					}
 
-					.tp-content .copyable{
+					.tp-content .copyable, .tp-popup .copyable{
 						user-select: text;
 						text-decoration: underline;
 						cursor: pointer;
@@ -1264,7 +1264,7 @@
 					}
 
 					.tp-content .layout-future input,
-					.tp-content .layout-future textarea {
+					.tp-content textarea {
 						width: 100%;
 						padding: 10px;
 						border: 1px solid #aaa;
@@ -1838,11 +1838,12 @@
 				content.append($(`
 					<div class="layout-tab">
 						<p>ID sản phẩm cần thêm</p>
-						<textarea id="product-link"></textarea>
+						<textarea id="product-link" placeholder="Link sản phẩm cần thêm phân loại"></textarea>
 						<p>Thông tin phân loại</p>
-						<textarea id="data"></textarea>
+						<textarea style="resize: both" id="data" placeholder="Mỗi SKU là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-Tên phân loại: Bắt buộc (Không quá 20 ký tự)\n-SKU: Bắt buộc\n-Giá: Bắt buộc\n-Số lượng: nếu không có sẽ mặc định là 0"></textarea>
 						<p>Hình ảnh phân loại</p>
 						<input type="file" multiple />
+						<p style="font-weight:700; color: crimson">*Tên hình ảnh phải là SKU của sản phẩm</p>
 						<button style="width: 100%" id="reporting">Xem Báo Cáo</button>
 					</div>
 				`));
@@ -2159,6 +2160,12 @@
 			case "suaGiaSKUShopeeLayout":
 				content.append($(`
 				<div class="layout-tab">
+					<p>Cách sửa giá:</p>
+					<select id="type">
+						<option data-type="all">Tất cả</option>
+						<option data-type="duoi">Giá đuôi</option>
+						<option data-type="dau">Giá đầu</option>
+					</select>
 					<textarea id="data" placeholder="Mỗi SKU là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-SKU: Bắt buộc (ABC123-DEF456 hoặc ABC123)\n-Giá: Bắt buộc"></textarea>
 				</div>
 				`));
@@ -2706,6 +2713,9 @@
 
 		// Sửa giá theo SKU sản phẩm
 		function suaGiaSKUShopee(){
+			var type = $(".tp-container.tp-content #type option:selected");
+			type = type.data("type");
+
 			var data = $(".tp-container.tp-content .layout-future textarea#data");
 			var arrayData = data.val().split("\n");
 			$.each(arrayData, (index, value) => {
@@ -2719,19 +2729,87 @@
 					var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
 					var priceBox = box.eq(index).find(".table-cell").eq(0).find("input");
 
-					if(skuBox.val().includes(sku)){
-						var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',') || "Không";
-						var gia1 = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+					switch(type){
+						case "all":
+							if(skuBox.val().includes(sku)){
+								var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',') || "Không";
+								var gia1 = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-						if(parseInt(priceBox.val()) < parseInt(gia)){
-							boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${gia1} > ${priceBox1})`, [`${skuBox.val()}`], ["crimson"]);
-							box.eq(index).css("background", "crimson");
-						}else{
-							priceBox.val(gia);
-							simulateReactEvent($(priceBox), "change");
-							box.eq(index).css("background", "lightgreen");
-							boxLogging(`Giá của ${skuBox.val()} đã sửa từ ${priceBox1} thành ${gia1}`, [`${skuBox.val()}`, `${priceBox1}`, `${gia1}`], ["lightgreen", "orange", "orange"]);
-						}
+								if(parseInt(priceBox.val()) < parseInt(gia)){
+									boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${gia1} > ${priceBox1})`, [`${skuBox.val()}`], ["crimson"]);
+									box.eq(index).css("background", "crimson");
+								}else{
+									priceBox.val(gia);
+									simulateReactEvent($(priceBox), "change");
+									box.eq(index).css("background", "lightgreen");
+									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${priceBox1} thành ${gia1}`, [`${skuBox.val()}`, `${priceBox1}`, `${gia1}`], ["lightgreen", "orange", "orange"]);
+								}
+							}
+						break;
+
+						case "duoi":
+							if(skuBox.val().includes(sku)){
+								var price = tachGia(priceBox.val());
+								var giaDau = price.giaDau;
+								var giaDuoi = gia;
+
+								var editPrice = gopGia(giaDau, giaDuoi);
+
+								if(parseInt(editPrice.gia) > parseInt(price.gia)){
+									giaDau = parseInt(giaDau) - 1000;
+
+									editPrice = gopGia(giaDau, giaDuoi);
+								}
+
+								if(parseInt(giaDuoi) > parseInt(giaDau)){
+									boxLogging(`Bỏ qua SKU: [copy]${skuBox.val()}[/copy] (có giá đuôi cao hơn giá đầu)`, [`${skuBox.val()}`], ["crimson"]);
+									box.eq(index).css("background", "crimson");
+									return;
+								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
+									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
+									box.eq(index).css("background", "orange");
+									priceBox.val(editPrice.gia);
+									simulateReactEvent($(priceBox), "change");
+								}else{
+									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
+									priceBox.val(editPrice.gia);
+									simulateReactEvent($(priceBox), "change");
+									box.eq(index).css("background", "lightgreen");
+								}
+							}
+						break;
+
+						case "dau":
+							if(skuBox.val().includes(sku)){
+								var price = tachGia(priceBox.val());
+								var giaDau = gia;
+								var giaDuoi = price.giaDuoi;
+
+								var editPrice = gopGia(giaDau, giaDuoi);
+
+								if(parseInt(editPrice.gia) > parseInt(price.gia)){
+									boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${editPrice.gia} > ${price.gia})`, [`${skuBox.val()}`], ["crimson"]);
+									box.eq(index).css("background", "crimson");
+									return;
+								}
+
+								if(parseInt(giaDuoi) > parseInt(giaDau)){
+									boxLogging(`Bỏ qua SKU: [copy]${skuBox.val()}[/copy] (có giá đuôi cao hơn giá đầu)`, [`${skuBox.val()}`], ["crimson"]);
+									box.eq(index).css("background", "crimson");
+									return;
+								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
+									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
+									box.eq(index).css("background", "orange");
+									priceBox.val(editPrice.gia);
+									simulateReactEvent($(priceBox), "change");
+								}else{
+									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
+									priceBox.val(editPrice.gia);
+									simulateReactEvent($(priceBox), "change");
+									box.eq(index).css("background", "lightgreen");
+								}
+							}
+						break;
 					}
 				});
 			});
@@ -2839,22 +2917,25 @@
 			var keywordInput = $(".tp-container.tp-content .layout-future .layout-tab #keyword");
 			var arrayData = data.val().split("\n").map(line => line.trim()).filter(line => line !== "");
 			var arrayKeyword = keywordInput.val().split("\n").map(line => line.trim()).filter(line => line !== "");
-			var type = parseInt($(".tp-container.tp-content .layout-future #type").find("option:selected").attr("data-count"));
 
-			if(arrayData.length.toString() != arrayKeyword.length.toString()){
-				boxLogging("Dữ liệu không khớp", ["Dữ liệu không khớp"], ["crimson"]);
-				boxToast(`Dữ liệu không khớp`, "error");
+			if (arrayData.length !== arrayKeyword.length) {
+				boxLogging("Số lượng dòng dữ liệu và từ khóa không khớp.", ["Số lượng dòng dữ liệu", "Số lượng dòng từ khóa"], ["crimson", "crimson"]);
+				boxToast(`Số lượng dòng dữ liệu và từ khóa không khớp.`, "error");
 				return;
 			}
 
+			var type = parseInt($(".tp-container.tp-content .layout-future #type").find("option:selected").attr("data-count"));
 			var box = $(".variation-edit-item.version-a").eq(group).find(".option-container .options-item.drag-item");
 
-			$.each(arrayKeyword, (index, value) => {
-				var nameInput = box.eq(index).find(".variation-input-item-container.variation-input-item input");
+			$.each(box, (index, element) => {
+				var nameInput = $(element).find(".variation-input-item-container.variation-input-item input");
 				var currentName = nameInput.val();
 				var newValue = null;
-				var dataItem = arrayData[index];
-				var keywordItem = arrayKeyword[index]; // Lấy keyword tương ứng
+				var dataItem = arrayData[index % arrayData.length]; // Sử dụng modulo để lặp nếu cần
+				var keywordItem = arrayKeyword[index % arrayKeyword.length]; // Sử dụng modulo để lặp nếu cần
+				var pos = 0;
+
+				console.log(`Data: ${dataItem}, Keyword: ${keywordItem}, Current Name: ${currentName}`);
 
 				switch (type) {
 					// Thêm ký tự vào đầu
@@ -2867,7 +2948,7 @@
 						break;
 					// Thêm ký tự trước từ khóa
 					case 2:
-						var pos = currentName.indexOf(keywordItem);
+						pos = currentName.toLowerCase().indexOf(keywordItem.toLowerCase());
 						if (pos < 0) {
 							return; // Bỏ qua nếu không tìm thấy từ khóa
 						}
@@ -2877,7 +2958,7 @@
 						break;
 					// Thêm ký tự sau từ khóa
 					case 3:
-						var pos = currentName.indexOf(keywordItem);
+						pos = currentName.toLowerCase().indexOf(keywordItem.toLowerCase());
 						if (pos < 0) {
 							return; // Bỏ qua nếu không tìm thấy từ khóa
 						}
@@ -2895,7 +2976,7 @@
 						break;
 					// Xóa ký tự trước từ khóa
 					case 6:
-						var pos = currentName.indexOf(keywordItem);
+						pos = currentName.toLowerCase().indexOf(keywordItem.toLowerCase());
 						if (pos < 0) {
 							return; // Bỏ qua nếu không tìm thấy từ khóa
 						}
@@ -2903,28 +2984,36 @@
 						break;
 					// Xóa ký tự sau từ khóa
 					case 7:
-						var pos = currentName.indexOf(keywordItem);
+						pos = currentName.toLowerCase().indexOf(keywordItem.toLowerCase());
 						if (pos < 0) {
 							return; // Bỏ qua nếu không tìm thấy từ khóa
 						}
 						newValue = currentName.slice(0, pos + keywordItem.length).trim();
 						break;
 					case 8:
-						newValue = currentName.replace(keywordItem, dataItem).trim();
+						newValue = currentName.replace(new RegExp(keywordItem, 'g'), dataItem).trim(); // Sử dụng RegExp để thay thế tất cả các lần xuất hiện
 						break;
 				}
 
 				if (newValue !== null) {
 					if (newValue.length > 20) {
-						boxLogging(`Số ký tự ${currentName} vượt quá mức cho phép (${newValue.length}/20)`, [`${currentName}`, `${newValue.length}/20`], ["crimson", "crimson"]);
+						boxLogging(`Số ký tự "${currentName}" vượt quá mức cho phép (${newValue.length}/20)`, [`"${currentName}"`, `${newValue.length}/20`], ["crimson", "crimson"]);
 						nameInput.css({
 							"background": "crimson",
 							"color": "#fff"
 						});
 					} else {
+						if (nameInput.val() === newValue) {
+							boxLogging(`Giữ nguyên "${currentName}"`);
+							nameInput.css({
+								"background": "pink",
+								"color": "#fff"
+							});
+							return;
+						}
 						nameInput.val(newValue);
 						simulateReactEvent(nameInput, "input");
-						boxLogging(`Đã đổi ${currentName} thành ${newValue}`, [`${currentName}`, `${newValue}`], ["green", "green"]);
+						boxLogging(`Đã đổi "${currentName}" thành "${newValue}"`, [`"${currentName}"`, `"${newValue}"`], ["green", "green"]);
 						nameInput.css({
 							"background": "green",
 							"color": "#fff"
@@ -3192,8 +3281,8 @@
 
 			// 2. Lưu thông tin phân loại (đã parse)
 			var variants = variantLines.map(line => {
-				var [name, sku, price] = line.trim().split("\t");
-				return { name, sku, price: + price, stock: 1 };
+				var [name, sku, price, stock] = line.trim().split("\t");
+				return { name, sku, price: + price, stock, };
 			});
 			sessionStorage.setItem("batchVariantData", JSON.stringify(variants));
 
@@ -3283,6 +3372,7 @@
 					<thead style="background-color: #f5f5f5;">
 						<tr>
 							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">STT</th>
+							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">ID</th>
 							<th style="text-align:left; padding: 10px; border-bottom: 1px solid #ddd;">Tên</th>
 							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">SKU</th>
 							<th style="text-align:right; padding: 10px; border-bottom: 1px solid #ddd;">Giá</th>
@@ -3303,8 +3393,9 @@
 					var row = $(`
 						<tr style="background-color: ${stt % 2 === 0 ? '#fafafa' : '#ffffff'};">
 							<td style="text-align:center; padding: 8px; border-bottom: 1px solid #eee;">${stt++}</td>
-							<td style="text-align:left; padding: 8px; border-bottom: 1px solid #eee;">${v.name}</td>
-							<td style="text-align:center; padding: 8px; border-bottom: 1px solid #eee;">${v.sku}</td>
+							<td class="copyable" style="text-align: center; padding: 8px; border-bottom: 1px silid #eee"><a href="https://banhang.shopee.vn/portal/product/${item.id || Object.keys(item) || "#"}/">${item.id || Object.keys(item) || "Không xác định"}</a></td>
+							<td class="copyable" style="text-align:left; padding: 8px; border-bottom: 1px solid #eee;">${v.name}</td>
+							<td class="copyable" style="text-align:center; padding: 8px; border-bottom: 1px solid #eee;">${v.sku}</td>
 							<td style="text-align:right; padding: 8px; border-bottom: 1px solid #eee;">${v.price.toLocaleString()}</td>
 							<td style="text-align:right; padding: 8px; border-bottom: 1px solid #eee;">${v.stock}</td>
 							<td style="text-align:center; padding: 8px; border-bottom: 1px solid #eee;">
@@ -3668,12 +3759,14 @@
 			$.each(array, (index, value) => {
 				var sku = value.sku;
 				var gia = value.price.toString();
+				var stock = value.stock.toString();
 
 				var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
 
 				$.each(box, (index, value) => {
-					var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
 					var priceBox = box.eq(index).find(".table-cell").eq(0).find("input");
+					var stockBox = box.eq(index).find(".table-cell").eq(1).find("input");
+					var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
 
 					if(skuBox.val().includes(sku)){
 						var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',') || "Không";
@@ -3705,6 +3798,21 @@
 						else {
 							$(priceBox).get(0).fireEvent("onchange");
 						}
+
+						// stockBox.click();
+
+						// var wareHouse = $(".multi-warehouse-stock-edit");
+
+						// var wareHouseStock = wareHouse.find(".stock-edit .stock-table .eds-table__body-container .eds-table__main-body .eds-scrollbar__content table tbody tr");
+
+						// $.each(wareHouseStock, (index, value) => {
+						// 	var nameWareHouse = $(value).find(".td").eq(0).find(".stock-edit-name .eds-popover__ref");
+						// 	var stockWareHouse = $(value).find(".td").eq(1).find(".product-edit-form-item input");
+
+						// 	if(nameWareHouse.includes("KHO 77")){
+						// 		simulateReactInput(stockWareHouse, stock);
+						// 	}
+						// })
 					}
 				});
 			});
