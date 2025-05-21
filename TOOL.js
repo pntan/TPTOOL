@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.3";
+	const VERSION = "2.1.4";
 
 	/*const Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -41,7 +41,7 @@
 			"comboKMShopee": comboKMShopee,
 			"kiemTraPhanLoaiShopee": kiemTraPhanLoaiShopee,
 			"themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
-			"layTenPhanLoaiShopee": layTenPhanLoaiShopee,
+			"layPhanLoaiShopee": layPhanLoaiShopee,
 			// "themPhanLoaiShopee": themPhanLoaiShopee,
 			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
@@ -51,6 +51,7 @@
 			"saoChepFlashSaleTiktok": saoChepFlashSaleTiktok,
 			"kiemTraMaPhanLoaiTiktok": kiemTraMaPhanLoaiTiktok,
 			"chinhSuaKhuyenMaiTiktok": chinhSuaKhuyenMaiTiktok,
+			"themPhanLoaiTiktok": themPhanLoaiTiktok,
 			// "tgFlashSaleTiktok": tgFlashSaleTiktok,
 			// "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
 			// // --- SAPO
@@ -836,7 +837,7 @@
 								<option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
 								<option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
 								<option data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại</option>
-								<option data-func="layTenPhanLoaiShopee">Lấy Tên Phân Loại</option>
+								<option data-func="layPhanLoaiShopee" data-layout="layPhanLoaiShopeeLayout">Lấy Phân Loại</option>
 								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
 								<!-- <option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option> -->
 								<!-- <option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option> -->
@@ -848,6 +849,7 @@
 								<option data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chép Chương Trình Flash Sale</option>
 								<option data-func="kiemTraMaPhanLoaiTiktok">Hiển Thị Mã Phân Loại</option>
 								<option data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
+								<option data-func="themPhanLoaiTiktok" data-layout="themPhanLoaiTikTokLayout">Thêm Phân Loại</option>
 								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
@@ -1125,7 +1127,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						display: none;
+						display: flex;
 						flex-direction: column;
 					}
 
@@ -1264,7 +1266,7 @@
 					}
 
 					.tp-content .layout-future input,
-					.tp-content textarea {
+					.tp-content .layout-future textarea {
 						width: 100%;
 						padding: 10px;
 						border: 1px solid #aaa;
@@ -1273,6 +1275,10 @@
 						background: rgba(255, 255, 255, 0.7);
 						color: #000;
 						resize: both;
+					}
+
+					.tp-content .layout-future textarea {
+						min-height: 10vh;
 					}
 
 					.tp-content .layout-future label {
@@ -1701,6 +1707,30 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "layPhanLoaiShopeeLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<p>Số lượng tùy chỉnh?</p>
+						<input id="stock-edit" type="number" placeholder="Mặc định số lượng = 0" />
+						<div style="display: flex; justify-content: center; align-items: center">
+							<p>Lấy số lượng theo sàn</p>
+							<input type="checkbox" id="getStock" />
+						</div>
+					</div>
+				`))
+				break;
+			case "themPhanLoaiTikTokLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<p>Thông tin phân loại</p>
+						<textarea id="data" placeholder="Mỗi phân loại là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-Tên phân loại: bắt buộc\n-Số Lượng: Nếu để trống sẽ bỏ qua\n-Giá: Nếu để trống sẽ bỏ qua"></textarea>
+						<p>Hình ảnh phân loại</p>
+						<input type="file" webkitdirectory directory multiple />
+						<p style="font-weight:700; color: crimson">*Tên hình ảnh phải là SKU của sản phẩm</p>
+					</div>
+				`));
+				setEventThemPhanLoaiTiktok();
+				break;
 			case "chinhSuaKhuyenMaiTiktokLayout":
 				$("#excute-command").hide();
 				content.append($(`
@@ -2918,11 +2948,11 @@
 			var arrayData = data.val().split("\n").map(line => line.trim()).filter(line => line !== "");
 			var arrayKeyword = keywordInput.val().split("\n").map(line => line.trim()).filter(line => line !== "");
 
-			if (arrayData.length !== arrayKeyword.length) {
-				boxLogging("Số lượng dòng dữ liệu và từ khóa không khớp.", ["Số lượng dòng dữ liệu", "Số lượng dòng từ khóa"], ["crimson", "crimson"]);
-				boxToast(`Số lượng dòng dữ liệu và từ khóa không khớp.`, "error");
-				return;
-			}
+			// if (arrayData.length !== arrayKeyword.length) {
+			// 	boxLogging("Số lượng dòng dữ liệu và từ khóa không khớp.", ["Số lượng dòng dữ liệu", "Số lượng dòng từ khóa"], ["crimson", "crimson"]);
+			// 	boxToast(`Số lượng dòng dữ liệu và từ khóa không khớp.`, "error");
+			// 	return;
+			// }
 
 			var type = parseInt($(".tp-container.tp-content .layout-future #type").find("option:selected").attr("data-count"));
 			var box = $(".variation-edit-item.version-a").eq(group).find(".option-container .options-item.drag-item");
@@ -4442,23 +4472,73 @@
 			// $("button[data-uid='deletecolumnui:button:0d701']").click();
 		}
 
-		// Lấy tên phân loại shopee
-		function layTenPhanLoaiShopee(){
+		// Lấy phân loại shopee
+		async function layPhanLoaiShopee() {
+			boxToast("Đang xử lý");
 			var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
+			var boxDetail = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+			var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
 
-			var currentList = [];
+			let currentList = [];
+			var zip = new JSZip();
 
-			// Thu thập các tên phân loại đang hiển thị trên giao diện
-			box.each((_, el) => {
+			for (let i = 0; i < box.length; i++) {
+				var el = box[i];
 				var name = $(el).find(".variation-input-item-container.variation-input-item input").val();
-				currentList.push(name.toLowerCase());
+				var detailRow = boxDetail.eq(i).find(".table-cell");
+				var price = detailRow.eq(0).find("input").val();
+				let stockVal = detailRow.eq(1).find("input").val();
+				var skuText = detailRow.eq(2).find("textarea").val() || `variant-${i}`;
+
+				var getStock = $(".tp-container.tp-content .layout-future #getStock").prop("checked");
+				if (!getStock) {
+					var editStock = $(".tp-container.tp-content .layout-future #stock-edit").val();
+					stockVal = editStock.length === 0 ? 0 : editStock;
+				}
+
+				var copyVariant = `${name}\t${skuText}\t${price}\t${stockVal}`;
+				currentList.push(copyVariant);
+
+				// Tải ảnh lớn → chuyển sang PNG thật sự
+				var img = boxLeft.eq(i).find("img");
+				if (img.length) {
+					let url = img.attr("src");
+					if (url) {
+						var parts = url.split("/");
+						var fileId = parts[parts.length - 1];
+						fileId = fileId.toString().replace("_tn", "");
+						var fullUrl = `https://banhang.shopee.vn/api/v1/cdn_proxy/${fileId}`;
+
+						try {
+							var response = await fetch(fullUrl);
+							var blob = await response.blob();
+
+							var imageBitmap = await createImageBitmap(blob);
+							var canvas = document.createElement("canvas");
+							canvas.width = imageBitmap.width;
+							canvas.height = imageBitmap.height;
+
+							var ctx = canvas.getContext("2d");
+							ctx.drawImage(imageBitmap, 0, 0);
+
+							var pngBlob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+
+							var filename = `${skuText}.png`;
+							var arrayBuffer = await pngBlob.arrayBuffer();
+							zip.file(filename, arrayBuffer);
+						} catch (error) {
+							console.error('Lỗi tải/chuyển ảnh:', fullUrl, error);
+						}
+					}
+				}
+			}
+
+			zip.generateAsync({ type: 'blob' }).then(function (zipBlob) {
+				saveAs(zipBlob, "Anh_Phan_Loai_PNG.zip");
 			});
 
 			boxToast(`Đã sao chép tên ${currentList.length} phân loại`, "success");
-
-			currentList = currentList.join("\n");
-
-			navigator.clipboard.writeText(currentList);
+			navigator.clipboard.writeText(currentList.join("\n"));
 		}
 
 		// Tự động thêm preview link
@@ -4507,6 +4587,151 @@
 					boxToast(`Đã thêm link xem trước cho sản phẩm`);
 				}
 			},500);
+		}
+
+		// Thêm phân loại tiktok
+		function setEventThemPhanLoaiTiktok(){
+			// Gắn sự kiện và cho phép chọn thư mục
+			$(".tp-container.tp-content .layout-future .layout-tab input")
+				.attr({
+				webkitdirectory: true,
+				directory: true,
+				multiple: true
+				})
+				.on("change", function () {
+				var files = this.files;
+
+				// Xóa map cũ
+				inputMap = {};
+
+				for (let i = 0; i < files.length; i++) {
+					var file = files[i];
+
+					// Lấy tên file không có đuôi mở rộng
+					var fileNameOnly = file.name.split(".")[0].trim().toUpperCase();
+
+					// Tạo DataTransfer chứa file
+					var dt = new DataTransfer();
+					dt.items.add(file);
+
+					// Tạo input giả (để nạp file vào ô của Shopee)
+					var newInput = $("<input type='file'>").prop("files", dt.files).addClass("single-file-input");
+
+					// Gán theo SKU
+					inputMap[fileNameOnly] = newInput;
+				}
+			});
+		}
+
+		function themPhanLoaiTiktok(){
+			boxLogging("THEMPHANLOAI");
+			var data = $(".tp-container.tp-content .layout-future #data");
+
+			data = data.val().split("\n");
+
+			var name = [], sku = [], price = [], stock = [];
+
+			$.each(data, (index, value) => {
+				value = value.split("\t");
+				name.push(value[0]);
+				sku.push(value[1]);
+				price.push(value[2]);
+				stock.push(value[3] || 0);
+			})
+
+			var len = name.length, i = 0;
+
+			function nextItem(){
+				if(i >= len){
+					setVariantItem(data);
+					return;
+				}
+
+				var box = $(".sc-dHntBn.hkbMon div div.flex.flex-row.relative");
+
+				var newBox = box.eq(box.length - 1).find("input");
+
+				var imgBox = newBox.eq(0);
+				var nameBox = newBox.eq(1);
+
+				simulateReactInput(nameBox, name[i]);
+
+				simulateReactEvent(nameBox, "change");
+
+				nameBox.blur();
+
+				setTimeout(() => {
+					var imgInputTiktok = imgBox[0];
+
+					if (inputMap[sku[i]]) {
+						// inputMap[found] là jQuery object, cần lấy phần tử gốc
+						var fileInputEl = inputMap[sku[i]].get(0);
+						if (!fileInputEl || !fileInputEl.files || fileInputEl.files.length === 0) return;
+
+						var file = fileInputEl.files[0];
+						var dt = new DataTransfer();
+						dt.items.add(file);
+
+						// Click input đầu tiên để kích hoạt UI React
+						// if(!clickInput){
+						// 	imgInputTiktok.click();
+						// 	clickInput = true;
+						// }
+
+						setTimeout(() => {
+							imgInputTiktok.files = dt.files;
+
+							// Tạo sự kiện change để Shopee nhận diện file mới
+							var evt = new Event("change", { bubbles: true });
+							imgInputTiktok.dispatchEvent(evt);
+							boxLogging(`Đã sửa ảnh cho SKU [copy]${sku}[/copy]`, [`${sku}`], ["green"])
+						}, 100); // có thể chỉnh tăng lên nếu chưa kịp load
+					}else{
+						boxLogging(`SKU [copy]${sku}[/copy] không có ảnh`, [`${sku}`], ["crimson"])
+					}
+
+					i++;
+
+					setTimeout(nextItem, 2000);
+
+				}, 500)
+			}
+
+			nextItem();
+
+			function setVariantItem(data){
+				boxAlert("SỬA CHI TIẾT");
+				var table = $(".core-table-content-inner table tbody tr");
+
+				$.each(table, (index, value) => {
+					var nameBox = table.eq(index).find("td").eq(0).find("p").eq(0);
+					var priceBox = table.eq(index).find("td").eq(1).find("input");
+					var stockBox = table.eq(index).find("td").eq(2).find("input");
+					var skuBox = table.eq(index).find("td").eq(3).find("input");
+
+					$.each(name, (index, value) => {
+						if(nameBox.text().includes(name[index])){
+							simulateReactInput(priceBox, price[index]);
+							simulateReactInput(stockBox, stock[index]);
+							simulateReactInput(skuBox, sku[index]);
+						}
+					})
+				})
+			}
+		}
+
+		// Giữ ctrl + click để mở trong tab mới
+		if(window.location.toString().includes("https://seller-vn.tiktok.com/")){
+			$("a").on("click", function(e){
+
+				var url = $(this).attr("href");
+
+				if(e.ctrlKey){
+					e.preventDefault();
+					e.stopPropagation();
+					window.open(url, "_blank");
+				}s
+			})
 		}
 
 		// Chat với AI
