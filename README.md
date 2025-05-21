@@ -47,7 +47,44 @@ Công cụ này được viết bằng JavaScript và chạy trực tiếp trên
 3.  Nhấp vào **"Create a new script"** hoặc **"Thêm script mới"**.
 4.  Xóa toàn bộ nội dung mặc định trong trình chỉnh sửa và **dán đoạn mã sau đây**:
     ```javascript
-    // @require       [https://cdn.jsdelivr.net/gh/pntan/TPTOOL@latest/TOOL.js](https://cdn.jsdelivr.net/gh/pntan/TPTOOL@latest/TOOL.js)
+    // ==UserScript==
+    // @name         Công Cụ Hỗ Trợ GITHUB
+    // @namespace    http://tampermonkey.net/
+    // @version      2025-01-02
+    // @description  Bộ công cụ tích hợp các chức năng hỗ trợ cho sàn TMĐT
+    // @author       TanPhan
+    // @match        https://*/*
+    // @icon         https://www.google.com/s2/favicons?sz=64&domain=http://anonymouse.org/
+    // @grant        GM_xmlhttpRequest
+    // @require      https://code.jquery.com/jquery-3.7.1.min.js
+    // @require      https://code.jquery.com/ui/1.14.1/jquery-ui.js
+    // @require      https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js
+    // @updateURL    https://raw.githubusercontent.com/pntan/TPTOOL/main/TOOL-combined.user.js
+    // @downloadURL  https://raw.githubusercontent.com/pntan/TPTOOL/main/TOOL-combined.user.js
+    // @connect      raw.githubusercontent.com
+    // ==/UserScript==
+    /* globals       jQuery, $, waitForKeyElements */
+    
+    (function() {
+        const rawScriptUrl = 'https://raw.githubusercontent.com/pntan/TPTOOL/main/TOOL.js?nocache=' + Date.now();
+    
+        GM_xmlhttpRequest({
+            method: 'GET',
+            url: rawScriptUrl,
+            onload: function(response) {
+                try {
+                    console.log(eval(response.responseText));
+                    console.log('[TOOL] Đã tải và chạy TOOL.js mới nhất từ GitHub.');
+                } catch (e) {
+                    console.error('[TOOL] Lỗi khi chạy script TOOL.js:', e);
+                }
+            },
+            onerror: function(err) {
+                console.error('[TOOL] Không thể tải TOOL.js từ GitHub:', err);
+            }
+        });
+    })();
+
     ```
 5.  **Lưu script** (thường là `Ctrl + S` hoặc qua menu của Tampermonkey) và **tải lại trang** bạn đang mở để công cụ bắt đầu hoạt động.
 
