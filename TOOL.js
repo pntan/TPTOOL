@@ -1,10 +1,8 @@
-	'use strict';
-
 	// Trạng thái hiển thị của giao diện
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.5";
+	const VERSION = "2.1.6";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -46,7 +44,7 @@
 			"themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
 			"layPhanLoaiShopee": layPhanLoaiShopee,
 			// "themPhanLoaiShopee": themPhanLoaiShopee,
-			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
+			"giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
 			// //"batKhuyenMaiShopee": batKhuyenMaiShopee,
 			// // --- TIKTOK
@@ -973,7 +971,7 @@
 								<option data-func="layPhanLoaiShopee" data-layout="layPhanLoaiShopeeLayout">Lấy Phân Loại</option>
 								<option data-func="layLinkChuaSKUShopee" data-layout="layLinkChuaSKUShopeeLayout">Lấy Link Chứa SKU</option>
 								<option data-func="suaTonSKUNhieuLinkShopee" data-layout="suaTonSKUNhieuLinkShopeeLayout">Sửa Tồn Theo SKU Nhiều Link</option>
-								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
+								<option data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
 								<!-- <option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option> -->
 								<!-- <option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option> -->
 							</optgroup>
@@ -1263,7 +1261,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						display: none;
+						display: flex;
 						flex-direction: column;
 					}
 
@@ -5498,6 +5496,58 @@
 		// 	sku: ["GDD041-GG130"],
 		// 	stock: ["0"]
 		// })
+
+		// Sửa giá của đăng ký chương trinh shopee
+		function giaDuoiChuongTrinhShopee(){
+			console.log("CẬP NHẬT GIÁ ĐUÔI");
+
+			var box = $(".eds-react-table-container table.src-components-ProductTable-VirtualTable---vBody--2QBA6 tbody > div");
+
+			$.each(box, (index, value) => {
+						var parent = box.eq(index).find("tr.src-components-ProductTable-VirtualTable---vExpandedRow--375Xg table tbody.eds-react-table-tbody > tr");
+				$.each(parent, (index, value) => {
+						if(parent.eq(index).is(".eds-react-table-row-selected")){
+							//var checkBox = parent.eq(index).find("td").eq(0).find("label");
+							var id = parent.eq(index).find("td").eq(1).find("div.src-components-ProductTable-VariationCol---variationCol--2pxe1 > div").eq(0);
+							var name = parent.eq(index).find("td").eq(1).find("div.src-components-ProductTable-VariationCol---variationCol--2pxe1 > div").eq(1);
+							var currentPrice = parent.eq(index).find("td").eq(5);
+							var price = parent.eq(index).find("td").eq(2).find("input");
+
+							var gia = currentPrice.text().replace("₫", "");
+							gia = gia.replace(".", "");
+
+							var giaKM = suaGiaDuoi(gia);
+
+							var discountType = $('input[name="discount-type"]:checked');
+							console.log(discountType);
+
+							if(discountType.length > 0){
+								var type = discountType.eq(0).attr("id");
+
+								var giaGiam = $(`input[id="tp-discount"]`).val().length > 0 ? $(`input[id="tp-discount"]`).val() : 0;
+
+								giaGiam = parseInt(giaGiam);
+
+								console.log(giaGiam);
+
+								if(type == "money"){
+									giaKM -= giaGiam
+								}else if(type == "percent"){
+									giaKM *= (100 - giaGiam) / 100;
+								}
+							}
+
+							giaKM = giaKM.toString().split("");
+							giaKM[giaKM.length - 1] = "1";
+							giaKM = giaKM.join();
+
+
+							clearReactInput(price);
+							simulateReactInput(price, giaKM);
+						}
+				});
+			});
+		}
 
 		// Chat với AI
 		function aiChat(){
