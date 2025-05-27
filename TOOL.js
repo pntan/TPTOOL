@@ -1,3 +1,5 @@
+	'use strict';
+
 	// Trạng thái hiển thị của giao diện
 	var createUI = false;
 
@@ -1261,7 +1263,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						display: none;
+						display: flex;
 						flex-direction: column;
 					}
 
@@ -3715,36 +3717,46 @@
 				return;
 			}
 
-			// Tạo bảng với style đẹp
-			var table = $(`
-				<table style="
-					border-collapse: separate;
-					border-spacing: 0;
-					width: 100%;
-					margin: 20px 0;
-					font-family: Arial, sans-serif;
-					font-size: 14px;
-					box-shadow: 0 0 10px rgba(0,0,0,0.1);
-					border-radius: 5px;
-					overflow: hidden;
-					border: 1px solid #ccc;
+			// Tạo một div bao bọc để kiểm soát việc cuộn
+			var scrollableContainer = $(`
+				<div style="
+					max-height: 500px; /* Đặt chiều cao tối đa mà bạn muốn cho bảng cuộn */
+					overflow-y: auto; /* Chỉ cuộn theo chiều dọc nếu cần */
+					overflow-x: hidden; /* Ngăn cuộn ngang nếu không cần thiết */
+					border: 1px solid #ccc; /* Border cho container cuộn */
+					border-radius: 5px; /* Bo góc cho container */
+					box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Shadow cho container */
+					margin: 20px 0; /* Khoảng cách với các phần tử khác */
 				">
-					<h2 style="text-align: center; font-weight: 700; font-size: 1.5em">Báo Cáo Thêm Phân Loại</h2>
-					<thead style="background-color: #f5f5f5;">
-						<tr>
-							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">STT</th>
-							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">ID</th>
-							<th style="text-align:left; padding: 10px; border-bottom: 1px solid #ddd;">Tên</th>
-							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">SKU</th>
-							<th style="text-align:right; padding: 10px; border-bottom: 1px solid #ddd;">Giá</th>
-							<th style="text-align:right; padding: 10px; border-bottom: 1px solid #ddd;">Tồn kho</th>
-							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">Hình ảnh</th>
-							<th style="text-align:left; padding: 10px; border-bottom: 1px solid #ddd;">Ghi chú</th>
-						</tr>
-					</thead>
-					<tbody></tbody>
-				</table>
+					<table style="
+						border-collapse: separate;
+						border-spacing: 0;
+						width: 100%;
+						font-family: Arial, sans-serif;
+						font-size: 14px;
+						/* Các style của bảng không cần overflow ở đây nữa */
+					">
+						<h2 style="text-align: center; font-weight: 700; font-size: 1.5em; margin: 10px 0;">Báo Cáo Thêm Phân Loại</h2>
+						<thead style="background-color: #f5f5f5;">
+							<tr>
+								<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">STT</th>
+								<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">ID</th>
+								<th style="text-align:left; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">Tên</th>
+								<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">SKU</th>
+								<th style="text-align:right; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">Giá</th>
+								<th style="text-align:right; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">Tồn kho</th>
+								<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">Hình ảnh</th>
+								<th style="text-align:left; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">Ghi chú</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
 			`);
+
+			// Lấy tham chiếu đến bảng và tbody bên trong container cuộn
+			var table = scrollableContainer.find("table");
+			var tbody = table.find("tbody");
 
 			let stt = 1;
 			items.forEach((item) => {
@@ -3754,7 +3766,7 @@
 					var row = $(`
 						<tr style="background-color: ${stt % 2 === 0 ? '#fafafa' : '#ffffff'};">
 							<td style="text-align:center; padding: 8px; border-bottom: 1px solid #eee;">${stt++}</td>
-							<td class="copyable" style="text-align: center; padding: 8px; border-bottom: 1px silid #eee"><a href="https://banhang.shopee.vn/portal/product/${item.id || Object.keys(item) || "#"}/">${item.id || Object.keys(item) || "Không xác định"}</a></td>
+							<td class="copyable" style="text-align: center; padding: 8px; border-bottom: 1px solid #eee"><a href="https://banhang.shopee.vn/portal/product/${item.id || Object.keys(item.variants) || "#"}/" target="_blank">${item.id || Object.keys(item.variants) || "Không xác định"}</a></td>
 							<td class="copyable" style="text-align:left; padding: 8px; border-bottom: 1px solid #eee;">${v.name}</td>
 							<td class="copyable" style="text-align:center; padding: 8px; border-bottom: 1px solid #eee;">${v.sku}</td>
 							<td style="text-align:right; padding: 8px; border-bottom: 1px solid #eee;">${v.price.toLocaleString()}</td>
@@ -3765,11 +3777,12 @@
 							<td style="text-align:left; padding: 8px; border-bottom: 1px solid #eee;">${item.note || ""}</td>
 						</tr>
 					`);
-					table.find("tbody").append(row);
+					tbody.append(row); // append vào tbody đã được lấy tham chiếu
 				});
 			});
 
-			boxPopup(table);
+			// Gọi boxPopup với container cuộn thay vì bảng trực tiếp
+			boxPopup(scrollableContainer);
 
 			var totalVariants = items.reduce((sum, item) => sum + (item.variants?.length || 0), 0);
 			boxLogging(`Tạo báo cáo với tổng ${totalVariants} biến thể.`, [], ["green"]);
@@ -3845,7 +3858,8 @@
 			var exitItem = {
 				[data.id]: {
 					variants: existingVariants,
-					note: "Tên phân loại đã tồn tại"
+					note: "Tên phân loại đã tồn tại",
+					id: data.id
 				}
 			};
 
@@ -3961,7 +3975,8 @@
 				var errorList = {
 					[data.id]: {
 						variants: errorVariants,
-						note: "Sản phẩm cần xem xét lại giá"
+						note: "Sản phẩm cần xem xét lại giá",
+						id: data.id
 					}
 				};
 
@@ -4228,7 +4243,7 @@
 			//kiemTraPhanLoaiHangLoatShopee();
 			// ✅ Khi xử lý xong:
 			setTimeout(saveProduct, 3000);
-			moveToNextProduct();
+			// moveToNextProduct();
 		}
 
 		// Lưu sản phẩm sau khi thêm phân loại
