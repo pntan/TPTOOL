@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.6";
+	const VERSION = "2.1.7";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -46,7 +46,7 @@
 			"themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
 			"layPhanLoaiShopee": layPhanLoaiShopee,
 			// "themPhanLoaiShopee": themPhanLoaiShopee,
-			"giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
+			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
 			// //"batKhuyenMaiShopee": batKhuyenMaiShopee,
 			// // --- TIKTOK
@@ -71,6 +71,10 @@
 
 		const actionOnlineMap = {
 			"aiChat": aiChat,
+		}
+
+		const actionOptionMap = {
+			"scaleMainContent": scaleMainContent
 		}
 
 		// Thêm thư viện
@@ -106,7 +110,7 @@
 				loadNext();
 			}catch (e){
 				boxAlert(`Không thể load ${scripts[index]}`, "error");
-			}				
+			}
 		}
 
 		// lấy nonce từ tag có sẵn trong trang
@@ -783,20 +787,25 @@
 
 		// Kiểm tra tự động mở các danh sách...
 		function checkPage(){
+			boxAlert("CHECKPAGE");
 			var domain = window.location;
 			var host = domain.host, pathName = domain.pathname, port = domain.port, protocol = domain.protocol;
 
-			if(pathName.includes("portal/product/")){
-				if(pathName.includes("list")){
-					waitForElement($("body"), ".product-variation-item.product-more-models", (el) => {
-						$(".product-variation-item.product-more-models").click();
-					})
-				}else{
-					waitForElement($("body"), ".variation-model-table-footer button.eds-button.eds-button--link.eds-button--normal", (el) => {
-						simulateReactEvent($(el), "click");
-						boxToast("Đã mở rộng danh sách phân loại");
-					});
-				}
+			console.log(domain);
+
+			if(pathName.includes("portal/product/list")){
+				waitForElement($("body"), ".product-variation-item.product-more-models", (el) => {
+					$(".product-variation-item.product-more-models").click();
+				})
+			}
+
+			if(pathName.includes("portal/product")){
+				boxAlert("MO DANH SACH");
+				waitForElement($("body"), ".variation-model-table-footer button.eds-button.eds-button--link.eds-button--normal", (el) => {
+					console.log($(el));
+					$(el).click();
+					boxToast("Đã mở rộng danh sách phân loại");
+				});
 			}
 		}
 
@@ -973,7 +982,7 @@
 								<option data-func="layPhanLoaiShopee" data-layout="layPhanLoaiShopeeLayout">Lấy Phân Loại</option>
 								<option data-func="layLinkChuaSKUShopee" data-layout="layLinkChuaSKUShopeeLayout">Lấy Link Chứa SKU</option>
 								<option data-func="suaTonSKUNhieuLinkShopee" data-layout="suaTonSKUNhieuLinkShopeeLayout">Sửa Tồn Theo SKU Nhiều Link</option>
-								<option data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
+								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
 								<!-- <option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option> -->
 								<!-- <option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option> -->
 							</optgroup>
@@ -1016,14 +1025,17 @@
 
 					<div id="tab-custom" class="tab-content">
 						<select id="optionSelect">
-							<option>Chọn Chức Năng</option>
-							<option>Chung</option>
-							<option>Shopee</option>
-							<option>Tiktok</option>
-							<option>Lazada</option>
-							<option>Sapo</option>
-							<option>Khác</option>
+							<option hidden>Chọn Chức Năng</option>
+							<option data-layout="chung">Chung</option>
+							<option data-layout="shopee">Shopee</option>
+							<option data-layout="tiktok">Tiktok</option>
+							<option data-layout="lazada">Lazada</option>
+							<option data-layout="sapo">Sapo</option>
+							<option data-layout="khac">Khác</option>
 						</select>
+
+						<div class="layout-future optionSelect">
+						</div>
 					</div>
 
 					<div id="tab-online-function" class="tab-content">
@@ -1263,7 +1275,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						display: none;
+						display: flex;
 						flex-direction: column;
 					}
 
@@ -1741,6 +1753,13 @@
 				$("iframe").eq(index).remove();
 			});
 
+			$("select#optionSelect").on("change", function(){
+				var option = $(this).find("option:selected");
+				$(".layout-tab").remove();
+
+				createLayoutOption(option.data("layout"));
+			})
+
 			// Chọn chức năng online
 			$("select#onlineSelect").on("change", function(){
 				var option = $(this).find("option:selected");
@@ -1750,6 +1769,30 @@
 
 				if(actionOnlineMap[option.data("func")])
 					actionOnlineMap[option.data("func")]();
+			})
+		}
+
+		function createLayoutOption(layoutName){
+			layoutName = layoutName == undefined ? "Không có giao diện" : layoutName;
+
+			$("#excuse-command").hide();
+
+			var content = $(".layout-future.optionSelect");
+
+			switch(layoutName){
+				case "shopee":
+					content.append($(`
+						<div class="layout-option">
+							<div class="box">
+								<button class="excuse-command" data-func="scaleMainContent" id="scale-main-content">Mở Rộng Không Gian Làm Việc</button>
+							</div>
+						</div>
+					`))
+					break;
+			}
+
+			$(".layout-future.optionSelect button.excuse-command").on("click", function(e){
+				actionOptionMap[$(this).data("func")]();
 			})
 		}
 
@@ -2012,7 +2055,7 @@
 								<button class="remove-promotion" style="background: crimson; color: #fff; font-weight: 700">Xóa</button>
 							</div>
 
-							<!-- DATA MẪU 
+							<!-- DATA MẪU
 							<div style="display: flex; justify-content: center; align-items: center; gap: 2vw" class="box-promotion">
 								<input class="name" type="text" placeholder="Tên chương trình" value="Chương Trình 1" /><span class="count-character">0/50</span>
 								<input class="time-start" type="datetime-local" placeholder="Bắt đầu" value="05/28/2025 09:00 AM" />
@@ -3478,12 +3521,12 @@
 							$(popUp).on("click", () => {
 							boxLogging(`Đã xóa [copy]${sku}[/copy]`, [`${sku}`], ["green"])
 							currentItem++;
-							nextItem();				
+							nextItem();
 						})
 
 							$(popUp).find(".eds-modal__box .eds-modal__content.eds-modal__content--normal .eds-modal__footer").find("button").eq(1).click();
 						}, 500)
-					}, 500)					
+					}, 500)
 
 					$(".tp-container.tp-content .layout-future .layout-tab #skip").click(() => {
 						boxLogging(`Đã bỏ qua [copy]${sku}[/copy]`, [`${sku}`], ["orange"])
@@ -3717,46 +3760,36 @@
 				return;
 			}
 
-			// Tạo một div bao bọc để kiểm soát việc cuộn
-			var scrollableContainer = $(`
-				<div style="
-					max-height: 500px; /* Đặt chiều cao tối đa mà bạn muốn cho bảng cuộn */
-					overflow-y: auto; /* Chỉ cuộn theo chiều dọc nếu cần */
-					overflow-x: hidden; /* Ngăn cuộn ngang nếu không cần thiết */
-					border: 1px solid #ccc; /* Border cho container cuộn */
-					border-radius: 5px; /* Bo góc cho container */
-					box-shadow: 0 0 10px rgba(0,0,0,0.1); /* Shadow cho container */
-					margin: 20px 0; /* Khoảng cách với các phần tử khác */
+			// Tạo bảng với style đẹp
+			var table = $(`
+				<table style="
+					border-collapse: separate;
+					border-spacing: 0;
+					width: 100%;
+					margin: 20px 0;
+					font-family: Arial, sans-serif;
+					font-size: 14px;
+					box-shadow: 0 0 10px rgba(0,0,0,0.1);
+					border-radius: 5px;
+					overflow: hidden;
+					border: 1px solid #ccc;
 				">
-					<table style="
-						border-collapse: separate;
-						border-spacing: 0;
-						width: 100%;
-						font-family: Arial, sans-serif;
-						font-size: 14px;
-						/* Các style của bảng không cần overflow ở đây nữa */
-					">
-						<h2 style="text-align: center; font-weight: 700; font-size: 1.5em; margin: 10px 0;">Báo Cáo Thêm Phân Loại</h2>
-						<thead style="background-color: #f5f5f5;">
-							<tr>
-								<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">STT</th>
-								<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">ID</th>
-								<th style="text-align:left; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">Tên</th>
-								<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">SKU</th>
-								<th style="text-align:right; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">Giá</th>
-								<th style="text-align:right; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">Tồn kho</th>
-								<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">Hình ảnh</th>
-								<th style="text-align:left; padding: 10px; border-bottom: 1px solid #ddd; position: sticky; top: 0; background-color: #f5f5f5; z-index: 1;">Ghi chú</th>
-							</tr>
-						</thead>
-						<tbody></tbody>
-					</table>
-				</div>
+					<h2 style="text-align: center; font-weight: 700; font-size: 1.5em">Báo Cáo Thêm Phân Loại</h2>
+					<thead style="background-color: #f5f5f5;">
+						<tr>
+							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">STT</th>
+							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">ID</th>
+							<th style="text-align:left; padding: 10px; border-bottom: 1px solid #ddd;">Tên</th>
+							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">SKU</th>
+							<th style="text-align:right; padding: 10px; border-bottom: 1px solid #ddd;">Giá</th>
+							<th style="text-align:right; padding: 10px; border-bottom: 1px solid #ddd;">Tồn kho</th>
+							<th style="text-align:center; padding: 10px; border-bottom: 1px solid #ddd;">Hình ảnh</th>
+							<th style="text-align:left; padding: 10px; border-bottom: 1px solid #ddd;">Ghi chú</th>
+						</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
 			`);
-
-			// Lấy tham chiếu đến bảng và tbody bên trong container cuộn
-			var table = scrollableContainer.find("table");
-			var tbody = table.find("tbody");
 
 			let stt = 1;
 			items.forEach((item) => {
@@ -3766,7 +3799,7 @@
 					var row = $(`
 						<tr style="background-color: ${stt % 2 === 0 ? '#fafafa' : '#ffffff'};">
 							<td style="text-align:center; padding: 8px; border-bottom: 1px solid #eee;">${stt++}</td>
-							<td class="copyable" style="text-align: center; padding: 8px; border-bottom: 1px solid #eee"><a href="https://banhang.shopee.vn/portal/product/${item.id || Object.keys(item.variants) || "#"}/" target="_blank">${item.id || Object.keys(item.variants) || "Không xác định"}</a></td>
+							<td class="copyable" style="text-align: center; padding: 8px; border-bottom: 1px silid #eee"><a href="https://banhang.shopee.vn/portal/product/${item.id || Object.keys(item) || "#"}/">${item.id || Object.keys(item) || "Không xác định"}</a></td>
 							<td class="copyable" style="text-align:left; padding: 8px; border-bottom: 1px solid #eee;">${v.name}</td>
 							<td class="copyable" style="text-align:center; padding: 8px; border-bottom: 1px solid #eee;">${v.sku}</td>
 							<td style="text-align:right; padding: 8px; border-bottom: 1px solid #eee;">${v.price.toLocaleString()}</td>
@@ -3777,12 +3810,11 @@
 							<td style="text-align:left; padding: 8px; border-bottom: 1px solid #eee;">${item.note || ""}</td>
 						</tr>
 					`);
-					tbody.append(row); // append vào tbody đã được lấy tham chiếu
+					table.find("tbody").append(row);
 				});
 			});
 
-			// Gọi boxPopup với container cuộn thay vì bảng trực tiếp
-			boxPopup(scrollableContainer);
+			boxPopup(table);
 
 			var totalVariants = items.reduce((sum, item) => sum + (item.variants?.length || 0), 0);
 			boxLogging(`Tạo báo cáo với tổng ${totalVariants} biến thể.`, [], ["green"]);
@@ -3858,8 +3890,7 @@
 			var exitItem = {
 				[data.id]: {
 					variants: existingVariants,
-					note: "Tên phân loại đã tồn tại",
-					id: data.id
+					note: "Tên phân loại đã tồn tại"
 				}
 			};
 
@@ -3975,8 +4006,7 @@
 				var errorList = {
 					[data.id]: {
 						variants: errorVariants,
-						note: "Sản phẩm cần xem xét lại giá",
-						id: data.id
+						note: "Sản phẩm cần xem xét lại giá"
 					}
 				};
 
@@ -4243,7 +4273,7 @@
 			//kiemTraPhanLoaiHangLoatShopee();
 			// ✅ Khi xử lý xong:
 			setTimeout(saveProduct, 3000);
-			// moveToNextProduct();
+			moveToNextProduct();
 		}
 
 		// Lưu sản phẩm sau khi thêm phân loại
@@ -4796,7 +4826,7 @@
 				chinhSuaKhuyenMaiTiktok();
 			});
 		}
-		
+
 		function chinhSuaKhuyenMaiTiktok(){
 			var data = $(".tp-container.tp-content .layout-future .layout-tab #data")
 			data = data.val().split("\n");
@@ -5282,7 +5312,7 @@
 		function setEventSuaTonSKUNhieuLinkShopee(){
 			$(".tp-container.tp-content .layout-future .layout-tab #skip").click(() => {
 				boxLogging(`Đã bỏ qua [copy]${sku}[/copy]`, [`${sku}`], ["orange"])
-				currentItem++;	
+				currentItem++;
 				nextItem();
 			})
 		}
@@ -5338,7 +5368,7 @@
 					}
 					window.open(`https://banhang.shopee.vn/portal/product/${listLink[currentLink]}`, "_blank");
 				}
-			})			
+			})
 		}
 
 		tpBroadcast.addEventListener("message", function(e){
@@ -5512,55 +5542,25 @@
 		// 	stock: ["0"]
 		// })
 
-		// Sửa giá của đăng ký chương trinh shopee
-		function giaDuoiChuongTrinhShopee(){
-			console.log("CẬP NHẬT GIÁ ĐUÔI");
-
-			var box = $(".eds-react-table-container table.src-components-ProductTable-VirtualTable---vBody--2QBA6 tbody > div");
-
-			$.each(box, (index, value) => {
-						var parent = box.eq(index).find("tr.src-components-ProductTable-VirtualTable---vExpandedRow--375Xg table tbody.eds-react-table-tbody > tr");
-				$.each(parent, (index, value) => {
-						if(parent.eq(index).is(".eds-react-table-row-selected")){
-							//var checkBox = parent.eq(index).find("td").eq(0).find("label");
-							var id = parent.eq(index).find("td").eq(1).find("div.src-components-ProductTable-VariationCol---variationCol--2pxe1 > div").eq(0);
-							var name = parent.eq(index).find("td").eq(1).find("div.src-components-ProductTable-VariationCol---variationCol--2pxe1 > div").eq(1);
-							var currentPrice = parent.eq(index).find("td").eq(5);
-							var price = parent.eq(index).find("td").eq(2).find("input");
-
-							var gia = currentPrice.text().replace("₫", "");
-							gia = gia.replace(".", "");
-
-							var giaKM = suaGiaDuoi(gia);
-
-							var discountType = $('input[name="discount-type"]:checked');
-							console.log(discountType);
-
-							if(discountType.length > 0){
-								var type = discountType.eq(0).attr("id");
-
-								var giaGiam = $(`input[id="tp-discount"]`).val().length > 0 ? $(`input[id="tp-discount"]`).val() : 0;
-
-								giaGiam = parseInt(giaGiam);
-
-								console.log(giaGiam);
-
-								if(type == "money"){
-									giaKM -= giaGiam
-								}else if(type == "percent"){
-									giaKM *= (100 - giaGiam) / 100;
-								}
-							}
-
-							giaKM = giaKM.toString().split("");
-							giaKM[giaKM.length - 1] = "1";
-							giaKM = giaKM.join();
-
-
-							clearReactInput(price);
-							simulateReactInput(price, giaKM);
-						}
-				});
+		// Mở rộng không gian làm việc
+		var optionStatus = false;
+		function scaleMainContent(){
+			waitForElement($("body"), ".product-edit__main", (mainContent) => {
+				mainContent = $(mainContent);
+				if(!optionStatus){
+					mainContent.css({
+						"width": "100%",
+						"position": "absolute",
+						"top": "0",
+						"left": "0",
+						"margin-left": "0",
+						"z-index": "9999",
+					});
+					optionStatus = true;
+				}else{
+					mainContent.removeAttr("style");
+					optionStatus = false;
+				}
 			});
 		}
 
