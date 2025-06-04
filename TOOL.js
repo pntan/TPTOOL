@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.7";
+	const VERSION = "2.1.8";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -55,9 +55,11 @@
 			"kiemTraMaPhanLoaiTiktok": kiemTraMaPhanLoaiTiktok,
 			"chinhSuaKhuyenMaiTiktok": chinhSuaKhuyenMaiTiktok,
 			"themPhanLoaiTiktok": themPhanLoaiTiktok,
+			"themHinhTheoSKUTiktok": themHinhTheoSKUTiktok,
 			// "tgFlashSaleTiktok": tgFlashSaleTiktok,
 			// "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
 			// // --- SAPO
+			"lienKetSKUSapo": lienKetSKUSapo,
 			// "kiemTraTonSapo": kiemTraTonSapo,
 			// // -- LAZADA
 			"giaDuoiLazada": giaDuoiLazada,
@@ -110,7 +112,7 @@
 				loadNext();
 			}catch (e){
 				boxAlert(`Không thể load ${scripts[index]}`, "error");
-			}
+			}				
 		}
 
 		// lấy nonce từ tag có sẵn trong trang
@@ -209,13 +211,13 @@
 		function boxAlert(content, type = "log"){
 			switch(type){
 				case "log":
-					console.log(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: yellow; font-size: 1.5rem");
+					console.log(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: orange; font-size: 1.5rem");
 				break;
 				case "error":
-					console.error(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: yellow; font-size: 1.5rem")
+					console.error(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: orange; font-size: 1.5rem")
 				break;
 				case "warn":
-					console.warn(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: yellow; font-size: 1.5rem");
+					console.warn(`%cTanPhan: %c${content}`, "color: crimson; font-size: 2rem", "color: orange; font-size: 1.5rem");
 				break;
 			}
 		}
@@ -494,7 +496,7 @@
 			setNativeValue(el, '');
 		}
 
-		// Theo dõi phần tử
+		// Hàm theo dõi phần tử
 		function waitForElement(root, selector, callback, options = {}) {
 			var {
 				once = true,
@@ -509,30 +511,45 @@
 
 			if (!(rootNode instanceof Node)) {
 				console.error("❌ waitForElement: root không phải DOM node hợp lệ:", rootNode);
-				return;
+				return null; // TRẢ VỀ NULL NẾU ROOT KHÔNG HỢP LỆ
 			}
 
 			let observer = null;
 			let timeoutId = null;
 			let delayTimer = null;
 			let lastMatchedElement = null;
+			let foundAndTriggered = false; // Biến cờ để đảm bảo callback chỉ chạy một lần nếu once là true
 
 			function runCallback(el) {
+				if (foundAndTriggered && once) { // Nếu đã chạy và là once, thoát
+					return;
+				}
+				foundAndTriggered = true; // Đánh dấu đã chạy
+
 				callback(el);
 				if (once) {
-					observer.disconnect();
+					if (observer) {
+						observer.disconnect();
+						observer = null; // Gán lại null sau khi disconnect
+					}
 					if (timeoutId) clearTimeout(timeoutId);
 					if (delayTimer) clearTimeout(delayTimer);
 				}
 			}
 
+			// Kiểm tra ban đầu, nhưng không sử dụng cho logic SPA (once: false)
 			var initial = rootNode.querySelector(selector);
-			if (initial && !waitForLastChange) {
-				callback(initial);
-				if (once) return;
+			if (initial && !waitForLastChange && once) {
+				runCallback(initial);
+				return null; // Nếu tìm thấy ngay và once là true, không cần observer
 			}
 
 			observer = new MutationObserver(() => {
+				// Chỉ tiếp tục nếu chưa tìm thấy và kích hoạt và không phải là once HOẶC là once nhưng chưa kích hoạt
+				if (foundAndTriggered && once) {
+					return;
+				}
+
 				var found = rootNode.querySelector(selector);
 				if (found) {
 					lastMatchedElement = found;
@@ -550,14 +567,23 @@
 
 			if (timeout) {
 				timeoutId = setTimeout(() => {
-					observer.disconnect();
-					if (waitForLastChange && lastMatchedElement) {
-						runCallback(lastMatchedElement);
+					if (!foundAndTriggered) { // Chỉ xử lý timeout nếu callback chưa được gọi
+						if (observer) {
+							observer.disconnect();
+							observer = null;
+						}
+						if (waitForLastChange && lastMatchedElement) {
+							runCallback(lastMatchedElement);
+						} else {
+							// Nếu timeout mà không tìm thấy gì (hoặc không có nội dung đủ)
+							// và không có lastMatchedElement, có thể gọi callback với null
+							callback(null); // Báo hiệu timeout cho bên ngoài
+						}
 					}
 				}, timeout);
 			}
 
-			return observer;
+			return observer; // Trả về observer để có thể disconnect từ bên ngoài
 		}
 
 		function awaitForElement(root, selector, options = {}) {
@@ -884,6 +910,127 @@
 			return socket;
 		}
 
+		const COMMON_CONTAINER_SELECTORS = [
+			'#root',        // React, đôi khi Vue, cũng là Sapo theo bạn nói
+			'#app',         // Vue, đôi khi React
+			'#wrapper',     // Chung chung
+			'#container',   // Chung chung
+			'#main',        // Chung chung, HTML5
+			'#___gatsby',   // Gatsby (React based)
+			'#next',        // Next.js (React based)
+			// Các class phổ biến khác (ít cụ thể hơn ID nhưng vẫn hữu ích):
+			'.root',
+			'.app',
+			'.wrapper',
+			'.container',
+			'.main',
+			'[data-v-app]', // Một số ứng dụng Vue có thể dùng thuộc tính này
+		];
+
+		function checkElementPage() {
+			boxAlert("ĐANG KIỂM TRA PHẦN TỬ TRANG (Đang chờ SPA ổn định)");
+
+			return new Promise((resolve) => {
+				let foundContainer = null;
+				let activeObserver = null; // Biến để giữ observer đang hoạt động của waitForElement
+				let nextSelectorTimeoutId = null; // Biến để quản lý timeout chuyển selector
+
+				const tryNextSelector = (index) => {
+					// Nếu đã tìm thấy container và resolve, dừng tất cả các hoạt động đang chờ và thoát
+					if (foundContainer) {
+						return;
+					}
+
+					// Nếu đã thử hết các selector mà không tìm thấy
+					if (index >= COMMON_CONTAINER_SELECTORS.length) {
+						boxAlert("KHÔNG TÌM THẤY PHẦN TỬ CHÍNH CÓ NỘI DUNG. Mặc định thêm vào BODY.");
+						resolve(document.body); // Fallback an toàn
+						
+						// Đảm bảo ngắt kết nối observer cuối cùng nếu có
+						if (activeObserver) {
+							activeObserver.disconnect();
+							activeObserver = null;
+						}
+						if (nextSelectorTimeoutId) {
+							clearTimeout(nextSelectorTimeoutId);
+							nextSelectorTimeoutId = null;
+						}
+						return;
+					}
+
+					const selector = COMMON_CONTAINER_SELECTORS[index];
+					boxAlert(`Đang thử tìm: ${selector}`);
+
+					// Hủy bỏ observer cũ và timeout cũ trước khi bắt đầu cái mới
+					if (activeObserver) {
+						activeObserver.disconnect();
+						activeObserver = null;
+					}
+					if (nextSelectorTimeoutId) {
+						clearTimeout(nextSelectorTimeoutId);
+						nextSelectorTimeoutId = null;
+					}
+
+					// Gọi waitForElement của bạn
+					activeObserver = waitForElement(document.body, selector, (element) => {
+						// Chỉ xử lý nếu chưa tìm thấy container và element hợp lệ
+						// (callback của waitForElement có thể gọi với null nếu timeout)
+						if (!foundContainer && element) { 
+							// KIỂM TRA QUAN TRỌNG: Kiểm tra xem phần tử đã có nội dung hay chưa
+							// children.length > 0: Có phần tử con
+							// innerHTML.trim().length > 0: Có nội dung văn bản (không phải chỉ khoảng trắng)
+							if (element.children.length > 0 || element.innerHTML.trim().length > 0) {
+								foundContainer = element; // Gán phần tử đã tìm thấy
+								boxAlert(`Đã tìm thấy phần tử chính và có nội dung: ${selector}`);
+								
+								// Đảm bảo ngắt kết nối observer hiện tại
+								if (activeObserver) { 
+									activeObserver.disconnect();
+									activeObserver = null;
+								}
+								// Hủy timeout để chuyển selector tiếp theo
+								if (nextSelectorTimeoutId) { 
+									clearTimeout(nextSelectorTimeoutId);
+									nextSelectorTimeoutId = null;
+								}
+								resolve(foundContainer); // Trả về phần tử đã tìm thấy
+							} else {
+								// boxAlert(`Tìm thấy ${selector} nhưng chưa có nội dung, tiếp tục chờ...`);
+								// Không cần thông báo quá nhiều nếu chỉ là chờ đợi nội dung
+							}
+						} else if (!foundContainer && element === null) {
+							// Nếu waitForElement báo timeout (callback(null)), chuyển sang selector tiếp theo
+							boxAlert(`waitForElement timeout cho ${selector}. Thử selector kế tiếp.`);
+							tryNextSelector(index + 1);
+						}
+					}, {
+						once: false, // QUAN TRỌNG: Giữ observer hoạt động để chờ nội dung được load
+						timeout: 7000 // Tăng timeout để cho phép SPA có thời gian render nội dung
+					});
+
+					// Nếu waitForElement trả về null ngay lập tức (ví dụ: rootNode không hợp lệ)
+					if (!activeObserver) {
+						boxAlert(`waitForElement không thể khởi tạo observer cho ${selector}. Thử selector tiếp theo.`);
+						tryNextSelector(index + 1);
+						return; // Thoát khỏi hàm này để tránh chạy tiếp logic dưới
+					}
+
+					// Set timeout để chuyển sang selector tiếp theo
+					// Đây là một "fallback" nếu MutationObserver không hoạt động như mong đợi
+					// hoặc nếu phần tử không bao giờ có đủ nội dung trong thời gian chờ
+					nextSelectorTimeoutId = setTimeout(() => {
+						if (!foundContainer) { // Nếu vẫn chưa tìm thấy container với nội dung sau timeout
+							boxAlert(`Timeout (tự chuyển) cho ${selector}. Thử selector kế tiếp.`);
+							tryNextSelector(index + 1); // Thử selector kế tiếp
+						}
+					}, 7500); // Lớn hơn timeout của waitForElement một chút
+				};
+
+				// Bắt đầu quá trình tìm kiếm từ selector đầu tiên
+				tryNextSelector(0);
+			});
+		}
+
 		// Khải tạo chương trình
 		function INITCONFIG(){
 			boxAlert("ĐANG KHỞI TẠO");
@@ -891,20 +1038,26 @@
 				if (createUI)
 					return;
 				createUI = true;
-				createLayout();
-				applyNonce();
+				checkElementPage().then(mainContent => {
+					boxAlert("ĐÃ TÌM THẤY PHẦN TỬ CHÍNH CÓ NỘI DUNG");
+					createLayout(mainContent);
+					applyNonce();
 
-				// Kết nối máy chủ
-				// socket = getUrlServer();
+					// Kết nối máy chủ
+					// socket = getUrlServer();
 
-				// Kiểm tra tự động mở các danh sách
-				checkPage();
+					// Kiểm tra tự động mở các danh sách
+					checkPage();
+				}).catch(err => {
+					boxAlert(`LỖI: ${err.message}`, "error");
+					console.error("Lỗi khi tìm phần tử chính:", err);
+				});
 			});
 		}
 
 		INITCONFIG();
 
-		function createLayout(){
+		function createLayout(mainContent){
 			if(window.parent != window.top){
 				boxAlert(`Đã bỏ qua một lần thêm giao diện`);
 				return;
@@ -912,9 +1065,10 @@
 
 			boxAlert(`Đang dựng giao diện`);
 
+			mainContent = $(mainContent);
 
 			// Giao diện HTML
-			$("body").append($(`
+			mainContent.append($(`
 				<!-- GIAO DIỆN CHƯƠNG TRÌNH -->
 				<div class="tp-popup">
 					<div class="popup-overlay"></div>
@@ -994,6 +1148,7 @@
 								<option data-func="kiemTraMaPhanLoaiTiktok">Hiển Thị Mã Phân Loại</option>
 								<option data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
 								<option data-func="themPhanLoaiTiktok" data-layout="themPhanLoaiTikTokLayout">Thêm Phân Loại</option>
+								<option data-func="themHinhTheoSKUTiktok" data-layout="themHinhTheoSKUTiktokLayout">Thêm Hình Theo SKU</option>
 								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
@@ -1007,6 +1162,7 @@
 
 							<!-- Sapo -->
 							<optgroup label="Sapo">
+								<option data-func="lienKetSKUSapo" data-layout="lienKetSKUSapoLayout">Liên Kết SKU</option>
 								<option disabled data-func="kiemTraTonSapo" data-layout="kiemTraTonSapoLayout">Kiểm Tra Tồn</option>
 							</optgroup>
 
@@ -1059,7 +1215,7 @@
 				</div>
 			`));
 
-			$("body").append($(`
+			mainContent.append($(`
 				<style class="tp-style">
 					.tp-popup {
 						position: fixed;
@@ -1275,6 +1431,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
+						// Ẩn hiện giao diện chính
 						display: none;
 						flex-direction: column;
 					}
@@ -1786,7 +1943,7 @@
 							<div class="box">
 								<button class="excuse-command" data-func="scaleMainContent" id="scale-main-content">Mở Rộng Không Gian Làm Việc</button>
 							</div>
-						</div>
+						</div>						
 					`))
 					break;
 			}
@@ -1811,13 +1968,21 @@
 				break;
 				case "aiChatLayout":
 					content.append($(`
-						<div class="layout-tab">
-							<div class="message-content">
-							</div>
-							<div class="typing-content">
-								<input type="text" placeholder="Nhập tin nhắn..." />
-							</div>
-						</div>
+					<div class="layout-tab">
+						<input type="file" webkitdirectory directory multiple />
+						<p>Tải lên thư mục có chứa hình ảnh, không cần tải lên từng hình</p>
+						<p style="font-weight:700; color: crimson">*Tên hình ảnh phải là SKU của sản phẩm</p>
+
+						<!--<label for="search-name">
+								<p>Đổi Theo Tên</p>
+								<input id="search-name" type="radio" name="searchType" />
+						</label>
+
+						<label for="search-sku">
+								<p>Đổi Theo SKU</p>
+								<input id="search-sku" type="radio" name="searchType" />
+						</label> -->
+					</div>
 					`))
 
 					$(".layout-tab").css({
@@ -1894,6 +2059,60 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "themHinhTheoSKUTiktokLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<input type="file" webkitdirectory directory multiple />
+						<p>Tải lên thư mục có chứa hình ảnh, không cần tải lên từng hình</p>
+						<p style="font-weight:700; color: crimson">*Tên hình ảnh phải là SKU của sản phẩm</p>
+
+						<!--<label for="search-name">
+								<p>Đổi Theo Tên</p>
+								<input id="search-name" type="radio" name="searchType" />
+						</label>
+
+						<label for="search-sku">
+								<p>Đổi Theo SKU</p>
+								<input id="search-sku" type="radio" name="searchType" />
+						</label> -->
+					</div>
+				`));
+				setEventThemHinhTheoSKUTiktok();
+				break;
+			case "lienKetSKUSapoLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<p>Cách liên kết SKU</p>
+						<div class="box">
+							<label for="link-type-1">Liên Kết Với x0</label>
+							<input type="radio" name="link-type" id="link-type-1" value="1" checked />
+						</div>
+						<div class="box">
+							<label for="link-type-2">Liên Kết Với SKU hiện tại</label>
+							<input type="radio" name="link-type" id="link-type-2" value="2" />
+						</div>
+					</div>
+				`))
+
+				content.append($(`
+					<style>
+						.box{
+							display: flex;
+							align-items: center;
+							gap: 10px;
+							margin-bottom: 10px;
+							width: 100%;
+							justify-content: space-between;
+						}
+
+						.box label{
+							width: 100%;
+							text-align: left;
+						}
+					</style>
+				`));
+				setEventLienKetSKUSapo();
+				break;
 			case "layLinkChuaSKUShopeeLayout":
 				$("#excuse-command").hide();
 				content.append($(`
@@ -2055,7 +2274,7 @@
 								<button class="remove-promotion" style="background: crimson; color: #fff; font-weight: 700">Xóa</button>
 							</div>
 
-							<!-- DATA MẪU
+							<!-- DATA MẪU 
 							<div style="display: flex; justify-content: center; align-items: center; gap: 2vw" class="box-promotion">
 								<input class="name" type="text" placeholder="Tên chương trình" value="Chương Trình 1" /><span class="count-character">0/50</span>
 								<input class="time-start" type="datetime-local" placeholder="Bắt đầu" value="05/28/2025 09:00 AM" />
@@ -2272,21 +2491,21 @@
 				break;
 			case "suaHinhSKUShopeeLayout":
 				content.append($(`
-				<div class="layout-tab">
-					<input type="file" webkitdirectory directory multiple />
-					<p>Tải lên thư mục có chứa hình ảnh, không cần tải lên từng hình</p>
-					<p style="font-weight:700; color: crimson">*Tên hình ảnh phải là SKU của sản phẩm</p>
+					<div class="layout-tab">
+						<input type="file" webkitdirectory directory multiple />
+						<p>Tải lên thư mục có chứa hình ảnh, không cần tải lên từng hình</p>
+						<p style="font-weight:700; color: crimson">*Tên hình ảnh phải là SKU của sản phẩm</p>
 
-					<!--<label for="search-name">
-							<p>Đổi Theo Tên</p>
-							<input id="search-name" type="radio" name="searchType" />
-					</label>
+						<!--<label for="search-name">
+								<p>Đổi Theo Tên</p>
+								<input id="search-name" type="radio" name="searchType" />
+						</label>
 
-					<label for="search-sku">
-							<p>Đổi Theo SKU</p>
-							<input id="search-sku" type="radio" name="searchType" />
-					</label> -->
-				</div>
+						<label for="search-sku">
+								<p>Đổi Theo SKU</p>
+								<input id="search-sku" type="radio" name="searchType" />
+						</label> -->
+					</div>
 				`));
 
 					$(".layout-tab label").css({
@@ -3521,12 +3740,12 @@
 							$(popUp).on("click", () => {
 							boxLogging(`Đã xóa [copy]${sku}[/copy]`, [`${sku}`], ["green"])
 							currentItem++;
-							nextItem();
+							nextItem();				
 						})
 
 							$(popUp).find(".eds-modal__box .eds-modal__content.eds-modal__content--normal .eds-modal__footer").find("button").eq(1).click();
 						}, 500)
-					}, 500)
+					}, 500)					
 
 					$(".tp-container.tp-content .layout-future .layout-tab #skip").click(() => {
 						boxLogging(`Đã bỏ qua [copy]${sku}[/copy]`, [`${sku}`], ["orange"])
@@ -4776,11 +4995,11 @@
 
 			$.each(row, (index, value) => {
 				var name = row.eq(index).find("td.core-table-td").eq(0);
-				var price = row.eq(index).find("td.core-table-td").eq(1);
-				var stock = row.eq(index).find("td.core-table-td").eq(2);
-				var sku = row.eq(index).find("td.core-table-td").eq(3);
+				var price = row.eq(index).find("td.core-table-td div#skus");
+				// var stock = row.eq(index).find("td.core-table-td").eq(2);
+				// var sku = row.eq(index).find("td.core-table-td").eq(3);
 
-				var productID = price.find("#skus").data("id");
+				var productID = price.data("id");
 				productID = productID.split(".");
 				productID = productID[productID.length - 1];
 
@@ -4826,7 +5045,7 @@
 				chinhSuaKhuyenMaiTiktok();
 			});
 		}
-
+		
 		function chinhSuaKhuyenMaiTiktok(){
 			var data = $(".tp-container.tp-content .layout-future .layout-tab #data")
 			data = data.val().split("\n");
@@ -5312,7 +5531,7 @@
 		function setEventSuaTonSKUNhieuLinkShopee(){
 			$(".tp-container.tp-content .layout-future .layout-tab #skip").click(() => {
 				boxLogging(`Đã bỏ qua [copy]${sku}[/copy]`, [`${sku}`], ["orange"])
-				currentItem++;
+				currentItem++;	
 				nextItem();
 			})
 		}
@@ -5368,7 +5587,7 @@
 					}
 					window.open(`https://banhang.shopee.vn/portal/product/${listLink[currentLink]}`, "_blank");
 				}
-			})
+			})			
 		}
 
 		tpBroadcast.addEventListener("message", function(e){
@@ -5562,6 +5781,151 @@
 					optionStatus = false;
 				}
 			});
+		}
+
+		function setEventLienKetSKUSapo(){
+
+		}
+
+		function lienKetSKUSapo(){
+			boxAlert("LIENKETSKUSAPO");
+			var excuse = {
+				moRongDanhSach: function() {
+					var box = $(".product-list-container .product-item-wrapper");
+					$.each(box, (index, value) => {
+						simulateReactEvent($(box).eq(index).find(".show-more button"), "click");
+
+						var variants = $(box).eq(index).find(".variant-list-wrapper.variant-list-orig .product-tooltip-wrapper");
+
+						$.each(variants, (indexVariant, valueVariant) => {
+							var checkBox = variants.eq(indexVariant).find(".item-checkbox input");
+							var img = variants.eq(indexVariant).find(".item-image img");
+							var name = variants.eq(indexVariant).find(".item-product .item-product span");
+							var sku = variants.eq(indexVariant).find(".item-product .item-sku span");
+							var status = variants.eq(indexVariant).find(".item-status span");
+							var buttonAction = variants.eq(indexVariant).find(".item-action > div");
+
+							simulateReactEvent(buttonAction.eq(1), "click");
+							waitForElement($("body"), ".popup-select-product-v2", (modal) => {
+								// DO SOMETHING
+							});
+						});
+					});
+				}
+			}
+			
+			excuse.moRongDanhSach();
+		}
+
+		// Thêm hình theo SKU tiktok
+		var listSKUImgTiktok = [];
+		function setEventThemHinhTheoSKUTiktok (){
+			// Gắn sự kiện và cho phép chọn thư mục
+			$(".tp-container.tp-content .layout-future .layout-tab input")
+				.attr({
+				webkitdirectory: true,
+				directory: true,
+				multiple: true
+				})
+				.on("change", function () {
+				var files = this.files;
+				listSKUImgTiktok = [];
+
+				// Xóa map cũ
+				inputMap = {};
+
+				for (let i = 0; i < files.length; i++) {
+					var file = files[i];
+
+					// Lấy tên file không có đuôi mở rộng
+					var fileNameOnly = file.name.split(".")[0].trim().toUpperCase();
+
+					listSKUImgTiktok.push(fileNameOnly);
+
+					// Tạo DataTransfer chứa file
+					var dt = new DataTransfer();
+					dt.items.add(file);
+
+					// Tạo input giả (để nạp file vào ô của Shopee)
+					var newInput = $("<input type='file'>").prop("files", dt.files).addClass("single-file-input");
+
+					// Gán theo SKU
+					inputMap[fileNameOnly] = newInput;
+				}
+			});
+		}
+
+		function themHinhTheoSKUTiktok(){
+			boxLogging("THÊM HÌNH ẢNH THEO SKU TIKTOK");
+
+			var mappingData = [];
+
+			var table = $(".core-table-content-inner table tbody tr");
+
+			$.each(table, (index, value) => {
+				var nameBox = table.eq(index).find("td").eq(0).find("p").eq(0);
+				// var priceBox = table.eq(index).find("td").eq(1).find("input");
+				// var stockBox = table.eq(index).find("td").eq(2).find("input");
+				var skuBox = table.eq(index).find("td").eq(table.eq(index).find("td").length - 2).find("input");
+
+				if(listSKUImgTiktok.includes(skuBox.val().toUpperCase())){
+					mappingData.push({
+						name: nameBox.text().trim(),
+						sku: skuBox.val().trim(),
+						// price: priceBox.val().trim(),
+						// stock: stockBox.val().trim()
+					});
+				}
+			})
+
+			console.log(mappingData);
+
+			var box = $("#sale_properties .space-y-12 div").eq(0).find("> div").eq(2).find("> div").eq(0).find("> div[role='button']");
+
+			$.each(box, (indexBox, valueBox) => {
+				var imgBox = box.eq(indexBox).find("> div div > div.mr-12");
+				var nameBox = box.eq(indexBox).find("> div div > div.w-full.overflow-hidden").find("input");
+
+				// console.log(box.eq(indexBox).find("> div div > div"));
+
+				$.each(mappingData, async (indexMapp, valueMapp) => {
+					if(nameBox.val().trim().includes(mappingData[indexMapp].name)){
+						var imgInputTiktok = imgBox.find("input")[0];
+
+						console.log(imgInputTiktok);
+
+						if (inputMap[mappingData[indexMapp].sku]) {
+							// inputMap[found] là jQuery object, cần lấy phần tử gốc
+							var fileInputEl = inputMap[mappingData[indexMapp].sku].get(0);
+
+							if (!fileInputEl || !fileInputEl.files || fileInputEl.files.length === 0) return;
+
+							var file = fileInputEl.files[0];
+							var dt = new DataTransfer();
+							dt.items.add(file);
+
+							// Click input đầu tiên để kích hoạt UI React
+							// if(!clickInput){
+							// 	imgInputTiktok.click();
+							// 	clickInput = true;
+							// }
+
+							setTimeout(() => {
+								imgInputTiktok.files = dt.files;
+
+								// Tạo sự kiện change để Shopee nhận diện file mới
+								var evt = new Event("change", { bubbles: true });
+								imgInputTiktok.dispatchEvent(evt);
+								boxLogging(`Đã sửa ảnh cho SKU [copy]${sku}[/copy]`, [`${sku}`], ["green"]);
+							}, 100); // có thể chỉnh tăng lên nếu chưa kịp load
+						}else{
+							boxLogging(`SKU [copy]${sku}[/copy] không có ảnh`, [`${sku}`], ["crimson"])
+						}
+					}
+				});
+			});
+
+			boxToast(`Đã thêm xong hình ảnh theo SKU TikTok`, "success");
 		}
 
 		// Chat với AI
