@@ -1038,6 +1038,17 @@
 				if (createUI)
 					return;
 				createUI = true;
+
+				createLayout($("body"));
+				applyNonce();
+
+				// Kiểm tra tự động mở các danh sách
+				checkPage();
+
+				// Kết nối máy chủ
+				// socket = getUrlServer();
+
+				/*
 				checkElementPage().then(mainContent => {
 					boxAlert("ĐÃ TÌM THẤY PHẦN TỬ CHÍNH CÓ NỘI DUNG");
 					createLayout(mainContent);
@@ -1052,6 +1063,7 @@
 					boxAlert(`LỖI: ${err.message}`, "error");
 					console.error("Lỗi khi tìm phần tử chính:", err);
 				});
+				*/
 			});
 		}
 
@@ -1431,7 +1443,7 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						// Ẩn hiện giao diện chính
+						// Ẩn hiện giao diện chính;
 						display: none;
 						flex-direction: column;
 					}
