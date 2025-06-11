@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.8";
+	const VERSION = "2.0.0";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -3419,14 +3419,9 @@
 
 			var clickInput = false;
 
-			$.each(box, (index) => {
+			$.each(box, async (index) => {
 				var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
 				var sku = skuBox.val().trim().toUpperCase();
-
-				if(boxLeft.eq(index).find(".table-cell img.shopee-image-manager__image").length > 0){
-					boxLogging(`Phân Loại ${sku} đã có ảnh`, [`${sku}`], ["crimson"]);
-					return;
-				}
 
 				var imgInputShopee = boxLeft.eq(index).find(".table-cell").eq(0).find("input[type=file]")[0];
 
@@ -3436,6 +3431,21 @@
 				// );
 
 				if (inputMap[sku]) {
+					if(boxLeft.eq(index).find(".table-cell img.shopee-image-manager__image").length > 0){
+						// boxLogging(`Phân Loại ${sku} đã có ảnh`, [`${sku}`], ["crimson"]);
+						var delButton = boxLeft.eq(index).find("span.shopee-image-manager__icon.shopee-image-manager__icon--delete");
+
+						simulateReactEvent($(delButton), "click");
+
+						boxLogging(`Đã xóa ảnh của SKU [copy]${sku}[/copy]`, [`${sku}`], ["orange"]);
+
+						boxLeft.eq(index).css({
+							"background": "orange",
+						});
+						// Chờ xóa ảnh
+						await delay(500);
+					}
+
 					// inputMap[found] là jQuery object, cần lấy phần tử gốc
 					var fileInputEl = inputMap[sku].get(0);
 					if (!fileInputEl || !fileInputEl.files || fileInputEl.files.length === 0) return;
@@ -3457,9 +3467,17 @@
 						var evt = new Event("change", { bubbles: true });
 						imgInputShopee.dispatchEvent(evt);
 						boxLogging(`Đã sửa ảnh cho SKU [copy]${sku}[/copy]`, [`${sku}`], ["green"])
+						boxLeft.eq(index).css({
+							"background": "lightgreen",
+							color: "#000"
+						});
 					}, 100); // có thể chỉnh tăng lên nếu chưa kịp load
 				}else{
 					boxLogging(`SKU [copy]${sku}[/copy] không có ảnh`, [`${sku}`], ["crimson"])
+					boxLeft.eq(index).css({
+						"background": "crimson",
+						"color": "#fff"
+					});
 				}
 
 			});
