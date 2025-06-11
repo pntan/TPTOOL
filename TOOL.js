@@ -1038,32 +1038,29 @@
 				if (createUI)
 					return;
 				createUI = true;
-
 				createLayout($("body"));
 				applyNonce();
-
-				// Kiểm tra tự động mở các danh sách
-				checkPage();
 
 				// Kết nối máy chủ
 				// socket = getUrlServer();
 
-				/*
-				checkElementPage().then(mainContent => {
-					boxAlert("ĐÃ TÌM THẤY PHẦN TỬ CHÍNH CÓ NỘI DUNG");
-					createLayout(mainContent);
-					applyNonce();
+				// Kiểm tra tự động mở các danh sách
+				checkPage();
 
-					// Kết nối máy chủ
-					// socket = getUrlServer();
+				// checkElementPage().then(mainContent => {
+				// 	boxAlert("ĐÃ TÌM THẤY PHẦN TỬ CHÍNH CÓ NỘI DUNG");
+				// 	createLayout(mainContent);
+				// 	applyNonce();
 
-					// Kiểm tra tự động mở các danh sách
-					checkPage();
-				}).catch(err => {
-					boxAlert(`LỖI: ${err.message}`, "error");
-					console.error("Lỗi khi tìm phần tử chính:", err);
-				});
-				*/
+				// 	// Kết nối máy chủ
+				// 	// socket = getUrlServer();
+
+				// 	// Kiểm tra tự động mở các danh sách
+				// 	checkPage();
+				// }).catch(err => {
+				// 	boxAlert(`LỖI: ${err.message}`, "error");
+				// 	console.error("Lỗi khi tìm phần tử chính:", err);
+				// });
 			});
 		}
 
@@ -1443,8 +1440,8 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						// Ẩn hiện giao diện chính;
-						display: none;
+						// Ẩn hiện giao diện chính
+						display: flex;
 						flex-direction: column;
 					}
 
@@ -3427,7 +3424,7 @@
 				var sku = skuBox.val().trim().toUpperCase();
 
 				if(boxLeft.eq(index).find(".table-cell img.shopee-image-manager__image").length > 0){
-					boxLogging(`Phân Loại ${sku} đã có ảnh`, [`${sku}`], ["crimson"])
+					boxLogging(`Phân Loại ${sku} đã có ảnh`, [`${sku}`], ["crimson"]);
 					return;
 				}
 
