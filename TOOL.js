@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.9";
+	const VERSION = "2.1.10";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -1443,6 +1443,12 @@
 						// Ẩn hiện giao diện chính
 						display: flex;
 						flex-direction: column;
+						opacity: 0.05;
+						transition: opacity 0.3s ease;
+					}
+
+					.tp-content:hover{
+						opacity: 1;
 					}
 
 					.tp-content > div{
@@ -5891,9 +5897,12 @@
 
 			$.each(table, (index, value) => {
 				var nameBox = table.eq(index).find("td").eq(0).find("p").eq(0);
+				var id = table.eq(index).find("td").eq(0).find("p").eq(1).find(".copyable");
 				// var priceBox = table.eq(index).find("td").eq(1).find("input");
 				// var stockBox = table.eq(index).find("td").eq(2).find("input");
-				var skuBox = table.eq(index).find("td").eq(table.eq(index).find("td").length - 2).find("input");
+				var skuBox = table.eq(index).find("td").find(`input#skus${id.text().trim()}`);
+
+				console.log(`NAME: ${nameBox.text()}\nSKU: ${skuBox.val()}`);
 
 				if(listSKUImgTiktok.includes(skuBox.val().toUpperCase())){
 					mappingData.push({
@@ -5905,8 +5914,6 @@
 				}
 			})
 
-			console.log(mappingData);
-
 			var box = $("#sale_properties .space-y-12 div").eq(0).find("> div").eq(2).find("> div").eq(0).find("> div[role='button']");
 
 			$.each(box, (indexBox, valueBox) => {
@@ -5914,14 +5921,29 @@
 				var nameBox = box.eq(indexBox).find("> div div > div.w-full.overflow-hidden").find("input");
 
 				// console.log(box.eq(indexBox).find("> div div > div"));
+				$.each(mappingData, (indexMapp, valueMapp) => {
+					if(nameBox.val().trim().includes(mappingData[indexMapp].name)){
+						if(inputMap[mappingData[indexMapp].sku]) {
+							boxLogging(`Đang xóa ảnh cho SKU [copy]${mappingData[indexMapp].sku}[/copy]`, [`${mappingData[indexMapp].sku}`], ["green"]);
+							var delButon = imgBox.find(".core-space .core-space-item").eq(1);
+
+							console.log(delButon);
+
+							simulateReactEvent(imgBox.find("> div > div"), "mouseenter");
+
+							// simulateReactEvent(delButon, "click");
+
+							simulateReactEvent(delButon.find("svg"), "click");
+						}
+					}
+				});
 
 				$.each(mappingData, async (indexMapp, valueMapp) => {
 					if(nameBox.val().trim().includes(mappingData[indexMapp].name)){
-						var imgInputTiktok = imgBox.find("input")[0];
-
-						console.log(imgInputTiktok);
+						var imgInputTiktok = imgBox.find(".core-upload input")[0];
 
 						if (inputMap[mappingData[indexMapp].sku]) {
+
 							// inputMap[found] là jQuery object, cần lấy phần tử gốc
 							var fileInputEl = inputMap[mappingData[indexMapp].sku].get(0);
 
