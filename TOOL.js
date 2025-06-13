@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.10";
+	const VERSION = "2.0.0";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -21,6 +21,7 @@
 		const LIBRARIES = [
 			"https://code.jquery.com/jquery-3.7.1.min.js", // JQYERY
 			"https://code.jquery.com/ui/1.14.1/jquery-ui.js", // JQUERY UI
+			"https://cdn.jsdelivr.net/npm/jquery-zoom@1.7.21/jquery.zoom.min.js", // JQUERY ZOOM
 			"https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js", // EXCEL
 			"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js", // ZIP FILE
 			"https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js", // SAVE FILE
@@ -45,6 +46,7 @@
 			"kiemTraPhanLoaiShopee": kiemTraPhanLoaiShopee,
 			"themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
 			"layPhanLoaiShopee": layPhanLoaiShopee,
+			"layIDSanPhamShopee": layIDSanPhamShopee,
 			// "themPhanLoaiShopee": themPhanLoaiShopee,
 			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
@@ -56,6 +58,7 @@
 			"chinhSuaKhuyenMaiTiktok": chinhSuaKhuyenMaiTiktok,
 			"themPhanLoaiTiktok": themPhanLoaiTiktok,
 			"themHinhTheoSKUTiktok": themHinhTheoSKUTiktok,
+			"layIDSanPhamTiktok": layIDSanPhamTiktok,
 			// "tgFlashSaleTiktok": tgFlashSaleTiktok,
 			// "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
 			// // --- SAPO
@@ -69,6 +72,7 @@
 			// //-- KHÁC
 			"splitExcelFile": splitExcelFile,
 			"compareVoucher": compareVoucher,
+			"moLink": moLink,
 		};
 
 		const actionOnlineMap = {
@@ -833,6 +837,66 @@
 					boxToast("Đã mở rộng danh sách phân loại");
 				});
 			}
+			
+			// 1. Tạo phần tử để hiển thị ảnh zoom
+			// Chúng ta sẽ tạo một div ẩn ban đầu, sau đó hiển thị và di chuyển nó.
+			const $zoomResultDiv = $('<div id="zoom-result"></div>').css({
+				position: 'absolute', // Quan trọng để có thể di chuyển bằng top/left
+				border: '2px solid #ccc',
+				boxShadow: '0 0 10px rgba(0,0,0,0.5)',
+				backgroundColor: '#fff',
+				overflow: 'hidden', // Đảm bảo nội dung zoom không tràn ra ngoài
+				zIndex: 99999,      // Đảm bảo nó nằm trên cùng
+				display: 'none',    // Ẩn ban đầu
+				width: '300px',     // Kích thước của khung zoom
+				height: '300px',    // Kích thước của khung zoom
+				pointerEvents: 'none' // Ngăn không cho div này chặn các sự kiện chuột khác
+			}).appendTo('body');
+
+			// 2. Áp dụng plugin jQuery Zoom cho ảnh
+			$('div img').each(function() {
+				const $thisImg = $(this);
+
+				console.log(this);
+
+				// Chỉ áp dụng cho ảnh có src và có vẻ là ảnh nội dung (không phải icon nhỏ)
+				// Bạn có thể tùy chỉnh điều kiện này theo nhu cầu
+				if ($thisImg.attr('src') && $thisImg.width() > 50 && $thisImg.height() > 50) {
+					$thisImg.zoom({
+						on: 'hover',
+						magnify: 1.5,
+						target: $zoomResultDiv, // Gắn kết quả zoom vào phần tử đã tạo
+						onZoomIn: function() {
+							// Khi zoom bắt đầu, hiển thị div kết quả
+							$zoomResultDiv.show();
+						},
+						onZoomOut: function() {
+							// Khi zoom kết thúc, ẩn div kết quả
+							$zoomResultDiv.hide();
+						}
+					});
+
+					// 3. Xử lý sự kiện mousemove để di chuyển phần tử zoom
+					$thisImg.on('mousemove', function(e) {
+						// Chỉ di chuyển nếu div zoom đang hiển thị (tức là đang zoom)
+						if ($zoomResultDiv.is(':visible')) {
+							// Cập nhật vị trí của div zoom theo con trỏ chuột
+							// Trừ một nửa chiều rộng/cao để div nằm chính giữa con trỏ
+							$zoomResultDiv.css({
+								left: e.pageX - ($zoomResultDiv.width() / 2) + 'px',
+								top: e.pageY - ($zoomResultDiv.height() / 2) + 'px'
+							});
+						}
+					});
+				}
+			});
+
+			// 4. Xử lý sự kiện mouseleave để ẩn div zoom khi con trỏ rời khỏi bất kỳ ảnh nào
+			// (nếu plugin onZoomOut không đủ mạnh trong mọi trường hợp)
+			// hoặc khi con trỏ rời khỏi trang
+			$('body').on('mouseleave', 'img', function() {
+				$zoomResultDiv.hide();
+			});
 		}
 
 		var socket = null;
@@ -1143,6 +1207,7 @@
 								<option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
 								<option data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại</option>
 								<option data-func="layPhanLoaiShopee" data-layout="layPhanLoaiShopeeLayout">Lấy Phân Loại</option>
+								<option data-func="layIDSanPhamShopee" data-layout="layIDSanPhamShopeeLayout">Lấy ID Sản Phẩm</option>
 								<option data-func="layLinkChuaSKUShopee" data-layout="layLinkChuaSKUShopeeLayout">Lấy Link Chứa SKU</option>
 								<option data-func="suaTonSKUNhieuLinkShopee" data-layout="suaTonSKUNhieuLinkShopeeLayout">Sửa Tồn Theo SKU Nhiều Link</option>
 								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
@@ -1157,7 +1222,8 @@
 								<option data-func="kiemTraMaPhanLoaiTiktok">Hiển Thị Mã Phân Loại</option>
 								<option data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
 								<option data-func="themPhanLoaiTiktok" data-layout="themPhanLoaiTikTokLayout">Thêm Phân Loại</option>
-								<option data-func="themHinhTheoSKUTiktok" data-layout="themHinhTheoSKUTiktokLayout">Thêm Hình Theo SKU</option>
+								<option data-func="themHinhTheoSKUTiktok" data-layout="themHinhTheoSKUTiktokLayout">Sửa Hình Theo SKU</option>
+								<option data-func="layIDSanPhamTiktok" data-layout="layIDSanPhamTiktokLayout">Lấy ID Sản Phẩm</option>
 								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
@@ -1178,8 +1244,9 @@
 							<!-- Khác -->
 							<optgroup label="Khác">
 								<option data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
-								<!-- <option disabled data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option> -->
 								<option data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
+								<option data-func="moLink" data-layout="moLinkLayout">Mở Link Hàng Loạt</option>
+								<!-- <option disabled data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option> -->
 							</optgroup>
 
 						</select>
@@ -2074,6 +2141,32 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "moLinkLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<textarea id="data" placeholder="Nhập đường dẫn, mỗi đường dẫn trên một dòng"></textarea>
+					</div>
+				`))
+				setEventMoLink();
+				break;
+			case "layIDSanPhamTiktokLayout":
+				content.append($(`
+						<div class="layout-tab">
+							<label for="copy-type">Lấy đường dẫn sản phẩm</label>
+							<input type="checkbox" id="copy-type" />
+							<p style="font-weight:700; color: crimson">*Mặc định chỉ lấy ID sản phẩm</p>
+						</div>
+				`));
+				break;
+			case "layIDSanPhamShopeeLayout":
+				content.append($(`
+						<div class="layout-tab">
+							<label for="copy-type">Lấy đường dẫn sản phẩm</label>
+							<input type="checkbox" id="copy-type" />
+							<p style="font-weight:700; color: crimson">*Mặc định chỉ lấy ID sản phẩm</p>
+						</div>
+				`));
+				break;
 			case "themHinhTheoSKUTiktokLayout":
 				content.append($(`
 					<div class="layout-tab">
@@ -5965,16 +6058,87 @@
 								// Tạo sự kiện change để Shopee nhận diện file mới
 								var evt = new Event("change", { bubbles: true });
 								imgInputTiktok.dispatchEvent(evt);
+
+								$(imgInputTiktok).parent().parent().parent().parent().parent().parent().css("background","lightgreen");
 								boxLogging(`Đã sửa ảnh cho SKU [copy]${sku}[/copy]`, [`${sku}`], ["green"]);
 							}, 100); // có thể chỉnh tăng lên nếu chưa kịp load
 						}else{
-							boxLogging(`SKU [copy]${sku}[/copy] không có ảnh`, [`${sku}`], ["crimson"])
+							boxLogging(`SKU [copy]${sku}[/copy] không có ảnh`, [`${sku}`], ["crimson"]);
+							$(imgInputTiktok).parent().parent().parent().parent().parent().parent().css("background","crimson");
 						}
 					}
 				});
 			});
 
 			boxToast(`Đã thêm xong hình ảnh theo SKU TikTok`, "success");
+		}
+
+		// Lấy ID của sản phẩm Shopee
+		function layIDSanPhamShopee(){
+			boxLogging("LẤY ID SẢN PHẨM SHOPEE");
+
+			var container = $(".eds-table__main-body").eq(0).find(".eds-scrollbar__wrapper .eds-scrollbar__content table tbody tr");
+
+			var type = $(".tp-container.tp-content .layout-future .layout-tab #copy-type").prop("checked") ? "https://banhang.shopee.vn/portal/product/" : "";
+			
+			var idList = [];
+
+			$.each(container, (index, value) => {
+				var box = container.eq(index).find("> td").eq(1);
+				var id = box.find(".item-id.text-overflow2");
+
+				id = id.text().trim();
+				id = id.split(":")[1].trim();
+
+				idList.push(`${type}${id}`);
+			});
+
+			navigator.clipboard.writeText(idList.join("\n"));
+
+			boxToast(`Đã lấy xong ID sản phẩm Shopee`, "success");
+		}
+
+		// Lấy ID của sản phẩm Tiktok
+		function layIDSanPhamTiktok(){
+			boxLogging("LẤY ID SẢN PHẨM TIKTOK");
+
+			var container = $(".core-table-body table tbody tr");
+
+			var type = $(".tp-container.tp-content .layout-future .layout-tab #copy-type").prop("checked") ? "https://seller-vn.tiktok.com/product/edit/" : "";
+
+			var idList = [];
+
+			$.each(container, (index, value) => {
+				try {
+					var id = container.eq(index).find("> td").eq(2).find("> div > span > div > div").eq(1).find("> div span[data-id='product.manage.table.columns.id']");
+
+					id = id.text().trim();
+					id = id.split(":")[1].trim();
+
+					idList.push(`${type}${id}`);
+				}catch (error) {
+					boxToast(`Lỗi khi lấy ID sản phẩm tại dòng ${index + 1}: ${error.message}`, "error");
+				}
+			});
+
+			navigator.clipboard.writeText(idList.join("\n"));
+
+			boxToast(`Đã lấy xong ID sản phẩm TikTok`, "success");
+		}
+
+		// Mở link hàng loạt
+		function moLink(){
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data");
+
+			var linkList = data.val().split("\n").filter(link => link.trim() !== "");
+
+			$.each(linkList, (index, link) => {
+				if(link.trim() !== ""){
+					window.open(link, "_blank");
+				}
+			});
+
+			boxToast(`Đã mở ${linkList.length} link`, "success");
 		}
 
 		// Chat với AI
