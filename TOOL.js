@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.0.0";
+	const VERSION = "2.0.1";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -317,7 +317,7 @@
 				event = new MouseEvent(type, {
 					bubbles: true,
 					cancelable: true,
-					view: window,
+					// view: window,
 					button: options.button !== undefined ? options.button : 0, // 0 cho chuột trái (mặc định)
 					buttons: options.buttons !== undefined ? options.buttons : (type === 'mousedown' ? 1 : 0), // 1 cho nút trái đang nhấn
 					clientX: options.clientX || 0,
