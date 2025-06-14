@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.14";
+	const VERSION = "2.2.15";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -951,8 +951,8 @@
 
 					function setDragAndDropInputFile() {
 						
-						var el1 = $("[class ^= 'uploadContainer']");
 						$(".tp-inputfake").remove(); // Xóa các input giả trước đó
+						var el1 = $("[class ^= 'uploadContainer']");
 						var detailImg = $(el1).find("> div").eq(1).find("[class ^= 'uploadRender']");
 
 						$.each(detailImg, (index, value) => {
@@ -987,6 +987,40 @@
 								simulateReactInputFile($(e).parent().find(".cursor-default input[type='file']"));
 							});
 						});
+
+						var el2 = $("#sale_properties .space-y-12 div").eq(0).find("> div").eq(2).find("> div").eq(0).find("> div[role='button']");
+						 $.each(el2, (index, value) => {
+							var variantImg = el2.eq(index).find(".cursor-default");
+
+							if(variantImg.length != 1)
+								return;
+
+							var inputFake = $("<input class='tp-inputfake' type='file' accept='image/*' multiple>");
+							
+							inputFake.css({
+								position: "absolute",
+								top: 0,
+								left: 0,
+								width: "100%",
+								height: "100%",
+								opacity: 0,
+								cursor: "pointer"
+							});
+
+							variantImg.prepend(inputFake);
+
+							inputFake.on("change", (e) => {
+								boxAlert("Đã chọn file thành công! Đang xử lý file...");
+								e = e.target;
+								attachFileToInput(inputFake, $(e).parent().find(".core-upload input[type='file']"), 100, async (v) => {
+									await delay(500);
+
+									setDragAndDropInputFile();
+								});
+								simulateReactInputFile($(e).parent().find(".core-upload input[type='file']"));
+							});
+						 })
+
 					}
 
 					boxAlert("Đang thay đổi input file TikTok");
