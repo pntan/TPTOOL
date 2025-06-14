@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.12";
+	const VERSION = "2.1.13";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -257,6 +257,97 @@
 		// Chờ
 		function delay(ms) {
 			return new Promise(resolve => setTimeout(resolve, ms));
+		}
+
+		/**
+		 * Gắn một file từ một input file nguồn sang một input file đích và kích hoạt sự kiện change.
+		 *
+		 * @param {HTMLElement|jQuery} sourceFileInput - Phần tử input type="file" gốc hoặc jQuery object chứa file cần lấy.
+		 * @param {HTMLElement|jQuery} targetFileInput - Phần tử input type="file" đích hoặc jQuery object mà file sẽ được gán vào.
+		 * @param {number} [delay=100] - Thời gian chờ (ms) trước khi gắn file và kích hoạt sự kiện. Mặc định là 100ms.
+		 * @param {Function} [onSuccessCallback] - Hàm callback sẽ được gọi sau khi file được gắn thành công.
+		 * @param {Function} [onErrorCallback] - Hàm callback sẽ được gọi nếu không tìm thấy file nguồn hoặc có lỗi.
+		*/
+		function attachFileToInput(sourceFileInput, targetFileInput, delay = 100, onSuccessCallback, onErrorCallback) {
+
+			// --- Chuẩn hóa tham số đầu vào thành phần tử DOM gốc (HTMLInputElement) ---
+			let sourceFileInputEl;
+			if (sourceFileInput instanceof jQuery) {
+				sourceFileInputEl = sourceFileInput.get(0); // Lấy phần tử DOM từ jQuery object
+			} else if (sourceFileInput instanceof HTMLElement) {
+				sourceFileInputEl = sourceFileInput;
+			} else {
+				console.warn("Lỗi: sourceFileInput không phải là phần tử DOM hợp lệ hoặc jQuery object.");
+				if (onErrorCallback) {
+					onErrorCallback("sourceFileInput không hợp lệ.");
+				}
+				return;
+			}
+
+			let targetFileInputEl;
+			if (targetFileInput instanceof jQuery) {
+				targetFileInputEl = targetFileInput.get(0); // Lấy phần tử DOM từ jQuery object
+			} else if (targetFileInput instanceof HTMLElement) {
+				targetFileInputEl = targetFileInput;
+			} else {
+				console.warn("Lỗi: targetFileInput không phải là phần tử DOM hợp lệ hoặc jQuery object.");
+				if (onErrorCallback) {
+					onErrorCallback("targetFileInput không hợp lệ.");
+				}
+				return;
+			}
+			// --- Kết thúc chuẩn hóa ---
+
+
+			// 1. Kiểm tra tính hợp lệ của input file nguồn
+			if (!sourceFileInputEl || !sourceFileInputEl.files || sourceFileInputEl.files.length === 0) {
+				console.warn("Lỗi: Input file nguồn không hợp lệ hoặc không có file nào được chọn.");
+				if (onErrorCallback) {
+					onErrorCallback("Input file nguồn không hợp lệ hoặc không có file nào được chọn.");
+				}
+				return;
+			}
+
+			// 2. Kiểm tra tính hợp lệ của input file đích
+			if (!targetFileInputEl || targetFileInputEl.type !== 'file') {
+				console.error("Lỗi: Input file đích không hợp lệ (không phải type='file').");
+				if (onErrorCallback) {
+					onErrorCallback("Input file đích không hợp lệ.");
+				}
+				return;
+			}
+
+			// Lấy file đầu tiên từ input nguồn
+			const fileToAttach = sourceFileInputEl.files[0];
+
+			// Tạo đối tượng DataTransfer để chứa file
+			const dt = new DataTransfer();
+			dt.items.add(fileToAttach);
+
+			// Sử dụng setTimeout để đảm bảo UI kịp load hoặc xử lý
+			setTimeout(() => {
+				try {
+					// Gán FileList vào input đích
+					targetFileInputEl.files = dt.files;
+
+					// Tạo và gửi sự kiện 'change' để React/UI nhận diện file mới
+					const changeEvent = new Event("change", { bubbles: true });
+					targetFileInputEl.dispatchEvent(changeEvent);
+
+					console.log(`Đã gắn file '${fileToAttach.name}' vào input đích.`);
+
+					// Gọi callback thành công nếu có
+					if (onSuccessCallback) {
+						onSuccessCallback(fileToAttach, targetFileInputEl);
+					}
+
+				} catch (error) {
+					console.error("Lỗi khi gắn file hoặc kích hoạt sự kiện:", error);
+					if (onErrorCallback) {
+						onErrorCallback(error);
+					}
+				}
+			}, delay);
 		}
 
 		// Hàm giả lập thao tác người dùng (đã sửa đổi)
@@ -823,80 +914,105 @@
 
 			console.log(domain);
 
-			if(pathName.includes("portal/product/list")){
-				waitForElement($("body"), ".product-variation-item.product-more-models", (el) => {
-					$(".product-variation-item.product-more-models").click();
-				})
-			}
+			/*
+			LABEL của optgroup:
+			- Shopee
+			- TikTok
+			- Lazada
+			- Sapo
+			- Khác
+			*/
 
-			if(pathName.includes("portal/product")){
-				boxAlert("MO DANH SACH");
-				waitForElement($("body"), ".variation-model-table-footer button.eds-button.eds-button--link.eds-button--normal", (el) => {
-					console.log($(el));
-					$(el).click();
-					boxToast("Đã mở rộng danh sách phân loại");
-				});
-			}
-			
-			// 1. Tạo phần tử để hiển thị ảnh zoom
-			// Chúng ta sẽ tạo một div ẩn ban đầu, sau đó hiển thị và di chuyển nó.
-			const $zoomResultDiv = $('<div id="zoom-result"></div>').css({
-				position: 'absolute', // Quan trọng để có thể di chuyển bằng top/left
-				border: '2px solid #ccc',
-				boxShadow: '0 0 10px rgba(0,0,0,0.5)',
-				backgroundColor: '#fff',
-				overflow: 'hidden', // Đảm bảo nội dung zoom không tràn ra ngoài
-				zIndex: 99999,      // Đảm bảo nó nằm trên cùng
-				display: 'none',    // Ẩn ban đầu
-				width: '300px',     // Kích thước của khung zoom
-				height: '300px',    // Kích thước của khung zoom
-				pointerEvents: 'none' // Ngăn không cho div này chặn các sự kiện chuột khác
-			}).appendTo('body');
+			$("#tab-function optgroup").hide(); // Ẩn tất cả các optgroup
+			$("#tab-function optgroup[label='Khác']").show(); // Hiển thị optgroup General
 
-			// 2. Áp dụng plugin jQuery Zoom cho ảnh
-			$('div img').each(function() {
-				const $thisImg = $(this);
+			// Shopee
+			if(host.includes("shopee.vn")){
+				$("#tab-function optgroup[label='Shopee']").show(); // Hiển thị optgroup Shopee
 
-				console.log(this);
+				if(pathName.includes("portal/product/list")){
+					waitForElement($("body"), ".product-variation-item.product-more-models", (el) => {
+						$(".product-variation-item.product-more-models").click();
+					})
+				}
 
-				// Chỉ áp dụng cho ảnh có src và có vẻ là ảnh nội dung (không phải icon nhỏ)
-				// Bạn có thể tùy chỉnh điều kiện này theo nhu cầu
-				if ($thisImg.attr('src') && $thisImg.width() > 50 && $thisImg.height() > 50) {
-					$thisImg.zoom({
-						on: 'hover',
-						magnify: 1.5,
-						target: $zoomResultDiv, // Gắn kết quả zoom vào phần tử đã tạo
-						onZoomIn: function() {
-							// Khi zoom bắt đầu, hiển thị div kết quả
-							$zoomResultDiv.show();
-						},
-						onZoomOut: function() {
-							// Khi zoom kết thúc, ẩn div kết quả
-							$zoomResultDiv.hide();
-						}
-					});
-
-					// 3. Xử lý sự kiện mousemove để di chuyển phần tử zoom
-					$thisImg.on('mousemove', function(e) {
-						// Chỉ di chuyển nếu div zoom đang hiển thị (tức là đang zoom)
-						if ($zoomResultDiv.is(':visible')) {
-							// Cập nhật vị trí của div zoom theo con trỏ chuột
-							// Trừ một nửa chiều rộng/cao để div nằm chính giữa con trỏ
-							$zoomResultDiv.css({
-								left: e.pageX - ($zoomResultDiv.width() / 2) + 'px',
-								top: e.pageY - ($zoomResultDiv.height() / 2) + 'px'
-							});
-						}
+				if(pathName.includes("portal/product")){
+					boxAlert("MO DANH SACH");
+					waitForElement($("body"), ".variation-model-table-footer button.eds-button.eds-button--link.eds-button--normal", (el) => {
+						console.log($(el));
+						$(el).click();
+						boxToast("Đã mở rộng danh sách phân loại");
 					});
 				}
-			});
+			}else if(host.includes("tiktok.com")){
+				$("#tab-function optgroup[label='TikTok']").show(); // Hiển thị optgroup TikTok
 
-			// 4. Xử lý sự kiện mouseleave để ẩn div zoom khi con trỏ rời khỏi bất kỳ ảnh nào
-			// (nếu plugin onZoomOut không đủ mạnh trong mọi trường hợp)
-			// hoặc khi con trỏ rời khỏi trang
-			$('body').on('mouseleave', 'img', function() {
-				$zoomResultDiv.hide();
-			});
+				if(pathName.includes("product/edit/")){
+
+					var inputFake = $("<input class='tp-inputfake' type='file' accept='image/*' multiple>")
+					.css({
+						position: "absolute",
+						top: 0,
+						left: 0,
+						width: "100%",
+						height: "100%",
+						opacity: 0,
+						cursor: "pointer"
+					}).on("change", (e) => {
+						boxAlert("Đã chọn file thành công! Đang xử lý file...");
+						e = e.target;
+						attachFileToInput(inputFake, $(e).parent().find(".cursor-default input[type='file']"));
+						simulateReactInputFile($(e).parent().find(".cursor-default input[type='file']"));
+						setDragAndDropInputFile();
+					});
+
+					function setDragAndDropInputFile() {
+						var el1 = $("[class ^= 'uploadContainer']");
+						$(".tp-inputfake").remove(); // Xóa các input giả trước đó
+						var detailImg = $(el1).find("> div").eq(1).find("[class ^= 'uploadRender']");
+
+						$.each(detailImg, (index, value) => {
+							if(!detailImg.eq(index).find(".cursor-default .core-upload input[type='file']").length > 0){
+								boxAlert("Không tìm thấy input file TikTok");
+								console.log(detailImg.eq(index));
+								return;
+							}
+
+							detailImg.eq(index).prepend(inputFake);
+						});
+					}
+
+					boxAlert("Đang thay đổi input file TikTok");
+
+					waitForElement($("body"), "[class ^= 'uploadContainer']", (el) => {
+						setDragAndDropInputFile();
+					}, {once: true});
+
+					$(document).on("click", ".core-space .core-space-item", (e) => {
+						var svg = $(e.target).prop("tagName") == "PATH" ? $(e.target).parent() : $(e.target);
+						svg.parent().addClass("tp-clicked");
+
+						var fatherBox = svg.parent().parent();
+
+						if(fatherBox.clasList("core-space-item"))
+							fatherBox.parent();
+
+						var len = fatherBox.find(".core-space-item").length;
+
+						boxAlert("ABC");
+						console.log(e.target);
+						console.log(fatherBox)
+
+						$.each(fatherBox.find(".core-space-item"), async (index, value) => {
+							console.log($(value).hasClass("tp-clicked") && index == len - 1);
+							if($(value).hasClass("tp-clicked") && index == len - 1){
+								boxAlert("Đã xóa thành công!");
+								setDragAndDropInputFile();
+							}
+						});
+					});
+				}
+			}
 		}
 
 		var socket = null;
