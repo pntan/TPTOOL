@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.15";
+	const VERSION = "2.2.16";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -1057,6 +1057,8 @@
 						});
 					});
 				}
+			}else if(host.includes("lazada.vn")){
+				$("#tab-function optgroup[label='Lazada']").show(); // Hiển thị optgroup TikTok
 			}
 		}
 
@@ -6144,7 +6146,7 @@
 
 		function themHinhTheoSKUTiktok(){
 			boxLogging("THÊM HÌNH ẢNH THEO SKU TIKTOK");
-``
+
 			var mappingData = [];
 
 			var table = $(".core-table-content-inner table tbody tr");
@@ -6213,16 +6215,16 @@
 							// 	clickInput = true;
 							// }
 
-							setTimeout(() => {
-								imgInputTiktok.files = dt.files;
+							// setTimeout(() => {
+							imgInputTiktok.files = dt.files;
 
-								// Tạo sự kiện change để Shopee nhận diện file mới
-								var evt = new Event("change", { bubbles: true });
-								imgInputTiktok.dispatchEvent(evt);
+							// Tạo sự kiện change để Shopee nhận diện file mới
+							var evt = new Event("change", { bubbles: true });
+							imgInputTiktok.dispatchEvent(evt);
 
-								$(imgInputTiktok).parent().parent().parent().parent().parent().parent().css("background","lightgreen");
-								boxLogging(`Đã sửa ảnh cho SKU [copy]${sku}[/copy]`, [`${sku}`], ["green"]);
-							}, 100); // có thể chỉnh tăng lên nếu chưa kịp load
+							$(imgInputTiktok).parent().parent().parent().parent().parent().parent().css("background","lightgreen");
+							boxLogging(`Đã sửa ảnh cho SKU [copy]${sku}[/copy]`, [`${sku}`], ["green"]);
+							// }, 100); // có thể chỉnh tăng lên nếu chưa kịp load
 						}else{
 							boxLogging(`SKU [copy]${sku}[/copy] không có ảnh`, [`${sku}`], ["crimson"]);
 							$(imgInputTiktok).parent().parent().parent().parent().parent().parent().css("background","crimson");
