@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.11";
+	const VERSION = "2.0.0";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -3534,7 +3534,7 @@
 						// boxLogging(`Phân Loại ${sku} đã có ảnh`, [`${sku}`], ["crimson"]);
 						var delButton = boxLeft.eq(index).find("span.shopee-image-manager__icon.shopee-image-manager__icon--delete");
 
-						simulateReactEvent($(delButton), "click");
+						simulateReactEvent($(delButton), 'click');
 
 						boxLogging(`Đã xóa ảnh của SKU [copy]${sku}[/copy]`, [`${sku}`], ["orange"]);
 
