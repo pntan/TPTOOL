@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.1.13";
+	const VERSION = "2.2.14";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -949,24 +949,8 @@
 
 				if(pathName.includes("product/edit/")){
 
-					var inputFake = $("<input class='tp-inputfake' type='file' accept='image/*' multiple>")
-					.css({
-						position: "absolute",
-						top: 0,
-						left: 0,
-						width: "100%",
-						height: "100%",
-						opacity: 0,
-						cursor: "pointer"
-					}).on("change", (e) => {
-						boxAlert("Đã chọn file thành công! Đang xử lý file...");
-						e = e.target;
-						attachFileToInput(inputFake, $(e).parent().find(".cursor-default input[type='file']"));
-						simulateReactInputFile($(e).parent().find(".cursor-default input[type='file']"));
-						setDragAndDropInputFile();
-					});
-
 					function setDragAndDropInputFile() {
+						
 						var el1 = $("[class ^= 'uploadContainer']");
 						$(".tp-inputfake").remove(); // Xóa các input giả trước đó
 						var detailImg = $(el1).find("> div").eq(1).find("[class ^= 'uploadRender']");
@@ -978,7 +962,30 @@
 								return;
 							}
 
+							var inputFake = $("<input class='tp-inputfake' type='file' accept='image/*' multiple>");
+							
+							inputFake.css({
+								position: "absolute",
+								top: 0,
+								left: 0,
+								width: "100%",
+								height: "100%",
+								opacity: 0,
+								cursor: "pointer"
+							});
+
 							detailImg.eq(index).prepend(inputFake);
+							
+							inputFake.on("change", (e) => {
+								boxAlert("Đã chọn file thành công! Đang xử lý file...");
+								e = e.target;
+								attachFileToInput(inputFake, $(e).parent().find(".cursor-default input[type='file']"), 100, async (v) => {
+									await delay(500);
+
+									setDragAndDropInputFile();
+								});
+								simulateReactInputFile($(e).parent().find(".cursor-default input[type='file']"));
+							});
 						});
 					}
 
@@ -989,17 +996,21 @@
 					}, {once: true});
 
 					$(document).on("click", ".core-space .core-space-item", (e) => {
-						var svg = $(e.target).prop("tagName") == "PATH" ? $(e.target).parent() : $(e.target);
+						boxAlert("NODENAME::" + $(e.target).prop("nodeName"));
+						var svg = $(e.target).prop("nodeName") == "path" ? $(e.target).parent() : $(e.target);
 						svg.parent().addClass("tp-clicked");
 
-						var fatherBox = svg.parent().parent();
+						var fatherBox = svg.parent().parent()
+						
+						console.log(fatherBox.attr("class") + " " + fatherBox.attr("class") == "core-space-item");
 
-						if(fatherBox.clasList("core-space-item"))
-							fatherBox.parent();
+						if(fatherBox.attr("class") == "core-space-item")
+							fatherBox = svg.parent().parent().parent();
 
 						var len = fatherBox.find(".core-space-item").length;
 
 						boxAlert("ABC");
+						console.log(e);
 						console.log(e.target);
 						console.log(fatherBox)
 
@@ -6099,7 +6110,7 @@
 
 		function themHinhTheoSKUTiktok(){
 			boxLogging("THÊM HÌNH ẢNH THEO SKU TIKTOK");
-
+``
 			var mappingData = [];
 
 			var table = $(".core-table-content-inner table tbody tr");
