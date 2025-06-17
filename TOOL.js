@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.16";
+	const VERSION = "2.2.17";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -21,7 +21,6 @@
 		const LIBRARIES = [
 			"https://code.jquery.com/jquery-3.7.1.min.js", // JQYERY
 			"https://code.jquery.com/ui/1.14.1/jquery-ui.js", // JQUERY UI
-			"https://cdn.jsdelivr.net/npm/jquery-zoom@1.7.21/jquery.zoom.min.js", // JQUERY ZOOM
 			"https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js", // EXCEL
 			"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js", // ZIP FILE
 			"https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js", // SAVE FILE
@@ -33,7 +32,7 @@
 			// --- SHOPEE
 			"giaDuoiShopee": giaDuoiShopee,
 			"kTr5LanGiaShopee": kTr5LanGiaShopee,
-			"tinhGiaBanShopee": tinhGiaBanShopee,
+			"tinhGiaBan": tinhGiaBan,
 			"flashSaleShopee": flashSaleShopee,
 			"kiemTraMaPhanLoaiShopee": kiemTraMaPhanLoaiShopee,
 			"suaGiaSKUShopee": suaGiaSKUShopee,
@@ -909,6 +908,9 @@
 		// Kiểm tra tự động mở các danh sách...
 		function checkPage(){
 			boxAlert("CHECKPAGE");
+
+			// Phóng to hình ảnh khi hover
+
 			var domain = window.location;
 			var host = domain.host, pathName = domain.pathname, port = domain.port, protocol = domain.protocol;
 
@@ -1058,7 +1060,9 @@
 					});
 				}
 			}else if(host.includes("lazada.vn")){
-				$("#tab-function optgroup[label='Lazada']").show(); // Hiển thị optgroup TikTok
+				$("#tab-function optgroup[label='Lazada']").show(); // Hiển thị optgroup Lazada
+			}else if(host.includes("sapo")){
+				$("#tab-function optgroup[label='Sapo']").show(); // Hiển thị optgroup Sapo
 			}
 		}
 
@@ -1261,6 +1265,7 @@
 		// Khải tạo chương trình
 		function INITCONFIG(){
 			boxAlert("ĐANG KHỞI TẠO");
+			boxToast(`Đang Tạo Chương Trình`);
 			loadLibrary(LIBRARIES, () => {
 				if (createUI)
 					return;
@@ -1359,7 +1364,6 @@
 							<optgroup label="Shopee">
 								<option data-func="giaDuoiShopee">Cập Nhật Giá Đuôi</option>
 								<option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
-								<option data-func="tinhGiaBanShopee" data-layout="tinhGiaBanShopeeLayout">Tính Giá Bán</option>
 								<option data-func="kTr5LanGiaShopee" data-layout="kTr5LanGiaShopeeLayout">Kiểm Tra 5 Lần Giá</option>
 								<option data-func="kiemTraMaPhanLoaiShopee">Hiển Thị Mã Phân Loại</option>
 								<option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
@@ -1409,6 +1413,7 @@
 								<option data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
 								<option data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
 								<option data-func="moLink" data-layout="moLinkLayout">Mở Link Hàng Loạt</option>
+								<option data-func="tinhGiaBan" data-layout="tinhGiaBanLayout">Tính Giá Bán</option>
 								<!-- <option disabled data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option> -->
 							</optgroup>
 
@@ -3078,7 +3083,7 @@
 				</div>
 				`));
 				break;
-			case "tinhGiaBanShopeeLayout":
+			case "tinhGiaBanLayout":
 				content.append($(`
 				<div class="layout-tab">
 					<div class="input-cost">
@@ -3092,7 +3097,7 @@
 					</div>
 				</div>
 				`));
-				setEventTinhGiaBanShopee();
+				setEventTinhGiaBan();
 				break;
 			case "themPhanLoaiLazadaLayout":
 				content.append($(`
@@ -3190,7 +3195,7 @@
 		}
 
 		// Tính giá bán sàn cam
-		function tinhGiaBanShopee(){
+		function tinhGiaBan(){
 			var cost = $("#cost").val().split(",");
 			cost = cost.join("");
 			var afterPrice, beforePrice;
@@ -3271,7 +3276,7 @@
 			}
 		}
 
-		function setEventTinhGiaBanShopee(){
+		function setEventTinhGiaBan(){
 			// $("#after-price").parent().on("click", function(){
 			// 	navigator.clipboard.writeText($(this).find("span").text().replace(",", ""));
 			// });
@@ -3288,7 +3293,7 @@
 				cost = cost.join("");
 				cost = cost.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 				$("#cost").val(cost);
-				tinhGiaBanShopee();
+				tinhGiaBan();
 			});
 		}
 
@@ -4935,49 +4940,145 @@
 			writeData();
 		}
 
-		// Cập nhật giá đuôi tiktok
-		function giaDuoiTiktok(){
-			var box = $(".theme-arco-table-content-inner .theme-arco-table-body").find("div div > div");
+		// Cập nhật giá đuôi Tiktok
+		function giaDuoiTiktok() {
 
-			var countProduct = 0;
-			var currentProduct = 0;
+			async function processProductsByLastFlag() {
+				let scrolledWithoutNewProducts = false;
+				let consecutiveSkippedProducts = 0; // Biến đếm số sản phẩm liên tiếp đã có giá khuyến mãi
+				const MAX_CONSECUTIVE_SKIPS = 5; // Ngưỡng: 5 sản phẩm liên tiếp đã có giá
 
-			$.each(box, (index, value) => {
-				if($(box).eq(index).hasClass("theme-arco-table-tr-custom-expand-row")){
-				// Số lượng phân loại
-				var checked = box.eq(index).find("div").find(".theme-arco-checkbox-mask").parent().parent();
+				while (true) {
+					var allProductRows = $(".theme-arco-table-content-inner .theme-arco-table-body").find("div div > div");
+					let nextProductToProcess = null;
 
-				if(checked.hasClass("theme-arco-checkbox-checked")){
-					var countProduct = box.eq(index).find("div").eq(39).find(".p-12").text();
-					countProduct = countProduct.match(/\d+/);
-				}
-				}else if($(box).eq(index).is(".theme-arco-table-tr, .theme-arco-table-row-custom-expand, .styled")){
-					currentProduct += 1;
-					var parent = $(box).eq(index);
-					var name = parent.find(".theme-arco-table-td").eq(1).find("span");
-					var currentPrice = parent.find(".theme-arco-table-td").eq(2).find("span p");
-					var promotionPrice = parent.find(".theme-arco-table-td").eq(3).find("input");
+					let lastFlaggedRow = allProductRows.filter(".tp-flag").last();
+					let startIndex = 0;
 
-					if(promotionPrice.length > 0){
-						if(promotionPrice.val().length > 0)
-							return;
-						var gia = currentPrice.text().replace(",", "");
-						gia = gia.replace(".", "");
-						gia = gia.replace("₫", "");
-						gia = tachGia(gia).giaDuoi;
+					if (lastFlaggedRow.length > 0) {
+						startIndex = allProductRows.index(lastFlaggedRow) + 1;
+					}
 
-						promotionPrice.select().focus();
+					for (let i = startIndex; i < allProductRows.length; i++) {
+						let currentRow = $(allProductRows).eq(i);
 
-						promotionPrice.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
+						if (!currentRow.is(".theme-arco-table-tr, .theme-arco-table-row-custom-expand, .styled")) {
+							// Nếu là hàng không hợp lệ, không tính vào số lượng skipped liên tiếp
+							// nhưng vẫn cần chuyển sang hàng tiếp theo để tìm sản phẩm
+							continue; 
+						}
 
-						simulateReactInput(promotionPrice, gia);
+						// Nếu hàng đã có tp-flag (trường hợp DOM thay đổi)
+						if (currentRow.hasClass("tp-flag")) {
+							// Nếu hàng này đã được đánh dấu, chúng ta vẫn xem xét nó là "skipped" theo một nghĩa nào đó
+							// Tuy nhiên, để chính xác theo yêu cầu "có giá khuyến mãi", chúng ta sẽ xử lý riêng
+							continue; 
+						}
+						
+						// Đây là hàng hợp lệ và chưa được xử lý (chưa có tp-flag)
+						nextProductToProcess = currentRow;
+						break; 
+					}
 
-						gia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+					if (nextProductToProcess) {
+						// Đã tìm thấy một sản phẩm chưa xử lý (chưa có tp-flag)
+						scrolledWithoutNewProducts = false;
+						consecutiveSkippedProducts = 0; // Reset đếm khi tìm thấy sản phẩm cần xử lý
 
-						boxLogging(`[copy]${name.text()}[/copy] đã cập nhật từ ${currentPrice.text()} -> ${gia}`, [`${name.text()}`, `${currentPrice.text()}`, `${gia}`], ["green", "orange", "orange"]);
+						nextProductToProcess.addClass("tp-flag");
+
+						var nameElement = nextProductToProcess.find(".theme-arco-table-td").eq(1).find("span");
+						var productName = nameElement.text().trim();
+						boxLogging(`Đang xử lý sản phẩm: "${productName}"`, [`${productName}`], ["cyan"]);
+
+						var currentPrice = nextProductToProcess.find(".theme-arco-table-td").eq(2).find("span p");
+						var promotionPrice = nextProductToProcess.find(".theme-arco-table-td").eq(3).find("input");
+
+						if (promotionPrice.length > 0) {
+							if (promotionPrice.val().length > 0) {
+								boxLogging(`Sản phẩm "${productName}" đã có giá khuyến mãi. Bỏ qua.`, [`${productName}`], ["gray"]);
+								consecutiveSkippedProducts++; // Tăng đếm khi sản phẩm đã có giá
+								// await delay(50); 
+							} else { // Chưa có giá khuyến mãi, tiến hành nhập
+								var gia = currentPrice.text();
+								gia = gia.replace(/[,.₫]/g, '');
+								gia = tachGia(gia).giaDuoi;
+
+								if (parseInt(gia) == 0) {
+									boxLogging(`Sản phẩm "${productName}" có giá bằng 0. Bỏ qua.`, [`${productName}`], ["yellow"]);
+									consecutiveSkippedProducts = 0; // Reset đếm khi bỏ qua vì giá 0
+									// await delay(50);
+								} else {
+									// Tương tác UI và chờ đợi
+									simulateReactEvent(promotionPrice, "focus");
+									// await delay(300);
+
+									promotionPrice.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
+									// await delay(500);
+
+									simulateReactInput(promotionPrice, gia);
+									// await delay(800);
+
+									var formattedGia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+									boxLogging(`[copy]${nameElement.text()}[/copy] đã cập nhật từ ${currentPrice.text()} -> ${formattedGia}`, [`${nameElement.text()}`, `${currentPrice.text()}`, `${formattedGia}`], ["green", "orange", "orange"]);
+									consecutiveSkippedProducts = 0; // Reset đếm khi sản phẩm được xử lý
+								}
+							}
+						} else {
+							boxLogging(`Sản phẩm "${productName}" không có ô nhập giá khuyến mãi.`, [], ["yellow"]);
+							consecutiveSkippedProducts = 0; // Reset đếm khi không có ô nhập
+						}
+
+						// Kiểm tra điều kiện dừng nếu đã có N sản phẩm liên tiếp bị bỏ qua vì đã có giá
+						if (consecutiveSkippedProducts >= MAX_CONSECUTIVE_SKIPS) {
+							boxLogging(`Đã bỏ qua ${MAX_CONSECUTIVE_SKIPS} sản phẩm liên tiếp do đã có giá khuyến mãi. Coi như đã xử lý xong các sản phẩm mới thêm vào. Kết thúc quá trình.`, [], ["green"]);
+							boxToast(`Đã hoàn tất cập nhật giá! ${MAX_CONSECUTIVE_SKIPS} sản phẩm liên tiếp đã có giá sẵn.`, "success");
+							break; // Thoát vòng lặp chính
+						}
+
+						await delay(100); 
+
+					} else {
+						// Không tìm thấy sản phẩm chưa xử lý nào trên DOM hiện tại (tất cả đã được gắn cờ hoặc không hợp lệ)
+						// Đây là lúc ta xác định tất cả các hàng hợp lệ đang hiển thị đều đã được xử lý.
+						// Reset consecutiveSkippedProducts ở đây vì chúng ta đang cuộn xuống, không phải bỏ qua liên tiếp
+						consecutiveSkippedProducts = 0;
+
+						boxLogging("Đã xử lý tất cả sản phẩm hợp lệ hiện có trên màn hình. Thử cuộn để tải thêm...", [], ["gray"]);
+						window.scrollTo(0, document.body.scrollHeight);
+						await delay(3000); 
+
+						var reloadedProductRows = $(".theme-arco-table-content-inner .theme-arco-table-body").find("div div > div");
+						
+						let newUnprocessedFoundAfterScroll = false;
+						for (let i = 0; i < reloadedProductRows.length; i++) {
+							let row = $(reloadedProductRows).eq(i);
+							if (row.is(".theme-arco-table-tr, .theme-arco-table-row-custom-expand, .styled") && !row.hasClass("tp-flag")) {
+								newUnprocessedFoundAfterScroll = true;
+								break;
+							}
+						}
+
+						if (!newUnprocessedFoundAfterScroll) {
+							if (scrolledWithoutNewProducts) {
+								boxLogging("Không tìm thấy sản phẩm mới chưa xử lý sau nhiều lần cuộn. Kết thúc quá trình.", [], ["blue"]);
+								boxToast("Đã hoàn tất cập nhật giá cho tất cả sản phẩm có thể tìm thấy!", "success");
+								break;
+							} else {
+								boxLogging("Lần đầu cuộn không thấy sản phẩm mới. Có thể chưa load xong, sẽ thử lại...", [], ["yellow"]);
+								scrolledWithoutNewProducts = true;
+							}
+						} else {
+							boxLogging(`Tìm thấy sản phẩm mới sau khi cuộn. Tiếp tục xử lý...`, [], ["blue"]);
+							scrolledWithoutNewProducts = false;
+						}
 					}
 				}
-			});
+
+				boxLogging("Quá trình xử lý sản phẩm đã hoàn tất.", [], ["blue"]);
+			}
+
+			processProductsByLastFlag();
 		}
 
 		// Sao chép chương trình flash sale
@@ -6106,134 +6207,206 @@
 			excuse.moRongDanhSach();
 		}
 
-		// Thêm hình theo SKU tiktok
+		// Biến global (hoặc scope cha)
 		var listSKUImgTiktok = [];
-		function setEventThemHinhTheoSKUTiktok (){
-			// Gắn sự kiện và cho phép chọn thư mục
-			$(".tp-container.tp-content .layout-future .layout-tab input")
+		var inputMap = {}; // Lưu trữ các đối tượng jQuery input file giả lập { "SKU_UPPERCASE": jQueryFileInputObject }
+
+		// Hàm khởi tạo sự kiện cho nút chọn thư mục
+		function setEventThemHinhTheoSKUTiktok() {
+			boxLogging("Thiết lập sự kiện chọn thư mục ảnh...", [], ["gray"]);
+			const fileInputSelector = ".tp-container.tp-content .layout-future .layout-tab input"; 
+
+			$(fileInputSelector)
 				.attr({
-				webkitdirectory: true,
-				directory: true,
-				multiple: true
+					webkitdirectory: true,
+					directory: true,
+					multiple: true
 				})
 				.on("change", function () {
-				var files = this.files;
-				listSKUImgTiktok = [];
+					const files = this.files;
+					listSKUImgTiktok = []; 
+					inputMap = {}; 
 
-				// Xóa map cũ
-				inputMap = {};
+					if (files.length === 0) {
+						boxLogging("Không có file ảnh nào được chọn.", [], ["yellow"]);
+						boxToast("Chưa chọn ảnh!", "warning");
+						return;
+					}
 
-				for (let i = 0; i < files.length; i++) {
-					var file = files[i];
+					for (let i = 0; i < files.length; i++) {
+						const file = files[i];
+						const fileNameOnly = file.name.split(".")[0].trim().toUpperCase();
 
-					// Lấy tên file không có đuôi mở rộng
-					var fileNameOnly = file.name.split(".")[0].trim().toUpperCase();
+						listSKUImgTiktok.push(fileNameOnly); 
 
-					listSKUImgTiktok.push(fileNameOnly);
+						const dt = new DataTransfer();
+						dt.items.add(file);
 
-					// Tạo DataTransfer chứa file
-					var dt = new DataTransfer();
-					dt.items.add(file);
-
-					// Tạo input giả (để nạp file vào ô của Shopee)
-					var newInput = $("<input type='file'>").prop("files", dt.files).addClass("single-file-input");
-
-					// Gán theo SKU
-					inputMap[fileNameOnly] = newInput;
-				}
-			});
+						const newInput = $("<input type='file'>").prop("files", dt.files).addClass("single-file-input");
+						inputMap[fileNameOnly] = newInput;
+					}
+					boxLogging(`Đã nạp ${Object.keys(inputMap).length} ảnh vào bộ nhớ từ thư mục đã chọn.`, [], ["blue"]);
+					boxToast(`Đã nạp ${Object.keys(inputMap).length} ảnh vào bộ nhớ!`, "success");
+				});
 		}
 
-		function themHinhTheoSKUTiktok(){
-			boxLogging("THÊM HÌNH ẢNH THEO SKU TIKTOK");
+		// Hàm chính để thêm hình ảnh theo SKU
+		async function themHinhTheoSKUTiktok() {
+			boxLogging("BẮT ĐẦU THÊM HÌNH ẢNH THEO SKU TIKTOK", [], ["green"]);
 
-			var mappingData = [];
+			if (Object.keys(inputMap).length === 0) {
+				boxLogging("Chưa có hình ảnh nào được nạp vào bộ nhớ. Vui lòng chọn thư mục ảnh trước.", [], ["red"]);
+				boxToast("Chưa có ảnh! Vui lòng chọn thư mục ảnh.", "error");
+				return; 
+			}
 
-			var table = $(".core-table-content-inner table tbody tr");
+			const mappingData = []; // Lưu trữ thông tin SKU/Name của các biến thể CÓ TRÊN SÀN VÀ CÓ ẢNH TƯƠNG ỨNG
 
-			$.each(table, (index, value) => {
-				var nameBox = table.eq(index).find("td").eq(0).find("p").eq(0);
-				var id = table.eq(index).find("td").eq(0).find("p").eq(1).find(".copyable");
-				// var priceBox = table.eq(index).find("td").eq(1).find("input");
-				// var stockBox = table.eq(index).find("td").eq(2).find("input");
-				var skuBox = table.eq(index).find("td").find(`input#skus${id.text().trim()}`);
+			// **Bước 1: Thu thập thông tin các SKUs và tên biến thể từ bảng sản phẩm (tab SKU List)**
+			const tableRows = $(".core-table-content-inner table tbody tr");
+			if (tableRows.length === 0) {
+				boxLogging("Không tìm thấy bảng SKU biến thể để lấy thông tin. Đảm bảo bạn đang ở trang quản lý biến thể sản phẩm.", [], ["red"]);
+				boxToast("Không tìm thấy bảng SKU!", "error");
+				return;
+			}
 
-				console.log(`NAME: ${nameBox.text()}\nSKU: ${skuBox.val()}`);
+			boxLogging(`Đang thu thập thông tin SKU từ ${tableRows.length} hàng biến thể trên sàn...`, [], ["blue"]);
+			for (let i = 0; i < tableRows.length; i++) {
+				const row = tableRows.eq(i);
+				const nameBox = row.find("td").eq(0).find("p").eq(0); 
+				const idElement = row.find("td").eq(0).find("p").eq(1).find(".copyable"); 
+				const skuInput = row.find("td").find(`input#skus${idElement.text().trim()}`); 
 
-				if(listSKUImgTiktok.includes(skuBox.val().toUpperCase())){
-					mappingData.push({
-						name: nameBox.text().trim(),
-						sku: skuBox.val().trim(),
-						// price: priceBox.val().trim(),
-						// stock: stockBox.val().trim()
-					});
+				if (skuInput.length > 0 && skuInput.val()) {
+					const skuValue = skuInput.val().trim().toUpperCase();
+					// CHỈ THÊM VÀO MAPPINGDATA NẾU SKU NÀY CÓ TRÊN SÀN VÀ CÓ FILE ẢNH TƯƠNG ỨNG
+					if (inputMap[skuValue]) { 
+						mappingData.push({
+							name: nameBox.text().trim(),
+							sku: skuValue,
+						});
+					} else {
+						boxLogging(`SKU "${skuValue}" có trên sàn nhưng không có file ảnh tương ứng. Bỏ qua.`, [], ["gray"]);
+					}
 				}
-			})
+			}
 
-			var box = $("#sale_properties .space-y-12 div").eq(0).find("> div").eq(2).find("> div").eq(0).find("> div[role='button']");
+			if (mappingData.length === 0) {
+				boxLogging("Không tìm thấy SKU nào trên sàn có file ảnh tương ứng đã nạp. Kiểm tra lại tên file và SKUs.", [], ["orange"]);
+				boxToast("Không tìm thấy SKU phù hợp!", "warning");
+				return;
+			}
 
-			$.each(box, (indexBox, valueBox) => {
-				var imgBox = box.eq(indexBox).find("> div div > div.mr-12");
-				var nameBox = box.eq(indexBox).find("> div div > div.w-full.overflow-hidden").find("input");
+			boxLogging(`Tìm thấy ${mappingData.length} biến thể SKU có ảnh cần thêm/sửa trên sàn.`, [], ["blue"]);
 
-				// console.log(box.eq(indexBox).find("> div div > div"));
-				$.each(mappingData, (indexMapp, valueMapp) => {
-					if(nameBox.val().trim().includes(mappingData[indexMapp].name)){
-						if(inputMap[mappingData[indexMapp].sku]) {
-							boxLogging(`Đang xóa ảnh cho SKU [copy]${mappingData[indexMapp].sku}[/copy]`, [`${mappingData[indexMapp].sku}`], ["green"]);
-							var delButon = imgBox.find(".core-space .core-space-item").eq(1);
+			// **Bước 2: Lặp qua từng container biến thể trên UI và xử lý ảnh (xóa trước, thêm sau)**
+			const variantImageContainers = $("#sale_properties .space-y-12 div > div:nth-child(3) > div:nth-child(1) > div[role='button']");
 
-							console.log(delButon);
+			if (variantImageContainers.length === 0) {
+				boxLogging("Không tìm thấy các khối UI để tải ảnh biến thể. Đảm bảo bạn đang ở phần 'Thuộc tính bán hàng' và các biến thể đã được tạo.", [], ["red"]);
+				boxToast("Không tìm thấy UI upload ảnh!", "error");
+				return;``
+			}
 
-							simulateReactEvent(imgBox.find("> div > div"), "mouseenter");
+			let processedCount = 0;
+			
+			for (let i = 0; i < variantImageContainers.length; i++) {
+				const currentVariantContainer = variantImageContainers.eq(i);
+				const imgBox = currentVariantContainer.find("> div div > div.mr-12"); // Container chứa ảnh hiện tại
+				const nameInputForVariant = currentVariantContainer.find("> div div > div.w-full.overflow-hidden").find("input"); // Input chứa tên biến thể
 
-							// simulateReactEvent(delButon, "click");
+				if (nameInputForVariant.length === 0 || !nameInputForVariant.val()) {
+					boxLogging(`Cảnh báo: Không tìm thấy input tên biến thể hoặc giá trị rỗng cho container ${i}. Bỏ qua.`, [], ["yellow"]);
+					continue; 
+				}
 
-							simulateReactEvent(delButon.find("svg"), "click");
-						}
+				const currentVariantName = nameInputForVariant.val().trim();
+				let foundMapping = null;
+
+				// Tìm trong mappingData đã được lọc (chỉ chứa các SKU có trên sàn và có ảnh)
+				for (let j = 0; j < mappingData.length; j++) {
+					// So sánh tên biến thể trên UI với tên biến thể trong mappingData
+					if (currentVariantName.includes(mappingData[j].name)) {
+						foundMapping = mappingData[j];
+						break;
 					}
-				});
+				}
 
-				$.each(mappingData, async (indexMapp, valueMapp) => {
-					if(nameBox.val().trim().includes(mappingData[indexMapp].name)){
-						var imgInputTiktok = imgBox.find(".core-upload input")[0];
+				if (foundMapping) {
+					const skuToProcess = foundMapping.sku;
+					const fileInputEl = inputMap[skuToProcess].get(0); // Lấy phần tử input file giả lập
 
-						if (inputMap[mappingData[indexMapp].sku]) {
-
-							// inputMap[found] là jQuery object, cần lấy phần tử gốc
-							var fileInputEl = inputMap[mappingData[indexMapp].sku].get(0);
-
-							if (!fileInputEl || !fileInputEl.files || fileInputEl.files.length === 0) return;
-
-							var file = fileInputEl.files[0];
-							var dt = new DataTransfer();
-							dt.items.add(file);
-
-							// Click input đầu tiên để kích hoạt UI React
-							// if(!clickInput){
-							// 	imgInputTiktok.click();
-							// 	clickInput = true;
-							// }
-
-							// setTimeout(() => {
-							imgInputTiktok.files = dt.files;
-
-							// Tạo sự kiện change để Shopee nhận diện file mới
-							var evt = new Event("change", { bubbles: true });
-							imgInputTiktok.dispatchEvent(evt);
-
-							$(imgInputTiktok).parent().parent().parent().parent().parent().parent().css("background","lightgreen");
-							boxLogging(`Đã sửa ảnh cho SKU [copy]${sku}[/copy]`, [`${sku}`], ["green"]);
-							// }, 100); // có thể chỉnh tăng lên nếu chưa kịp load
-						}else{
-							boxLogging(`SKU [copy]${sku}[/copy] không có ảnh`, [`${sku}`], ["crimson"]);
-							$(imgInputTiktok).parent().parent().parent().parent().parent().parent().css("background","crimson");
-						}
+					// Kiểm tra lại file ảnh có sẵn trong inputMap không (phòng trường hợp lỗi logic mappingData)
+					if (!fileInputEl || !fileInputEl.files || fileInputEl.files.length === 0) {
+						boxLogging(`Lỗi: Không tìm thấy file ảnh cho SKU [copy]${skuToProcess}[/copy] trong bộ nhớ. Bỏ qua.`, [`${skuToProcess}`], ["red"]);
+						currentVariantContainer.css("background","red"); 
+						// await delay(500); 
+						continue; 
 					}
-				});
-			});
+					const file = fileInputEl.files[0];
+					const dt = new DataTransfer();
+					dt.items.add(file);
 
-			boxToast(`Đã thêm xong hình ảnh theo SKU TikTok`, "success");
+					// **THAO TÁC XÓA ẢNH CŨ (ƯU TIÊN HÀNG ĐẦU)**
+					// Kiểm tra xem có ảnh đang hiển thị trong container này không
+					const existingImagePreview = imgBox.find("img"); 
+					if (existingImagePreview.length > 0) {
+						boxLogging(`Đang chuẩn bị xóa ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy])...`, [`${skuToProcess}`], ["orange"]);
+						
+						// Di chuột vào ảnh để hiển thị nút xóa
+						simulateReactEvent(imgBox.find("> div > div"), "mouseenter"); 
+						// await delay(400); // Chờ nút xóa hiện ra (điều chỉnh nếu cần)
+
+						var delButton = imgBox.find(".core-space .core-space-item").eq(1); 
+
+						if (delButton.length > 0) {
+							boxLogging(`Đang click nút xóa cho biến thể "${currentVariantName}"...`, [], ["orange"]);
+							// delButton.get(0).click(); 
+							simulateReactEvent(delButton.find("svg"), "click");
+							// await delay(2000); // Rất quan trọng: Chờ ảnh xóa xong và UI cập nhật
+							boxLogging(`Đã xóa ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
+						} else {
+							boxLogging(`Không tìm thấy nút xóa ảnh cho biến thể "${currentVariantName}". Có thể ảnh đã được xóa hoặc không có.`, [], ["yellow"]);
+						}
+					} else {
+						boxLogging(`Không có ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]) để xóa.`, [`${skuToProcess}`], ["gray"]);
+					}
+
+					// **THAO TÁC THÊM ẢNH MỚI (CHỈ THỰC HIỆN SAU KHI ĐẢM BẢO CÓ INPUT)**
+					// Tìm lại input[type="file"] sau khi ảnh cũ đã được xóa (nếu có)
+					const imgInputTiktok = imgBox.find(".core-upload input[type='file']")[0]; 
+
+					if (!imgInputTiktok) {
+						boxLogging(`Lỗi: Không tìm thấy input upload ảnh cho biến thể "${currentVariantName}" (SKU: ${skuToProcess}) sau khi xóa ảnh cũ (nếu có).`, [`${currentVariantName}`, `${skuToProcess}`], ["red"]);
+						currentVariantContainer.css("background","red");
+						// await delay(500);
+						continue;
+					}
+
+					boxLogging(`Đang thêm ảnh mới cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy])...`, [`${skuToProcess}`], ["blue"]);
+					
+					imgInputTiktok.files = dt.files; // Gán file vào input
+
+					const changeEvent = new Event("change", { bubbles: true });
+					imgInputTiktok.dispatchEvent(changeEvent);
+
+					currentVariantContainer.css("background","lightgreen");
+					boxLogging(`Đã thêm ảnh cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
+					
+					await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
+					processedCount++;
+
+				} else {
+					// Trường hợp này xảy ra khi biến thể trên UI (currentVariantName)
+					// không tìm thấy trong mappingData (tức là không có SKU tương ứng hoặc không có ảnh đã nạp)
+					boxLogging(`Biến thể "${currentVariantName}" không có ảnh phù hợp đã nạp. Bỏ qua.`, [`${currentVariantName}`], ["crimson"]);
+					currentVariantContainer.css("background","crimson");
+					// await delay(500); 
+				}
+			}
+
+			boxLogging(`Đã hoàn tất thêm hình ảnh theo SKU TikTok cho ${processedCount} biến thể.`, [], ["blue"]);
+			boxToast(`Đã thêm xong hình ảnh theo SKU TikTok!`, "success");
 		}
 
 		// Lấy ID của sản phẩm Shopee
