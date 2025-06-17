@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.17";
+	const VERSION = "2.2.18";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -16,17 +16,158 @@
 	JquUI.setAttribute("src", "https://code.jquery.com/ui/1.14.1/jquery-ui.js");
 	JquUI.setAttribute("rel", "preload");
 	document.head.appendChild(JquUI);*/
+		
+	console.log(`%cTanPhan: %cCHƯƠNG TRÌNH ĐANG KHỞI ĐỘNG`, "color: crimson; font-size: 2rem", "color: orange; font-size: 1.5rem");
 
-		// Danh sách thư viện cần thêm
-		const LIBRARIES = [
-			"https://code.jquery.com/jquery-3.7.1.min.js", // JQYERY
-			"https://code.jquery.com/ui/1.14.1/jquery-ui.js", // JQUERY UI
-			"https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js", // EXCEL
-			"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js", // ZIP FILE
-			"https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js", // SAVE FILE
-			"https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js", // BOOTSTRAP
-			"https://cdn.socket.io/4.8.1/socket.io.min.js", // SOCKET IO
-		];
+	// Thêm thư viện
+	function loadLibrary(scripts, callback){
+		let index = 0;
+		const total = scripts.length;
+
+		function loadNext() {
+			if (index >= total) {
+				if (callback) {
+					callback();
+				}
+				return;
+			}
+
+			const currentUrl = scripts[index];
+			const fileExtension = currentUrl.split('.').pop().split('?')[0]; // Lấy phần mở rộng, bỏ qua query params
+
+			// ----------------------------------------------------
+			// Bước 1: Kiểm tra xem script/style đã tồn tại trên trang chưa
+			// ----------------------------------------------------
+			let alreadyExists = false;
+			let elementTagName = '';
+
+			if (fileExtension === 'js') {
+				elementTagName = 'script';
+				// Kiểm tra sự tồn tại của script bằng cách duyệt qua các thẻ script hiện có
+				const existingScripts = document.querySelectorAll('script[src]');
+				for (const script of existingScripts) {
+					// So sánh đường dẫn hoặc chỉ tên file/phiên bản
+					// Đây là logic kiểm tra nâng cao: kiểm tra có chứa tên script (và version) không
+					if (script.src === currentUrl || script.src.includes(currentUrl.split('/').slice(-2).join('/'))) {
+						alreadyExists = true;
+						break;
+					}
+				}
+				// Bổ sung kiểm tra biến toàn cục cho các thư viện cụ thể như jQuery
+				if (currentUrl.includes('jquery.min.js') && typeof jQuery !== 'undefined') {
+					alreadyExists = true;
+				} else if (currentUrl.includes('elevatezoom.min.js') && typeof $.fn.elevateZoom !== 'undefined') {
+					alreadyExists = true;
+				}
+
+			} else if (fileExtension === 'css') {
+				elementTagName = 'link';
+				// Kiểm tra sự tồn tại của stylesheet bằng cách duyệt qua các thẻ link hiện có
+				const existingLinks = document.querySelectorAll('link[rel="stylesheet"]');
+				for (const link of existingLinks) {
+					if (link.href === currentUrl || link.href.includes(currentUrl.split('/').slice(-2).join('/'))) {
+						alreadyExists = true;
+						break;
+					}
+				}
+			} else {
+				console.error(`%cTanPhan: %cKhông hỗ trợ định dạng file: ${fileExtension} cho URL: ${currentUrl}`, "color: crimson; font-size: 2rem", "color: orange; font-size: 1.5rem");
+				index++;
+				loadNext(); // Chuyển sang file tiếp theo
+				return;
+			}
+
+			if (alreadyExists) {
+				console.error(`%cTanPhan: %c"${currentUrl}" đã tồn tại. Bỏ qua tải.`, "color: crimson; font-size: 2rem", "color: orange; font-size: 1.5rem");
+				index++;
+				loadNext(); // Chuyển sang file tiếp theo
+				return;
+			}
+
+			// ----------------------------------------------------
+			// Bước 2: Tạo và thêm thẻ script/link phù hợp
+			// ----------------------------------------------------
+			let element;
+			if (elementTagName === 'script') {
+				element = document.createElement('script');
+				element.src = currentUrl;
+				element.type = 'text/javascript';
+			} else if (elementTagName === 'link') {
+				element = document.createElement('link');
+				element.href = currentUrl;
+				element.rel = 'stylesheet';
+				element.type = 'text/css';
+			}
+
+			if (!element) { // Trường hợp lỗi không tạo được element
+				index++;
+				loadNext();
+				return;
+			}
+
+			element.onload = () => {
+				console.log(`%cTanPhan: %cĐã thêm thành công: "${currentUrl}"`, "color: crimson; font-size: 2rem", "color: orange; font-size: 1.5rem");
+				index++;
+				loadNext();
+			};
+
+			element.onerror = (e) => {
+				console.error(`%cTanPhan: %cCó lỗi khi thêm: "${currentUrl}"`, "color: crimson; font-size: 2rem", "color: orange; font-size: 1.5rem");
+				index++;
+				loadNext(); // Vẫn cố gắng tải tiếp các file khác
+			};
+
+			document.head.appendChild(element);
+		}
+
+		// Bắt đầu quá trình tải
+		loadNext();				
+	}
+	
+	// Danh sách thư viện cần thêm
+	const LIBRARIES = [
+		"https://code.jquery.com/jquery-3.7.1.min.js", // JQYERY
+		"https://code.jquery.com/ui/1.14.1/jquery-ui.js", // JQUERY UI
+		"https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js", // EXCEL
+		"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js", // ZIP FILE
+		"https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js", // SAVE FILE
+		"https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js", // BOOTSTRAP
+		"https://cdn.socket.io/4.8.1/socket.io.min.js", // SOCKET IO
+	];
+
+	loadLibrary(LIBRARIES, (e) => {
+		console.log(`%cTanPhan: %cĐÃ THÊM THƯ VIỆN`, "color: crimson; font-size: 2rem", "color: orange; font-size: 1.5rem");
+		INITCONFIG();		
+	});
+
+	function INITCONFIG(){
+		boxAlert("ĐANG KHỞI TẠO GIAO DIỆN");
+		if (createUI)
+			return;
+		createUI = true;
+		createLayout($("body"));
+		applyNonce();
+
+		// Kết nối máy chủ
+		// socket = getUrlServer();
+
+		// Kiểm tra tự động mở các danh sách
+		checkPage();
+
+		// checkElementPage().then(mainContent => {
+		// 	boxAlert("ĐÃ TÌM THẤY PHẦN TỬ CHÍNH CÓ NỘI DUNG");
+		// 	createLayout(mainContent);
+		// 	applyNonce();
+
+		// 	// Kết nối máy chủ
+		// 	// socket = getUrlServer();
+
+		// 	// Kiểm tra tự động mở các danh sách
+		// 	checkPage();
+		// }).catch(err => {
+		// 	boxAlert(`LỖI: ${err.message}`, "error");
+		// 	console.error("Lỗi khi tìm phần tử chính:", err);
+		// });
 
 		const actionMap = {
 			// --- SHOPEE
@@ -80,42 +221,6 @@
 
 		const actionOptionMap = {
 			"scaleMainContent": scaleMainContent
-		}
-
-		// Thêm thư viện
-		function loadLibrary(scripts, callback){
-			let index = 0;
-			try{
-
-				function loadNext(){
-					if (index >= scripts.length){
-						if (callback)
-							callback();
-						return;
-					}
-
-					let script = document.createElement("script");
-					script.src = scripts[index];
-
-					script.onload = () => {
-						boxAlert(`Đã thêm ${scripts[index]}`);
-						index++;
-						loadNext();
-					}
-
-					script.onerror = (e) => {
-						boxAlert(`Có lỗi khi thêm ${scripts[index]}`, "error");
-						console.log(e);
-						index++;
-						loadNext();
-					}
-
-					document.head.appendChild(script);
-				}
-				loadNext();
-			}catch (e){
-				boxAlert(`Không thể load ${scripts[index]}`, "error");
-			}				
 		}
 
 		// lấy nonce từ tag có sẵn trong trang
@@ -1261,42 +1366,6 @@
 				tryNextSelector(0);
 			});
 		}
-
-		// Khải tạo chương trình
-		function INITCONFIG(){
-			boxAlert("ĐANG KHỞI TẠO");
-			boxToast(`Đang Tạo Chương Trình`);
-			loadLibrary(LIBRARIES, () => {
-				if (createUI)
-					return;
-				createUI = true;
-				createLayout($("body"));
-				applyNonce();
-
-				// Kết nối máy chủ
-				// socket = getUrlServer();
-
-				// Kiểm tra tự động mở các danh sách
-				checkPage();
-
-				// checkElementPage().then(mainContent => {
-				// 	boxAlert("ĐÃ TÌM THẤY PHẦN TỬ CHÍNH CÓ NỘI DUNG");
-				// 	createLayout(mainContent);
-				// 	applyNonce();
-
-				// 	// Kết nối máy chủ
-				// 	// socket = getUrlServer();
-
-				// 	// Kiểm tra tự động mở các danh sách
-				// 	checkPage();
-				// }).catch(err => {
-				// 	boxAlert(`LỖI: ${err.message}`, "error");
-				// 	console.error("Lỗi khi tìm phần tử chính:", err);
-				// });
-			});
-		}
-
-		INITCONFIG();
 
 		function createLayout(mainContent){
 			if(window.parent != window.top){
@@ -3113,8 +3182,8 @@
 				<div class="layout-tab">
 				<div class="layout-tab">
 					<textarea id="group" placeholder="Nhập từ khóa của nhóm:\nSố phần trăm, key1, key2, key3,..\nSố phần trăm, key1, key2, key3,...">
-	10%, massage, diện chẩn, khẩu trang, bịt mặt
-	5%, áo mưa bít, bít cá, bít dù</textarea>
+					10%, massage, diện chẩn, khẩu trang, bịt mặt
+					5%, áo mưa bít, bít cá, bít dù</textarea>
 				</div>
 				</div>`));
 				break;
@@ -6556,3 +6625,4 @@
 				$(".tab-content#tab-online-function").scrollTop($(".tab-content#tab-online-function").prop("scrollHeight"));
 			})
 		}
+	}
