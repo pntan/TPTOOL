@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.19";
+	const VERSION = "2.2.20";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -146,6 +146,7 @@
 			return;
 		createUI = true;
 		createLayout($("body"));
+		
 		applyNonce();
 
 		// Kết nối máy chủ
@@ -6513,6 +6514,8 @@
 						} else {
 							boxLogging(`Không tìm thấy nút xóa ảnh cho biến thể "${currentVariantName}". Có thể ảnh đã được xóa hoặc không có.`, [], ["yellow"]);
 						}
+
+						
 					} else {
 						boxLogging(`Không có ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]) để xóa.`, [`${skuToProcess}`], ["gray"]);
 					}
@@ -6538,7 +6541,7 @@
 					currentVariantContainer.css("background","lightgreen");
 					boxLogging(`Đã thêm ảnh cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
 					
-					// await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
+					await delay(2000); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
 					processedCount++;
 
 				} else {
