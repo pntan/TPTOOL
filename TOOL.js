@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.18";
+	const VERSION = "2.2.19";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -539,19 +539,20 @@
 		// Giả lập input file
 		function simulateReactInputFile(input) {
 			var nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'files')?.set;
-			if (nativeInputValueSetter) {
-				nativeInputValueSetter.call(input, input.files);
-			}
 
-			// Trigger lại các sự kiện input và change để React có thể nhận diện sự thay đổi
-			var inputEvent = new Event('input', { bubbles: true });
-			var changeEvent = new Event('change', { bubbles: true });
+			try{
+				if (nativeInputValueSetter) {
+					nativeInputValueSetter.call(input, input.files);
+				}
 
-			input.dispatchEvent(inputEvent);
-			input.dispatchEvent(changeEvent);
+				// Trigger lại các sự kiện input và change để React có thể nhận diện sự thay đổi
+				var inputEvent = new Event('input', { bubbles: true });
+				var changeEvent = new Event('change', { bubbles: true });
+
+				input.dispatchEvent(inputEvent);
+				input.dispatchEvent(changeEvent);
+			}catch(e){}
 		}
-
-
 
 		// Giả lập xóa nội dung
 		function simulateClearing(inputElement, delay = 50, callback) {
@@ -1033,7 +1034,7 @@
 			$("#tab-function optgroup").hide(); // Ẩn tất cả các optgroup
 			$("#tab-function optgroup[label='Khác']").show(); // Hiển thị optgroup General
 
-			// Shopee
+			// Kiểm tra trang Shopee
 			if(host.includes("shopee.vn")){
 				$("#tab-function optgroup[label='Shopee']").show(); // Hiển thị optgroup Shopee
 
@@ -1051,12 +1052,16 @@
 						boxToast("Đã mở rộng danh sách phân loại");
 					});
 				}
-			}else if(host.includes("tiktok.com")){
+			}else if(host.includes("tiktok.com")){ // Kiểm tra trang Tiktok
 				$("#tab-function optgroup[label='TikTok']").show(); // Hiển thị optgroup TikTok
 
 				if(pathName.includes("product/edit/")){
-
+					// Giả lập kéo hình ảnh vào input Tiktok
+					
+					var proccessFileStatus = false;
 					function setDragAndDropInputFile() {
+
+						boxAlert("Đang gán lại input giả");
 						
 						$(".tp-inputfake").remove(); // Xóa các input giả trước đó
 						var el1 = $("[class ^= 'uploadContainer']");
@@ -1064,8 +1069,8 @@
 
 						$.each(detailImg, (index, value) => {
 							if(!detailImg.eq(index).find(".cursor-default .core-upload input[type='file']").length > 0){
-								boxAlert("Không tìm thấy input file TikTok");
-								console.log(detailImg.eq(index));
+								// boxAlert("Không tìm thấy input file TikTok");
+								// console.log(detailImg.eq(index));
 								return;
 							}
 
@@ -1085,13 +1090,14 @@
 							
 							inputFake.on("change", (e) => {
 								boxAlert("Đã chọn file thành công! Đang xử lý file...");
-								e = e.target;
-								attachFileToInput(inputFake, $(e).parent().find(".cursor-default input[type='file']"), 100, async (v) => {
-									await delay(500);
 
-									setDragAndDropInputFile();
-								});
-								simulateReactInputFile($(e).parent().find(".cursor-default input[type='file']"));
+								e = e.target;
+
+								if(!proccessFileStatus && e.files.length == 1){
+									attachFileToInput(inputFake, $(e).parent().find(".cursor-default input[type='file']"));
+									simulateReactInputFile($(e).parent().find(".cursor-default input[type='file']"));
+								}else
+									splitInputFile(inputFake, $(e));
 							});
 						});
 
@@ -1126,8 +1132,78 @@
 								});
 								simulateReactInputFile($(e).parent().find(".core-upload input[type='file']"));
 							});
-						 })
+						})
+					}
 
+					function splitInputFile(inputFake, inputTarget){
+						const files = inputFake.get(0).files;
+						listSKUImgTiktok = []; 
+						inputMap = []; 
+
+						if (files.length === 0) {
+							boxLogging("Không có file ảnh nào được chọn.", [], ["yellow"]);
+							boxToast("Chưa chọn ảnh!", "warning");
+							return;
+						}
+
+						for (let i = 0; i < files.length; i++) {
+							const file = files[i];
+							const fileNameOnly = file.name.split(".")[0].trim().toUpperCase();
+
+							listSKUImgTiktok.push(fileNameOnly); 
+
+							const dt = new DataTransfer();
+							dt.items.add(file);
+
+							const newInput = $("<input type='file'>").prop("files", dt.files).addClass("single-file-input");
+							inputMap.push(newInput);
+						}
+						boxLogging(`Đã nạp ${Object.keys(inputMap).length} ảnh vào bộ nhớ từ thư mục đã chọn.`, [], ["blue"]);
+						boxToast(`Đã nạp ${Object.keys(inputMap).length} ảnh vào bộ nhớ!`, "success");
+
+						proccessFile(inputMap, inputFake, inputTarget);
+					}
+
+					function proccessFile(inputMap, inputFake, inputTarget){
+						proccessFileStatus = true;
+						boxAlert("INPUT FAKER");
+						console.log(inputFake);
+						boxAlert("INPUT TARGET");
+						console.log(inputTarget);
+
+						var i = 0;
+						
+						async function nextImg(){
+							if(i >= inputMap.length){
+								proccessFileStatus = false;
+								boxToast(`Đã tải xong ảnh sản phẩm`)
+								return;
+							}
+
+							inputTarget = $(".tp-inputfake");
+
+							inputTarget = inputTarget.parent().find(".cursor-default input[type='file']");
+
+							console.log(inputTarget);
+
+							attachFileToInput(inputMap[i], inputTarget);
+
+							await delay(200);
+
+							simulateReactInputFile(inputTarget);
+
+							await delay(200);
+
+							setDragAndDropInputFile();
+
+							i++;
+
+							await delay(200);
+
+							nextImg();
+						}
+
+						nextImg();
 					}
 
 					boxAlert("Đang thay đổi input file TikTok");
@@ -6462,7 +6538,7 @@
 					currentVariantContainer.css("background","lightgreen");
 					boxLogging(`Đã thêm ảnh cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
 					
-					await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
+					// await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
 					processedCount++;
 
 				} else {
