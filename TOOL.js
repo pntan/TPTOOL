@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.20";
+	const VERSION = "2.2.21";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -1002,6 +1002,256 @@
 			scrollLoop(); // Bắt đầu quá trình cuộn
 		}
 
+		/**
+		 * Hiển thị một tooltip tùy chỉnh (div) với nội dung zoom khi hover vào hình ảnh.
+		 * Hàm này lắng nghe sự kiện trên toàn bộ document và sử dụng document.elementsFromPoint()
+		 * để phát hiện ảnh tại vị trí con trỏ, cho phép hoạt động linh hoạt trên các trang web động.
+		 *
+		 * @param {function($img): jQuery} getContentHtmlCallback Hàm callback trả về nội dung HTML của tooltip dưới dạng jQuery object.
+		 * Hàm này nhận đối tượng jQuery của ảnh đang hover làm đối số.
+		 * @param {object} [options={}] Tùy chọn cấu hình.
+		 * @param {number} [options.offsetX=15] Khoảng cách ngang từ con trỏ đến tooltip.
+		 * @param {number} [options.offsetY=15] Khoảng cách dọc từ con trỏ đến tooltip.
+		 * @param {number} [options.maxWidth=300] Chiều rộng tối đa ban đầu của tooltip.
+		 * @param {string} [options.widthUnit='px'] Đơn vị cho maxWidth (px, vw).
+		 * @param {number} [options.maxHeight=200] Chiều cao tối đa ban đầu của tooltip.
+		 * @param {string} [options.heightUnit='px'] Đơn vị cho maxHeight (px, vh).
+		 * @param {string} [options.tooltipClass='custom-tooltip'] Class CSS thêm vào tooltip div.
+		 * @param {string} [options.imageFilterSelector='img'] Selector để lọc các thẻ img cụ thể nếu muốn, mặc định là tất cả img.
+		 */
+		function zoomImg(getContentHtmlCallback, options = {}) {
+			console.log("Hàm zoomImg đang được khởi tạo...");
+
+			const defaultOptions = {
+				offsetX: 15,
+				offsetY: 15,
+				maxWidth: 300,
+				widthUnit: 'px',
+				maxHeight: 200,
+				heightUnit: 'px',
+				tooltipClass: 'custom-tooltip',
+				imageFilterSelector: 'img'
+			};
+			const opts = { ...defaultOptions, ...options };
+
+			let currentTooltip = null;
+			let hoverTimeout = null;
+			const HOVER_DELAY = 100;
+			let lastTargetImage = null;
+
+			// Hàm tính toán vị trí tối ưu cho tooltip
+			const calculateTooltipPosition = (e, tooltipElement, currentWidth, currentHeight, attemptScaling = false) => {
+				const mouseX = e.clientX;
+				const mouseY = e.clientY;
+				const viewportWidth = window.innerWidth;
+				const viewportHeight = window.innerHeight;
+
+				let finalX = 0;
+				let finalY = 0;
+				let bestFitFound = false;
+				
+				// Khoảng cách tối thiểu từ con trỏ để tooltip không bị đè
+				const cursorOffset = 10; 
+
+				// Các chiến lược thử vị trí theo thứ tự ưu tiên: Trái -> Dưới -> Phải -> Trên
+				const priorityPositions = [
+					// Trái: Căn giữa theo chiều dọc của con trỏ
+					{ x: mouseX - currentWidth - cursorOffset, y: mouseY - currentHeight / 2 },
+					// Dưới: Căn giữa theo chiều ngang của con trỏ
+					{ x: mouseX - currentWidth / 2, y: mouseY + cursorOffset },
+					// Phải: Căn giữa theo chiều dọc của con trỏ
+					{ x: mouseX + cursorOffset, y: mouseY - currentHeight / 2 },
+					// Trên: Căn giữa theo chiều ngang của con trỏ
+					{ x: mouseX - currentWidth / 2, y: mouseY - currentHeight - cursorOffset }
+				];
+
+				for (const pos of priorityPositions) {
+					let tempX = pos.x;
+					let tempY = pos.y;
+
+					// Đảm bảo tooltip không vượt quá biên trái/trên của viewport
+					if (tempX < 0) tempX = 0;
+					if (tempY < 0) tempY = 0;
+					
+					// Đảm bảo tooltip không vượt quá biên phải/dưới của viewport
+					if (tempX + currentWidth > viewportWidth) tempX = viewportWidth - currentWidth;
+					if (tempY + currentHeight > viewportHeight) tempY = viewportHeight - currentHeight;
+
+					// Kiểm tra xem sau khi điều chỉnh, tooltip có nằm hoàn toàn trong viewport không
+					const fitsInViewport = (
+						tempX >= 0 && tempX + currentWidth <= viewportWidth &&
+						tempY >= 0 && tempY + currentHeight <= viewportHeight
+					);
+
+					if (fitsInViewport) {
+						// Kiểm tra xem vị trí này có đè lên con trỏ không
+						const doesOverlapCursor = (
+							mouseX >= tempX && mouseX <= tempX + currentWidth &&
+							mouseY >= tempY && mouseY <= tempY + currentHeight
+						);
+
+						if (!doesOverlapCursor) {
+							finalX = tempX;
+							finalY = tempY;
+							bestFitFound = true;
+							break;
+						}
+					}
+				}
+
+				// Nếu không tìm được vị trí lý tưởng không đè lên con trỏ
+				// và được phép thử scale lại
+				if (!bestFitFound && attemptScaling) {
+					console.log("Không đủ chỗ không đè lên chuột, đang cố gắng scale tooltip.");
+
+					// Tính toán không gian khả dụng sau khi trừ đi lề
+					let availableWidthPx = viewportWidth - 2 * cursorOffset; 
+					let availableHeightPx = viewportHeight - 2 * cursorOffset;
+
+					// Áp dụng lại max-width/max-height dựa trên không gian khả dụng và đơn vị ban đầu của người dùng
+					// (Chuyển đổi vw/vh thành px nếu cần để tính toán)
+					let desiredMaxWidthPx = (opts.widthUnit === 'vw' ? (opts.maxWidth / 100) * viewportWidth : opts.maxWidth);
+					let desiredMaxHeightPx = (opts.heightUnit === 'vh' ? (opts.maxHeight / 100) * viewportHeight : opts.maxHeight);
+
+					// Giới hạn kích thước theo không gian khả dụng
+					let newMaxWidth = Math.min(desiredMaxWidthPx, availableWidthPx);
+					let newMaxHeight = Math.min(desiredMaxHeightPx, availableHeightPx);
+
+					tooltipElement.css({
+						'max-width': `${newMaxWidth}px`, // Tạm thời dùng px để đảm bảo vừa
+						'max-height': `${newMaxHeight}px`
+					});
+
+					// Lấy lại kích thước thực tế sau khi đã scale
+					currentWidth = tooltipElement.outerWidth();
+					currentHeight = tooltipElement.outerHeight();
+					console.log(`Tooltip scaled to: ${currentWidth}px x ${currentHeight}px`);
+
+					// Thử lại tìm vị trí với kích thước mới (chỉ một lần nữa sau khi scale)
+					// Lặp lại logic tìm vị trí nhưng không thử scale lần nữa (avoid infinite loop)
+					return calculateTooltipPosition(e, tooltipElement, currentWidth, currentHeight, false); 
+				}
+
+				return { x: finalX, y: finalY, found: bestFitFound };
+			};
+
+
+			// Hàm tạo và hiển thị tooltip
+			const createAndShowTooltip = (e, $hoveredImage) => {
+				if (lastTargetImage && lastTargetImage[0] === $hoveredImage[0]) {
+					return;
+				}
+
+				if (currentTooltip) {
+					currentTooltip.remove();
+					currentTooltip = null;
+				}
+				
+				lastTargetImage = $hoveredImage;
+				console.log("Tạo và hiển thị tooltip cho:", lastTargetImage[0]);
+
+				// 1. Tạo phần tử tooltip ban đầu với max-width/max-height được thiết lập
+				currentTooltip = $('<div>')
+					.addClass(opts.tooltipClass)
+					.css({
+						position: 'fixed',
+						'z-index': 99999,
+						'pointer-events': 'none',
+						'background-color': 'rgba(0, 0, 0, 0.8)',
+						color: 'white',
+						padding: '8px',
+						'border-radius': '4px',
+						'box-shadow': '0 2px 10px rgba(0, 0, 0, 0.3)',
+						'max-width': `${opts.maxWidth}${opts.widthUnit}`, // Áp dụng max-width/height ban đầu
+						'max-height': `${opts.maxHeight}${opts.heightUnit}`,
+						overflow: 'auto',
+						display: 'block',
+						'word-wrap': 'break-word',
+						'box-sizing': 'border-box'
+					})
+					.append(getContentHtmlCallback($hoveredImage));
+
+				$('body').append(currentTooltip);
+
+				// 2. Đo kích thước tooltip sau khi được thêm vào DOM
+				let tooltipWidth = currentTooltip.outerWidth();
+				let tooltipHeight = currentTooltip.outerHeight();
+
+				// 3. Tính toán vị trí ban đầu (không scale)
+				let positionResult = calculateTooltipPosition(e, currentTooltip, tooltipWidth, tooltipHeight, true); // true = cho phép thử scale
+
+				// 4. Nếu không tìm thấy vị trí tốt với kích thước ban đầu,
+				// hàm calculateTooltipPosition đã tự động scale và tìm lại.
+				// Chỉ cần áp dụng kết quả cuối cùng.
+				currentTooltip.css({
+					left: `${positionResult.x}px`,
+					top: `${positionResult.y}px`
+				});
+
+				// 5. Nếu sau khi mọi nỗ lực mà tooltip vẫn bị tràn hoặc không tối ưu,
+				// có thể điều chỉnh lại lần cuối để nó nằm gọn trong viewport
+				// (Điều này thường không cần nếu logic trên hoạt động đúng)
+				const viewportWidth = window.innerWidth;
+				const viewportHeight = window.innerHeight;
+				let finalX = parseFloat(currentTooltip.css('left'));
+				let finalY = parseFloat(currentTooltip.css('top'));
+
+				if (finalX + currentTooltip.outerWidth() > viewportWidth) {
+					finalX = viewportWidth - currentTooltip.outerWidth();
+				}
+				if (finalY + currentTooltip.outerHeight() > viewportHeight) {
+					finalY = viewportHeight - currentTooltip.outerHeight();
+				}
+				if (finalX < 0) finalX = 0;
+				if (finalY < 0) finalY = 0;
+
+				currentTooltip.css({
+					left: `${finalX}px`,
+					top: `${finalY}px`
+				});
+			};
+
+			const hideAndRemoveTooltip = () => {
+				if (hoverTimeout) {
+					clearTimeout(hoverTimeout);
+					hoverTimeout = null;
+				}
+				if (currentTooltip) {
+					currentTooltip.remove();
+					currentTooltip = null;
+				}
+				lastTargetImage = null;
+			};
+
+			$(document).on('mouseover', function(e) {
+				if (hoverTimeout) {
+					clearTimeout(hoverTimeout);
+				}
+
+				const elementsAtPoint = document.elementsFromPoint(e.clientX, e.clientY);
+				let targetImage = null;
+
+				for (const el of elementsAtPoint) {
+					const $el = $(el); 
+					if ($el.is('img') && $el.is(opts.imageFilterSelector)) {
+						targetImage = $el;
+						break;
+					}
+				}
+
+				if (targetImage) {
+					hoverTimeout = setTimeout(() => {
+						createAndShowTooltip(e, targetImage);
+					}, HOVER_DELAY);
+				} else {
+					hideAndRemoveTooltip();
+				}
+			});
+
+			$(document).on('mouseout', hideAndRemoveTooltip);
+			$(window).on('scroll mouseleave', hideAndRemoveTooltip);
+		}
+
 		// Broadcast tab
 		var tpBroadcast = new BroadcastChannel("tp-broadcast-tab");
 		// Kiểm tra nếu có tab cha đã mở tab này
@@ -1017,6 +1267,47 @@
 			boxAlert("CHECKPAGE");
 
 			// Phóng to hình ảnh khi hover
+			zoomImg(
+				($hoveredImage) => {
+					// Đây là hàm callback để tạo nội dung cho tooltip.
+					// $hoveredImage là đối tượng jQuery của thẻ <img> mà người dùng đang hover.
+
+					const imageUrl = $hoveredImage.attr('src'); 
+					// Thử tìm URL ảnh lớn hơn nếu có
+					const fullSizeImageUrl = $hoveredImage.attr('data-full-size-url') 
+										|| $hoveredImage.attr('data-src') 
+										|| imageUrl;
+					
+					// Cố gắng tìm tên sản phẩm hoặc thông tin liên quan từ các phần tử cha hoặc anh chị em
+					let productName = "Sản phẩm";
+					// Các selector phổ biến cho container sản phẩm trên các sàn khác nhau
+					const $productCard = $hoveredImage.closest('.theme-arco-table-tr, .product-card, .item-card, .sc-card-product'); 
+					if ($productCard.length) {
+						// Các selector phổ biến cho tên sản phẩm
+						productName = $productCard.find('h1, h2, h3, .product-name, .item-title, .title, [data-name="product-title"]').first().text().trim() || productName;
+					}
+
+					return $(`
+						<div style="text-align: center; overflow: hidden;">
+							<!-- <h4 style="margin: 0 0 8px; color: white; font-size: 1.1em; max-height: 40px; overflow: hidden;">${productName}</h4> -->
+							<img src="${fullSizeImageUrl}" style="width: 100%; height: auto; display: block; margin: auto; border: 1px solid #555; object-fit: contain;">
+							<!-- <p style="font-size: 0.85em; margin-top: 8px; color: #ccc;">URL: <span style="font-size: 0.7em;">${imageUrl.substring(0, Math.min(imageUrl.length, 60))}...</span></p> -->
+						</div>
+					`);
+				},
+				{
+					offsetX: 20,
+					offsetY: 20,
+					maxWidth: 30,
+					widthUnit: "vw",
+					maxHeight: 30,
+					heightUnit: "vw",
+					tooltipClass: 'product-image-zoom-tooltip',
+					// Thay đổi 'img' nếu bạn muốn chỉ nhắm mục tiêu các hình ảnh cụ thể
+					// Ví dụ: 'img.product-thumbnail', '.some-container img', 'img[alt]', v.v.
+					imageFilterSelector: 'img' 
+				}
+			);
 
 			var domain = window.location;
 			var host = domain.host, pathName = domain.pathname, port = domain.port, protocol = domain.protocol;
@@ -5133,12 +5424,12 @@
 
 						nextProductToProcess.addClass("tp-flag");
 
-						var nameElement = nextProductToProcess.find(".theme-arco-table-td").eq(1).find("span");
+						var nameElement = nextProductToProcess.find(".theme-arco-table-td").eq(0).find("span");
 						var productName = nameElement.text().trim();
 						boxLogging(`Đang xử lý sản phẩm: "${productName}"`, [`${productName}`], ["cyan"]);
 
-						var currentPrice = nextProductToProcess.find(".theme-arco-table-td").eq(2).find("span p");
-						var promotionPrice = nextProductToProcess.find(".theme-arco-table-td").eq(3).find("input");
+						var currentPrice = nextProductToProcess.find(".theme-arco-table-td").eq(1).find("span p");
+						var promotionPrice = nextProductToProcess.find(".theme-arco-table-td").eq(2).find("input");
 
 						if (promotionPrice.length > 0) {
 							if (promotionPrice.val().length > 0) {
@@ -5163,7 +5454,7 @@
 									// await delay(500);
 
 									simulateReactInput(promotionPrice, gia);
-									// await delay(800);
+									await delay(200);
 
 									var formattedGia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 									boxLogging(`[copy]${nameElement.text()}[/copy] đã cập nhật từ ${currentPrice.text()} -> ${formattedGia}`, [`${nameElement.text()}`, `${currentPrice.text()}`, `${formattedGia}`], ["green", "orange", "orange"]);
@@ -6509,7 +6800,7 @@
 							boxLogging(`Đang click nút xóa cho biến thể "${currentVariantName}"...`, [], ["orange"]);
 							// delButton.get(0).click(); 
 							simulateReactEvent(delButton.find("svg"), "click");
-							// await delay(2000); // Rất quan trọng: Chờ ảnh xóa xong và UI cập nhật
+							await delay(200); // Rất quan trọng: Chờ ảnh xóa xong và UI cập nhật
 							boxLogging(`Đã xóa ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
 						} else {
 							boxLogging(`Không tìm thấy nút xóa ảnh cho biến thể "${currentVariantName}". Có thể ảnh đã được xóa hoặc không có.`, [], ["yellow"]);
@@ -6532,6 +6823,8 @@
 					}
 
 					boxLogging(`Đang thêm ảnh mới cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy])...`, [`${skuToProcess}`], ["blue"]);
+
+					$(imgInputTiktok).focus();
 					
 					imgInputTiktok.files = dt.files; // Gán file vào input
 
@@ -6541,7 +6834,7 @@
 					currentVariantContainer.css("background","lightgreen");
 					boxLogging(`Đã thêm ảnh cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
 					
-					await delay(2000); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
+					await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
 					processedCount++;
 
 				} else {
