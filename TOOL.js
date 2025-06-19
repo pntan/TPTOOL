@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.21";
+	const VERSION = "2.2.22";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -1288,7 +1288,7 @@
 					}
 
 					return $(`
-						<div style="text-align: center; overflow: hidden;">
+						<div style="text-align: center;">
 							<!-- <h4 style="margin: 0 0 8px; color: white; font-size: 1.1em; max-height: 40px; overflow: hidden;">${productName}</h4> -->
 							<img src="${fullSizeImageUrl}" style="width: 100%; height: auto; display: block; margin: auto; border: 1px solid #555; object-fit: contain;">
 							<!-- <p style="font-size: 0.85em; margin-top: 8px; color: #ccc;">URL: <span style="font-size: 0.7em;">${imageUrl.substring(0, Math.min(imageUrl.length, 60))}...</span></p> -->
@@ -1300,8 +1300,8 @@
 					offsetY: 20,
 					maxWidth: 30,
 					widthUnit: "vw",
-					maxHeight: 30,
-					heightUnit: "vw",
+					maxHeight: "auto",
+					heightUnit: "",
 					tooltipClass: 'product-image-zoom-tooltip',
 					// Thay đổi 'img' nếu bạn muốn chỉ nhắm mục tiêu các hình ảnh cụ thể
 					// Ví dụ: 'img.product-thumbnail', '.some-container img', 'img[alt]', v.v.
@@ -5385,7 +5385,14 @@
 				let consecutiveSkippedProducts = 0; // Biến đếm số sản phẩm liên tiếp đã có giá khuyến mãi
 				const MAX_CONSECUTIVE_SKIPS = 5; // Ngưỡng: 5 sản phẩm liên tiếp đã có giá
 
+				let productProcesscount = 0
+
 				while (true) {
+					if(productProcesscount == 30){
+						await delay(5000);
+						productProcesscount = 0;
+					}
+					productProcesscount++;
 					var allProductRows = $(".theme-arco-table-content-inner .theme-arco-table-body").find("div div > div");
 					let nextProductToProcess = null;
 
@@ -5453,8 +5460,10 @@
 									promotionPrice.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
 									// await delay(500);
 
+									// simulateReactInput(promotionPrice, gia, 50);
+									
 									simulateReactInput(promotionPrice, gia);
-									await delay(200);
+									simulateReactEvent(promotionPrice, "blur");
 
 									var formattedGia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 									boxLogging(`[copy]${nameElement.text()}[/copy] đã cập nhật từ ${currentPrice.text()} -> ${formattedGia}`, [`${nameElement.text()}`, `${currentPrice.text()}`, `${formattedGia}`], ["green", "orange", "orange"]);
@@ -5473,7 +5482,7 @@
 							break; // Thoát vòng lặp chính
 						}
 
-						await delay(100); 
+						await delay(500); 
 
 					} else {
 						// Không tìm thấy sản phẩm chưa xử lý nào trên DOM hiện tại (tất cả đã được gắn cờ hoặc không hợp lệ)
