@@ -1051,7 +1051,12 @@
 				let bestFitFound = false;
 				
 				// Khoảng cách tối thiểu từ con trỏ để tooltip không bị đè
-				const cursorOffset = 10; 
+				var cursorOffset = 10; 
+
+				var eWidth  = $(e.target).outerWidth();
+				var eHeight = $(e.target).outerHeight();
+
+				cursorOffset = eWidth > eHeight ? eWidth : eHeight;
 
 				// Các chiến lược thử vị trí theo thứ tự ưu tiên: Trái -> Dưới -> Phải -> Trên
 				const priorityPositions = [
