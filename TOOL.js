@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.22";
+	const VERSION = "2.2.23";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -5438,6 +5438,13 @@
 
 						var nameElement = nextProductToProcess.find(".theme-arco-table-td").eq(0).find("span");
 						var productName = nameElement.text().trim();
+
+						var activeStatus = nextProductToProcess.find(".theme-arco-table-td").eq(nextProductToProcess.find(".theme-arco-table-td").length - 1).find("button[role='switch']");
+
+						// Kiểm tra và kích hoạt khuyến mãi để thao tác
+						if(!activeStatus.attr("aria-checked"))
+							simulateReactEvent(activeStatus, "click");
+
 						boxLogging(`Đang xử lý sản phẩm: "${productName}"`, [`${productName}`], ["cyan"]);
 
 						var currentPrice = nextProductToProcess.find(".theme-arco-table-td").eq(1).find("span p");
@@ -5453,16 +5460,19 @@
 								gia = gia.replace(/[,.₫]/g, '');
 								gia = tachGia(gia).giaDuoi;
 
+								promotionPrice.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
+
 								if (parseInt(gia) == 0) {
 									boxLogging(`Sản phẩm "${productName}" có giá bằng 0. Bỏ qua.`, [`${productName}`], ["yellow"]);
 									consecutiveSkippedProducts = 0; // Reset đếm khi bỏ qua vì giá 0
+
+									// Tắt khuyến mãi cho phân loại không có giá đuôi
+									simulateReactEvent(activeStatus, "click");
 									// await delay(50);
 								} else {
 									// Tương tác UI và chờ đợi
 									simulateReactEvent(promotionPrice, "focus");
 									// await delay(300);
-
-									promotionPrice.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
 									// await delay(500);
 
 									// simulateReactInput(promotionPrice, gia, 50);
@@ -6838,7 +6848,7 @@
 
 					boxLogging(`Đang thêm ảnh mới cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy])...`, [`${skuToProcess}`], ["blue"]);
 
-					$(imgInputTiktok).focus();
+					$(nameInputForVariant).get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });;
 					
 					imgInputTiktok.files = dt.files; // Gán file vào input
 
