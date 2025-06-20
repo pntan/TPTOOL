@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.24";
+	const VERSION = "2.2.25";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -2089,18 +2089,18 @@
 						left: calc(100% - 7%);
 						top: calc(100% - 20%);
 						width: auto;
-						height: auto;
-						aspect-ratio: 1 / 1;
-						border-radius: 100px;
-						background: rgba(255, 255, 255, 0.6);
-						box-shadow: -5px 5px 10px #000;
+						height: 5vh;
+						aspect-ratio: 16 / 9;
+						// border-radius: 10px;
+						// background: rgba(255, 255, 255, 0.6);
+						// box-shadow: -5px 5px 10px #000;
 						padding: 0.5vw 0.5vw;
 						display: flex;
 						align-items: center;
 						justify-content: center;
 						font-size: 1.5rem;
 						font-weight: 700;
-						opacity: 0.6;
+						// opacity: 0.6;
 						display: flex;
 					}
 
@@ -2115,23 +2115,25 @@
 
 					.eye-toggle {
 						position: relative;
-						width: 40px; /* Tăng kích thước để có không gian cho mí mắt */
-						height: 25px; /* Tăng chiều cao để mắt trông tự nhiên hơn */
+						width: 100%; /* Tăng kích thước để có không gian cho mí mắt */
+						height: 100%; /* Tăng chiều cao để mắt trông tự nhiên hơn */
 						cursor: pointer;
 						overflow: hidden; /* Quan trọng để ẩn phần mắt bị che bởi mí */
 						display: flex;
 						justify-content: center;
 						align-items: center;
-						border-radius: 50%; /* Giúp định hình mắt ban đầu */
+						border-radius: 100%; /* Giúp định hình mắt ban đầu */
 						box-shadow: 0 0 0 2px #333; /* Viền mắt */
 						background-color: #f0f0f0; /* Màu nền cho lòng trắng mắt, nếu cần */
+						transition: 0.5s;
 					}
 
 					/* Con ngươi */
 					.eye-toggle .pupil {
 						position: absolute;
-						width: 20px; /* Kích thước tròng đen */
-						height: 20px;
+						width: auto; /* Kích thước tròng đen */
+						height: 80%;
+						aspect-ratio: 1 / 1;
 						background-color: #333;
 						border-radius: 50%;
 						transform: scale(1);
@@ -2181,6 +2183,10 @@
 					}
 
 					/* Trạng thái ẩn (mắt nhắm) */
+					.eye-toggle.hidden{
+						height: 0;
+					}
+
 					.eye-toggle.hidden .pupil {
 						transform: scale(0); /* Con ngươi ẩn dần */
 						opacity: 0;
