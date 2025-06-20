@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.23";
+	const VERSION = "2.2.24";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -132,6 +132,7 @@
 		"https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js", // ZIP FILE
 		"https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js", // SAVE FILE
 		"https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js", // BOOTSTRAP
+		"https://kit.fontawesome.com/e538a919ef.js", // Fontawesome
 		"https://cdn.socket.io/4.8.1/socket.io.min.js", // SOCKET IO
 	];
 
@@ -145,8 +146,9 @@
 		if (createUI)
 			return;
 		createUI = true;
+
 		createLayout($("body"));
-		
+
 		applyNonce();
 
 		// Kết nối máy chủ
@@ -204,6 +206,7 @@
 			// "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
 			// // --- SAPO
 			"lienKetSKUSapo": lienKetSKUSapo,
+			"hienThiThemDSSapo": hienThiThemDSSapo,
 			// "kiemTraTonSapo": kiemTraTonSapo,
 			// // -- LAZADA
 			"giaDuoiLazada": giaDuoiLazada,
@@ -1541,6 +1544,11 @@
 				$("#tab-function optgroup[label='Lazada']").show(); // Hiển thị optgroup Lazada
 			}else if(host.includes("sapo")){
 				$("#tab-function optgroup[label='Sapo']").show(); // Hiển thị optgroup Sapo
+
+				// Tự nhấn hiển thị thêm
+				waitForElement($("body"), ".product-list-container .product-item-wrapper .show-more button", (el) => {
+					simulateReactEvent($(el), "click");
+				}, {once: true})
 			}
 		}
 
@@ -1763,7 +1771,12 @@
 				<div id="toast-container"></div>
 
 				<div class="tp-container tp-button-toggle">
-					<p>ChuẩnMua</p>
+					<div class="eye-toggle" id="myEyeToggle">
+						<div class="pupil"></div>
+						<div class="slash"></div>
+						<div class="eyelid top"></div>
+						<div class="eyelid bottom"></div>
+					</div>
 				</div>
 
 				<div id="custom-context-menu" style="display:none; position:absolute; z-index:9999;">
@@ -1846,6 +1859,7 @@
 
 							<!-- Sapo -->
 							<optgroup label="Sapo">
+								<option data-func="hienThiThemDSSapo">Hiển Thị Thêm Danh Sách</option>
 								<option data-func="lienKetSKUSapo" data-layout="lienKetSKUSapoLayout">Liên Kết SKU</option>
 								<option disabled data-func="kiemTraTonSapo" data-layout="kiemTraTonSapoLayout">Kiểm Tra Tồn</option>
 							</optgroup>
@@ -2087,7 +2101,7 @@
 						font-size: 1.5rem;
 						font-weight: 700;
 						opacity: 0.6;
-						display: none;
+						display: flex;
 					}
 
 					.tp-button-toggle:hover{
@@ -2095,9 +2109,98 @@
 					}
 
 					.tp-button-toggle.active{
-						background: lightgreen;
 						color: #000;
 						opacity: 1;
+					}
+
+					.eye-toggle {
+						position: relative;
+						width: 40px; /* Tăng kích thước để có không gian cho mí mắt */
+						height: 25px; /* Tăng chiều cao để mắt trông tự nhiên hơn */
+						cursor: pointer;
+						overflow: hidden; /* Quan trọng để ẩn phần mắt bị che bởi mí */
+						display: flex;
+						justify-content: center;
+						align-items: center;
+						border-radius: 50%; /* Giúp định hình mắt ban đầu */
+						box-shadow: 0 0 0 2px #333; /* Viền mắt */
+						background-color: #f0f0f0; /* Màu nền cho lòng trắng mắt, nếu cần */
+					}
+
+					/* Con ngươi */
+					.eye-toggle .pupil {
+						position: absolute;
+						width: 20px; /* Kích thước tròng đen */
+						height: 20px;
+						background-color: #333;
+						border-radius: 50%;
+						transform: scale(1);
+						opacity: 1;
+						transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+						z-index: 2; /* Đảm bảo con ngươi nằm trên mí mắt */
+					}
+
+					/* Đường gạch chéo khi ẩn */
+					.eye-toggle .slash {
+						position: absolute;
+						width: 90%; /* Chiều dài đường gạch chéo */
+						height: 3px;
+						background-color: #333;
+						transform: rotate(45deg) scaleX(0); /* Ban đầu ẩn */
+						transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+						opacity: 0;
+						z-index: 3; /* Nằm trên cùng */
+					}
+
+					/* Các mí mắt trên và dưới */
+					.eye-toggle .eyelid {
+						position: absolute;
+						width: 100%;
+						height: 50%; /* Mỗi mí chiếm nửa chiều cao */
+						background-color: white; /* Màu nền của mí mắt, trùng với nền của khu vực chứa mắt */
+						transition: transform 0.3s ease-in-out, border-radius 0.3s ease-in-out;
+						z-index: 1; /* Nằm trên con ngươi nhưng dưới đường gạch chéo */
+					}
+
+					.eye-toggle .eyelid.top {
+						top: 0;
+						left: 0;
+						transform-origin: bottom center; /* Quay quanh cạnh dưới */
+						transform: translateY(-5px) rotateX(0deg); /* Đẩy lên 1 chút khi mở */
+						border-bottom-left-radius: 60% 30px; /* Điều chỉnh độ cong, giá trị thứ 2 là bán kính y */
+						border-bottom-right-radius: 60% 30px;
+					}
+
+					.eye-toggle .eyelid.bottom {
+						bottom: 0;
+						left: 0;
+						transform-origin: top center; /* Quay quanh cạnh trên */
+						transform: translateY(5px) rotateX(0deg); /* Đẩy xuống 1 chút khi mở */
+						border-top-left-radius: 60% 30px; /* Điều chỉnh độ cong */
+						border-top-right-radius: 60% 30px;
+					}
+
+					/* Trạng thái ẩn (mắt nhắm) */
+					.eye-toggle.hidden .pupil {
+						transform: scale(0); /* Con ngươi ẩn dần */
+						opacity: 0;
+					}
+
+					.eye-toggle.hidden .slash {
+						transform: rotate(45deg) scaleX(1); /* Gạch chéo hiện ra */
+						opacity: 1;
+					}
+
+					.eye-toggle.hidden .eyelid.top {
+						transform: translateY(0px) rotateX(-90deg); /* Về vị trí giữa và xoay nhắm */
+						border-bottom-left-radius: 0; /* Thẳng ra khi nhắm */
+						border-bottom-right-radius: 0;
+					}
+
+					.eye-toggle.hidden .eyelid.bottom {
+						transform: translateY(0px) rotateX(90deg); /* Về vị trí giữa và xoay nhắm */
+						border-top-left-radius: 0; /* Thẳng ra khi nhắm */
+						border-top-right-radius: 0;
 					}
 
 					.tp-content{
@@ -2117,11 +2220,11 @@
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
-						// Ẩn hiện giao diện chính
-						display: flex;
+						// Ẩn hiện giao diện chính;
+						display: none;
 						flex-direction: column;
-						opacity: 0.05;
-						transition: opacity 0.3s ease;
+						//opacity: 1;
+						//transition: opacity 0.3s ease;
 					}
 
 					.tp-content:hover{
@@ -2388,24 +2491,24 @@
 			`))
 
 			// Context menu
-			$(document).on("contextmenu", (e) => {
-				var ignoreTags = ["img", "a", "input", "textarea", "button", "select"];
-				var isIgnored = ignoreTags.includes(e.target.tagName.toLowerCase());
+			// $(document).on("contextmenu", (e) => {
+			// 	var ignoreTags = ["img", "a", "input", "textarea", "button", "select"];
+			// 	var isIgnored = ignoreTags.includes(e.target.tagName.toLowerCase());
 
-				// Nếu không giữ Ctrl hoặc đang nhấn vào thẻ đặc biệt thì cho context mặc định
-				if (!e.ctrlKey || isIgnored) return true;
+			// 	// Nếu không giữ Ctrl hoặc đang nhấn vào thẻ đặc biệt thì cho context mặc định
+			// 	if (!e.ctrlKey || isIgnored) return true;
 
-				e.preventDefault();
+			// 	e.preventDefault();
 
-				var offset = 10;
+			// 	var offset = 10;
 
-				$("#custom-context-menu")
-				.css({
-					top: e.pageY + offset + "px",
-					left: e.pageX + offset + "px"
-				})
-				.fadeIn(100);
-			});
+			// 	$("#custom-context-menu")
+			// 	.css({
+			// 		top: e.pageY + offset + "px",
+			// 		left: e.pageX + offset + "px"
+			// 	})
+			// 	.fadeIn(100);
+			// });
 
 			$(document).on("click", () => {
 				$("#custom-context-menu").fadeOut(100);
@@ -2574,12 +2677,27 @@
 					$(".tp-container.tp-content").css("display", "none");
 					$(this).removeClass("active");
 					boxAlert("Ẩn Giao Diện");
+					$(this).find("svg").remove().append($(`<i class="fa-solid fa-eye"></i>`));
 				}else{
 					$(".tp-container.tp-content").css("display", "block");
 					$(this).addClass("active");
 					boxAlert("Hiện Giao Diện");
-				}
+					$(this).find("svg").remove().append($(`<i class="fa-solid fa-eye-slash"></i>`));
+				}				
 			});
+
+			const eyeToggle = $('.tp-container.tp-button-toggle');
+			if (eyeToggle.length) {
+				eyeToggle.on('click', function() {
+					$("#myEyeToggle").toggleClass('hidden');
+					
+					if ($("#myEyeToggle").hasClass('hidden')) {
+						console.log('Mắt đang ẩn');
+					} else {
+						console.log('Mắt đang hiện');
+					}
+				});
+			}
 
 			// Chọn chức năng cho sàn
 			$("select#functionSelect").on("change", function(){
@@ -6639,7 +6757,7 @@
 		}
 
 		function lienKetSKUSapo(){
-			boxAlert("LIENKETSKUSAPO");
+			boxAlert("LIÊN KẾT SKU SAPO");
 			var excuse = {
 				moRongDanhSach: function() {
 					var box = $(".product-list-container .product-item-wrapper");
@@ -6940,6 +7058,15 @@
 			});
 
 			boxToast(`Đã mở ${linkList.length} link`, "success");
+		}
+
+		// Hiển thị thêm danh sách
+		function hienThiThemDSSapo(){
+			var buttonShowMore = $(".product-list-container .product-item-wrapper .show-more button");
+
+			console.log(buttonShowMore);
+			
+			simulateReactEvent(buttonShowMore, "click");
 		}
 
 		// Chat với AI
