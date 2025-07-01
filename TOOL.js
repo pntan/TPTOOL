@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.25";
+	const VERSION = "2.2.26";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -202,6 +202,8 @@
 			"themPhanLoaiTiktok": themPhanLoaiTiktok,
 			"themHinhTheoSKUTiktok": themHinhTheoSKUTiktok,
 			"layIDSanPhamTiktok": layIDSanPhamTiktok,
+			"xoaPhanLoaiTiktok": xoaPhanLoaiTiktok,
+			"flashSaleTiktok": flashSaleTiktok,
 			// "tgFlashSaleTiktok": tgFlashSaleTiktok,
 			// "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
 			// // --- SAPO
@@ -211,10 +213,13 @@
 			// // -- LAZADA
 			"giaDuoiLazada": giaDuoiLazada,
 			"themPhanLoaiLazada": themPhanLoaiLazada,
+			"khoiPhucSanPhamLazada": khoiPhucSanPhamLazada,
+			"themHinhTheoSKULazada": themHinhTheoSKULazada,
 			// "themGiaTheoSKULazada": themGiaTheoSKULazada,
 			// "ktraGiaChuongTrinhKMLazada": ktraGiaChuongTrinhKMLazada,
 			// //-- KHÁC
 			"splitExcelFile": splitExcelFile,
+			"mergeExcelFile": mergeExcelFile,
 			"compareVoucher": compareVoucher,
 			"moLink": moLink,
 		};
@@ -1788,7 +1793,6 @@
 
 				<div class="tp-container tp-content">
 					<div class="program-title">
-						<p>Công Cụ Hỗ Trợ</p>
 						<p>Ver ${VERSION}</p>
 						<p id="server-status">OFFLINE</p>
 					</div>
@@ -1796,6 +1800,7 @@
 					<div class="program-log">
 						<pre class="logging"></pre>
 					</div>
+					<p id="clear-log-button" style="text-align: right; font-size: 0.8em; color: rgb(129, 186, 255)">Làm Sạch Log</p>
 
 					<div class="program-tab">
 						<div class="tab-title">
@@ -1840,10 +1845,12 @@
 							<!-- TikTok -->
 							<optgroup label="TikTok">
 								<option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
+								<option data-func="flashSaleTiktok">Flash Sale</option>
 								<option data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chép Chương Trình Flash Sale</option>
 								<option data-func="kiemTraMaPhanLoaiTiktok">Hiển Thị Mã Phân Loại</option>
 								<option data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
 								<option data-func="themPhanLoaiTiktok" data-layout="themPhanLoaiTikTokLayout">Thêm Phân Loại</option>
+								<option data-func="xoaPhanLoaiTiktok" data-layout="xoaPhanLoaiTiktokLayout">Xóa Phân Loại</option>
 								<option data-func="themHinhTheoSKUTiktok" data-layout="themHinhTheoSKUTiktokLayout">Sửa Hình Theo SKU</option>
 								<option data-func="layIDSanPhamTiktok" data-layout="layIDSanPhamTiktokLayout">Lấy ID Sản Phẩm</option>
 								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
@@ -1852,14 +1859,16 @@
 							<!-- Lazada -->
 							<optgroup label="Lazada">
 								<option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
+								<option data-func="khoiPhucSanPhamLazada">Khôi Phục Sản Phẩm Đã Xóa</option>
 								<option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
 								<option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
+								<option data-func="themHinhTheoSKULazada" data-layout="themHinhTheoSKULazadaLayout">Sửa Hình Theo SKU</option>
 								<option disabled data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
 							</optgroup>
 
 							<!-- Sapo -->
 							<optgroup label="Sapo">
-								<option data-func="hienThiThemDSSapo">Hiển Thị Thêm Danh Sách</option>
+								<option data-func="hienThiThemDSSapo">Hiển Thị Thêm Danh Sách Sản Phẩm Sàn</option>
 								<option data-func="lienKetSKUSapo" data-layout="lienKetSKUSapoLayout">Liên Kết SKU</option>
 								<option disabled data-func="kiemTraTonSapo" data-layout="kiemTraTonSapoLayout">Kiểm Tra Tồn</option>
 							</optgroup>
@@ -1867,6 +1876,7 @@
 							<!-- Khác -->
 							<optgroup label="Khác">
 								<option data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
+								<option data-func="mergeExcelFile" data-layout="mergeExcelFileLayout">Gộp File Excel</option>
 								<option data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
 								<option data-func="moLink" data-layout="moLinkLayout">Mở Link Hàng Loạt</option>
 								<option data-func="tinhGiaBan" data-layout="tinhGiaBanLayout">Tính Giá Bán</option>
@@ -2227,7 +2237,7 @@
 						flex-grow: 1;
 						overflow: hidden;
 						// Ẩn hiện giao diện chính;
-						display: none;
+						display: flex;
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
@@ -2254,27 +2264,30 @@
 						margin-bottom: 1vh;
 					}
 
+					// .tp-content .program-title p:nth-child(1){
+					// 	font-size: 1.6em;
+					// 	font-weight: bold;
+
+					// 	color: #555;
+					// }
+
+					// .tp-content .program-title p:nth-child(2){
+					// 	font-size: 0.9em;
+					// }
+
 					.tp-content .program-title p:nth-child(1){
-						font-size: 1.6em;
-						font-weight: bold;
-
-						color: #555;
+						font-size: 0.5em;
 					}
-
 					.tp-content .program-title p:nth-child(2){
-						font-size: 0.9em;
-					}
-
-					.tp-content .program-title p:nth-child(3){
 						font-size: 1.1em;
 						color: #000;
 					}
 
-					.tp-content .program-title p:nth-child(3).online{
+					.tp-content .program-title p:nth-child(2).online{
 						color: lightgreen;
 					}
 
-					.tp-content .program-title p:nth-child(3).connect{
+					.tp-content .program-title p:nth-child(2).connect{
 						color: #f7ad00;
 					}
 
@@ -2369,6 +2382,92 @@
 
 					.tp-content .layout-future * {
 						margin-bottom: 10px;
+					}
+
+					.switch-wrapper {
+						display: flex;
+						align-items: center;
+						gap: 10px;
+						font-family: sans-serif;
+					}
+
+					/* Label: "Thêm" / "Xóa" */
+					.switch-label {
+						font-size: 14px;
+						font-weight: bold;
+						color: #444;
+						width: 50px; /* Chiều rộng cố định cho label */
+						text-align: center;
+					}
+
+					/* Container chính của switch */
+					.switch {
+						position: relative;
+						/* Dùng kích thước bạn đã đặt trong JS */
+						width: 60px;
+						height: 28px;
+						/* Có thể thêm cursor: pointer; ở đây hoặc ở .slider */
+						cursor: pointer; /* Thêm cursor pointer cho toàn bộ vùng switch */
+					}
+
+					/* Ẩn input */
+					.switch input {
+						opacity: 0;
+						width: 0;
+						height: 0;
+						position: absolute; /* Đảm bảo nó không chiếm không gian */
+					}
+
+					/* Track của switch (thanh nền) */
+					.slider {
+						position: relative; /* Giữ relative để handle định vị absolute bên trong */
+						background-color: #ccc;
+						border-radius: 34px; /* Làm tròn theo chiều cao (28px) -> radius 14px, 34px là tròn hoàn toàn nếu width = 34*2 */
+						width: 100%; /* Chiếm toàn bộ chiều rộng của .switch */
+						height: 100%; /* Chiếm toàn bộ chiều cao của .switch */
+						transition: background-color 0.3s ease-in-out; /* Thêm ease-in-out cho mượt hơn */
+						box-sizing: border-box; /* Đảm bảo padding/border không làm tăng kích thước */
+						/* Nếu bạn muốn viền như hình ảnh lỗi, hãy thêm border ở đây. */
+						/* border: 1px solid #007bff; */ /* Ví dụ, nếu bạn muốn viền xanh dương cố định */
+					}
+
+					/* Nút tròn gạt (handle) */
+					.slider-handle {
+						position: absolute;
+						height: 22px; /* Kích thước nút kéo */
+						width: 22px; /* Kích thước nút kéo */
+						left: 3px; /* Vị trí ban đầu từ bên trái của slider */
+						top: 3px; /* Vị trí ban đầu từ trên xuống của slider */
+						background-color: white;
+						border-radius: 50%;
+						transition: left 0.3s ease-in-out; /* Thay đổi transition thành left thay vì transform */
+						box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+					}
+
+					/* Trạng thái BẬT của switch */
+					/* Khi input được checked, thay đổi background của slider */
+					.switch input:checked + .slider {
+						background-color: #007bff; /* Màu xanh khi bật */
+					}
+
+					/* Di chuyển nút tròn gạt khi switch BẬT */
+					/* Khi input được checked, tìm .slider-handle bên trong .slider */
+					.switch input:checked + .slider .slider-handle {
+						/* Tính toán vị trí mới:
+						Tổng chiều rộng của slider (60px)
+						Trừ đi chiều rộng của handle (22px)
+						Trừ đi khoảng cách left ban đầu (3px)
+						= 60 - 22 - 3 = 35px
+						*/
+						left: 35px;
+						/* Hoặc dùng calc() để linh hoạt hơn:
+						left: calc(100% - 22px - 3px);
+						*/
+					}
+
+					/* Tùy chỉnh làm tròn cho slider nếu bạn thêm class .round vào HTML */
+					.slider.round {
+						border-radius: 14px; /* Để khớp với height 28px, radius 14px sẽ là hình elip tròn */
 					}
 
 					.tp-content .layout-future input,
@@ -2705,6 +2804,12 @@
 				});
 			}
 
+			// Xóa log
+			$("#clear-log-button").on("click", function(){
+				$(".program-log pre.logging").empty();
+				boxToast("Đã xóa log", "success");
+			});
+
 			// Chọn chức năng cho sàn
 			$("select#functionSelect").on("change", function(){
 				var option = $(this).find("option:selected");
@@ -2875,6 +2980,24 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "xoaPhanLoaiTiktokLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<textarea id="data" placeholder="Nhập SKU cần xóa, mỗi SKU là một dòng"></textarea>
+					</div>
+				`))
+				setEventXoaPhanLoaiTiktok();
+				break;
+			case "themHinhTheoSKULazadaLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<input type="file" webkitdirectory directory multiple />
+						<p>Tải lên thư mục có chứa hình ảnh, không cần tải lên từng hình</p>
+						<p style="font-weight:700; color: crimson">*Tên hình ảnh phải là SKU của sản phẩm</p>
+					</div>
+				`))
+				setEventThemHinhTheoSKuLazada();
+				break;
 			case "moLinkLayout":
 				content.append($(`
 					<div class="layout-tab">
@@ -2925,13 +3048,15 @@
 				content.append($(`
 					<div class="layout-tab">
 						<p>Cách liên kết SKU</p>
-						<div class="box">
-							<label for="link-type-1">Liên Kết Với x0</label>
-							<input type="radio" name="link-type" id="link-type-1" value="1" checked />
-						</div>
-						<div class="box">
-							<label for="link-type-2">Liên Kết Với SKU hiện tại</label>
-							<input type="radio" name="link-type" id="link-type-2" value="2" />
+						<div class="switch-wrapper">
+							<span class="switch-label">Tự Động</span>
+							<label class="switch">
+								<input type="checkbox" id="toggle-switch" checked />
+								<div class="slider">
+									<div class="slider-handle"></div>
+								</div>
+							</label>
+							<span class="switch-label">Thủ Công</span>
 						</div>
 					</div>
 				`))
@@ -3012,14 +3137,14 @@
 				content.append($(`
 					<div class="layout-tab">
 						<div class="switch-wrapper">
-						<span class="switch-label">Xóa</span>
-						<label class="switch">
-							<input type="checkbox" id="toggle-switch">
-							<div class="slider">
-								<div class="slider-handle"></div>
-							</div>
-						</label>
-						<span class="switch-label">Thêm</span>
+							<span class="switch-label">Xóa</span>
+							<label class="switch">
+								<input type="checkbox" id="toggle-switch" />
+								<div class="slider">
+									<div class="slider-handle"></div>
+								</div>
+							</label>
+							<span class="switch-label">Thêm</span>
 						</div>
 						<div class="button-control-promotion" style="display: flex; gap: 1vw;">
 							<button style="width: 100%" id="prev">Sản Phẩm Trước</button>
@@ -3453,6 +3578,19 @@
 					`));
 					// setEventKiemTraTonSapo();
 					break;
+				case "mergeExcelFileLayout":
+					content.append($(`
+					<div class="layout-tab">
+						<input type="file" id="mergeFileInput" multiple accept=".xlsx, .xls">
+						<br><br>
+						<label>Dòng header:</label>
+						<input type="number" id="headerRowsCount" value="1" min="0">
+						<br />
+						<label>Số dòng mô tả:</label>
+						<input type="number" id="descriptionRowsCount" value="100" min="1">
+					</div>
+					`));
+					break;
 				case "splitExcelFileLayout":
 					content.append($(`
 					<div class="layout-tab">
@@ -3706,17 +3844,46 @@
 
 		// Cập nhật giá đuôi sàn cam
 		function giaDuoiShopee(){
+			boxLogging("Đang cập nhật giá đuôi cho sản phẩm");
 			var box = $(".discount-item-component");
 
-			$.each(box, (index, value) => {
-				var parent = box.eq(index).find(".discount-edit-item-model-list .discount-edit-item-model-component");
-				$.each(parent, (index, value) => {
-					var name = parent.eq(index).find(".item-content.item-variation .ellipsis-content.single");
-					var currentPrice = parent.eq(index).find(".item-content.item-price");
-					var price = parent.eq(index).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.currency-input input");
-					var percent = parent.eq(index).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.discount-input input");
-					var stock = parent.eq(index).find(".item-content.item-stock");
-					var switcher = parent.eq(index).find(".item-content.item-enable-disable .eds-switch.eds-switch--normal");
+			var indexBox = 0;
+
+			function nextBox(){
+				if(indexBox >= box.length){
+					boxLogging("Đã cập nhật giá đuôi cho tất cả sản phẩm");
+					return;
+				}
+
+				var minPrice = Infinity;
+				var maxPrice = -Infinity;
+
+				var parent = box.eq(indexBox).find(".discount-edit-item-model-list .discount-edit-item-model-component");
+
+				var checkBox = box.eq(indexBox).find(".discount-item-header .header-left-area .header-left-top input");
+
+				if(!checkBox.prop("checked")){
+					// Nếu sản phẩm chưa được chọn
+					indexBox++;
+					nextBox();
+					return;
+				}
+
+				var indexParent = 0;
+
+				async function nextParent(){
+					if(indexParent >= parent.length){
+						boxLogging(`Đã cập nhật giá đuôi`);
+						boxToast(`Đã cập nhật giá đuôi`, "success");
+						return;
+					}
+
+					var name = parent.eq(indexParent).find(".item-content.item-variation .ellipsis-content.single");
+					var currentPrice = parent.eq(indexParent).find(".item-content.item-price");
+					var price = parent.eq(indexParent).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.currency-input input");
+					var percent = parent.eq(indexParent).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.discount-input input");
+					var stock = parent.eq(indexParent).find(".item-content.item-stock");
+					var switcher = parent.eq(indexParent).find(".item-content.item-enable-disable .eds-switch.eds-switch--normal");
 
 
 					var gia = currentPrice.text().replace("₫", "");
@@ -3725,24 +3892,53 @@
 					var giaKM = tachGia(gia).giaDuoi;
 
 					if(!switcher.hasClass("eds-switch--disabled")){
+						// Những sản phẩm không bị disabled
 						if(!switcher.hasClass("eds-switch--open")){
-							parent.eq(index).css({
+							// Những sản phẩm chưa được bật
+							parent.eq(indexParent).css({
 								"background": "orange",
 								"color": "#fff"
 							});
+							// Bật công tắc
 							switcher.trigger("click").click();
 							boxLogging(`Sản phẩm ${name.text()} vừa được Bật`, [`${name.text()}`, "Bật"], ["orange", "green"]);
-						}
 
+							await delay(500);
+						}
+						
 						if(switcher.hasClass("eds-switch--open")){
+							// Những sản phẩm đã bật
 							if(parseInt(giaKM) <= 0){
-								parent.eq(index).css({
+								// Những sản phẩm không có giá đuôi
+								parent.eq(indexParent).css({
 									"background": "crimson",
 									"color": "#fff"
 								});
 								boxLogging(`Sản phẩm [copy]${name.text()}[/copy] không có giá đuôi`, [`${name.text()}`], ["crimson"]);
 							}else{
+								// Những sản phẩm có giá đuôi
+								if(minPrice > parseInt(giaKM)){
+									minPrice = parseInt(giaKM);
+									indexParent = 0;
+									nextParent();
+									return;
+								}
+
+								var maxAccept = minPrice * 5;
+
+								if(parseInt(tachGia(gia).gia) > parseInt(maxAccept)){
+									boxLogging(`Sản phẩm [copy]${name.text()}[/copy] có giá quá cao, không thể cập nhật giá đuôi`, [`${name.text()}`], ["pink"]);
+									parent.eq(indexParent).css({
+										"background": "pink",
+										"color": "#fff"
+									});
+									indexParent++;
+									nextParent();
+									return;
+								}
+
 								simulateClearing($(price), 0, () => {
+									// Ghi giá đuôi vào ô giá
 									$(price).val(giaKM);
 									simulateReactEvent($(price), "input");
 								})
@@ -3754,10 +3950,18 @@
 							}
 						}
 					}
-				});
-			});
 
-			boxToast("Hoàn thành cập nhật giá đuôi", "success")
+					indexParent++;
+					nextParent();
+				};
+
+				nextParent();
+
+				indexBox++;
+				nextBox();
+			};
+
+			nextBox();
 		}
 
 		// Tính giá bán sàn cam
@@ -5369,6 +5573,427 @@
 			setTimeout(moveToNextProduct,3000);
 		}
 
+		// Gộp file excel
+		async function mergeExcelFile() {
+			const input = document.getElementById("mergeFileInput");
+			const descriptionRowsCount = parseInt(document.getElementById("descriptionRowsCount").value);
+			const headerRowsCount = 1;
+
+			if (!input.files.length || input.files.length < 2) {
+				boxToast("Vui lòng chọn từ 2 file Excel trở lên để gộp.", "warning");
+				return;
+			}
+
+			const actualHeaderRowIndex = descriptionRowsCount + 1;
+			const startDataRowIndex = actualHeaderRowIndex + headerRowsCount;
+
+			const allUniqueHeaders = new Map();
+			let finalColumnOrder = [];
+			const processedHeaders = new Set();
+			const mergedColumnWidths = new Map();
+			const mergedMerges = new Set();
+			const mergedDataRowsMap = new Map();
+			const mergedAuxiliaryHeaderRows = Array.from({ length: descriptionRowsCount }, () => []);
+			const finalHeaderMap = new Map();
+
+
+			// --- BƯỚC 1: Xử lý file đầu tiên để thiết lập cấu trúc cột và header phụ ban đầu ---
+			let firstFile = input.files[0];
+			let firstBuffer = null;
+			let firstWorkbook = null;
+			let firstOriginalSheet = null;
+
+			try {
+				firstBuffer = await firstFile.arrayBuffer();
+				firstWorkbook = new ExcelJS.Workbook();
+				await firstWorkbook.xlsx.load(firstBuffer);
+				firstOriginalSheet = firstWorkbook.worksheets[0];
+
+				if (!firstOriginalSheet) {
+					boxToast(`File ${firstFile.name} không có sheet nào. Vui lòng kiểm tra lại.`, "error");
+					return;
+				}
+
+				for (let r = 1; r <= descriptionRowsCount; r++) {
+					const rowValues = firstOriginalSheet.getRow(r).values;
+					if (rowValues) {
+						mergedAuxiliaryHeaderRows[r - 1] = rowValues.slice(1);
+					} else {
+						mergedAuxiliaryHeaderRows[r - 1] = [];
+					}
+				}
+
+				const headerRowValues = firstOriginalSheet.getRow(actualHeaderRowIndex).values;
+				const firstFileDataHeaders = headerRowValues ? headerRowValues.slice(1).map(h => String(h || '').trim()) : [];
+
+				firstFileDataHeaders.forEach(headerText => {
+					if (headerText) {
+						const lowerCaseHeader = headerText.toLowerCase();
+						allUniqueHeaders.set(lowerCaseHeader, headerText);
+						if (!processedHeaders.has(lowerCaseHeader)) {
+							finalColumnOrder.push(headerText);
+							processedHeaders.add(lowerCaseHeader);
+						}
+					}
+				});
+
+				finalColumnOrder.forEach((headerText, index) => {
+					finalHeaderMap.set(headerText.toLowerCase(), index);
+				});
+
+				const firstFileHeaderRow = firstOriginalSheet.getRow(actualHeaderRowIndex);
+				firstOriginalSheet.columns.forEach((column, colIndex) => {
+					const cellColIndex = colIndex + 1;
+					if (column.width) {
+						const headerCell = firstFileHeaderRow.getCell(cellColIndex);
+						const headerText = String(headerCell.value || '').trim();
+						if (headerText) {
+							const lowerCaseHeader = headerText.toLowerCase();
+							mergedColumnWidths.set(lowerCaseHeader, column.width);
+						}
+					}
+				});
+
+				if (firstOriginalSheet._merges) {
+					Object.keys(firstOriginalSheet._merges).forEach(mergeRange => {
+						const [startRow, startCol, endRow, endCol] = parseMergeRange(mergeRange);
+						if (startRow >= 1 && startRow <= descriptionRowsCount && endRow <= descriptionRowsCount) {
+							mergedMerges.add(mergeRange);
+						}
+					});
+				}
+
+				for (let r = startDataRowIndex; r <= firstOriginalSheet.rowCount; r++) {
+					const rowValues = firstOriginalSheet.getRow(r).values;
+					const originalDataRowValues = rowValues ? rowValues.slice(1) : [];
+
+					const tempMappedRowValues = new Array(finalColumnOrder.length).fill(undefined);
+					originalDataRowValues.forEach((cellValue, originalIndex) => {
+						const headerText = firstFileDataHeaders[originalIndex];
+						if (headerText) {
+							const finalIndex = finalHeaderMap.get(headerText.toLowerCase());
+							if (finalIndex !== undefined) {
+								tempMappedRowValues[finalIndex] = cellValue;
+							}
+						}
+					});
+
+					const primaryKeyColIndex = 0;
+					const primaryKey = normalizeCellValue(tempMappedRowValues[primaryKeyColIndex]);
+
+					if (primaryKey === '') {
+						if (!mergedDataRowsMap.has('__NO_PRIMARY_KEY__')) {
+							mergedDataRowsMap.set('__NO_PRIMARY_KEY__', []);
+						}
+						mergedDataRowsMap.get('__NO_PRIMARY_KEY__').push([...tempMappedRowValues]);
+					} else {
+						if (!mergedDataRowsMap.has(primaryKey)) {
+							mergedDataRowsMap.set(primaryKey, []);
+						}
+						mergedDataRowsMap.get(primaryKey).push([...tempMappedRowValues]);
+					}
+				}
+			} catch (error) {
+				boxToast(`Lỗi khi đọc file đầu tiên (${firstFile.name}): ${error.message}`, "error");
+				console.error(`Error processing first file ${firstFile.name}:`, error);
+				return;
+			} finally {
+				// LOẠI BỎ firstWorkbook.destroy() VÀ ĐẢM BẢO KHÔNG CÒN THAM CHIẾU
+				if (firstWorkbook) {
+					firstWorkbook.eachSheet(sheet => firstWorkbook.removeWorksheet(sheet.id));
+					// firstWorkbook.destroy(); // <--- Dòng này đã bị xóa
+					firstWorkbook = null;
+					firstBuffer = null;
+					firstOriginalSheet = null;
+				}
+			}
+
+
+			// --- BƯỚC 2: Duyệt qua từng file còn lại và gộp dữ liệu vào các cấu trúc đã có ---
+			for (let i = 1; i < input.files.length; i++) {
+				const currentFile = input.files[i];
+				let currentBuffer = null;
+				let currentWorkbook = null;
+				let originalSheet = null;
+
+				try {
+					currentBuffer = await currentFile.arrayBuffer();
+					currentWorkbook = new ExcelJS.Workbook();
+					await currentWorkbook.xlsx.load(currentBuffer);
+					originalSheet = currentWorkbook.worksheets[0];
+
+					if (!originalSheet) {
+						console.warn(`File ${currentFile.name} không có sheet chính nào (worksheet[0]). Bỏ qua.`);
+						continue;
+					}
+
+					const headerRowValues = originalSheet.getRow(actualHeaderRowIndex).values;
+					const currentFileHeaders = headerRowValues ? headerRowValues.slice(1).map(h => String(h || '').trim()) : [];
+
+					currentFileHeaders.forEach(headerText => {
+						if (headerText) {
+							const lowerCaseHeader = headerText.toLowerCase();
+							allUniqueHeaders.set(lowerCaseHeader, headerText);
+							if (!processedHeaders.has(lowerCaseHeader)) {
+								finalColumnOrder.push(headerText);
+								processedHeaders.add(lowerCaseHeader);
+							}
+						}
+					});
+
+					finalColumnOrder.forEach((headerText, index) => {
+						finalHeaderMap.set(headerText.toLowerCase(), index);
+					});
+
+					for (let r = 1; r <= descriptionRowsCount; r++) {
+						const currentAuxRowValues = originalSheet.getRow(r).values;
+						if (!currentAuxRowValues) continue;
+
+						const trimmedAuxRowValues = currentAuxRowValues.slice(1);
+
+						let targetAuxRow = mergedAuxiliaryHeaderRows[r - 1];
+						if (!targetAuxRow) {
+							targetAuxRow = new Array(finalColumnOrder.length).fill(undefined);
+							mergedAuxiliaryHeaderRows[r - 1] = targetAuxRow;
+						} else if (targetAuxRow.length < finalColumnOrder.length) {
+							targetAuxRow = targetAuxRow.concat(new Array(finalColumnOrder.length - targetAuxRow.length).fill(undefined));
+							mergedAuxiliaryHeaderRows[r - 1] = targetAuxRow;
+						}
+
+						trimmedAuxRowValues.forEach((cellValue, originalColIndex) => {
+							const headerTextForCol = currentFileHeaders[originalColIndex];
+							if (headerTextForCol) {
+								const finalColIndexForAux = finalHeaderMap.get(headerTextForCol.toLowerCase());
+								if (finalColIndexForAux !== undefined) {
+									const existingValue = targetAuxRow[finalColIndexForAux];
+									if (existingValue === undefined || existingValue === null || String(existingValue).trim() === '' ||
+										(cellValue !== undefined && cellValue !== null && String(cellValue).trim() !== '')) {
+										targetAuxRow[finalColIndexForAux] = cellValue;
+									}
+								}
+							}
+						});
+					}
+
+					if (originalSheet._merges) {
+						Object.keys(originalSheet._merges).forEach(mergeRange => {
+							const [startRow, startCol, endRow, endCol] = parseMergeRange(mergeRange);
+							if (startRow >= 1 && startRow <= descriptionRowsCount && endRow <= descriptionRowsCount) {
+								mergedMerges.add(mergeRange);
+							}
+						});
+					}
+
+					const currentFileHeaderRow = originalSheet.getRow(actualHeaderRowIndex);
+					originalSheet.columns.forEach((column, colIndex) => {
+						const cellColIndex = colIndex + 1;
+						if (column.width) {
+							const headerCell = currentFileHeaderRow.getCell(cellColIndex);
+							const headerText = String(headerCell.value || '').trim();
+							if (headerText) {
+								const lowerCaseHeader = headerText.toLowerCase();
+								const existingWidth = mergedColumnWidths.get(lowerCaseHeader) || 0;
+								if (column.width > existingWidth) {
+									mergedColumnWidths.set(lowerCaseHeader, column.width);
+								}
+							}
+						}
+					});
+
+					for (let r = startDataRowIndex; r <= originalSheet.rowCount; r++) {
+						const rowValues = originalSheet.getRow(r).values;
+						const originalDataRowValues = rowValues ? rowValues.slice(1) : [];
+						const tempMappedRowValues = new Array(finalColumnOrder.length).fill(undefined);
+
+						originalDataRowValues.forEach((cellValue, originalIndex) => {
+							const headerText = currentFileHeaders[originalIndex];
+							if (headerText) {
+								const finalIndex = finalHeaderMap.get(headerText.toLowerCase());
+								if (finalIndex !== undefined) {
+									tempMappedRowValues[finalIndex] = cellValue;
+								}
+							}
+						});
+
+						const primaryKeyColIndex = 0;
+						const primaryKey = normalizeCellValue(tempMappedRowValues[primaryKeyColIndex]);
+
+						if (primaryKey === '') {
+							if (!mergedDataRowsMap.has('__NO_PRIMARY_KEY__')) {
+								mergedDataRowsMap.set('__NO_PRIMARY_KEY__', []);
+							}
+							mergedDataRowsMap.get('__NO_PRIMARY_KEY__').push([...tempMappedRowValues]);
+						} else {
+							let foundMatch = false;
+							const possibleMatches = mergedDataRowsMap.get(primaryKey);
+
+							if (possibleMatches && possibleMatches.length > 0) {
+								for (const existingRowReference of possibleMatches) {
+									if (isSameRecord(existingRowReference, tempMappedRowValues, finalHeaderMap, currentFileHeaders)) {
+										tempMappedRowValues.forEach((valueToCopy, finalIndex) => {
+											if (valueToCopy !== null && valueToCopy !== undefined && normalizeCellValue(valueToCopy) !== '') {
+												existingRowReference[finalIndex] = valueToCopy;
+											}
+										});
+										foundMatch = true;
+										break;
+									}
+								}
+							}
+
+							if (!foundMatch) {
+								if (!mergedDataRowsMap.has(primaryKey)) {
+									mergedDataRowsMap.set(primaryKey, []);
+								}
+								mergedDataRowsMap.get(primaryKey).push([...tempMappedRowValues]);
+							}
+						}
+					}
+				} catch (error) {
+					boxToast(`Lỗi khi đọc file ${currentFile.name}: ${error.message}`, "error");
+					console.error(`Error processing file ${currentFile.name}:`, error);
+				} finally {
+					// LOẠI BỎ currentWorkbook.destroy() VÀ ĐẢM BẢO KHÔNG CÒN THAM CHIẾU
+					if (currentWorkbook) {
+						currentWorkbook.eachSheet(sheet => currentWorkbook.removeWorksheet(sheet.id));
+						// currentWorkbook.destroy(); // <--- Dòng này đã bị xóa
+						currentWorkbook = null;
+						currentBuffer = null;
+						originalSheet = null;
+					}
+				}
+			}
+
+			// --- Giai đoạn FINALIZE: Ghi dữ liệu đã gộp vào Workbook đích ---
+			const newWorkbook = new ExcelJS.Workbook();
+			let targetSheet = newWorkbook.addWorksheet("Merged Data");
+
+			mergedAuxiliaryHeaderRows.forEach((rowValues, index) => {
+				const targetRow = targetSheet.getRow(index + 1);
+				let valuesToSet = [...rowValues];
+				if (valuesToSet.length < finalColumnOrder.length) {
+					valuesToSet = valuesToSet.concat(new Array(finalColumnOrder.length - valuesToSet.length).fill(undefined));
+				}
+				targetRow.values = [undefined, ...valuesToSet];
+			});
+
+			const targetHeaderRow = targetSheet.getRow(actualHeaderRowIndex);
+			targetHeaderRow.values = [undefined, ...finalColumnOrder];
+
+			const mergedDataRowsFinal = [];
+			mergedDataRowsMap.forEach((rows, key) => {
+				if (key !== '__NO_PRIMARY_KEY__') {
+					mergedDataRowsFinal.push(...rows);
+				}
+			});
+			if (mergedDataRowsMap.has('__NO_PRIMARY_KEY__')) {
+				mergedDataRowsFinal.push(...mergedDataRowsMap.get('__NO_PRIMARY_KEY__'));
+			}
+
+			mergedDataRowsFinal.forEach((rowValues) => {
+				targetSheet.addRow([undefined, ...rowValues]);
+			});
+
+			mergedMerges.forEach(mergeRange => {
+				try {
+					targetSheet.mergeCells(mergeRange);
+				} catch (e) {
+					console.warn(`Could not apply merge ${mergeRange} to final sheet. Error: ${e.message}`);
+				}
+			});
+
+			mergedColumnWidths.forEach((width, headerTextLower) => {
+				const colIndex = finalHeaderMap.get(headerTextLower);
+				if (colIndex !== undefined) {
+					const targetColumn = targetSheet.getColumn(colIndex + 1);
+					if (targetColumn) {
+						targetColumn.width = width;
+					}
+				}
+			});
+
+			// --- Xử lý các sheet phụ từ tất cả các file nguồn ---
+			for (let i = 0; i < input.files.length; i++) {
+				const currentFile = input.files[i];
+				let currentWorkbook = null;
+
+				try {
+					const currentBuffer = await currentFile.arrayBuffer();
+					currentWorkbook = new ExcelJS.Workbook();
+					await currentWorkbook.xlsx.load(currentBuffer);
+
+					for (let j = 1; j < currentWorkbook.worksheets.length; j++) {
+						const originalOtherSheet = currentWorkbook.worksheets[j];
+						let newSheetName = originalOtherSheet.name;
+
+						let counter = 1;
+						while (newWorkbook.worksheets.some(ws => ws.name === newSheetName)) {
+							newSheetName = `${originalOtherSheet.name}_${counter++}`;
+						}
+						if (newSheetName === "Merged Data") {
+							newSheetName = `${originalOtherSheet.name}_${currentFile.name.replace(/\.xlsx$/i, '')}_copy`;
+							let innerCounter = 1;
+							while (newWorkbook.worksheets.some(ws => ws.name === newSheetName)) {
+								newSheetName = `${originalOtherSheet.name}_${currentFile.name.replace(/\.xlsx$/i, '')}_copy${innerCounter++}`;
+							}
+						}
+
+						console.log(`Adding new sheet: ${newSheetName} from file ${currentFile.name}`);
+						const newSheet = newWorkbook.addWorksheet(newSheetName);
+
+						originalOtherSheet.eachRow({ includeEmpty: true }, (row, rowNumber) => {
+							const newRow = newSheet.getRow(rowNumber);
+							copyRow(row, newRow);
+						});
+
+						if (originalOtherSheet._merges) {
+							Object.keys(originalOtherSheet._merges).forEach(mergeRange => {
+								try {
+									newSheet.mergeCells(mergeRange);
+								} catch (e) {
+									console.warn(`Could not merge cells ${mergeRange} in new sheet (${newSheetName}). Error: ${e.message}`);
+								}
+							});
+						}
+						originalOtherSheet.columns.forEach((column, colIndex) => {
+							if (column.width) {
+								const newSheetColumn = newSheet.getColumn(colIndex + 1);
+								if (newSheetColumn) {
+									newSheetColumn.width = column.width;
+								}
+							}
+						});
+					}
+				} catch (error) {
+					console.warn(`Error processing auxiliary sheets from file ${currentFile.name}: ${error.message}`);
+				} finally {
+					// LOẠI BỎ currentWorkbook.destroy() VÀ ĐẢM BẢO KHÔNG CÒN THAM CHIẾU
+					if (currentWorkbook) {
+						currentWorkbook.eachSheet(sheet => currentWorkbook.removeWorksheet(sheet.id));
+						// currentWorkbook.destroy(); // <--- Dòng này đã bị xóa
+						currentWorkbook = null;
+					}
+				}
+			}
+
+
+			// --- Ghi workbook đã gộp ra file ---
+			try {
+				const buffer = await newWorkbook.xlsx.writeBuffer();
+				saveAs(new Blob([buffer], { type: "application/octet-stream" }), "merged_excel_file.xlsx");
+				boxToast(`Đã gộp file Excel thành công!`, "success");
+			} catch (error) {
+				boxToast(`Lỗi khi ghi file Excel: ${error.message}`, "error");
+				console.error("Error writing merged Excel file:", error);
+			} finally {
+				// LOẠI BỎ newWorkbook.destroy() VÀ ĐẢM BẢO KHÔNG CÒN THAM CHIẾU
+				if (newWorkbook) {
+					newWorkbook.eachSheet(sheet => newWorkbook.removeWorksheet(sheet.id));
+					// newWorkbook.destroy(); // <--- Dòng này đã bị xóa
+				}
+			}
+		}
+
 		// Tách file excel
 		async function splitExcelFile() {
 			var input = document.getElementById("fileInput");
@@ -5434,6 +6059,161 @@
 			});
 
 			boxToast(`Đã chia nhỏ file excel thành công`, "success");
+		}
+
+		/**
+		 * Chuyển đổi một chuỗi cột (ví dụ: "A", "AB") thành số cột (1-indexed).
+		 * Ví dụ: "A" -> 1, "Z" -> 26, "AA" -> 27.
+		 * @param {string} colStr Chuỗi chữ cái của cột.
+		 * @returns {number} Số cột (1-indexed).
+		 */
+		function decodeColumn(colStr) {
+			let col = 0;
+			for (let i = 0; i < colStr.length; i++) {
+				col = col * 26 + (colStr.charCodeAt(i) - 'A'.charCodeAt(0) + 1);
+			}
+			return col;
+		}
+
+		/**
+		 * Chuyển đổi một số cột (1-indexed) thành chuỗi chữ cái của cột.
+		 * Ví dụ: 1 -> "A", 26 -> "Z", 27 -> "AA".
+		 * @param {number} colNumber Số cột (1-indexed).
+		 * @returns {string} Chuỗi chữ cái của cột.
+		 */
+		function encodeColumn(colNumber) {
+			let result = '';
+			while (colNumber > 0) {
+				let remainder = (colNumber - 1) % 26;
+				result = String.fromCharCode(65 + remainder) + result;
+				colNumber = Math.floor((colNumber - 1) / 26);
+			}
+			return result;
+		}
+
+		/**
+		 * Chuyển đổi một địa chỉ ô Excel (ví dụ: "A1", "AB10") thành một đối tượng { row, col }.
+		 * @param {string} address Chuỗi địa chỉ ô Excel.
+		 * @returns {{row: number, col: number}} Đối tượng chứa số hàng và số cột (1-indexed).
+		 */
+		function decodeCell(address) {
+			let colPart = '';
+			let rowPart = '';
+
+			// Tách phần chữ (cột) và phần số (hàng) từ địa chỉ
+			for (let i = 0; i < address.length; i++) {
+				const char = address[i];
+				if (char >= 'A' && char <= 'Z') {
+					colPart += char;
+				} else if (char >= '0' && char <= '9') {
+					rowPart += char;
+				}
+			}
+
+			const col = decodeColumn(colPart);
+			const row = parseInt(rowPart, 10);
+
+			return { row: row, col: col };
+		}
+
+		/**
+		 * Chuyển đổi tọa độ hàng và cột thành địa chỉ ô Excel (ví dụ: 1, 1 -> "A1").
+		 * @param {number} row Số hàng (1-indexed).
+		 * @param {number} col Số cột (1-indexed).
+		 * @returns {string} Chuỗi địa chỉ ô Excel.
+		 */
+		function encodeCell(row, col) {
+			return encodeColumn(col) + row;
+		}
+
+		/**
+		 * Phân tích một chuỗi phạm vi ô Excel (ví dụ: "A1:B2") thành một mảng tọa độ số.
+		 * @param {string} range Chuỗi phạm vi ô Excel.
+		 * @returns {[number, number, number, number]} Mảng [startRow, startCol, endRow, endCol].
+		 * Trả về [0, 0, 0, 0] nếu phạm vi không hợp lệ.
+		 */
+		function parseMergeRange(range) {
+			if (typeof range !== 'string' || range.trim() === '') {
+				console.warn(`Invalid merge range input: '${range}'. Returning default coordinates.`);
+				return [0, 0, 0, 0];
+			}
+
+			const cells = range.split(':');
+
+			if (cells.length < 1 || cells[0].trim() === '') { // Thêm kiểm tra cho cells[0] rỗng
+				console.warn(`Incomplete or empty merge range: '${range}'. Returning default coordinates.`);
+				return [0, 0, 0, 0];
+			}
+
+			const startCellStr = cells[0].trim();
+			let endCellStr = startCellStr; // Mặc định endCellStr là startCellStr nếu chỉ có 1 ô
+
+			if (cells.length >= 2 && cells[1].trim() !== '') {
+				endCellStr = cells[1].trim();
+			}
+
+			const startCellCoords = decodeCell(startCellStr);
+			const endCellCoords = decodeCell(endCellStr);
+
+			return [startCellCoords.row, startCellCoords.col, endCellCoords.row, endCellCoords.col];
+		}
+
+		/**
+		 * Normalize cell value for comparison (e.g., trim strings, convert to string).
+		 * @param {*} value Cell value.
+		 * @returns {string} Normalized string value.
+		 */
+		function normalizeCellValue(value) {
+			if (value === null || value === undefined) {
+				return '';
+			}
+			if (typeof value === 'object' && value.richText) {
+				return value.richText.map(text => text.text).join('').trim();
+			}
+			return String(value).trim();
+		}
+
+		/**
+		 * So sánh hai bản ghi để xác định xem chúng có phải là cùng một bản ghi dựa trên các cột chung.
+		 * @param {Array<*>} row1 Dòng dữ liệu thứ nhất.
+		 * @param {Array<*>} row2 Dòng dữ liệu thứ hai.
+		 * @param {Map<string, number>} finalHeaderMap Bản đồ từ tên header chuẩn hóa đến index cột cuối cùng.
+		 * @param {Array<string>} currentFileHeaders Các header của file hiện tại đang được xử lý.
+		 * @returns {boolean} True nếu là cùng một bản ghi, ngược lại False.
+		 */
+		function isSameRecord(row1, row2, finalHeaderMap, currentFileHeaders) {
+			// Chỉ so sánh các cột đã có trong finalHeaderMap (tức là các cột chung)
+			for (const [headerTextLower, finalIndex] of finalHeaderMap.entries()) {
+				// Tìm index của header này trong currentFileHeaders
+				const originalIndex = currentFileHeaders.findIndex(h => normalizeCellValue(h).toLowerCase() === headerTextLower);
+
+				// Nếu header này có trong file hiện tại (originalIndex !== -1) VÀ
+				// cả hai hàng đều có giá trị ở cột này (không phải undefined/null)
+				if (originalIndex !== -1 &&
+					row1[finalIndex] !== undefined && row1[finalIndex] !== null &&
+					row2[finalIndex] !== undefined && row2[finalIndex] !== null) {
+
+					// So sánh giá trị
+					if (normalizeCellValue(row1[finalIndex]) !== normalizeCellValue(row2[finalIndex])) {
+						return false; // Khác nhau ở cột chung -> không phải cùng bản ghi
+					}
+				}
+			}
+			return true; // Tất cả các cột chung đều giống nhau hoặc một trong hai không có giá trị
+		}
+
+		/**
+		 * Chuyển đổi tọa độ số thành chuỗi phạm vi ô Excel (ví dụ: 1, 1, 2, 2 -> "A1:B2").
+		 * @param {number} startRow Số hàng bắt đầu (1-indexed).
+		 * @param {number} startCol Số cột bắt đầu (1-indexed).
+		 * @param {number} endRow Số hàng kết thúc (1-indexed).
+		 * @param {number} endCol Số cột kết thúc (1-indexed).
+		 * @returns {string} Chuỗi phạm vi ô Excel.
+		 */
+		function encodeRange(startRow, startCol, endRow, endCol) {
+			const startCellAddress = encodeCell(startRow, startCol);
+			const endCellAddress = encodeCell(endRow, endCol);
+			return `${startCellAddress}:${endCellAddress}`;
 		}
 
 		function copyRow(sourceRow, targetRow) {
@@ -6762,34 +7542,445 @@
 
 		}
 
-		function lienKetSKUSapo(){
+		async function lienKetSKUSapo(){
 			boxAlert("LIÊN KẾT SKU SAPO");
-			var excuse = {
-				moRongDanhSach: function() {
-					var box = $(".product-list-container .product-item-wrapper");
-					$.each(box, (index, value) => {
-						simulateReactEvent($(box).eq(index).find(".show-more button"), "click");
 
-						var variants = $(box).eq(index).find(".variant-list-wrapper.variant-list-orig .product-tooltip-wrapper");
+			function checkSKU(sku){
+				// Biểu thức chính quy để trích xuất phần SKU chính:
+				// ^                   : Bắt đầu chuỗi
+				// ([A-Z]+[A-Z0-9]*)   : NHÓM 1 - Phần đầu của SKU chính (bắt buộc): 1+ chữ cái hoa, theo sau là 0+ chữ hoa/số.
+				// (-[A-Z]+[A-Z0-9]*)? : NHÓM 2 - Phần sau của SKU chính (tùy chọn): Dấu gạch nối, 1+ chữ cái hoa, theo sau là 0+ chữ hoa/số.
+				// (.*)                : NHÓM 3 - Bất kỳ ký tự nào còn lại sau phần SKU chính (có thể là nhiễu).
+				// $                   : Kết thúc chuỗi
+				const pattern = /^([A-Z]+[A-Z0-9]*)(-[A-Z]+[A-Z0-9]*)?(.*)$/;
 
-						$.each(variants, (indexVariant, valueVariant) => {
-							var checkBox = variants.eq(indexVariant).find(".item-checkbox input");
-							var img = variants.eq(indexVariant).find(".item-image img");
-							var name = variants.eq(indexVariant).find(".item-product .item-product span");
-							var sku = variants.eq(indexVariant).find(".item-product .item-sku span");
-							var status = variants.eq(indexVariant).find(".item-status span");
-							var buttonAction = variants.eq(indexVariant).find(".item-action > div");
+				const match = sku.match(pattern);
 
-							simulateReactEvent(buttonAction.eq(1), "click");
-							waitForElement($("body"), ".popup-select-product-v2", (modal) => {
-								// DO SOMETHING
-							});
-						});
-					});
+				if (match) {
+					let mainSkuPart = match[1]; // Lấy phần đầu của SKU chính
+
+					// Nếu có phần thứ hai của SKU chính, nối vào
+					if (match[2]) {
+						mainSkuPart += match[2];
+					}
+
+					const noisePart = match[3]; // Lấy phần còn lại (nhiễu)
+
+					const hasNoise = noisePart !== ''; // Có nhiễu nếu phần còn lại không rỗng
+
+					return {
+						sku: mainSkuPart, // Phần SKU chính được trích xuất
+						noise: noisePart,     // Phần nhiễu (rỗng nếu không có)
+						type: hasNoise    // true nếu có nhiễu, false nếu không
+					};
+				} else {
+					// Trường hợp không khớp với cả định dạng cơ bản của SKU chính (ví dụ: "123", "abc")
+					// Trong trường hợp này, toàn bộ chuỗi được coi là nhiễu.
+					return {
+						sku: "",          // Không trích xuất được SKU chính
+						noise: sku,           // Toàn bộ chuỗi là nhiễu
+						type: true        // Chắc chắn có nhiễu
+					};
+				}
+			}
+
+			var typeLink = $(".tp-content .layout-future .layout-tab #toggle-switch").prop("checked");
+
+			boxAlert(`Đang Liên Kết SKU`);
+
+			var containers = $(".product-list-wrapper .product-list-container .product-item-wrapper");
+
+			for(var containerElement of containers){
+				var openSku = false;
+
+				var product = $(containerElement).find(".product-item-line");
+
+				var product_name = product.find(".product-info div[data-id='tooltip']");
+
+				var variants = $(containerElement).find(".variant-list-wrapper .product-tooltip-wrapper");
+
+				for(var variantElement of variants){
+					var variant = $(variantElement);
+
+					var checkBox = $(variant).find(".item-checkbox input");
+					var variant_name = $(variant).find(".item-product").eq(0).find(".item-name span");
+					var variant_sku = $(variant).find(".item-product").eq(0).find(".item-sku span");
+					var variant_status = $(variant).find(".item-status span");
+
+					var variant_name_connect = $(variant).find(".item-product").eq(1).find(".item-name span") || false;
+					var variant_sku_connect = $(variant).find(".item-product").eq(1).find(".item-sku span") || false;
+
+					var variant_action = $(variant).find('.item-action');
+
+					if(!checkBox.prop("checked"))
+						continue;
+
+					// console.log(`${variant_name.text()}\n${variant_sku.text()}\n${variant_status.text()}\n${variant_name_connect.text()}\n${variant_sku_connect.text()}`);
+
+					var currentSKU = checkSKU(variant_sku.text());
+
+					console.log(currentSKU);
+
+					// Kiểm tra tính hợp lệ của SKU
+					if(currentSKU.type){
+						// SKU không hợp lệ
+						boxLogging(`SKU ${variant_sku.text()} trên sàn không hợp lệ`, [`${variant_sku.text()}`], ["crimson"]);
+
+						// Kiểm tra để mở link của sản phẩm hiện tại
+						// if(!openSku){
+						// 	// Chưa mở link của sản phẩm chứa phân loại hiện tại
+						// 	simulateReactEvent(variant_name, "click", {ctrlKey: true});
+						// 	openSku = true;
+						// }
+
+						if(variant_status.text().toLowerCase().includes("liên kết thành công") && variant_sku_connect.text().toLowerCase() === "x0"){
+							// Đã liên kết
+							var linkSKU = checkSKU(variant_sku_connect.text());
+
+							if(linkSKU.type){
+								// Hủy liên kết với sku đã liên kết không hợp lệ
+								boxLogging(`SKU ${variant_sku.text()} liên kết SKU không hợp lệ (${variant_sku_connect.text()})`);
+								variant_action.find("> div[data-for^='tool-tip-cancel']").click();
+							}
+						}
+					}else{
+						// SKU hợp lệ
+						if(variant_status.text().toLowerCase().includes("liên kết thành công")){
+							// Đã liên kết
+							var linkSKU = checkSKU(variant_sku_connect.text());
+
+							console.log(currentSKU);
+							console.log(linkSKU);
+
+							if(!linkSKU.sku.includes(currentSKU.sku)){
+								// Hủy liên kết SKU với sản phẩm không cùng SKU
+								boxLogging(`SKU ${variant_sku.text()} liên kết sai`);
+								variant_action.find("> div[data-for^='tool-tip-cancel']").click();
+							}
+						}
+					}	
+					
+					if(!typeLink){
+						// Loại liên kết tự động
+						if(!variant_status.text().toLowerCase().includes("liên kết thành công")){
+							// Liên kết những sản phẩm chưa liên kết
+							boxLogging(`Đang liên kết SKU ${variant_sku.text()}`, [`${variant_sku.text()}`], ["orange"]);
+							variant_action.find("> div[data-for^='tool-tip-auto']").click();
+						}	
+					}else{
+						// Loại liên kết thủ công
+						if(!variant_status.text().toLowerCase().includes("liên kết thành công")){
+							// Liên kết những sản phẩm chưa liên kết
+							boxLogging(`Đang liên kết SKU ${variant_sku.text()}`, [`${variant_sku.text()}`], ["orange"]);
+							variant_action.find("> div[data-for^='tool-tip-handle']").click();
+
+							simulateReactEvent(variant_action.find("> div[data-for^='tool-tip-handle'] > div"), "click");
+
+							await delay(200);
+
+							var el = $(".popup-select-product-v2");
+
+							var headerInput = $(el).find('.popup-select-product-header input');
+
+							waitForElement($("body"), ".popup-select-product-body .popup-select-product-body .pspb-row", async (el) => {
+								var sku = currentSKU.sku != '' ? currentSKU.sku : "x0";
+
+								simulateClearing(headerInput);
+								simulateReactInput(headerInput, sku);
+
+								await delay(5000);
+
+								console.log($(".popup-select-product-body .popup-select-product-body"));
+
+								var el = $(".popup-select-product-body .popup-select-product-body");
+
+								if($(el).text().toLowerCase().includes("Không tìm thấy sản phẩm")){
+									sku = "x0";
+									simulateClearing(headerInput);
+									simulateReactInput(headerInput, sku);
+								}
+
+								var popupContents = $(".popup-select-product-body .pspb-row");
+
+								for(var popupContentsElement of popupContents){
+									var popContent = $(popupContentsElement);
+
+									var nameBox = popContent.find(".pspb-row-col-right .pspb-line:nth-child(1) .pspb-line-col-left");
+									var skuBox = popContent.find(".pspb-row-col-right .pspb-line:nth-child(2) .pspb-line-col-left");
+
+									console.log(`${nameBox.text()} ${skuBox.text()}`);
+
+									if(skuBox.text().toLowerCase() === sku){
+										simulateReactEvent(popContent, "click");
+									}
+								}
+							}, {once: true});
+						}
+					}
 				}
 			}
 			
-			excuse.moRongDanhSach();
+			// $.each(container, (indexContainer, value) => {
+				
+			// 	var openSku = false;
+
+			// 	var product = container.eq(indexContainer).find(".product-item-line");
+
+			// 	var product_name = product.find(".product-info div[data-id='tooltip']");
+
+			// 	var variant = container.eq(indexContainer).find(".variant-list-wrapper .product-tooltip-wrapper");
+
+			// 	$.each(variant, async (indexVariant, value) => {
+			// 		var checkBox = variant.eq(indexVariant).find(".item-checkbox input");
+			// 		var variant_name = variant.eq(indexVariant).find(".item-product").eq(0).find(".item-name span");
+			// 		var variant_sku = variant.eq(indexVariant).find(".item-product").eq(0).find(".item-sku span");
+			// 		var variant_status = variant.eq(indexVariant).find(".item-status span");
+
+			// 		var variant_name_connect = variant.eq(indexVariant).find(".item-product").eq(1).find(".item-name span") || false;
+			// 		var variant_sku_connect = variant.eq(indexVariant).find(".item-product").eq(1).find(".item-sku span") || false;
+
+			// 		var variant_action = variant.eq(indexVariant).find('.item-action');
+
+			// 		if(!checkBox.prop("checked"))
+			// 			return;
+
+			// 		// console.log(`${variant_name.text()}\n${variant_sku.text()}\n${variant_status.text()}\n${variant_name_connect.text()}\n${variant_sku_connect.text()}`);
+
+			// 		var currentSKU = checkSKU(variant_sku.text());
+
+			// 		console.log(currentSKU);
+
+			// 		// Kiểm tra tính hợp lệ của SKU
+			// 		if(currentSKU.type){
+			// 			// SKU không hợp lệ
+			// 			boxLogging(`SKU ${variant_sku.text()} trên sàn không hợp lệ`, [`${variant_sku.text()}`], ["crimson"]);
+
+			// 			// Kiểm tra để mở link của sản phẩm hiện tại
+			// 			// if(!openSku){
+			// 			// 	// Chưa mở link của sản phẩm chứa phân loại hiện tại
+			// 			// 	simulateReactEvent(variant_name, "click", {ctrlKey: true});
+			// 			// 	openSku = true;
+			// 			// }
+
+			// 			if(variant_status.text().toLowerCase().includes("liên kết thành công")){
+			// 				// Đã liên kết
+			// 				var linkSKU = checkSKU(variant_sku_connect.text());
+
+			// 				if(linkSKU.type){
+			// 					// Hủy liên kết với sku đã liên kết không hợp lệ
+			// 					boxLogging(`SKU ${variant_sku.text()} liên kết SKU không hợp lệ (${variant_sku_connect.text()})`);
+			// 					variant_action.find("> div[data-for^='tool-tip-cancel']").click();
+			// 				}
+			// 			}
+			// 		}else{
+			// 			// SKU hợp lệ
+			// 			if(variant_status.text().toLowerCase().includes("liên kết thành công")){
+			// 				// Đã liên kết
+			// 				var linkSKU = checkSKU(variant_sku_connect.text());
+
+			// 				console.log(currentSKU);
+			// 				console.log(linkSKU);
+
+			// 				if(!linkSKU.sku.includes(currentSKU.sku)){
+			// 					// Hủy liên kết SKU với sản phẩm không cùng SKU
+			// 					boxLogging(`SKU ${variant_sku.text()} liên kết sai`);
+			// 					variant_action.find("> div[data-for^='tool-tip-cancel']").click();
+			// 				}
+			// 			}
+			// 		}	
+					
+			// 		if(!typeLink){
+			// 			// Loại liên kết tự động
+			// 			if(!variant_status.text().toLowerCase().includes("liên kết thành công")){
+			// 				// Liên kết những sản phẩm chưa liên kết
+			// 				boxLogging(`Đang liên kết SKU ${variant_sku.text()}`, [`${variant_sku.text()}`], ["orange"]);
+			// 				variant_action.find("> div[data-for^='tool-tip-auto']").click();
+			// 			}	
+			// 		}else{
+			// 			// Loại liên kết thủ công
+			// 			if(!variant_status.text().toLowerCase().includes("liên kết thành công")){
+			// 				// Liên kết những sản phẩm chưa liên kết
+			// 				boxLogging(`Đang liên kết SKU ${variant_sku.text()}`, [`${variant_sku.text()}`], ["orange"]);
+			// 				variant_action.find("> div[data-for^='tool-tip-handle']").click();
+
+			// 				simulateReactEvent(variant_action.find("> div[data-for^='tool-tip-handle'] > div"), "click");
+
+			// 				await delay(200);
+
+			// 				var el = $(".popup-select-product-v2");
+
+			// 				var headerInput = $(el).find('.popup-select-product-header input');
+
+			// 				setTimeout(() => { 
+			// 					simulateReactInput(headerInput, currentSKU.sku != '' ? currentSKU.sku : "x0");
+			// 				}, 1000);
+			// 			}
+			// 		}		
+			// 	})
+			// })
+		}
+
+		// Flashsale Tiktok
+		function flashSaleTiktok(){
+			boxAlert("FLASHSALE TIKTOK");
+
+			async function processProductsByLastFlag() {
+				let scrolledWithoutNewProducts = false;
+				let consecutiveSkippedProducts = 0; // Biến đếm số sản phẩm liên tiếp đã có giá khuyến mãi
+				const MAX_CONSECUTIVE_SKIPS = 5; // Ngưỡng: 5 sản phẩm liên tiếp đã có giá
+
+				let productProcesscount = 0
+
+				while (true) {
+					if(productProcesscount == 30){
+						await delay(5000);
+						productProcesscount = 0;
+					}
+					productProcesscount++;
+					var allProductRows = $(".theme-arco-table-content-inner .theme-arco-table-body").find("div div > div");
+					let nextProductToProcess = null;
+
+					let lastFlaggedRow = allProductRows.filter(".tp-flag").last();
+					let startIndex = 0;
+
+					if (lastFlaggedRow.length > 0) {
+						startIndex = allProductRows.index(lastFlaggedRow) + 1;
+					}
+
+					for (let i = startIndex; i < allProductRows.length; i++) {
+						let currentRow = $(allProductRows).eq(i);
+
+						if (!currentRow.is(".theme-arco-table-tr, .theme-arco-table-row-custom-expand, .styled")) {
+							// Nếu là hàng không hợp lệ, không tính vào số lượng skipped liên tiếp
+							// nhưng vẫn cần chuyển sang hàng tiếp theo để tìm sản phẩm
+							continue; 
+						}
+
+						// Nếu hàng đã có tp-flag (trường hợp DOM thay đổi)
+						if (currentRow.hasClass("tp-flag")) {
+							// Nếu hàng này đã được đánh dấu, chúng ta vẫn xem xét nó là "skipped" theo một nghĩa nào đó
+							// Tuy nhiên, để chính xác theo yêu cầu "có giá khuyến mãi", chúng ta sẽ xử lý riêng
+							continue; 
+						}
+						
+						// Đây là hàng hợp lệ và chưa được xử lý (chưa có tp-flag)
+						nextProductToProcess = currentRow;
+						break; 
+					}
+
+					if (nextProductToProcess) {
+						// Đã tìm thấy một sản phẩm chưa xử lý (chưa có tp-flag)
+						scrolledWithoutNewProducts = false;
+						consecutiveSkippedProducts = 0; // Reset đếm khi tìm thấy sản phẩm cần xử lý
+
+						nextProductToProcess.addClass("tp-flag");
+
+						var nameElement = nextProductToProcess.find(".theme-arco-table-td").eq(0).find("span");
+						var productName = nameElement.text().trim();
+
+						var activeStatus = nextProductToProcess.find(".theme-arco-table-td").eq(nextProductToProcess.find(".theme-arco-table-td").length - 1).find("button[role='switch']");
+
+						// Kiểm tra và kích hoạt khuyến mãi để thao tác
+						if(!activeStatus.attr("aria-checked"))
+							simulateReactEvent(activeStatus, "click");
+
+						boxLogging(`Đang xử lý sản phẩm: "${productName}"`, [`${productName}`], ["cyan"]);
+
+						var currentPrice = nextProductToProcess.find(".theme-arco-table-td").eq(1).find("span p");
+						var promotionPrice = nextProductToProcess.find(".theme-arco-table-td").eq(2).find("input").eq(0);
+						var promotionPercent = nextProductToProcess.find(".theme-arco-table-td").eq(2).find("input").eq(1);
+
+						if (promotionPrice.length > 0) {
+							if (promotionPrice.val().length > 0) {
+								boxLogging(`Sản phẩm "${productName}" đã có giá khuyến mãi. Bỏ qua.`, [`${productName}`], ["gray"]);
+								consecutiveSkippedProducts++; // Tăng đếm khi sản phẩm đã có giá
+								// await delay(50); 
+							} else { // Chưa có giá khuyến mãi, tiến hành nhập
+								var gia = currentPrice.text();
+								gia = gia.replace(/[,.₫]/g, '');
+								gia = tachGia(gia).giaDuoi;
+
+								promotionPrice.get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+								if (parseInt(gia) == 0) {
+									boxLogging(`Sản phẩm "${productName}" có giá bằng 0. Bỏ qua.`, [`${productName}`], ["yellow"]);
+									consecutiveSkippedProducts = 0; // Reset đếm khi bỏ qua vì giá 0
+
+									// Tắt khuyến mãi cho phân loại không có giá đuôi
+									simulateReactEvent(activeStatus, "click");
+									// await delay(50);
+								} else {
+									gia = (parseInt(gia) - 1000 +  1).toString(); // Giảm giá 1000đ và cộng thêm 1đ để tránh giá bằng 0
+									// Tương tác UI và chờ đợi
+									simulateReactEvent(promotionPrice, "focus");
+									// await delay(300);
+									// await delay(500);
+
+									// simulateReactInput(promotionPrice, gia, 50);
+									
+									simulateReactInput(promotionPrice, gia);
+									simulateReactEvent(promotionPrice, "blur");
+
+									var formattedGia = gia.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+									boxLogging(`[copy]${nameElement.text()}[/copy] đã cập nhật từ ${currentPrice.text()} -> ${formattedGia}`, [`${nameElement.text()}`, `${currentPrice.text()}`, `${formattedGia}`], ["green", "orange", "orange"]);
+									consecutiveSkippedProducts = 0; // Reset đếm khi sản phẩm được xử lý
+								}
+							}
+						} else {
+							boxLogging(`Sản phẩm "${productName}" không có ô nhập giá khuyến mãi.`, [], ["yellow"]);
+							consecutiveSkippedProducts = 0; // Reset đếm khi không có ô nhập
+						}
+
+						// Kiểm tra điều kiện dừng nếu đã có N sản phẩm liên tiếp bị bỏ qua vì đã có giá
+						if (consecutiveSkippedProducts >= MAX_CONSECUTIVE_SKIPS) {
+							boxLogging(`Đã bỏ qua ${MAX_CONSECUTIVE_SKIPS} sản phẩm liên tiếp do đã có giá khuyến mãi. Coi như đã xử lý xong các sản phẩm mới thêm vào. Kết thúc quá trình.`, [], ["green"]);
+							boxToast(`Đã hoàn tất cập nhật giá! ${MAX_CONSECUTIVE_SKIPS} sản phẩm liên tiếp đã có giá sẵn.`, "success");
+							break; // Thoát vòng lặp chính
+						}
+
+						await delay(500); 
+
+					} else {
+						// Không tìm thấy sản phẩm chưa xử lý nào trên DOM hiện tại (tất cả đã được gắn cờ hoặc không hợp lệ)
+						// Đây là lúc ta xác định tất cả các hàng hợp lệ đang hiển thị đều đã được xử lý.
+						// Reset consecutiveSkippedProducts ở đây vì chúng ta đang cuộn xuống, không phải bỏ qua liên tiếp
+						consecutiveSkippedProducts = 0;
+
+						boxLogging("Đã xử lý tất cả sản phẩm hợp lệ hiện có trên màn hình. Thử cuộn để tải thêm...", [], ["gray"]);
+						window.scrollTo(0, document.body.scrollHeight);
+						await delay(3000); 
+
+						var reloadedProductRows = $(".theme-arco-table-content-inner .theme-arco-table-body").find("div div > div");
+						
+						let newUnprocessedFoundAfterScroll = false;
+						for (let i = 0; i < reloadedProductRows.length; i++) {
+							let row = $(reloadedProductRows).eq(i);
+							if (row.is(".theme-arco-table-tr, .theme-arco-table-row-custom-expand, .styled") && !row.hasClass("tp-flag")) {
+								newUnprocessedFoundAfterScroll = true;
+								break;
+							}
+						}
+
+						if (!newUnprocessedFoundAfterScroll) {
+							if (scrolledWithoutNewProducts) {
+								boxLogging("Không tìm thấy sản phẩm mới chưa xử lý sau nhiều lần cuộn. Kết thúc quá trình.", [], ["blue"]);
+								boxToast("Đã hoàn tất cập nhật giá cho tất cả sản phẩm có thể tìm thấy!", "success");
+								break;
+							} else {
+								boxLogging("Lần đầu cuộn không thấy sản phẩm mới. Có thể chưa load xong, sẽ thử lại...", [], ["yellow"]);
+								scrolledWithoutNewProducts = true;
+							}
+						} else {
+							boxLogging(`Tìm thấy sản phẩm mới sau khi cuộn. Tiếp tục xử lý...`, [], ["blue"]);
+							scrolledWithoutNewProducts = false;
+						}
+					}
+				}
+
+				boxLogging("Quá trình xử lý sản phẩm đã hoàn tất.", [], ["blue"]);
+			}
+
+			processProductsByLastFlag();
 		}
 
 		// Biến global (hoặc scope cha)
@@ -7067,12 +8258,351 @@
 		}
 
 		// Hiển thị thêm danh sách
-		function hienThiThemDSSapo(){
+		function hienThiThemDSSapo(...type){
 			var buttonShowMore = $(".product-list-container .product-item-wrapper .show-more button");
 
-			console.log(buttonShowMore);
+			$.each(buttonShowMore, (index, value) => {
+				if(buttonShowMore.eq(index).find("span").text().toLowerCase().includes("xem thêm")){
+					simulateReactEvent(buttonShowMore.eq(index), "click");
+				}
+			})		
+			boxToast(`Đã mở rộng danh sách`, "success");
+		}
+
+		// Khôi phục sản phẩm đã xóa
+		function khoiPhucSanPhamLazada(){
+			var i = 0;
+
+			function nextItem(){
+				var box = $(".pm-table-container .next-table-body table tbody tr");
+				var checkBox = box.eq(i).find("td:nth-child(1) input");
+				var buttonRecov = box.eq(i).find("td:last-child button");
+
+				if(checkBox.prop("checked")){
+					simulateReactEvent(buttonRecov, "click");
+
+					waitForElement($("body"), ".next-overlay-inner .next-dialog-footer button:nth-child(2)", async (el) => {
+						simulateReactEvent($(el), "click");
+
+						await delay(1500);
+
+						if (i < box.length){
+							i++;
+							nextItem();
+						}
+
+					}, {once: true});
+				}else{
+					if (i < box.length){
+						i++;
+						nextItem();
+					}
+				}
+			}
+
+			nextItem();
+		}
+
+		// Xóa phân loại Tiktok
+		async function setEventXoaPhanLoaiTiktok() {};
+
+		async function xoaPhanLoaiTiktok(){
+			boxLogging("XÓA PHÂN LOẠI TIKTOK");
+			inputMap = []; // Reset inputMap trước khi bắt đầu
+
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data");
+
+			data = data.val().split("\n");
+
+			$.each(data, (index, value) => {
+				inputMap.push(data[index].trim());
+			});
+
+			console.log(inputMap);
+
+			const tableRows = $(".core-table-content-inner table tbody tr");
+			if (tableRows.length === 0) {
+				boxLogging("Không tìm thấy bảng SKU biến thể để lấy thông tin. Đảm bảo bạn đang ở trang quản lý biến thể sản phẩm.", [], ["red"]);
+				boxToast("Không tìm thấy bảng SKU!", "error");
+				return;
+			}
+
+			var mappingData = [];
+
+			boxLogging(`Đang thu thập thông tin SKU từ ${tableRows.length} hàng biến thể trên sàn...`, [`${tableRows.length}`], ["blue"]);
+			for (let i = 0; i < tableRows.length; i++) {
+				var row = tableRows.eq(i);
+				var nameBox = row.find("td").eq(0).find("p").eq(0); 
+				var idElement = row.find("td").eq(0).find("p").eq(1).find(".copyable"); 
+				var skuInput = row.find("td").find(`input#skus${idElement.text().trim()}`);
+				var actionRemoveButton = row.find("td:last-child span button"); // Nút xóa biến thể
+
+				if (skuInput.length > 0 && skuInput.val()) {
+					var skuValue = skuInput.val().trim();
+					// CHỈ THÊM VÀO MAPPINGDATA NẾU SKU NÀY CÓ TRÊN SÀN VÀ CÓ FILE ẢNH TƯƠNG ỨNG
+					for(var skuItem of inputMap){
+						if (skuValue.includes(skuItem)) {
+							simulateReactEvent(actionRemoveButton, "click"); // Di chuột vào nút xóa biến thể
+							await delay(1000);
+						}
+					};
+				}
+			}
+
+			return
+
+			if (mappingData.length === 0) {
+				boxLogging("Không tìm thấy SKU nào trên sàn có file ảnh tương ứng đã nạp. Kiểm tra lại tên file và SKUs.", [], ["orange"]);
+				boxToast("Không tìm thấy SKU phù hợp!", "warning");
+				return;
+			}
+
+			boxLogging(`Tìm thấy ${mappingData.length} biến thể SKU có ảnh cần thêm/sửa trên sàn.`, [`${mappingData.length}`], ["blue"]);
+
+			// **Bước 2: Lặp qua từng container biến thể trên UI và xử lý ảnh (xóa trước, thêm sau)**
+			const variantImageContainers = $("#sale_properties .space-y-12 div > div:nth-child(3) > div:nth-child(1) > div[role='button']");
+
+			if (variantImageContainers.length === 0) {
+				boxLogging("Không tìm thấy các khối UI để tải ảnh biến thể. Đảm bảo bạn đang ở phần 'Thuộc tính bán hàng' và các biến thể đã được tạo.", [], ["red"]);
+				boxToast("Không tìm thấy UI upload ảnh!", "error");
+				return;
+			}
+
+			let processedCount = 0;
 			
-			simulateReactEvent(buttonShowMore, "click");
+			for (let i = 0; i < variantImageContainers.length; i++) {
+				const currentVariantContainer = variantImageContainers.eq(i);
+				const imgBox = currentVariantContainer.find("> div div > div.mr-12"); // Container chứa ảnh hiện tại
+				const nameInputForVariant = currentVariantContainer.find("> div div > div.w-full.overflow-hidden").find("input"); // Input chứa tên biến thể
+				var actionRemoveButton = currentVariantContainer.find("> div > div:nth-child(2) > svg:nth-child(1)"); // Nút hành động (xóa biến thể)
+
+				console.log(nameInputForVariant.val());
+
+				if (nameInputForVariant.length === 0 || !nameInputForVariant.val()) {
+					boxLogging(`Cảnh báo: Không tìm thấy input tên biến thể hoặc giá trị rỗng cho container ${i}. Bỏ qua.`, [], ["yellow"]);
+					continue; 
+				}
+
+				const currentVariantName = nameInputForVariant.val().trim();
+				let foundMapping = null;
+
+				// Tìm trong mappingData đã được lọc (chỉ chứa các SKU có trên sàn và có ảnh)
+				for (let j = 0; j < mappingData.length; j++) {
+					// So sánh tên biến thể trên UI với tên biến thể trong mappingData
+					if (currentVariantName.includes(mappingData[j].name)) {
+						foundMapping = mappingData[j];
+						break;
+					}
+				}
+
+				if (foundMapping) {
+					simulateReactEvent(actionRemoveButton, "click"); // Di chuột vào input tên biến thể để hiển thị nút xóa
+					await delay(200); // Chờ nút xóa hiện ra (điều
+				}
+			}
+
+			boxLogging(`Đã hoàn tất thêm hình ảnh theo SKU TikTok cho ${processedCount} biến thể.`, [], ["blue"]);
+			boxToast(`Đã thêm xong hình ảnh theo SKU TikTok!`, "success");
+		}
+
+		// Thêm hình ảnh theo SKU Lazada
+		function setEventThemHinhTheoSKuLazada(){
+			boxLogging("Thiết lập sự kiện chọn thư mục ảnh...", [], ["gray"]);
+			const fileInputSelector = ".tp-container.tp-content .layout-future .layout-tab input"; 
+
+			$(fileInputSelector)
+				.attr({
+					webkitdirectory: true,
+					directory: true,
+					multiple: true
+				})
+				.on("change", function () {
+					const files = this.files;
+					listSKUImgTiktok = []; 
+					inputMap = {}; 
+
+					if (files.length === 0) {
+						boxLogging("Không có file ảnh nào được chọn.", [], ["yellow"]);
+						boxToast("Chưa chọn ảnh!", "warning");
+						return;
+					}
+
+					for (let i = 0; i < files.length; i++) {
+						const file = files[i];
+						const fileNameOnly = file.name.split(".")[0].trim().toUpperCase();
+
+						listSKUImgTiktok.push(fileNameOnly); 
+
+						const dt = new DataTransfer();
+						dt.items.add(file);
+
+						const newInput = $("<input type='file'>").prop("files", dt.files).addClass("single-file-input");
+						inputMap[fileNameOnly] = newInput;
+					}
+					boxLogging(`Đã nạp ${Object.keys(inputMap).length} ảnh vào bộ nhớ từ thư mục đã chọn.`, [], ["blue"]);
+					boxToast(`Đã nạp ${Object.keys(inputMap).length} ảnh vào bộ nhớ!`, "success");
+				});
+		}
+
+		async function themHinhTheoSKULazada(){
+			boxLogging("THÊM HÌNH ẢNH THEO SKU LAZADA");
+
+			if (Object.keys(inputMap).length === 0) {
+				boxLogging("Chưa có hình ảnh nào được nạp vào bộ nhớ. Vui lòng chọn thư mục ảnh trước.", [], ["red"]);
+				boxToast("Chưa có ảnh! Vui lòng chọn thư mục ảnh.", "error");
+				return; 
+			}
+
+			const mappingData = []; // Lưu trữ thông tin SKU/Name của các biến thể CÓ TRÊN SÀN VÀ CÓ ẢNH TƯƠNG ỨNG
+
+			// **Bước 1: Thu thập thông tin các SKUs và tên biến thể từ bảng sản phẩm (tab SKU List)**
+			const tableRows = $(".props-sku-table .next-table-inner table tr");
+			if (tableRows.length === 0) {
+				boxLogging("Không tìm thấy bảng SKU biến thể để lấy thông tin. Đảm bảo bạn đang ở trang quản lý biến thể sản phẩm.", [], ["red"]);
+				boxToast("Không tìm thấy bảng SKU!", "error");
+				return;
+			}
+
+			boxLogging(`Đang thu thập thông tin SKU từ ${tableRows.length} hàng biến thể trên sàn...`, [], ["blue"]);
+			for (let i = 0; i < tableRows.length; i++) {
+				const row = tableRows.eq(i);
+				const nameBox = row.find("td:nth-child(1) button"); 
+				// const idElement = row.find("td").eq(0).find("p").eq(1).find(".copyable"); 
+				const skuInput = row.find("td:nth-child(5) input").find(`input#skus${idElement.text().trim()}`); 
+
+				if (skuInput.length > 0 && skuInput.val()) {
+					const skuValue = skuInput.val().trim().toUpperCase();
+					// CHỈ THÊM VÀO MAPPINGDATA NẾU SKU NÀY CÓ TRÊN SÀN VÀ CÓ FILE ẢNH TƯƠNG ỨNG
+					if (inputMap[skuValue]) { 
+						mappingData.push({
+							name: nameBox.text().trim(),
+							sku: skuValue,
+						});
+					} else {
+						boxLogging(`SKU "${skuValue}" có trên sàn nhưng không có file ảnh tương ứng. Bỏ qua.`, [], ["gray"]);
+					}
+				}
+			}
+
+			if (mappingData.length === 0) {
+				boxLogging("Không tìm thấy SKU nào trên sàn có file ảnh tương ứng đã nạp. Kiểm tra lại tên file và SKUs.", [], ["orange"]);
+				boxToast("Không tìm thấy SKU phù hợp!", "warning");
+				return;
+			}
+
+			boxLogging(`Tìm thấy ${mappingData.length} biến thể SKU có ảnh cần thêm/sửa trên sàn.`, [], ["blue"]);
+
+			// **Bước 2: Lặp qua từng container biến thể trên UI và xử lý ảnh (xóa trước, thêm sau)**
+			const variantImageContainers = $(".prop-group-body > div:nth-child(2) > div:nth-child(2) > div .prop-option-list .next-form-item");
+
+			if (variantImageContainers.length === 0) {
+				boxLogging("Không tìm thấy các khối UI để tải ảnh biến thể. Đảm bảo bạn đang ở phần 'Thuộc tính bán hàng' và các biến thể đã được tạo.", [], ["red"]);
+				boxToast("Không tìm thấy UI upload ảnh!", "error");
+				return;``
+			}
+
+			let processedCount = 0;
+			
+			for (let i = 0; i < variantImageContainers.length; i++) {
+				const currentVariantContainer = variantImageContainers.eq(i);
+				const imgBox = currentVariantContainer.find(".prop-option-item > div:nth-child(2) .gc-image-upload"); // Container chứa ảnh hiện tại
+				const nameInputForVariant = currentVariantContainer.find(".prop-option-item > div:nth-child(1)").find("input"); // Input chứa tên biến thể
+
+				if (nameInputForVariant.length === 0 || !nameInputForVariant.val()) {
+					boxLogging(`Cảnh báo: Không tìm thấy input tên biến thể hoặc giá trị rỗng cho container ${i}. Bỏ qua.`, [], ["yellow"]);
+					continue; 
+				}
+
+				return;
+
+				const currentVariantName = nameInputForVariant.val().trim();
+				let foundMapping = null;
+
+				// Tìm trong mappingData đã được lọc (chỉ chứa các SKU có trên sàn và có ảnh)
+				for (let j = 0; j < mappingData.length; j++) {
+					// So sánh tên biến thể trên UI với tên biến thể trong mappingData
+					if (currentVariantName.includes(mappingData[j].name)) {
+						foundMapping = mappingData[j];
+						break;
+					}
+				}
+
+				if (foundMapping) {
+					const skuToProcess = foundMapping.sku;
+					const fileInputEl = inputMap[skuToProcess].get(0); // Lấy phần tử input file giả lập
+
+					// Kiểm tra lại file ảnh có sẵn trong inputMap không (phòng trường hợp lỗi logic mappingData)
+					if (!fileInputEl || !fileInputEl.files || fileInputEl.files.length === 0) {
+						boxLogging(`Lỗi: Không tìm thấy file ảnh cho SKU [copy]${skuToProcess}[/copy] trong bộ nhớ. Bỏ qua.`, [`${skuToProcess}`], ["red"]);
+						currentVariantContainer.css("background","red"); 
+						// await delay(500); 
+						continue; 
+					}
+					const file = fileInputEl.files[0];
+					const dt = new DataTransfer();
+					dt.items.add(file);
+
+					// **THAO TÁC XÓA ẢNH CŨ (ƯU TIÊN HÀNG ĐẦU)**
+					// Kiểm tra xem có ảnh đang hiển thị trong container này không
+					const existingImagePreview = imgBox.find("img"); 
+					if (existingImagePreview.length > 0) {
+						boxLogging(`Đang chuẩn bị xóa ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy])...`, [`${skuToProcess}`], ["orange"]);
+						
+						// Di chuột vào ảnh để hiển thị nút xóa
+						simulateReactEvent(imgBox.find("> div > div"), "mouseenter"); 
+						// await delay(400); // Chờ nút xóa hiện ra (điều chỉnh nếu cần)
+
+						var delButton = imgBox.find(".core-space .core-space-item").eq(1); 
+
+						if (delButton.length > 0) {
+							boxLogging(`Đang click nút xóa cho biến thể "${currentVariantName}"...`, [], ["orange"]);
+							// delButton.get(0).click(); 
+							simulateReactEvent(delButton.find("svg"), "click");
+							await delay(200); // Rất quan trọng: Chờ ảnh xóa xong và UI cập nhật
+							boxLogging(`Đã xóa ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
+						} else {
+							boxLogging(`Không tìm thấy nút xóa ảnh cho biến thể "${currentVariantName}". Có thể ảnh đã được xóa hoặc không có.`, [], ["yellow"]);
+						}
+
+						
+					} else {
+						boxLogging(`Không có ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]) để xóa.`, [`${skuToProcess}`], ["gray"]);
+					}
+
+					// **THAO TÁC THÊM ẢNH MỚI (CHỈ THỰC HIỆN SAU KHI ĐẢM BẢO CÓ INPUT)**
+					// Tìm lại input[type="file"] sau khi ảnh cũ đã được xóa (nếu có)
+					const imgInputTiktok = imgBox.find(".core-upload input[type='file']")[0]; 
+
+					if (!imgInputTiktok) {
+						boxLogging(`Lỗi: Không tìm thấy input upload ảnh cho biến thể "${currentVariantName}" (SKU: ${skuToProcess}) sau khi xóa ảnh cũ (nếu có).`, [`${currentVariantName}`, `${skuToProcess}`], ["red"]);
+						currentVariantContainer.css("background","red");
+						// await delay(500);
+						continue;
+					}
+
+					boxLogging(`Đang thêm ảnh mới cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy])...`, [`${skuToProcess}`], ["blue"]);
+
+					$(nameInputForVariant).get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });;
+					
+					imgInputTiktok.files = dt.files; // Gán file vào input
+
+					const changeEvent = new Event("change", { bubbles: true });
+					imgInputTiktok.dispatchEvent(changeEvent);
+
+					currentVariantContainer.css("background","lightgreen");
+					boxLogging(`Đã thêm ảnh cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
+					
+					await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
+					processedCount++;
+
+				} else {
+					// Trường hợp này xảy ra khi biến thể trên UI (currentVariantName)
+					// không tìm thấy trong mappingData (tức là không có SKU tương ứng hoặc không có ảnh đã nạp)
+					boxLogging(`Biến thể "${currentVariantName}" không có ảnh phù hợp đã nạp. Bỏ qua.`, [`${currentVariantName}`], ["crimson"]);
+					currentVariantContainer.css("background","crimson");
+					// await delay(500); 
+				}
+			}
 		}
 
 		// Chat với AI
