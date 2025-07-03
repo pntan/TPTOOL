@@ -1775,13 +1775,17 @@
 
 				<div id="toast-container"></div>
 
-				<div class="tp-container tp-button-toggle">
+				<! -- <div class="tp-container tp-button-toggle">
 					<div class="eye-toggle" id="myEyeToggle">
 						<div class="pupil"></div>
 						<div class="slash"></div>
 						<div class="eyelid top"></div>
 						<div class="eyelid bottom"></div>
 					</div>
+				</div> -->
+
+				<div class="tp-container tp-button-toggle">
+					<i class="fa-solid fa-fingerprint"></i>
 				</div>
 
 				<div id="custom-context-menu" style="display:none; position:absolute; z-index:9999;">
@@ -2102,7 +2106,7 @@
 						height: 5vh;
 						aspect-ratio: 16 / 9;
 						// border-radius: 10px;
-						// background: rgba(255, 255, 255, 0.6);
+						background: rgba(255, 255, 255, 0.6);
 						// box-shadow: -5px 5px 10px #000;
 						padding: 0.5vw 0.5vw;
 						display: flex;
@@ -2112,6 +2116,7 @@
 						font-weight: 700;
 						// opacity: 0.6;
 						display: flex;
+						transition: color 0.5s;
 					}
 
 					.tp-button-toggle:hover{
@@ -2119,105 +2124,117 @@
 					}
 
 					.tp-button-toggle.active{
-						color: #000;
 						opacity: 1;
+						background: lightgreen;
 					}
 
-					.eye-toggle {
-						position: relative;
-						width: 100%; /* Tăng kích thước để có không gian cho mí mắt */
-						height: 100%; /* Tăng chiều cao để mắt trông tự nhiên hơn */
-						cursor: pointer;
-						overflow: hidden; /* Quan trọng để ẩn phần mắt bị che bởi mí */
-						display: flex;
-						justify-content: center;
-						align-items: center;
-						border-radius: 100%; /* Giúp định hình mắt ban đầu */
-						box-shadow: 0 0 0 2px #333; /* Viền mắt */
-						background-color: #f0f0f0; /* Màu nền cho lòng trắng mắt, nếu cần */
-						transition: 0.5s;
-					}
-
-					/* Con ngươi */
-					.eye-toggle .pupil {
-						position: absolute;
-						width: auto; /* Kích thước tròng đen */
-						height: 80%;
-						aspect-ratio: 1 / 1;
-						background-color: #333;
-						border-radius: 50%;
-						transform: scale(1);
-						opacity: 1;
-						transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-						z-index: 2; /* Đảm bảo con ngươi nằm trên mí mắt */
-					}
-
-					/* Đường gạch chéo khi ẩn */
-					.eye-toggle .slash {
-						position: absolute;
-						width: 90%; /* Chiều dài đường gạch chéo */
-						height: 3px;
-						background-color: #333;
-						transform: rotate(45deg) scaleX(0); /* Ban đầu ẩn */
-						transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-						opacity: 0;
-						z-index: 3; /* Nằm trên cùng */
-					}
-
-					/* Các mí mắt trên và dưới */
-					.eye-toggle .eyelid {
-						position: absolute;
+					.tp-button-toggle svg{
+						color: pink;
 						width: 100%;
-						height: 50%; /* Mỗi mí chiếm nửa chiều cao */
-						background-color: white; /* Màu nền của mí mắt, trùng với nền của khu vực chứa mắt */
-						transition: transform 0.3s ease-in-out, border-radius 0.3s ease-in-out;
-						z-index: 1; /* Nằm trên con ngươi nhưng dưới đường gạch chéo */
+						height: 100%;
+						font-size: 2em;
+						transition: color 0.5s;
 					}
 
-					.eye-toggle .eyelid.top {
-						top: 0;
-						left: 0;
-						transform-origin: bottom center; /* Quay quanh cạnh dưới */
-						transform: translateY(-5px) rotateX(0deg); /* Đẩy lên 1 chút khi mở */
-						border-bottom-left-radius: 60% 30px; /* Điều chỉnh độ cong, giá trị thứ 2 là bán kính y */
-						border-bottom-right-radius: 60% 30px;
+					.tp-button-toggle.active svg{
+						color: #fff;
 					}
 
-					.eye-toggle .eyelid.bottom {
-						bottom: 0;
-						left: 0;
-						transform-origin: top center; /* Quay quanh cạnh trên */
-						transform: translateY(5px) rotateX(0deg); /* Đẩy xuống 1 chút khi mở */
-						border-top-left-radius: 60% 30px; /* Điều chỉnh độ cong */
-						border-top-right-radius: 60% 30px;
-					}
+					// .eye-toggle {
+					// 	position: relative;
+					// 	width: 100%; /* Tăng kích thước để có không gian cho mí mắt */
+					// 	height: 100%; /* Tăng chiều cao để mắt trông tự nhiên hơn */
+					// 	cursor: pointer;
+					// 	overflow: hidden; /* Quan trọng để ẩn phần mắt bị che bởi mí */
+					// 	display: flex;
+					// 	justify-content: center;
+					// 	align-items: center;
+					// 	border-radius: 100%; /* Giúp định hình mắt ban đầu */
+					// 	box-shadow: 0 0 0 2px #333; /* Viền mắt */
+					// 	background-color: #f0f0f0; /* Màu nền cho lòng trắng mắt, nếu cần */
+					// 	transition: 0.5s;
+					// }
 
-					/* Trạng thái ẩn (mắt nhắm) */
-					.eye-toggle.hidden{
-						height: 0;
-					}
+					// /* Con ngươi */
+					// .eye-toggle .pupil {
+					// 	position: absolute;
+					// 	width: auto; /* Kích thước tròng đen */
+					// 	height: 80%;
+					// 	aspect-ratio: 1 / 1;
+					// 	background-color: #333;
+					// 	border-radius: 50%;
+					// 	transform: scale(1);
+					// 	opacity: 1;
+					// 	transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+					// 	z-index: 2; /* Đảm bảo con ngươi nằm trên mí mắt */
+					// }
 
-					.eye-toggle.hidden .pupil {
-						transform: scale(0); /* Con ngươi ẩn dần */
-						opacity: 0;
-					}
+					// /* Đường gạch chéo khi ẩn */
+					// .eye-toggle .slash {
+					// 	position: absolute;
+					// 	width: 90%; /* Chiều dài đường gạch chéo */
+					// 	height: 3px;
+					// 	background-color: #333;
+					// 	transform: rotate(45deg) scaleX(0); /* Ban đầu ẩn */
+					// 	transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+					// 	opacity: 0;
+					// 	z-index: 3; /* Nằm trên cùng */
+					// }
 
-					.eye-toggle.hidden .slash {
-						transform: rotate(45deg) scaleX(1); /* Gạch chéo hiện ra */
-						opacity: 1;
-					}
+					// /* Các mí mắt trên và dưới */
+					// .eye-toggle .eyelid {
+					// 	position: absolute;
+					// 	width: 100%;
+					// 	height: 50%; /* Mỗi mí chiếm nửa chiều cao */
+					// 	background-color: white; /* Màu nền của mí mắt, trùng với nền của khu vực chứa mắt */
+					// 	transition: transform 0.3s ease-in-out, border-radius 0.3s ease-in-out;
+					// 	z-index: 1; /* Nằm trên con ngươi nhưng dưới đường gạch chéo */
+					// }
 
-					.eye-toggle.hidden .eyelid.top {
-						transform: translateY(0px) rotateX(-90deg); /* Về vị trí giữa và xoay nhắm */
-						border-bottom-left-radius: 0; /* Thẳng ra khi nhắm */
-						border-bottom-right-radius: 0;
-					}
+					// .eye-toggle .eyelid.top {
+					// 	top: 0;
+					// 	left: 0;
+					// 	transform-origin: bottom center; /* Quay quanh cạnh dưới */
+					// 	transform: translateY(-5px) rotateX(0deg); /* Đẩy lên 1 chút khi mở */
+					// 	border-bottom-left-radius: 60% 30px; /* Điều chỉnh độ cong, giá trị thứ 2 là bán kính y */
+					// 	border-bottom-right-radius: 60% 30px;
+					// }
 
-					.eye-toggle.hidden .eyelid.bottom {
-						transform: translateY(0px) rotateX(90deg); /* Về vị trí giữa và xoay nhắm */
-						border-top-left-radius: 0; /* Thẳng ra khi nhắm */
-						border-top-right-radius: 0;
-					}
+					// .eye-toggle .eyelid.bottom {
+					// 	bottom: 0;
+					// 	left: 0;
+					// 	transform-origin: top center; /* Quay quanh cạnh trên */
+					// 	transform: translateY(5px) rotateX(0deg); /* Đẩy xuống 1 chút khi mở */
+					// 	border-top-left-radius: 60% 30px; /* Điều chỉnh độ cong */
+					// 	border-top-right-radius: 60% 30px;
+					// }
+
+					// /* Trạng thái ẩn (mắt nhắm) */
+					// .eye-toggle.hidden{
+					// 	height: 0;
+					// }
+
+					// .eye-toggle.hidden .pupil {
+					// 	transform: scale(0); /* Con ngươi ẩn dần */
+					// 	opacity: 0;
+					// }
+
+					// .eye-toggle.hidden .slash {
+					// 	transform: rotate(45deg) scaleX(1); /* Gạch chéo hiện ra */
+					// 	opacity: 1;
+					// }
+
+					// .eye-toggle.hidden .eyelid.top {
+					// 	transform: translateY(0px) rotateX(-90deg); /* Về vị trí giữa và xoay nhắm */
+					// 	border-bottom-left-radius: 0; /* Thẳng ra khi nhắm */
+					// 	border-bottom-right-radius: 0;
+					// }
+
+					// .eye-toggle.hidden .eyelid.bottom {
+					// 	transform: translateY(0px) rotateX(90deg); /* Về vị trí giữa và xoay nhắm */
+					// 	border-top-left-radius: 0; /* Thẳng ra khi nhắm */
+					// 	border-top-right-radius: 0;
+					// }
 
 					.tp-content{
 						// display: none;
@@ -2276,7 +2293,7 @@
 					// }
 
 					.tp-content .program-title p:nth-child(1){
-						font-size: 0.5em;
+						font-size: 1em;
 					}
 					.tp-content .program-title p:nth-child(2){
 						font-size: 1.1em;
@@ -2782,27 +2799,27 @@
 					$(".tp-container.tp-content").css("display", "none");
 					$(this).removeClass("active");
 					boxAlert("Ẩn Giao Diện");
-					$(this).find("svg").remove().append($(`<i class="fa-solid fa-eye"></i>`));
+					// $(this).find("svg").remove().append($(`<i class="fa-solid fa-eye"></i>`));
 				}else{
 					$(".tp-container.tp-content").css("display", "block");
 					$(this).addClass("active");
 					boxAlert("Hiện Giao Diện");
-					$(this).find("svg").remove().append($(`<i class="fa-solid fa-eye-slash"></i>`));
+					// $(this).find("svg").remove().append($(`<i class="fa-solid fa-eye-slash"></i>`));
 				}				
 			});
 
-			const eyeToggle = $('.tp-container.tp-button-toggle');
-			if (eyeToggle.length) {
-				eyeToggle.on('click', function() {
-					$("#myEyeToggle").toggleClass('hidden');
+			// const eyeToggle = $('.tp-container.tp-button-toggle');
+			// if (eyeToggle.length) {
+			// 	eyeToggle.on('click', function() {
+			// 		$("#myEyeToggle").toggleClass('hidden');
 					
-					if ($("#myEyeToggle").hasClass('hidden')) {
-						console.log('Mắt đang ẩn');
-					} else {
-						console.log('Mắt đang hiện');
-					}
-				});
-			}
+			// 		if ($("#myEyeToggle").hasClass('hidden')) {
+			// 			console.log('Mắt đang ẩn');
+			// 		} else {
+			// 			console.log('Mắt đang hiện');
+			// 		}
+			// 	});
+			// }
 
 			// Xóa log
 			$("#clear-log-button").on("click", function(){
@@ -7590,7 +7607,17 @@
 
 			var containers = $(".product-list-wrapper .product-list-container .product-item-wrapper");
 
-			for(var containerElement of containers){
+			var indexContainer = 0;
+
+			function nextContainer(){
+				if(indexContainer >= containers.length){
+					boxLogging(`Đã liên kết xong tất cả sản phẩm`, [], ["green"]);
+					boxToast(`Đã liên kết xong tất cả sản phẩm`, "success");
+					return;
+				};
+
+				var containerElement = containers.eq(indexContainer);
+
 				var openSku = false;
 
 				var product = $(containerElement).find(".product-item-line");
@@ -7599,7 +7626,16 @@
 
 				var variants = $(containerElement).find(".variant-list-wrapper .product-tooltip-wrapper");
 
-				for(var variantElement of variants){
+				var indexVariant = 0;
+
+				async function nextVariant(){
+					if(indexVariant >= variants.length){
+						boxLogging(`Đã liên kết xong sản phẩm ${product_name.text()}`, [`${product_name.text()}`], ["green"]);
+						boxToast(`Đã liên kết xong sản phẩm ${product_name.text()}`, "success");
+						return;
+					}
+
+					var variantElement = variants.eq(indexVariant);
 					var variant = $(variantElement);
 
 					var checkBox = $(variant).find(".item-checkbox input");
@@ -7612,8 +7648,12 @@
 
 					var variant_action = $(variant).find('.item-action');
 
-					if(!checkBox.prop("checked"))
-						continue;
+					if(!checkBox.prop("checked")){
+						// Nếu không chọn phân loại thì bỏ qua
+						indexVariant++;
+						nextVariant();
+						return;
+					}
 
 					// console.log(`${variant_name.text()}\n${variant_sku.text()}\n${variant_status.text()}\n${variant_name_connect.text()}\n${variant_sku_connect.text()}`);
 
@@ -7667,6 +7707,9 @@
 							boxLogging(`Đang liên kết SKU ${variant_sku.text()}`, [`${variant_sku.text()}`], ["orange"]);
 							variant_action.find("> div[data-for^='tool-tip-auto']").click();
 						}	
+
+						indexVariant++;
+						nextVariant();
 					}else{
 						// Loại liên kết thủ công
 						if(!variant_status.text().toLowerCase().includes("liên kết thành công")){
@@ -7678,26 +7721,28 @@
 
 							await delay(200);
 
-							var el = $(".popup-select-product-v2");
-
-							var headerInput = $(el).find('.popup-select-product-header input');
-
 							waitForElement($("body"), ".popup-select-product-body .popup-select-product-body .pspb-row", async (el) => {
+								var el = $(".popup-select-product-v2");
+
+								var headerInput = $(el).find('.popup-select-product-header input');
+
 								var sku = currentSKU.sku != '' ? currentSKU.sku : "x0";
 
-								simulateClearing(headerInput);
+								simulateClearing(headerInput, 0);
 								simulateReactInput(headerInput, sku);
 
-								await delay(5000);
+								await delay(3000);
 
-								console.log($(".popup-select-product-body .popup-select-product-body"));
+								el = $(".popup-select-product-body .popup-select-product-body");
 
-								var el = $(".popup-select-product-body .popup-select-product-body");
+								console.log(el.text());
 
-								if($(el).text().toLowerCase().includes("Không tìm thấy sản phẩm")){
+								if($(el).text().toLowerCase().includes("không tìm thấy sản phẩm")){
 									sku = "x0";
-									simulateClearing(headerInput);
+									simulateClearing(headerInput, 0);
+									await delay(200);
 									simulateReactInput(headerInput, sku);
+									await delay(3000);
 								}
 
 								var popupContents = $(".popup-select-product-body .pspb-row");
@@ -7710,15 +7755,27 @@
 
 									console.log(`${nameBox.text()} ${skuBox.text()}`);
 
-									if(skuBox.text().toLowerCase() === sku){
+									if(skuBox.text() == sku){
 										simulateReactEvent(popContent, "click");
 									}
 								}
+
+								simulateReactEvent(checkBox, "click");
+
+								indexVariant++;
+								nextVariant();
+
 							}, {once: true});
 						}
 					}
 				}
+
+				nextVariant();
+				indexContainer++;
+				nextContainer();
 			}
+
+			nextContainer();
 			
 			// $.each(container, (indexContainer, value) => {
 				
