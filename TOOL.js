@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.26";
+	const VERSION = "2.2.27";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -2254,7 +2254,7 @@
 						flex-grow: 1;
 						overflow: hidden;
 						// Ẩn hiện giao diện chính;
-						display: none;
+						display: flex;
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
@@ -3866,11 +3866,11 @@
 
 			var indexBox = 0;
 
-			function nextBox(){
-				if(indexBox >= box.length){
-					boxLogging("Đã cập nhật giá đuôi cho tất cả sản phẩm");
+			function kTra5LanGia(){
+				boxAlert("Đang kiểm tra giá đuôi cho sản phẩm");
+				indexBox--;
+				if(indexBox >= box.length)
 					return;
-				}
 
 				var minPrice = Infinity;
 				var maxPrice = -Infinity;
@@ -3888,10 +3888,84 @@
 
 				var indexParent = 0;
 
+				function checkItem(){
+					if(indexParent >= parent.length)
+						return
+
+					var name = parent.eq(indexParent).find(".item-content.item-variation .ellipsis-content.single");
+					var currentPrice = parent.eq(indexParent).find(".item-content.item-price");
+					var price = parent.eq(indexParent).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.currency-input input");
+					var percent = parent.eq(indexParent).find("form.eds-form.form.price-discount-form.eds-form--label-right .eds-form-item__content .eds-input.discount-input input");
+					var stock = parent.eq(indexParent).find(".item-content.item-stock");
+					var switcher = parent.eq(indexParent).find(".item-content.item-enable-disable .eds-switch.eds-switch--normal");
+
+					var giaGoc = currentPrice.text().replace("₫", "");
+					giaGoc = giaGoc.replace(".", "");
+
+					var giaKM = price.val().replace("₫", "");
+					giaKM = giaKM.replace(".", "");
+
+					if(maxPrice < parseInt(giaGoc)){
+						maxPrice = parseInt(giaGoc);
+						indexParent = 0;
+						checkItem();
+					}
+
+					if(!switcher.hasClass("eds-switch--disabled")){
+						if(minPrice > parseInt(giaKM)){
+							minPrice = parseInt(giaKM);
+							indexParent = 0;
+							checkItem();
+						}
+					}
+
+					var maxAccept = minPrice * 5;
+
+					console.log(`Giá gốc: ${giaGoc}, Giá KM: ${giaKM}, Max Accept: ${maxAccept}, Max Price: ${maxPrice}, Min Price: ${minPrice}`);
+
+					if(parseInt(giaGoc) > parseInt(maxAccept)){
+						boxLogging(`Sản phẩm [copy]${name.text()}[/copy] có giá quá cao, không thể cập nhật giá đuôi`, [`${name.text()}`], ["orange"]);
+						parent.eq(indexParent).css({
+							"background": "pink",
+							"color": "#fff"
+						});
+						indexParent = 0;
+						checkItem();
+					}
+
+					indexParent++;
+					checkItem();
+					return;
+				};
+
+				checkItem();
+			}
+
+			function nextBox(){
+				if(indexBox >= box.length){
+					boxLogging("Đã cập nhật giá đuôi cho tất cả sản phẩm");
+					return;
+				}
+
+				var parent = box.eq(indexBox).find(".discount-edit-item-model-list .discount-edit-item-model-component");
+
+				var checkBox = box.eq(indexBox).find(".discount-item-header .header-left-area .header-left-top input");
+
+				if(!checkBox.prop("checked")){
+					// Nếu sản phẩm chưa được chọn
+					indexBox++;
+					nextBox();
+					return;
+				}
+
+				var indexParent = 0;
+
 				async function nextParent(){
 					if(indexParent >= parent.length){
 						boxLogging(`Đã cập nhật giá đuôi`);
-						boxToast(`Đã cập nhật giá đuôi`, "success");
+						await delay(1000);
+						// Kiểm tra giá đuôi
+						// kTra5LanGia();
 						return;
 					}
 
@@ -3934,26 +4008,6 @@
 								boxLogging(`Sản phẩm [copy]${name.text()}[/copy] không có giá đuôi`, [`${name.text()}`], ["crimson"]);
 							}else{
 								// Những sản phẩm có giá đuôi
-								if(minPrice > parseInt(giaKM)){
-									minPrice = parseInt(giaKM);
-									indexParent = 0;
-									nextParent();
-									return;
-								}
-
-								var maxAccept = minPrice * 5;
-
-								if(parseInt(tachGia(gia).gia) > parseInt(maxAccept)){
-									boxLogging(`Sản phẩm [copy]${name.text()}[/copy] có giá quá cao, không thể cập nhật giá đuôi`, [`${name.text()}`], ["pink"]);
-									parent.eq(indexParent).css({
-										"background": "pink",
-										"color": "#fff"
-									});
-									indexParent++;
-									nextParent();
-									return;
-								}
-
 								simulateClearing($(price), 0, () => {
 									// Ghi giá đuôi vào ô giá
 									$(price).val(giaKM);
