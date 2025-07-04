@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.27";
+	const VERSION = "2.2.28";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -1826,7 +1826,7 @@
 
 							<!-- Shopee -->
 							<optgroup label="Shopee">
-								<option data-func="giaDuoiShopee">Cập Nhật Giá Đuôi</option>
+								<option data-func="giaDuoiShopee" data-layout="giaDuoiShopeeLayout">Cập Nhật Giá Đuôi</option>
 								<option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
 								<option data-func="kTr5LanGiaShopee" data-layout="kTr5LanGiaShopeeLayout">Kiểm Tra 5 Lần Giá</option>
 								<option data-func="kiemTraMaPhanLoaiShopee">Hiển Thị Mã Phân Loại</option>
@@ -2997,6 +2997,15 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "giaDuoiShopeeLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<p>Giá cao nhất: <span class="max-price">0</span></p>
+						<p>Giá thấp nhất: <span class="min-price">0</span></p>
+						<p>Giá đề xuất: <span class="avg-price">0</span></p>
+					</div>
+				`))
+				break;
 			case "xoaPhanLoaiTiktokLayout":
 				content.append($(`
 					<div class="layout-tab">
@@ -3960,12 +3969,33 @@
 
 				var indexParent = 0;
 
+				var minPrice = Infinity;
+				var maxPrice = -Infinity;
+
 				async function nextParent(){
 					if(indexParent >= parent.length){
 						boxLogging(`Đã cập nhật giá đuôi`);
 						await delay(1000);
 						// Kiểm tra giá đuôi
 						// kTra5LanGia();
+
+						var maxPriceText = $("span.max-price");
+						var minPriceText = $("span.min-price");
+						var avgPriceText = $("span.avg-price");
+
+						maxPriceText.text(maxPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + "₫");
+						minPriceText.text(minPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + "₫");
+
+						var maxAccept = minPrice * 5;
+						var minAccept = maxPrice / 5;
+
+						if(minAccept > minPrice)
+							minPrice = Math.ceil(parseInt(maxPrice) / 5);
+
+						if(maxAccept < maxPrice)
+							maxPrice = gopGia(parseInt(maxAccept) - 1000, tachGia(maxPrice).giaDuoi).gia;
+
+						avgPriceText.text(`Cao nhất ${maxPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + "₫"} / Thấp nhất ${minPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + "₫"}`);
 						return;
 					}
 
@@ -3982,6 +4012,13 @@
 
 					var giaKM = tachGia(gia).giaDuoi;
 
+					if(maxPrice < parseInt(gia)){
+						maxPrice = parseInt(gia);
+						indexParent = 0;
+						nextParent();
+						return;
+					}
+
 					if(!switcher.hasClass("eds-switch--disabled")){
 						// Những sản phẩm không bị disabled
 						if(!switcher.hasClass("eds-switch--open")){
@@ -3996,7 +4033,26 @@
 
 							await delay(500);
 						}
-						
+
+						// Kiểm tra giá
+						if(minPrice > parseInt(giaKM)){
+							minPrice = parseInt(giaKM);
+							indexParent = 0;
+							nextParent();
+							return;
+						}
+
+						var maxAccept = minPrice * 5;
+
+						if(parseInt(gia) > parseInt(maxAccept)){
+							boxLogging(`Sản phẩm [copy]${name.text()}[/copy] có giá quá cao, không thể cập nhật giá đuôi`, [`${name.text()}`], ["orange"]);
+							parent.eq(indexParent).css({
+								"background": "pink",
+								"color": "#fff"
+							});
+						}
+
+						// Những sản phẩm đã bật						
 						if(switcher.hasClass("eds-switch--open")){
 							// Những sản phẩm đã bật
 							if(parseInt(giaKM) <= 0){
