@@ -1,162 +1,145 @@
-<!-- GIAO DIỆN CHƯƠNG TRÌNH -->
 <div class="tp-popup">
-	<div class="popup-overlay"></div>
-	<div class="popup-box">
-		<div class="content" style="white-space: pre-wrap; overflow-y: auto;"></div>
-	</div>
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">Thông báo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="content" style="white-space: pre-wrap; overflow-y: auto;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div id="toast-container"></div>
 
-<!-- <div class="tp-container tp-button-toggle">
-	<div class="eye-toggle" id="myEyeToggle">
-		<div class="pupil"></div>
-		<div class="slash"></div>
-		<div class="eyelid top"></div>
-		<div class="eyelid bottom"></div>
-	</div>
-</div> -->
-
 <div class="tp-container tp-button-toggle">
-	<i class="fa-solid fa-fingerprint"></i>
+    <i class="fa-solid fa-fingerprint"></i>
 </div>
 
 <div id="custom-context-menu" style="display:none; position:absolute; z-index:9999;">
-	<ul>
-	<li class="menu-item" data-action="toggle-program">Ẩn/Hiện chương trình</li>
-	<li class="menu-item" data-action="connect-server">Kết nối máy chủ</li>
-	</ul>
+    <ul class="list-unstyled p-0 m-0">
+        <li class="menu-item" data-action="toggle-program">Ẩn/Hiện chương trình</li>
+        <li class="menu-item" data-action="connect-server">Kết nối máy chủ</li>
+    </ul>
 </div>
 
 <div class="tp-container tp-content">
-	<div class="program-title">
-		<p>Ver ${VERSION}</p>
-		<p id="server-status">OFFLINE</p>
-	</div>
+    <div class="program-title">
+        <p>Ver ${VERSION}</p>
+        <p id="server-status">OFFLINE</p>
+    </div>
 
-	<div class="program-log">
-		<pre class="logging"></pre>
-	</div>
-	<p id="clear-log-button" style="text-align: right; font-size: 0.8em; color: rgb(129, 186, 255)">Làm Sạch Log</p>
+    <div class="program-log">
+        <pre class="logging"></pre>
+    </div>
+    <p id="clear-log-button" class="text-end text-primary" style="font-size: 0.8em; cursor: pointer;">Làm Sạch Log</p>
 
-	<div class="program-tab">
-		<div class="tab-title">
-			<div class="tab-box" data-tab="tab-function">
-				<p>Chức Năng</p>
-			</div>
-			<div class="tab-box" data-tab="tab-custom">
-				<p>Tùy Chỉnh</p>
-			</div>
-			<div class="tab-box disabled" data-tab="tab-online-function">
-				<p>Chức Năng Online</p>
-			</div>
-		</div>
-	</div>
+    <ul class="nav nav-tabs mb-3 justify-content-center" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="function-tab" data-bs-toggle="tab" data-bs-target="#tab-function" type="button" role="tab" aria-controls="tab-function" aria-selected="true">Chức Năng</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="custom-tab" data-bs-toggle="tab" data-bs-target="#tab-custom" type="button" role="tab" aria-controls="tab-custom" aria-selected="false">Tùy Chỉnh</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link disabled" id="online-function-tab" data-bs-toggle="tab" data-bs-target="#tab-online-function" type="button" role="tab" aria-controls="tab-online-function" aria-selected="false">Chức Năng Online</button>
+        </li>
+    </ul>
 
-	<div id="tab-function" class="tab-content program-future active">
-		<select id="functionSelect">
-			<option hidden>Chọn Chức Năng</option>
+    <div class="tab-content flex-grow-1 overflow-auto">
+        <div class="tab-pane fade show active" id="tab-function" role="tabpanel" aria-labelledby="function-tab">
+            <select id="functionSelect" class="form-select mb-3">
+                <option hidden>Chọn Chức Năng</option>
+                <optgroup label="Shopee">
+                    <option data-func="giaDuoiShopee" data-layout="giaDuoiShopeeLayout">Cập Nhật Giá Đuôi</option>
+                    <option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
+                    <option data-func="kTr5LanGiaShopee" data-layout="kTr5LanGiaShopeeLayout">Kiểm Tra 5 Lần Giá</option>
+                    <option data-func="kiemTraMaPhanLoaiShopee">Hiển Thị Mã Phân Loại</option>
+                    <option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
+                    <option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
+                    <option data-func="themKyTuPhanLoaiShopee" data-layout="themKyTuPhanLoaiShopeeLayout">Sửa Tên Phân Loại</option>
+                    <option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
+                    <option data-func="cTrinhKMShopee" data-layout="cTrinhKMShopeeLayout">Điều Chỉnh Chương Trình Khuyến Mãi</option>
+                    <option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
+                    <option data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại</option>
+                    <option data-func="layPhanLoaiShopee" data-layout="layPhanLoaiShopeeLayout">Lấy Phân Loại</option>
+                    <option data-func="layIDSanPhamShopee" data-layout="layIDSanPhamShopeeLayout">Lấy ID Sản Phẩm</option>
+                    <option data-func="layLinkChuaSKUShopee" data-layout="layLinkChuaSKUShopeeLayout">Lấy Link Chứa SKU</option>
+                    <option data-func="suaTonSKUNhieuLinkShopee" data-layout="suaTonSKUNhieuLinkShopeeLayout">Sửa Tồn Theo SKU Nhiều Link</option>
+                    <option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
+                </optgroup>
+                <optgroup label="TikTok">
+                    <option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
+                    <option data-func="flashSaleTiktok">Flash Sale</option>
+                    <option data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chép Chương Trình Flash Sale</option>
+                    <option data-func="kiemTraMaPhanLoaiTiktok">Hiển Thị Mã Phân Loại</option>
+                    <option data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
+                    <option data-func="themPhanLoaiTiktok" data-layout="themPhanLoaiTikTokLayout">Thêm Phân Loại</option>
+                    <option data-func="xoaPhanLoaiTiktok" data-layout="xoaPhanLoaiTiktokLayout">Xóa Phân Loại</option>
+                    <option data-func="themHinhTheoSKUTiktok" data-layout="themHinhTheoSKUTiktokLayout">Sửa Hình Theo SKU</option>
+                    <option data-func="layIDSanPhamTiktok" data-layout="layIDSanPhamTiktokLayout">Lấy ID Sản Phẩm</option>
+                    <option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
+                </optgroup>
+                <optgroup label="Lazada">
+                    <option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
+                    <option data-func="khoiPhucSanPhamLazada">Khôi Phục Sản Phẩm Đã Xóa</option>
+                    <option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
+                    <option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
+                    <option data-func="themHinhTheoSKULazada" data-layout="themHinhTheoSKULazadaLayout">Sửa Hình Theo SKU</option>
+                    <option disabled data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
+                </optgroup>
+                <optgroup label="Sapo">
+                    <option data-func="hienThiThemDSSapo">Hiển Thị Thêm Danh Sách Sản Phẩm Sàn</option>
+                    <option data-func="lienKetSKUSapo" data-layout="lienKetSKUSapoLayout">Liên Kết SKU</option>
+                    <option disabled data-func="kiemTraTonSapo" data-layout="kiemTraTonSapoLayout">Kiểm Tra Tồn</option>
+                </optgroup>
+                <optgroup label="Khác">
+                    <option data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
+                    <option data-func="mergeExcelFile" data-layout="mergeExcelFileLayout">Gộp File Excel</option>
+                    <option data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
+                    <option data-func="moLink" data-layout="moLinkLayout">Mở Link Hàng Loạt</option>
+                    <option data-func="tinhGiaBan" data-layout="tinhGiaBanLayout">Tính Giá Bán</option>
+                </optgroup>
+            </select>
+            <div class="layout-future functionSelect"></div>
+        </div>
 
-			<!-- Shopee -->
-			<optgroup label="Shopee">
-				<option data-func="giaDuoiShopee" data-layout="giaDuoiShopeeLayout">Cập Nhật Giá Đuôi</option>
-				<option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
-				<option data-func="kTr5LanGiaShopee" data-layout="kTr5LanGiaShopeeLayout">Kiểm Tra 5 Lần Giá</option>
-				<option data-func="kiemTraMaPhanLoaiShopee">Hiển Thị Mã Phân Loại</option>
-				<option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
-				<option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
-				<option data-func="themKyTuPhanLoaiShopee" data-layout="themKyTuPhanLoaiShopeeLayout">Sửa Tên Phân Loại</option>
-				<option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
-				<option data-func="cTrinhKMShopee" data-layout="cTrinhKMShopeeLayout">Điều Chỉnh Chương Trình Khuyến Mãi</option>
-				<option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
-				<option data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại</option>
-				<option data-func="layPhanLoaiShopee" data-layout="layPhanLoaiShopeeLayout">Lấy Phân Loại</option>
-				<option data-func="layIDSanPhamShopee" data-layout="layIDSanPhamShopeeLayout">Lấy ID Sản Phẩm</option>
-				<option data-func="layLinkChuaSKUShopee" data-layout="layLinkChuaSKUShopeeLayout">Lấy Link Chứa SKU</option>
-				<option data-func="suaTonSKUNhieuLinkShopee" data-layout="suaTonSKUNhieuLinkShopeeLayout">Sửa Tồn Theo SKU Nhiều Link</option>
-				<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
-				<!-- <option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option> -->
-				<!-- <option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option> -->
-			</optgroup>
+        <div class="tab-pane fade" id="tab-custom" role="tabpanel" aria-labelledby="custom-tab">
+            <select id="optionSelect" class="form-select mb-3">
+                <option hidden>Chọn Chức Năng</option>
+                <option data-layout="chung">Chung</option>
+                <option data-layout="shopee">Shopee</option>
+                <option data-layout="tiktok">Tiktok</option>
+                <option data-layout="lazada">Lazada</option>
+                <option data-layout="sapo">Sapo</option>
+                <option data-layout="khac">Khác</option>
+            </select>
+            <div class="layout-future optionSelect"></div>
+        </div>
 
-			<!-- TikTok -->
-			<optgroup label="TikTok">
-				<option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
-				<option data-func="flashSaleTiktok">Flash Sale</option>
-				<option data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chép Chương Trình Flash Sale</option>
-				<option data-func="kiemTraMaPhanLoaiTiktok">Hiển Thị Mã Phân Loại</option>
-				<option data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
-				<option data-func="themPhanLoaiTiktok" data-layout="themPhanLoaiTikTokLayout">Thêm Phân Loại</option>
-				<option data-func="xoaPhanLoaiTiktok" data-layout="xoaPhanLoaiTiktokLayout">Xóa Phân Loại</option>
-				<option data-func="themHinhTheoSKUTiktok" data-layout="themHinhTheoSKUTiktokLayout">Sửa Hình Theo SKU</option>
-				<option data-func="layIDSanPhamTiktok" data-layout="layIDSanPhamTiktokLayout">Lấy ID Sản Phẩm</option>
-				<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
-			</optgroup>
+        <div class="tab-pane fade" id="tab-online-function" role="tabpanel" aria-labelledby="online-function-tab">
+            <select id="onlineSelect" class="form-select mb-3">
+                <option hidden>Chọn Chức Năng</option>
+                <option data-func="aiChat" data-layout="aiChatLayout">Veritas</option>
+                <option data-func="editDescription" data-layout="editDescriptionLayout">Sửa Mô Tả</option>
+            </select>
+            <div class="layout-future onlineSelect"></div>
+        </div>
+    </div>
 
-			<!-- Lazada -->
-			<optgroup label="Lazada">
-				<option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
-				<option data-func="khoiPhucSanPhamLazada">Khôi Phục Sản Phẩm Đã Xóa</option>
-				<option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
-				<option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
-				<option data-func="themHinhTheoSKULazada" data-layout="themHinhTheoSKULazadaLayout">Sửa Hình Theo SKU</option>
-				<option disabled data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
-			</optgroup>
-
-			<!-- Sapo -->
-			<optgroup label="Sapo">
-				<option data-func="hienThiThemDSSapo">Hiển Thị Thêm Danh Sách Sản Phẩm Sàn</option>
-				<option data-func="lienKetSKUSapo" data-layout="lienKetSKUSapoLayout">Liên Kết SKU</option>
-				<option disabled data-func="kiemTraTonSapo" data-layout="kiemTraTonSapoLayout">Kiểm Tra Tồn</option>
-			</optgroup>
-
-			<!-- Khác -->
-			<optgroup label="Khác">
-				<option data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
-				<option data-func="mergeExcelFile" data-layout="mergeExcelFileLayout">Gộp File Excel</option>
-				<option data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
-				<option data-func="moLink" data-layout="moLinkLayout">Mở Link Hàng Loạt</option>
-				<option data-func="tinhGiaBan" data-layout="tinhGiaBanLayout">Tính Giá Bán</option>
-				<!-- <option disabled data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option> -->
-			</optgroup>
-
-		</select>
-
-		<div class="layout-future functionSelect">
-		</div>
-	</div>
-
-	<div id="tab-custom" class="tab-content">
-		<select id="optionSelect">
-			<option hidden>Chọn Chức Năng</option>
-			<option data-layout="chung">Chung</option>
-			<option data-layout="shopee">Shopee</option>
-			<option data-layout="tiktok">Tiktok</option>
-			<option data-layout="lazada">Lazada</option>
-			<option data-layout="sapo">Sapo</option>
-			<option data-layout="khac">Khác</option>
-		</select>
-
-		<div class="layout-future optionSelect">
-		</div>
-	</div>
-
-	<div id="tab-online-function" class="tab-content">
-		<select id="onlineSelect">
-			<option hidden>Chọn Chức Năng</option>
-			<option data-func="aiChat" data-layout="aiChatLayout">Veritas</option>
-			<option data-func="editDescription" data-layout="editDescriptionLayout">Sửa Mô Tả</option>
-		</select>
-
-		<div class="layout-future onlineSelect">
-		</div>
-	</div>
-
-	<div class="button-control">
-		<button id="excuse-command" data-func="">Chạy</button>
-	</div>
-	<div class="resize-handle top-left"></div>
-	<div class="resize-handle top-right"></div>
-	<div class="resize-handle bottom-left"></div>
-	<div class="resize-handle bottom-right"></div>
+    <div class="button-control mt-auto pt-3">
+        <button id="excuse-command" data-func="" class="btn btn-danger w-100">Chạy</button>
+    </div>
+    
+    <div class="resize-handle top-left"></div>
+    <div class="resize-handle top-right"></div>
+    <div class="resize-handle bottom-left"></div>
+    <div class="resize-handle bottom-right"></div>
 </div>
