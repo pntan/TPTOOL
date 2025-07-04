@@ -1,22 +1,45 @@
-/* Các style Popup được giữ lại hoặc điều chỉnh để hoạt động với Modal Bootstrap */
+/* --- HIỆU ỨNG CHUNG (Glassmorphism) --- */
+/* Áp dụng hiệu ứng gương cho các container chính */
+.tp-container,
+.modal-content { /* modal-content của Bootstrap sẽ có hiệu ứng gương */
+    background: rgba(255, 255, 255, 0.2); /* Nền trắng trong suốt */
+    border-radius: 18px; /* Bo góc tròn hơn */
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); /* Bóng đổ mềm mại */
+    backdrop-filter: blur(10px); /* Hiệu ứng mờ nền */
+    -webkit-backdrop-filter: blur(10px); /* Hỗ trợ trình duyệt Webkit */
+    border: 1px solid rgba(255, 255, 255, 0.18); /* Viền mờ trong suốt */
+    color: #333; /* Đảm bảo chữ dễ đọc trên nền sáng */
+}
+
+/* Điều chỉnh màu sắc chữ cho phù hợp với nền gương */
+.tp-container p,
+.tp-container label,
+.tp-container .program-title p,
+#custom-context-menu .menu-item {
+    color: #222; /* Màu chữ đậm hơn để dễ đọc trên nền mờ */
+}
+
+
+/* --- CÁC THÀNH PHẦN RIÊNG BIỆT --- */
+
+/* Popup / Modal */
 .tp-popup {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    z-index: 9998; /* Giả sử UI chính có z-index: 9999 */
+    z-index: 9998;
+    /* backdrop-filter sẽ được áp dụng trực tiếp lên modal-backdrop của Bootstrap */
 }
 
-/* Lưu ý: .tp-popup .popup-overlay và .tp-popup .popup-box đã được thay thế bởi cấu trúc Modal của Bootstrap (.modal-backdrop, .modal-dialog, .modal-content).
-   Chỉ giữ lại style cho phần nội dung bên trong modal-body nếu bạn muốn định dạng riêng cho nó. */
 .tp-popup .popup-box .content { /* Class này áp dụng cho div.content bên trong modal-body */
     max-height: 100%;
     overflow-y: auto;
     font-family: monospace;
     font-size: 14px;
     padding: 1vh;
-    background: #fdfdfd;
+    background: rgba(255, 255, 255, 0.7); /* Nền trong suốt hơn cho phần nội dung log */
     border-radius: 8px;
     box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
     line-height: 1.5;
@@ -34,7 +57,7 @@
     z-index: 9999;
 }
 
-.toast { /* Toast của bạn vẫn dùng CSS tùy chỉnh */
+.toast {
     width: auto;
     max-width: 20vw;
     border-radius: 6px;
@@ -45,9 +68,10 @@
     transform: translateY(20px);
     transition: all 0.3s ease;
     position: relative;
-    background: #333;
     padding: 10px 15px;
     animation: slideIn 0.3s ease forwards;
+    /* Toast cũng có thể có glassmorphism nếu muốn, nhưng thường nó cần nền solid hơn để nổi bật */
+    background: rgba(0, 0, 0, 0.7); /* Màu nền đậm hơn để dễ đọc */
 }
 
 .toast.show { opacity: 1; transform: translateY(0); }
@@ -62,14 +86,16 @@
     position: absolute;
     z-index: 9999;
     min-width: 180px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    /* Áp dụng hiệu ứng glassmorphism */
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px; /* Giữ bo góc hiện có */
+    box-shadow: 0 8px 24px rgba(31, 38, 135, 0.37); /* Bóng đổ mềm mại hơn */
     font-family: "Segoe UI", sans-serif;
     animation: fadeIn 0.15s ease-in-out;
     overflow: hidden;
-    border: 1px solid #ddd;
-    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 #custom-context-menu .menu-item {
@@ -84,8 +110,8 @@
 }
 
 #custom-context-menu .menu-item:hover {
-    background-color: #f0f4f8;
-    color: #333; /* Giữ màu chữ nếu không muốn đổi thành màu mặc định của Bootstrap */
+    background-color: rgba(0, 123, 255, 0.1); /* Hover trong suốt hơn */
+    color: #007bff; /* Thay đổi màu chữ khi hover */
 }
 
 @keyframes fadeIn {
@@ -94,17 +120,55 @@
 }
 
 @media (prefers-color-scheme: dark) {
+    /* Điều chỉnh cho chế độ tối */
+    .tp-container,
+    .modal-content,
     #custom-context-menu {
-        background: rgba(0, 0, 0, 0.6);
-        border: 1px solid #333;
+        background: rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #eee;
     }
+    .tp-container p,
+    .tp-container label,
+    .tp-container .program-title p,
     #custom-context-menu .menu-item {
         color: #eee;
     }
+    .tp-content .program-log {
+        background: rgba(0, 0, 0, 0.5); /* Log cũng trong suốt trong dark mode */
+        box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
+        color: #eee;
+    }
+    .tp-popup .popup-box .content {
+        background: rgba(0, 0, 0, 0.5);
+        box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
+        color: #eee;
+    }
+    .tp-content .tab-content select,
+    .tp-content .layout-future input,
+    .tp-content .layout-future textarea {
+        background: rgba(0, 0, 0, 0.5);
+        color: #eee;
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+    .tp-content .program-title p:nth-child(2) {
+        color: #eee;
+    }
     #custom-context-menu .menu-item:hover {
-        background-color: #333;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+    .nav-link.active { /* Tab active trong dark mode */
+        background-color: rgba(0, 0, 0, 0.4) !important;
+        color: #fff !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    .nav-link { /* Tab non-active trong dark mode */
+        color: #bbb !important;
     }
 }
+
 
 /* General Container (Tùy chỉnh) */
 .tp-container {
@@ -116,11 +180,7 @@
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    background: rgba(255, 255, 255, 0.8);
-    border-radius: 10px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* Các thuộc tính glassmorphism đã chuyển lên chung */
     padding: 1vh 1vw;
 }
 
@@ -135,19 +195,20 @@
     width: auto;
     height: 5vh;
     aspect-ratio: 16 / 9;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.6); /* Có thể giữ nền này hoặc chuyển sang glassmorphism */
+    border-radius: 10px; /* Bo góc nhẹ */
     padding: 0.5vw 0.5vw;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.5rem;
     font-weight: 700;
-    transition: color 0.5s;
-    cursor: pointer; /* Thêm cursor để thể hiện là nút */
+    transition: color 0.5s, background 0.3s;
+    cursor: pointer;
 }
 
 .tp-button-toggle:hover {
-    opacity: 1;
+    background: rgba(255, 255, 255, 0.8); /* Nền sáng hơn khi hover */
 }
 
 .tp-button-toggle.active {
@@ -159,7 +220,7 @@
     color: pink;
     width: 100%;
     height: 100%;
-    font-size: 2em; /* Giữ để đảm bảo kích thước icon */
+    font-size: 2em;
     transition: color 0.5s;
 }
 
@@ -173,14 +234,9 @@
     height: auto;
     left: 0;
     top: 0;
-    /* backdrop-filter và background được định nghĩa ở .tp-container chung */
-    background: 0 4px 20px rgba(255, 255, 255, 0.4), 0 4px 30px rgba(0, 0, 0, 0.2);
-    color: #000;
-    border-radius: 10px;
-    padding: 1vh 1vw;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* Các thuộc tính glassmorphism đã chuyển lên .tp-container */
+    color: #000; /* Màu chữ mặc định */
+    /* border-radius, padding, backdrop-filter, border, box-shadow đã chuyển lên .tp-container */
     flex-grow: 1;
     overflow: hidden;
     display: flex;
@@ -210,19 +266,11 @@
 }
 
 .tp-content .program-title p:nth-child(1) {
-    font-size: 1.6em;
+    font-size: 1em;
     font-weight: bold;
     color: #555;
 }
 
-.tp-content .program-title p:nth-child(2) {
-    font-size: 0.9em;
-}
-
-/* Điều chỉnh lại font-size cho p:nth-child(1) và p:nth-child(2) để phù hợp với code cũ của bạn */
-.tp-content .program-title p:nth-child(1) {
-    font-size: 1em;
-}
 .tp-content .program-title p:nth-child(2) {
     font-size: 1.1em;
     color: #000;
@@ -236,13 +284,13 @@
     color: #f7ad00;
 }
 
-/* Program Log (Tùy chỉnh) */
+/* Program Log (Bên trong cần background hơi trong suốt) */
 .tp-content .program-log {
     width: 100%;
     height: auto;
     max-height: 20vh;
     overflow-y: auto;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.7); /* Nền trắng trong suốt cho log */
     border-radius: 8px;
     padding: 1vh 1vw;
     margin-bottom: 1vh;
@@ -254,13 +302,46 @@
     word-wrap: break-word;
     font-family: monospace;
     font-size: 13px;
+    color: #333; /* Màu chữ cho log */
 }
 
-/* Tab Content (Tùy chỉnh nhẹ) */
-.tab-content {
-    padding: 1vh; /* Giữ padding nếu muốn */
-    /* Các thuộc tính display, flex-grow, overflow đã được xử lý bằng class Bootstrap */
+/* Tabs (Bootstrap Navs and Tabs) */
+.nav-tabs .nav-link {
+    background-color: rgba(255, 255, 255, 0.4) !important; /* Nền tab mờ */
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px 8px 0 0 !important; /* Bo góc trên */
+    margin-right: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    color: #555 !important;
 }
+
+.nav-tabs .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.6) !important; /* Sáng hơn khi hover */
+    color: #000 !important;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.8) !important; /* Nền active sáng hơn */
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.8) !important; /* Khử viền dưới để liền với content */
+    color: #000 !important;
+    font-weight: bold;
+}
+.nav-tabs .nav-link.disabled {
+    background-color: rgba(200, 200, 200, 0.3) !important;
+    cursor: not-allowed;
+    color: #999 !important;
+}
+
+.tab-content {
+    padding: 1vh;
+    background: rgba(255, 255, 255, 0.6); /* Nền cho nội dung tab, hơi trong suốt */
+    border-radius: 0 0 10px 10px; /* Bo góc dưới */
+    border: 1px solid rgba(255, 255, 255, 0.18); /* Viền cho nội dung tab */
+    border-top: none; /* Khử viền trên để liền với tab */
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05); /* Bóng đổ nhẹ bên trong */
+}
+
 
 /* Form Controls (Tùy chỉnh nhẹ) */
 .tp-content .tab-content select {
@@ -270,23 +351,38 @@
     border-radius: 10px; /* Override Bootstrap nếu muốn 10px */
     font-size: 14px;
     margin-bottom: 1vh;
-    background: #f9f9f9;
+    background: rgba(255, 255, 255, 0.8); /* Nền input trong suốt */
+    color: #222;
+    border: 1px solid rgba(255, 255, 255, 0.5); /* Viền input mềm mại */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .tp-content .tab-content select optgroup {
     text-indent: 5%;
+    color: #333;
 }
 
 .tp-content .layout-future * {
-    margin-bottom: 10px; /* Giữ khoảng cách giữa các phần tử layout con */
+    margin-bottom: 10px;
 }
 
 .tp-content .layout-future input,
 .tp-content .layout-future textarea {
-    border-radius: 8px; /* Override Bootstrap nếu muốn 8px */
-    background: rgba(255, 255, 255, 0.7);
-    color: #000;
-    resize: both; /* Vẫn giữ cho textarea có thể thay đổi kích thước */
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.8); /* Nền input trong suốt */
+    color: #222;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+.tp-content .layout-future input:focus,
+.tp-content .layout-future textarea:focus,
+.tp-content .tab-content select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Focus ring của Bootstrap */
+    background: #fff; /* Nền solid hơn khi focus */
 }
 
 .tp-content .layout-future textarea {
@@ -301,9 +397,11 @@
     color: #222;
 }
 
-/* Buttons (Tùy chỉnh nhẹ) */
-.tp-content .layout-future button {
-    border-radius: 8px; /* Override Bootstrap nếu muốn 8px */
+/* Buttons (Sử dụng Bootstrap mặc định, nhưng có thể override bo góc) */
+.tp-content .layout-future button,
+.tp-content .button-control button {
+    border-radius: 8px; /* Bo góc 8px cho tất cả các nút */
+    /* Màu sắc và hover của Bootstrap đã đẹp rồi */
 }
 
 .tp-content .layout-future table tr {
@@ -319,7 +417,6 @@
 .tp-content .button-control button {
     padding: 12px;
     font-size: 15px;
-    border-radius: 8px; /* Override Bootstrap nếu muốn 8px */
 }
 
 /* Resize Handles (Giữ nguyên) */
@@ -327,9 +424,19 @@
     position: absolute;
     width: 16px;
     height: 16px;
-    background: #ccc;
+    background: rgba(204, 204, 204, 0.3); /* Mờ hơn */
     cursor: pointer;
     opacity: 0; /* Ẩn mặc định */
+    border-radius: 4px; /* Bo góc nhẹ */
+    transition: opacity 0.2s ease, background 0.2s ease;
+}
+
+.tp-content:hover .resize-handle {
+    opacity: 1; /* Hiện ra khi hover lên container chính */
+}
+
+.resize-handle:hover {
+    background: rgba(0, 123, 255, 0.5); /* Màu sáng khi hover */
 }
 
 .top-left { left: 0; top: 0; cursor: nw-resize; }
@@ -339,12 +446,12 @@
 
 /* Custom Switch (Giữ nguyên) */
 .switch-wrapper { display: flex; align-items: center; gap: 10px; font-family: sans-serif; }
-.switch-label { font-size: 14px; font-weight: bold; color: #444; width: 50px; text-align: center; }
+.switch-label { font-size: 14px; font-weight: bold; color: #222; width: 50px; text-align: center; } /* Màu chữ đậm hơn */
 .switch { position: relative; width: 60px; height: 28px; cursor: pointer; }
 .switch input { opacity: 0; width: 0; height: 0; position: absolute; }
 .slider {
     position: relative;
-    background-color: #ccc;
+    background-color: rgba(200, 200, 200, 0.5); /* Nền slider trong suốt */
     border-radius: 34px;
     width: 100%;
     height: 100%;
