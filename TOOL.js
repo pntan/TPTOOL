@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "TROLL TROLL VN";
+	const VERSION = "2.2.28";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -2244,9 +2244,6 @@
 						top: 0;
 						// transform: translate(-50%, -50%);
 						background: 0 4px 20px rgba(255, 255, 255, 0.4), 0 4px 30px rgba(0, 0, 0, 0.2);
-						background-image: url("https://github.com/pntan/TPTOOL/blob/main/s%E1%BA%BD-gay-bg.png?raw=true");
-						background-size:  cover;
-						background-repeat: no-repeat;
 						color: #000;
 						// box-shadow: -5px 5px 5px #fff;
 						border-radius: 10px;
