@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.28";
+	const VERSION = "TROLL TROLL VN";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -2244,6 +2244,9 @@
 						top: 0;
 						// transform: translate(-50%, -50%);
 						background: 0 4px 20px rgba(255, 255, 255, 0.4), 0 4px 30px rgba(0, 0, 0, 0.2);
+						background-image: url("https://github.com/pntan/TPTOOL/blob/main/s%E1%BA%BD-gay-bg.png?raw=true");
+						background-size:  cover;
+						background-repeat: no-repeat;
 						color: #000;
 						// box-shadow: -5px 5px 5px #fff;
 						border-radius: 10px;
@@ -2254,7 +2257,7 @@
 						flex-grow: 1;
 						overflow: hidden;
 						// Ẩn hiện giao diện chính;
-						display: none;
+						display: flex;
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
@@ -3971,6 +3974,7 @@
 
 				var minPrice = Infinity;
 				var maxPrice = -Infinity;
+				var maxAccept = 0;
 
 				async function nextParent(){
 					if(indexParent >= parent.length){
@@ -3986,8 +3990,10 @@
 						maxPriceText.text(maxPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + "₫");
 						minPriceText.text(minPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + "₫");
 
-						var maxAccept = minPrice * 5;
-						var minAccept = maxPrice / 5;
+						// var maxAccept = minPrice * 5;
+						var minAccept = maxAccept / 5;
+
+						console.log(minAccept, maxAccept, minPrice, maxPrice);
 
 						if(minAccept > minPrice)
 							minPrice = Math.ceil(parseInt(maxPrice) / 5);
@@ -4034,15 +4040,22 @@
 							await delay(500);
 						}
 
-						// Kiểm tra giá
-						if(minPrice > parseInt(giaKM)){
-							minPrice = parseInt(giaKM);
+						var giaKM5lan = giaKM;
+
+						if(parseInt(giaKM5lan) <= 0){
+							giaKM5lan = price.val().replace("₫", "");
+							giaKM5lan = giaKM5lan.replace(".", "");
+						}
+
+						// Kiểm tra 5 lần giá
+						if(minPrice > parseInt(giaKM5lan)){
+							minPrice = parseInt(giaKM5lan);
 							indexParent = 0;
 							nextParent();
 							return;
 						}
 
-						var maxAccept = minPrice * 5;
+						maxAccept = minPrice * 5;
 
 						if(parseInt(gia) > parseInt(maxAccept)){
 							boxLogging(`Sản phẩm [copy]${name.text()}[/copy] có giá quá cao, không thể cập nhật giá đuôi`, [`${name.text()}`], ["orange"]);
@@ -7841,7 +7854,7 @@
 								simulateClearing(headerInput, 0);
 								simulateReactInput(headerInput, sku);
 
-								await delay(3000);
+								await delay(1500);
 
 								el = $(".popup-select-product-body .popup-select-product-body");
 
@@ -7852,7 +7865,7 @@
 									simulateClearing(headerInput, 0);
 									await delay(200);
 									simulateReactInput(headerInput, sku);
-									await delay(3000);
+									await delay(500);
 								}
 
 								var popupContents = $(".popup-select-product-body .pspb-row");
