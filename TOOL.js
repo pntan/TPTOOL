@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.28";
+	const VERSION = "2.2.29";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -2254,7 +2254,7 @@
 						flex-grow: 1;
 						overflow: hidden;
 						// Ẩn hiện giao diện chính;
-						display: none;
+						display: flex;
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
@@ -4630,7 +4630,7 @@
 
 					// Click input đầu tiên để kích hoạt UI React
 					if(!clickInput){
-						imgInputShopee.click();
+						// imgInputShopee.click();
 						clickInput = true;
 					}
 
@@ -4780,44 +4780,59 @@
 
 		// Cập nhật giá đuôi Lazada
 		function giaDuoiLazada(){
+			boxAlert(`Cập nhật giá đuôi`)
 			var row = $(".next-table-row");
 			var price = [];
 
-			var i = 0;
-			$.each(row, (index, value) => {
-				var gia = $(value).find("input").val();
+			var indexRow = 0;
+			async function nextRow(){
+				if(indexRow > row.length){
+					boxToast(`Đã cập nhật giá đuôi`, "success");
+					boxLogging(`Đã cập nhất giá đuôi`);
+					return;
+				}
+
+				var gia = row.eq(indexRow).find("input").val();
 				var giaKM = tachGia(gia).giaDuoi;
 
-				var name = $(row).eq(index).find("td").eq(0).find("button span").text();
+				var name = row.eq(indexRow).find("td:nth-child(1) button span").text();
 
-				if($(value).find("td.special_price").has("button.next-btn").length > 0){
+				if(row.eq(indexRow).find("td.special_price").has("button.next-btn").length > 0){
 					if(parseInt(giaKM) == 0)
 						giaKM = gia;
-					price.push(giaKM);
-					$(value).find("td.special_price button.next-btn").click();
 
-					row.eq(index).css("background", "lightgreen");
+					row.eq(indexRow).find("td.special_price button.next-btn").click();
 
-					boxLogging(`Sản phẩm ${name} đã được cập nhất giá`, [`${name}`], ["green"]);
+					await delay(200);
+
+					var balloon = $(".next-overlay-wrapper .next-balloon-content");
+					
+					var inputPrice = balloon.eq(0).find(".money-number-picker input");
+					var buttonClick = balloon.eq(0).find(".action-wrapper button:nth-child(1)");
+
+					console.log(balloon, inputPrice, buttonClick);
+
+					inputPrice.select();
+					
+					inputPrice.attr("value", giaKM);
+
+					inputPrice.val(giaKM);
+
+					inputPrice.blur();
+
+					await delay(200);
+
+					buttonClick.click();
+
+					await delay(200);
+
+					boxLogging(`Đã cập nhật giá đuôi cho ${name}`, [`${name}`], ["pink"]);
 				}
-			})
 
-			var balloon = $(".next-overlay-wrapper");
-
-			$.each(balloon, (index, value) => {
-				var inputPrice = balloon.eq(index).find(".next-balloon-content .next-input.next-medium input");
-				var buttonClick = balloon.eq(index).find(".action-wrapper button.next-btn.next-medium.next-btn-primary")
-
-
-				inputPrice.select();
-				inputPrice.attr("value", price[index]);
-
-				inputPrice.val(price[index]);
-
-				buttonClick.click();
-			});
-
-			boxToast("Đã cập nhật giá đuôi", "success")
+				indexRow++;
+				nextRow();
+			}
+			nextRow();
 		}
 
 		// Điều chỉnh combo khuyến mãi shopee
