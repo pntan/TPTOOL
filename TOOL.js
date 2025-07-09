@@ -2254,7 +2254,7 @@
 						flex-grow: 1;
 						overflow: hidden;
 						// Ẩn hiện giao diện chính;
-						display: flex;
+						display: none;
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
