@@ -9129,8 +9129,6 @@
 								}else{
 									simulateClearReactInput($(priceBox));
 									simulateReactInput($(priceBox), editPrice.gia);
-
-									await delay(300);
 									box.eq(indexBox).css("color", "lightgreen");
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${priceBox1} thành ${gia1}`, [`${skuBox.val()}`, `${priceBox1}`, `${gia1}`], ["lightgreen", "orange", "orange"]);
 								}
@@ -9153,20 +9151,17 @@
 
 								if(parseInt(giaDuoi) > parseInt(giaDau)){
 									boxLogging(`Bỏ qua SKU: [copy]${skuBox.val()}[/copy] (có giá đuôi cao hơn giá đầu)`, [`${skuBox.val()}`], ["crimson"]);
-									await delay(300);
 									box.eq(indexBox).css("color", "crimson");
 									return;
 								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
 									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
 									simulateClearReactInput($(priceBox));
 									simulateReactInput($(priceBox), editPrice.gia);
-									await delay(300);
 									box.eq(indexBox).css("color", "orange");
 								}else{
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
 									simulateClearReactInput($(priceBox));
 									simulateReactInput($(priceBox), editPrice.gia);
-									await delay(300);
 									box.eq(indexBox).css("color", "lightgreen");
 								}
 							}
@@ -9182,27 +9177,23 @@
 
 								if(parseInt(editPrice.gia) > parseInt(price.gia)){
 									boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${editPrice.gia} > ${price.gia})`, [`${skuBox.val()}`], ["crimson"]);
-									await delay(300);
 									box.eq(indexBox).css("color", "crimson");
 									return;
 								}
 
 								if(parseInt(giaDuoi) > parseInt(giaDau)){
 									boxLogging(`Bỏ qua SKU: [copy]${skuBox.val()}[/copy] (có giá đuôi cao hơn giá đầu)`, [`${skuBox.val()}`], ["crimson"]);
-									await delay(300);
 									box.eq(indexBox).css("color", "crimson");
 									return;
 								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
 									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
 									simulateClearReactInput($(priceBox));
 									simulateReactInput($(priceBox), editPrice.gia);
-									await delay(300);
 									box.eq(indexBox).css("color", "orange");
 								}else{
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
 									simulateClearReactInput($(priceBox));
 									simulateReactInput($(priceBox), editPrice.gia);
-									await delay(300);
 									box.eq(indexBox).css("color", "lightgreen");
 								}
 							}
