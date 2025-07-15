@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.29";
+	const VERSION = "2.2.30";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -204,6 +204,7 @@
 			"layIDSanPhamTiktok": layIDSanPhamTiktok,
 			"xoaPhanLoaiTiktok": xoaPhanLoaiTiktok,
 			"flashSaleTiktok": flashSaleTiktok,
+			"suaGiaTheoSKUTiktok": suaGiaTheoSKUTiktok,
 			// "tgFlashSaleTiktok": tgFlashSaleTiktok,
 			// "ktraKhuyenMaiTiktok": ktraKhuyenMaiTiktok,
 			// // --- SAPO
@@ -1857,6 +1858,7 @@
 								<option data-func="xoaPhanLoaiTiktok" data-layout="xoaPhanLoaiTiktokLayout">Xóa Phân Loại</option>
 								<option data-func="themHinhTheoSKUTiktok" data-layout="themHinhTheoSKUTiktokLayout">Sửa Hình Theo SKU</option>
 								<option data-func="layIDSanPhamTiktok" data-layout="layIDSanPhamTiktokLayout">Lấy ID Sản Phẩm</option>
+								<option data-func="suaGiaTheoSKUTiktok" data-layout="suaGiaTheoSKUTiktokLayout">Sửa Giá Theo SKU</option>
 								<option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
 							</optgroup>
 
@@ -2254,7 +2256,7 @@
 						flex-grow: 1;
 						overflow: hidden;
 						// Ẩn hiện giao diện chính;
-						display: none;
+						display: flex;
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
@@ -2997,6 +2999,19 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "suaGiaTheoSKUTiktokLayout":
+				content.append($(`
+				<div class="layout-tab">
+					<p>Cách sửa giá:</p>
+					<select id="type">
+						<option data-type="all">Tất cả</option>
+						<option data-type="duoi">Giá đuôi</option>
+						<option data-type="dau">Giá đầu</option>
+					</select>
+					<textarea id="data" placeholder="Mỗi SKU là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-SKU: Bắt buộc (ABC123-DEF456 hoặc ABC123)\n-Giá: Bắt buộc"></textarea>
+				</div>
+				`));
+				break;
 			case "giaDuoiShopeeLayout":
 				content.append($(`
 					<div class="layout-tab">
@@ -4475,7 +4490,7 @@
 									box.eq(index).css("background", "crimson");
 								}else{
 									priceBox.val(gia);
-									simulateReactEvent($(priceBox), "change");
+									simulateReactEvent($(priceBox), "input");
 									box.eq(index).css("background", "lightgreen");
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${priceBox1} thành ${gia1}`, [`${skuBox.val()}`, `${priceBox1}`, `${gia1}`], ["lightgreen", "orange", "orange"]);
 								}
@@ -4504,11 +4519,11 @@
 									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
 									box.eq(index).css("background", "orange");
 									priceBox.val(editPrice.gia);
-									simulateReactEvent($(priceBox), "change");
+									simulateReactEvent($(priceBox), "input");
 								}else{
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
 									priceBox.val(editPrice.gia);
-									simulateReactEvent($(priceBox), "change");
+									simulateReactEvent($(priceBox), "input");
 									box.eq(index).css("background", "lightgreen");
 								}
 							}
@@ -4536,11 +4551,11 @@
 									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
 									box.eq(index).css("background", "orange");
 									priceBox.val(editPrice.gia);
-									simulateReactEvent($(priceBox), "change");
+									simulateReactEvent($(priceBox), "input");
 								}else{
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
 									priceBox.val(editPrice.gia);
-									simulateReactEvent($(priceBox), "change");
+									simulateReactEvent($(priceBox), "input");
 									box.eq(index).css("background", "lightgreen");
 								}
 							}
@@ -8795,6 +8810,417 @@
 					// await delay(500); 
 				}
 			}
+		}
+
+		// Hàm trợ giúp để lấy cookie (cho XSRF-TOKEN)
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        // Kích hoạt input file khi click nút
+        $('#triggerUploadButton').on('click', function() {
+            $('#imageUploadInput').click();
+        });
+
+        // Xử lý khi người dùng chọn file
+        $('#imageUploadInput').on('change', async function(event) {
+            const selectedFile = event.target.files[0];
+            if (selectedFile) {
+                $('#uploadStatus').text('Đang xử lý và tải lên...');
+                $('#uploadedImagePreview').hide(); // Ẩn preview cũ
+                console.log('File đã chọn:', selectedFile);
+
+                // Đây là các thông tin cần thiết từ ngữ cảnh của trang Lazada
+                // Bạn cần tự lấy chúng từ DOM hoặc URL hiện tại nếu muốn động
+                // Ví dụ, productId có thể lấy từ URL hoặc một phần tử ẩn trên trang
+                const currentProductId = '3070430347'; // Thay thế bằng productId thực tế của sản phẩm
+                const currentSpm = 'a1zawf.24863640.table_online_product.d_action_edit.40d41e13UwbeA3'; // Thay thế bằng spm thực tế
+                const currentSourceCode = 'product-manage'; // Hoặc giá trị bạn quan sát được
+
+                try {
+                    await startLazadaImageUpload(selectedFile, currentProductId, currentSpm, currentSourceCode);
+                    $('#uploadStatus').text('Tải lên hoàn tất!');
+                } catch (error) {
+                    $('#uploadStatus').text('Lỗi: ' + error.message);
+                    console.error('Lỗi trong quá trình tải ảnh:', error);
+                    alert('Có lỗi xảy ra khi tải ảnh. Vui lòng kiểm tra console để biết chi tiết.');
+                }
+            } else {
+                $('#uploadStatus').text('Chưa chọn ảnh nào.');
+            }
+        });
+
+        // === CÁC HÀM API ===
+
+        // Hàm chính điều phối quá trình tải lên
+        async function startLazadaImageUpload(file, productId, spm, sourceCode) {
+            // Lấy XSRF-TOKEN động từ cookie (thường là XSRF-TOKEN hoặc CSRFT)
+            const xsrfToken = getCookie('XSRF-TOKEN') || getCookie('CSRFT');
+            if (!xsrfToken) {
+                throw new Error('Không tìm thấy XSRF-TOKEN. Vui lòng đảm bảo bạn đã đăng nhập và đang chạy code trên trang Lazada Seller Center.');
+            }
+            // Giá trị bx-v có thể cố định hoặc bạn cần tìm cách lấy động nếu nó thay đổi
+            const bxV = '2.5.31'; // Lấy từ header bạn đã thấy
+            const refererUrl = window.location.href; // Hoặc URL cụ thể của trang publish product
+
+            console.log('Bước 1: Lấy thông tin xác thực tải lên...');
+            const authInfoResponse = await getUploadAuthInfo(productId, spm, sourceCode);
+            const uploadUrl = authInfoResponse.data.data.targetUrl;
+            if (!uploadUrl) {
+                throw new Error('Không nhận được targetUrl từ getUploadAuthInfo.');
+            }
+            console.log('Auth Info Response:', authInfoResponse);
+
+            console.log('Bước 2: Tải dữ liệu ảnh thực tế lên Lazada Server...');
+            // uploadedResponseData sẽ là object 'data' từ JSON phản hồi của Bước 2
+            const uploadedResponseData = await uploadFileToLazadaServer(
+                file,
+                productId,
+                spm,
+                sourceCode,
+                xsrfToken,
+                bxV,
+                refererUrl,
+                uploadUrl
+            );
+            console.log('Uploaded File Info (từ server Lazada):', uploadedResponseData);
+
+            // Đảm bảo có URL tạm thời và hash từ response Bước 2
+            if (!uploadedResponseData || !uploadedResponseData.url || !uploadedResponseData.features || !uploadedResponseData.features.image_hash) {
+                throw new Error('Phản hồi tải ảnh từ server Lazada không chứa đủ thông tin (URL hoặc hash).');
+            }
+
+            console.log('Bước 3: Đăng ký ảnh vào Media Center...');
+            // Truyền các thông tin cần thiết vào hàm addFileToMediaCenter
+            const finalResult = await addFileToMediaCenter(
+                file, // Truyền file gốc để lấy size và tên
+                uploadedResponseData.url, // URL tạm thời từ Bước 2
+                uploadedResponseData.features.image_hash, // Hash từ Bước 2
+                spm
+            );
+            console.log('Tải ảnh hoàn tất (Media Center):', finalResult);
+
+            if (finalResult && finalResult.data && finalResult.data.url) {
+                $('#uploadStatus').text('Tải lên thành công! URL ảnh: ' + finalResult.data.url);
+                $('#uploadedImagePreview').attr('src', finalResult.data.url).show();
+            } else {
+                throw new Error('Không lấy được URL ảnh cuối cùng từ Media Center.');
+            }
+        }
+
+        // --- Hàm cho Bước 1: Lấy thông tin xác thực ---
+        function getUploadAuthInfo(productId, spm, sourceCode) {
+            return new Promise((resolve, reject) => {
+                const apiPath = 'mtop.lazada.merchant.media.file.getuploadauthinfo';
+                const apiUrl = `/h5/${apiPath}/1.0/`; // Lazada thường dùng đường dẫn tương đối này
+
+                const mtopQueryParams = new URLSearchParams({
+                    jsv: '2.6.1',
+                    appKey: '4272',
+                    t: Date.now().toString(),
+                    v: '1.0',
+                    timeout: '30000',
+                    H5Request: 'true',
+                    url: apiPath,
+                    api: apiPath,
+                    type: 'originaljson',
+                    dataType: 'json',
+                    valueType: 'original',
+                    'x-i18n-regionID': 'LAZADA_VN'
+                });
+
+                const dataPayload = {
+                    _timezone: -7,
+                    spm: spm,
+                    productId: productId,
+                    sourceCode: sourceCode,
+                    host: 'sellercenter.lazada.vn'
+                };
+                mtopQueryParams.append('data', JSON.stringify(dataPayload));
+
+                $.ajax({
+                    url: apiUrl + '?' + mtopQueryParams.toString(),
+                    type: 'GET',
+                    success: function(response) {
+                        if (response && response.ret && response.ret[0].includes('SUCCESS')) {
+                            resolve(response);
+                        } else {
+                            reject(new Error('Lỗi lấy thông tin xác thực (getUploadAuthInfo): ' + JSON.stringify(response)));
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        reject(new Error('Lỗi AJAX getUploadAuthInfo: ' + error));
+                    }
+                });
+            });
+        }
+
+
+        // --- Hàm cho Bước 2: Tải dữ liệu ảnh thực tế lên Lazada Server ---
+        function uploadFileToLazadaServer(file, productId, spm, sourceCode, xsrfToken, bxV, refererUrl, uploadUrl) {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('_sourceCode', sourceCode);
+                formData.append('_productId', productId);
+                formData.append('_spm', spm);
+
+                $.ajax({
+                    url: `https://sellercenter.lazada.vn${uploadUrl}`,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'bx-v': bxV,
+                        'x-xsrf-token': xsrfToken,
+                        'referer': refererUrl
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function(response) {
+                        // Dựa vào response bạn cung cấp, nó có trường 'success' và 'data'
+                        if (response && response.success) {
+                            resolve(response.data); // Trả về object 'data' từ JSON phản hồi
+                        } else {
+                            reject(new Error('Lỗi từ server Lazada khi tải file: ' + JSON.stringify(response)));
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        reject(new Error(`Lỗi AJAX tải file lên Lazada Server (${xhr.status}): ${error} - ${xhr.responseText}`));
+                    }
+                });
+            });
+        }
+
+        // Hàm mới để lấy kích thước ảnh
+        function getImageDimensions(imageUrl) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve({ width: img.width, height: img.height });
+                img.onerror = (e) => reject(new Error('Không thể tải ảnh để lấy kích thước: ' + imageUrl + ' Error: ' + (e.message || 'Unknown error')));
+                img.src = imageUrl;
+            });
+        }
+
+        // --- Hàm cho Bước 3: Đăng ký ảnh vào Media Center ---
+        // file: đối tượng File gốc được chọn
+        // tempImageUrl: URL tạm thời từ phản hồi của Bước 2 (uploadedResponseData.url)
+        // imageHash: Hash ảnh từ phản hồi của Bước 2 (uploadedResponseData.features.image_hash)
+        function addFileToMediaCenter(file, tempImageUrl, imageHash, spm) {
+            return new Promise(async (resolve, reject) => {
+                const apiPath = 'mtop.lazada.merchant.media.file.add';
+                const apiUrl = `/h5/${apiPath}/1.0/`;
+
+                // Lấy kích thước ảnh từ URL tạm thời
+                let imageWidth, imageHeight;
+                try {
+                    const dimensions = await getImageDimensions(tempImageUrl);
+                    imageWidth = dimensions.width;
+                    imageHeight = dimensions.height;
+                } catch (error) {
+                    console.error('Lỗi khi lấy kích thước ảnh:', error);
+                    // Tiếp tục với 0 hoặc giá trị mặc định nếu không lấy được kích thước
+                    imageWidth = 0;
+                    imageHeight = 0;
+                }
+
+                // Lấy định dạng file từ tên file gốc
+                const fileExtension = file.name.split('.').pop().toUpperCase();
+                const fileFormat = ['JPG', 'JPEG', 'PNG', 'GIF', 'WEBP'].includes(fileExtension) ? fileExtension : 'PNG'; // Đảm bảo định dạng hợp lệ
+
+                const dataPayload = {
+                    fileFormat: fileFormat,
+                    fileType: 'image',
+                    folderId: '0',
+                    source: 'console', // Hoặc 'product-manage' tùy ngữ cảnh
+                    spm: spm,
+                    url: tempImageUrl, // URL tạm thời từ phản hồi Bước 2
+                    name: file.name, // Tên file gốc
+                    size: file.size, // Kích thước file gốc
+                    width: imageWidth, // Chiều rộng ảnh
+                    height: imageHeight, // Chiều cao ảnh
+                    md5: imageHash // Hash MD5 của ảnh từ phản hồi Bước 2
+                    // gmtCreate, gmtModified có thể thêm nếu bạn muốn, nhưng thường không bắt buộc
+                };
+
+                const mtopQueryParams = new URLSearchParams({
+                    jsv: '2.6.1',
+                    appKey: '4272',
+                    t: Date.now().toString(),
+                    v: '1.0',
+                    timeout: '30000',
+                    H5Request: 'true',
+                    url: apiPath,
+                    api: apiPath,
+                    type: 'originaljson',
+                    dataType: 'json',
+                    valueType: 'original',
+                    'x-i18n-regionID': 'LAZADA_VN'
+                });
+                mtopQueryParams.append('data', JSON.stringify(dataPayload));
+
+                $.ajax({
+                    url: apiUrl + '?' + mtopQueryParams.toString(),
+                    type: 'POST',
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response && response.ret && response.ret[0].includes('SUCCESS')) {
+                            resolve(response);
+                        } else {
+                            reject(new Error('Lỗi đăng ký Media Center: ' + JSON.stringify(response)));
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        reject(new Error('Lỗi AJAX đăng ký Media Center: ' + error));
+                    }
+                });
+            });
+        }
+		
+		async function suaGiaTheoSKUTiktok(){
+			var type = $(".tp-container.tp-content #type option:selected");
+			type = type.data("type");
+
+			var data = $(".tp-container.tp-content .layout-future textarea#data");
+			var arrayData = data.val().split("\n");
+
+			var groupVariant = parseInt($("#sale_properties .space-y-12 > div").length) - 1;
+
+			var indexData = 0, indexBox = 0;
+			
+			async function nextData(){
+				if(indexData == arrayData.length){
+					boxLogging(`Hoàn tất sửa giá`);
+					return;
+				}
+
+				var listData = arrayData[indexData].toString().split("\t");
+				var sku = listData[0];
+				var gia = listData[1];
+
+				var box = $(".core-table-content-inner table tbody tr");
+
+				indexBox = 0;
+
+				async function nextBox(){
+					if(indexBox == box.length){
+						return;
+					}
+
+					var nameBox = box.eq(indexBox).find("td").eq(0).find("p").eq(0);
+					var priceBox = box.eq(indexBox).find("td").eq(1 + groupVariant).find("input");
+					var stockBox = box.eq(indexBox).find("td").eq(2 + groupVariant).find("input");
+					var skuBox = box.eq(indexBox).find("td").eq(3 + groupVariant).find("input");
+
+					switch(type){
+						case "all":
+							if(skuBox.val().includes(sku)){
+								var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',') || "Không";
+								var gia1 = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+								if(parseInt(priceBox.val()) < parseInt(gia)){
+									boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${gia1} > ${priceBox1})`, [`${skuBox.val()}`], ["crimson"]);
+									box.eq(indexBox).css("color", "crimson");
+								}else{
+									simulateClearReactInput($(priceBox));
+									simulateReactInput($(priceBox), editPrice.gia);
+
+									await delay(300);
+									box.eq(indexBox).css("color", "lightgreen");
+									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${priceBox1} thành ${gia1}`, [`${skuBox.val()}`, `${priceBox1}`, `${gia1}`], ["lightgreen", "orange", "orange"]);
+								}
+							}
+						break;
+
+						case "duoi":
+							if(skuBox.val().includes(sku)){
+								var price = tachGia(priceBox.val());
+								var giaDau = price.giaDau;
+								var giaDuoi = gia;
+
+								var editPrice = gopGia(giaDau, giaDuoi);
+
+								if(parseInt(editPrice.gia) > parseInt(price.gia)){
+									giaDau = parseInt(giaDau) - 1000;
+
+									editPrice = gopGia(giaDau, giaDuoi);
+								}
+
+								if(parseInt(giaDuoi) > parseInt(giaDau)){
+									boxLogging(`Bỏ qua SKU: [copy]${skuBox.val()}[/copy] (có giá đuôi cao hơn giá đầu)`, [`${skuBox.val()}`], ["crimson"]);
+									await delay(300);
+									box.eq(indexBox).css("color", "crimson");
+									return;
+								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
+									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
+									simulateClearReactInput($(priceBox));
+									simulateReactInput($(priceBox), editPrice.gia);
+									await delay(300);
+									box.eq(indexBox).css("color", "orange");
+								}else{
+									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
+									simulateClearReactInput($(priceBox));
+									simulateReactInput($(priceBox), editPrice.gia);
+									await delay(300);
+									box.eq(indexBox).css("color", "lightgreen");
+								}
+							}
+						break;
+
+						case "dau":
+							if(skuBox.val().includes(sku)){
+								var price = tachGia(priceBox.val());
+								var giaDau = gia;
+								var giaDuoi = price.giaDuoi;
+
+								var editPrice = gopGia(giaDau, giaDuoi);
+
+								if(parseInt(editPrice.gia) > parseInt(price.gia)){
+									boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${editPrice.gia} > ${price.gia})`, [`${skuBox.val()}`], ["crimson"]);
+									await delay(300);
+									box.eq(indexBox).css("color", "crimson");
+									return;
+								}
+
+								if(parseInt(giaDuoi) > parseInt(giaDau)){
+									boxLogging(`Bỏ qua SKU: [copy]${skuBox.val()}[/copy] (có giá đuôi cao hơn giá đầu)`, [`${skuBox.val()}`], ["crimson"]);
+									await delay(300);
+									box.eq(indexBox).css("color", "crimson");
+									return;
+								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
+									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
+									simulateClearReactInput($(priceBox));
+									simulateReactInput($(priceBox), editPrice.gia);
+									await delay(300);
+									box.eq(indexBox).css("color", "orange");
+								}else{
+									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
+									simulateClearReactInput($(priceBox));
+									simulateReactInput($(priceBox), editPrice.gia);
+									await delay(300);
+									box.eq(indexBox).css("color", "lightgreen");
+								}
+							}
+						break;
+					}
+
+					indexBox++;
+					await nextBox();
+				};
+
+				indexData++;
+				await nextBox();
+				await nextData();
+			};
+
+			await nextData();
+
+			boxToast("Đã sửa giá các SKU được chọn", "success")
 		}
 
 		// Chat với AI
