@@ -1,145 +1,496 @@
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+<script src="https://kit.fontawesome.com/e538a919ef.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="./TOOL.css" />
+<script src="./TOOLv2.js"></script>
 <div class="tp-popup">
-    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="infoModalLabel">Thông báo</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="content" style="white-space: pre-wrap; overflow-y: auto;"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                </div>
-            </div>
-        </div>
-    </div>
+	<div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="infoModalLabel">Thông báo</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="content" style="white-space: pre-wrap; overflow-y: auto;"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div id="toast-container"></div>
 
 <div class="tp-container tp-button-toggle">
-    <i class="fa-solid fa-fingerprint"></i>
+	<i class="fa-solid fa-fingerprint"></i>
 </div>
 
 <div id="custom-context-menu" style="display:none; position:absolute; z-index:9999;">
-    <ul class="list-unstyled p-0 m-0">
-        <li class="menu-item" data-action="toggle-program">Ẩn/Hiện chương trình</li>
-        <li class="menu-item" data-action="connect-server">Kết nối máy chủ</li>
-    </ul>
+	<ul class="list-unstyled p-0 m-0">
+		<li class="menu-item" data-action="toggle-program">Ẩn/Hiện chương trình</li>
+		<li class="menu-item" data-action="connect-server">Kết nối máy chủ</li>
+	</ul>
 </div>
 
 <div class="tp-container tp-content">
-    <div class="program-title">
-        <p>Ver ${VERSION}</p>
-        <p id="server-status">OFFLINE</p>
-    </div>
+	<div class="color-theme">
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="switch">
+					<input id="switch-y" name="tripple" type="radio" value="Y" class="switch-input" checked />
+					<label for="switch-y" class="switch-label switch-label-y">Sáng</label>
+					<input id="switch-i" name="tripple" type="radio" value="I" class="switch-input" />
+					<label for="switch-i" class="switch-label switch-label-i">Tối</label>
+					<input id="switch-n" name="tripple" type="radio" value="N" class="switch-input" />
+					<label for="switch-n" class="switch-label switch-label-n">Tùy Chỉnh</label>
+					<span class="switch-selector"></span>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    <div class="program-log">
-        <pre class="logging"></pre>
-    </div>
-    <p id="clear-log-button" class="text-end text-primary" style="font-size: 0.8em; cursor: pointer;">Làm Sạch Log</p>
+	<div class="program-title">
+		<p>Ver 3.0.0</p>
+	</div>
+  
+	<div class="server-status">
+		<p id="status" data-status="offline">OFFLINE</p>
+		<p id="server-url"><a href="#">LINK SERVER</a></p>
+	</div>
 
-    <ul class="nav nav-tabs mb-3 justify-content-center" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="function-tab" data-bs-toggle="tab" data-bs-target="#tab-function" type="button" role="tab" aria-controls="tab-function" aria-selected="true">Chức Năng</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="custom-tab" data-bs-toggle="tab" data-bs-target="#tab-custom" type="button" role="tab" aria-controls="tab-custom" aria-selected="false">Tùy Chỉnh</button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link disabled" id="online-function-tab" data-bs-toggle="tab" data-bs-target="#tab-online-function" type="button" role="tab" aria-controls="tab-online-function" aria-selected="false">Chức Năng Online</button>
-        </li>
-    </ul>
+	<div class="program-log">
+		<pre class="logging">LOGGING</pre>
+		<button id="clear-log-button" class="text-end text-primary" style="font-size: 0.8em; cursor: pointer;">Làm Sạch Log</button>
+	</div>
 
-    <div class="tab-content flex-grow-1 overflow-auto">
-        <div class="tab-pane fade show active" id="tab-function" role="tabpanel" aria-labelledby="function-tab">
-            <select id="functionSelect" class="form-select mb-3">
-                <option hidden>Chọn Chức Năng</option>
-                <optgroup label="Shopee">
-                    <option data-func="giaDuoiShopee" data-layout="giaDuoiShopeeLayout">Cập Nhật Giá Đuôi</option>
-                    <option data-func="flashSaleShopee" data-layout="flashSaleShopeeLayout">Flash Sale</option>
-                    <option data-func="kTr5LanGiaShopee" data-layout="kTr5LanGiaShopeeLayout">Kiểm Tra 5 Lần Giá</option>
-                    <option data-func="kiemTraMaPhanLoaiShopee">Hiển Thị Mã Phân Loại</option>
-                    <option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
-                    <option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
-                    <option data-func="themKyTuPhanLoaiShopee" data-layout="themKyTuPhanLoaiShopeeLayout">Sửa Tên Phân Loại</option>
-                    <option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
-                    <option data-func="cTrinhKMShopee" data-layout="cTrinhKMShopeeLayout">Điều Chỉnh Chương Trình Khuyến Mãi</option>
-                    <option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
-                    <option data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại</option>
-                    <option data-func="layPhanLoaiShopee" data-layout="layPhanLoaiShopeeLayout">Lấy Phân Loại</option>
-                    <option data-func="layIDSanPhamShopee" data-layout="layIDSanPhamShopeeLayout">Lấy ID Sản Phẩm</option>
-                    <option data-func="layLinkChuaSKUShopee" data-layout="layLinkChuaSKUShopeeLayout">Lấy Link Chứa SKU</option>
-                    <option data-func="suaTonSKUNhieuLinkShopee" data-layout="suaTonSKUNhieuLinkShopeeLayout">Sửa Tồn Theo SKU Nhiều Link</option>
-                    <option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
-                </optgroup>
-                <optgroup label="TikTok">
-                    <option data-func="giaDuoiTiktok">Cập Nhật Giá Đuôi</option>
-                    <option data-func="flashSaleTiktok">Flash Sale</option>
-                    <option data-func="saoChepFlashSaleTiktok" data-layout="saoChepFlashSaleTiktokLayout">Sao Chép Chương Trình Flash Sale</option>
-                    <option data-func="kiemTraMaPhanLoaiTiktok">Hiển Thị Mã Phân Loại</option>
-                    <option data-func="chinhSuaKhuyenMaiTiktok" data-layout="chinhSuaKhuyenMaiTiktokLayout">Chỉnh Sửa Chương Trình Khuyến Mãi</option>
-                    <option data-func="themPhanLoaiTiktok" data-layout="themPhanLoaiTikTokLayout">Thêm Phân Loại</option>
-                    <option data-func="xoaPhanLoaiTiktok" data-layout="xoaPhanLoaiTiktokLayout">Xóa Phân Loại</option>
-                    <option data-func="themHinhTheoSKUTiktok" data-layout="themHinhTheoSKUTiktokLayout">Sửa Hình Theo SKU</option>
-                    <option data-func="layIDSanPhamTiktok" data-layout="layIDSanPhamTiktokLayout">Lấy ID Sản Phẩm</option>
-                    <option disabled data-func="ktraKhuyenMaiTiktok" data-layout="ktraKhuyenMaiTiktokLayout">Kiểm Tra Văng Khuyến Mãi</option>
-                </optgroup>
-                <optgroup label="Lazada">
-                    <option data-func="giaDuoiLazada">Cập Nhật Giá Đuôi</option>
-                    <option data-func="khoiPhucSanPhamLazada">Khôi Phục Sản Phẩm Đã Xóa</option>
-                    <option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
-                    <option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
-                    <option data-func="themHinhTheoSKULazada" data-layout="themHinhTheoSKULazadaLayout">Sửa Hình Theo SKU</option>
-                    <option disabled data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
-                </optgroup>
-                <optgroup label="Sapo">
-                    <option data-func="hienThiThemDSSapo">Hiển Thị Thêm Danh Sách Sản Phẩm Sàn</option>
-                    <option data-func="lienKetSKUSapo" data-layout="lienKetSKUSapoLayout">Liên Kết SKU</option>
-                    <option disabled data-func="kiemTraTonSapo" data-layout="kiemTraTonSapoLayout">Kiểm Tra Tồn</option>
-                </optgroup>
-                <optgroup label="Khác">
-                    <option data-func="splitExcelFile" data-layout="splitExcelFileLayout">Chia Nhỏ File Excel</option>
-                    <option data-func="mergeExcelFile" data-layout="mergeExcelFileLayout">Gộp File Excel</option>
-                    <option data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
-                    <option data-func="moLink" data-layout="moLinkLayout">Mở Link Hàng Loạt</option>
-                    <option data-func="tinhGiaBan" data-layout="tinhGiaBanLayout">Tính Giá Bán</option>
-                </optgroup>
-            </select>
-            <div class="layout-future functionSelect"></div>
-        </div>
+	<ul class="nav nav-tabs mb-3 justify-content-center" id="myTab" role="tablist">
+		<li class="nav-item" role="presentation">
+			<button class="nav-link active" id="function-tab" data-bs-toggle="tab" data-bs-target="#tab-function" type="button" role="tab" aria-controls="tab-function" aria-selected="true">Chức Năng</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link" id="custom-tab" data-bs-toggle="tab" data-bs-target="#tab-custom" type="button" role="tab" aria-controls="tab-custom" aria-selected="false">Tùy Chỉnh</button>
+		</li>
+		<li class="nav-item" role="presentation">
+			<button class="nav-link disabled" id="online-function-tab" data-bs-toggle="tab" data-bs-target="#tab-online-function" type="button" role="tab" aria-controls="tab-online-function" aria-selected="false">Chức Năng Online</button>
+		</li>
+	</ul>
 
-        <div class="tab-pane fade" id="tab-custom" role="tabpanel" aria-labelledby="custom-tab">
-            <select id="optionSelect" class="form-select mb-3">
-                <option hidden>Chọn Chức Năng</option>
-                <option data-layout="chung">Chung</option>
-                <option data-layout="shopee">Shopee</option>
-                <option data-layout="tiktok">Tiktok</option>
-                <option data-layout="lazada">Lazada</option>
-                <option data-layout="sapo">Sapo</option>
-                <option data-layout="khac">Khác</option>
-            </select>
-            <div class="layout-future optionSelect"></div>
-        </div>
+	<div class="tab-content flex-grow-1 overflow-auto">
+		<div class="tab-pane show active">
+			<div class="TP-APPVIEW">
+				<div class="TP-APP-BOX" data-function="giaDuoi" data-layout="#" data-platform="shopee,tiktok,lazada" title="Cập Nhật Giá Đuôi">
+					<div class="app-box-icon"><i class="fa-solid fa-money-bill-transfer"></i></div>
+					<p>Cập Nhật Giá Đuôi</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="flashSale" data-layout="#" data-platform="shopee,tiktok" title="Flash Sale">
+					<div class="app-box-icon"><i class="fa-solid fa-bolt"></i></div>
+					<p>Flash Sale</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="giaDuoiChuongTrinh" data-layout="#" data-platform="shopee" title="Cập Nhật Giá Đăng Ký Chương Trình">
+					<div class="app-box-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+					<p>Giá Chương Trình</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="kTr5LanGia" data-layout="#" data-platform="shopee" title="Kiểm Tra 5 Lần Giá">
+					<div class="app-box-icon"><i class="fa-solid fa-magnifying-glass-dollar"></i></div>
+					<p>Kiểm Tra 5 Lần Giá</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="saoChepFlashSale" data-layout="#" data-platform="tiktok" title="Sao Chép Chương Trình Flash Sale">
+					<div class="app-box-icon"><i class="fa-solid fa-clone"></i></div>
+					<p>Sao Chép Flash Sale</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="kiemTraMaPhanLoai" data-layout="#" data-platform="shopee,tiktok" title="Hiển Thị Mã Phân Loại">
+					<div class="app-box-icon"><i class="fa-solid fa-barcode"></i></div>
+					<p>Hiển Thị Mã Phân Loại</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="suaGiaTheoSKU" data-layout="#" data-platform="shopee,tiktok,lazada" title="Sửa Giá Theo SKU">
+					<div class="app-box-icon"><i class="fa-solid fa-money-bill-1-wave"></i></div>
+					<p>Sửa Giá Theo SKU</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="suaHinhTheoSKU" data-layout="#" data-platform="shopee,tiktok,lazada" title="Sửa Hình Theo SKU">
+					<div class="app-box-icon"><i class="fa-solid fa-image"></i></div>
+					<p>Sửa Hình Theo SKU</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="suaTenPhanLoaiSKU" data-layout="#" data-platform="shopee" title="Sửa Tên Phân Loại">
+					<div class="app-box-icon"><i class="fa-solid fa-font"></i></div>
+					<p>Sửa Tên Phân Loại</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="kiemTraPhanLoai" data-layout="#" data-platform="shopee" title="Kiểm Tra Phân Loại">
+					<div class="app-box-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+					<p>Kiểm Tra Phân Loại</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="themPhanLoai" data-layout="#" data-platform="shopee,tiktok,lazada" title="Thêm Phân Loại">
+					<div class="app-box-icon"><i class="fa-solid fa-plus"></i></div>
+					<p>Thêm Phân Loại</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="xoaPhanLoai" data-layout="#" data-platform="tiktok" title="Xóa Phân Loại">
+					<div class="app-box-icon"><i class="fa-solid fa-minus"></i></div>
+					<p>Xóa Phân Loại</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="layPhanLoai" data-layout="#" data-platform="shopee" title="Lấy Phân Loại">
+					<div class="app-box-icon"><i class="fa-solid fa-download"></i></div>
+					<p>Lấy Phân Loại</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="layIDSanPham" data-layout="#" data-platform="shopee,tiktok" title="Lấy ID Sản Phẩm">
+					<div class="app-box-icon"><i class="fa-solid fa-id-card"></i></div>
+					<p>Lấy ID Sản Phẩm</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="hienThiThemSanPham" data-layout="#" data-platform="sapo" title="Hiển Thị Thêm Danh Sách Sản Phẩm Sàn">
+					<div class="app-box-icon"><i class="fa-solid fa-list-ul"></i></div>
+					<p>Load Thêm Sản Phẩm</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="lienKetSKU" data-layout="#" data-platform="sapo" title="Liên Kết SKU">
+					<div class="app-box-icon"><i class="fa-solid fa-link"></i></div>
+					<p>Liên Kết SKU</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="kiemTraTon" data-layout="#" data-platform="sapo" title="Kiểm Tra Tồn">
+					<div class="app-box-icon"><i class="fa-solid fa-box-open"></i></div>
+					<p>Kiểm Tra Tồn</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="splitExcelFile" data-layout="#" data-platform="khac" title="Chia Nhỏ File Excel">
+					<div class="app-box-icon"><i class="fa-solid fa-scissors"></i></div>
+					<p>Chia Nhỏ File Excel</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="mergeExcelFile" data-layout="#" data-platform="khac" title="Gộp File Excel">
+					<div class="app-box-icon"><i class="fa-solid fa-layer-group"></i></div>
+					<p>Gộp File Excel</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="compareVoucher" data-layout="#" data-platform="khac" title="So Sánh Voucher">
+					<div class="app-box-icon"><i class="fas fa-ticket-alt"></i></div>
+					<p>So Sánh Voucher</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="moLink" data-layout="#" data-platform="khac" title="Mở Link Hàng Loạt">
+					<div class="app-box-icon"><i class="fas fa-external-link-alt"></i></div>
+					<p>Mở Link Hàng Loạt</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="tinhGiaBan" data-layout="#" data-platform="khac" title="Tính Giá Bán">
+					<div class="app-box-icon"><i class="fas fa-calculator"></i></div>
+					<p>Tính Giá Bán</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="ktraGiaChuongTrinhKM" data-layout="#" data-platform="lazada" title="Kiểm Tra Giá Chương Trình KM">
+					<div class="app-box-icon"><i class="fa-solid fa-tag"></i></div>
+					<p>Kiểm Tra Giá Chương Trình KM</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="ktraKhuyenMai" data-layout="#" data-platform="tiktok" title="Kiểm Tra Khuyến Mãi">
+					<div class="app-box-icon"><i class="fa-solid fa-gift"></i></div>
+					<p>Kiểm Tra Khuyến Mãi</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="chinhSuaKhuyenMai" data-layout="#" data-platform="tiktok" title="Chỉnh Sửa Khuyến Mãi">
+					<div class="app-box-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+					<p>Chỉnh Sửa Khuyến Mãi</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="thongKeDonHang" data-layout="#" data-platform="tiktok" title="Thống Kê Đơn Hàng">
+					<div class="app-box-icon"><i class="fa-solid fa-chart-bar"></i></div>
+					<p>Thống Kê Đơn Hàng</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="chinhSuaFlashSale" data-layout="#" data-platform="tiktok" title="Chỉnh Sửa Flash Sale">
+					<div class="app-box-icon"><i class="fa-solid fa-fire"></i></div>
+					<p>Chỉnh Sửa Flash Sale</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="timkiemTheoSKU" data-layout="#" data-platform="shopee" title="Tìm Kiếm Theo SKU">
+					<div class="app-box-icon"><i class="fa-solid fa-search"></i></div>
+					<p>Tìm Kiếm Theo SKU</p>
+				</div>
+				<div class="TP-APP-BOX" data-function="kiemTraThuocTinh" data-layout="#" data-platform="shopee" title="Kiểm Tra Thuộc Tính">
+					<div class="app-box-icon"><i class="fa-solid fa-list-check"></i></div>
+					<p>Kiểm Tra Thuộc Tính</p>
+				</div>
+			</div>
 
-        <div class="tab-pane fade" id="tab-online-function" role="tabpanel" aria-labelledby="online-function-tab">
-            <select id="onlineSelect" class="form-select mb-3">
-                <option hidden>Chọn Chức Năng</option>
-                <option data-func="aiChat" data-layout="aiChatLayout">Veritas</option>
-                <option data-func="editDescription" data-layout="editDescriptionLayout">Sửa Mô Tả</option>
-            </select>
-            <div class="layout-future onlineSelect"></div>
-        </div>
-    </div>
+			<div class="layout-future">
+				<button class="back">Trở Lại</button>
 
-    <div class="button-control mt-auto pt-3">
-        <button id="excuse-command" data-func="" class="btn btn-danger w-100">Chạy</button>
-    </div>
-    
-    <div class="resize-handle top-left"></div>
-    <div class="resize-handle top-right"></div>
-    <div class="resize-handle bottom-left"></div>
-    <div class="resize-handle bottom-right"></div>
+				<div class="tutorial">
+					<p class="title">Hướng Dẫn</p>
+					<div class="tutorial-container">
+						<p>Hướng dẫn sử dụng chức năng</p>
+					</div>
+				</div>
+
+				<div class="layout-tab giaDuoi">
+					<p>Cách sửa giá:</p>
+					<select id="type">
+						<option data-type="all">Tất cả</option>
+						<option data-type="duoi">Giá đuôi</option>
+						<option data-type="dau">Giá đầu</option>
+					</select>
+					<textarea id="data" placeholder="Mỗi SKU là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-SKU: Bắt buộc (ABC123-DEF456 hoặc ABC123)\n-Giá: Bắt buộc"></textarea>
+				</div>
+
+				<div class="layout-tab flashSale">
+					<p>Giá cao nhất: <span class="max-price">0</span></p>
+					<p>Giá thấp nhất: <span class="min-price">0</span></p>
+					<p>Giá đề xuất: <span class="avg-price">0</span></p>
+				</div>
+
+				<div class="layout-tab giaDuoiChuongTrinh">
+					<label for="discount">Giảm của giá đuôi</label>
+					<label for="money"><p>Tiền Mặt</p> <input type="radio" name="discount-type" id="money" /></label>
+					<label for="percent"><p>Phần Trăm</p> <input type="radio" name="discount-type" id="percent" /></label>
+					<input type="text" id="tp-discount" />
+				</div>
+
+				<div class="layout-tab kTr5LanGia">
+					<p>Giá Cao Nhất: <span id="maxSku">XXX-XXX</span> <span id="maxPrice">0</span></p>
+					<p>Giá Thấp Nhất: <span id="minSku">XXX-XXX</span> <span id="minPrice">0</span></p>
+					<p>Giá Đề Xuất: <span id="suggestPrice">0</span></p>
+				</div>
+
+				<div class="layout-tab saoChepFlashSale">
+					<input class="copy-link" type="text" placeholder="Link để sao chép" />
+					<div class="button-control-promotion">
+						<button class="add-promotion">Thêm Chương Trình Mới</button>
+					</div>
+					<div class="area-promotion">
+						<div style="display: none; justify-content: center; align-items: center; gap: 2vw" class="box-promotion root">
+							<input class="name" type="text" placeholder="Tên chương trình" /><span class="count-character">0/50</span>
+							<input class="time-start" type="datetime-local" placeholder="Bắt đầu"/>
+							<input class="time-end" type="datetime-local" placeholder="Kết thúc"/>
+							<button class="remove-promotion" style="background: crimson; color: #fff; font-weight: 700">Xóa</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="layout-tab kiemTraMaPhanLoai">
+					<p>Đây là nội dung cho Kiểm Tra Mã Phân Loại.</p>
+				</div>
+
+				<div class="layout-tab suaGiaTheoSKU">
+					<p>Cách sửa giá:</p>
+					<select id="type">
+						<option data-type="all">Tất cả</option>
+						<option data-type="duoi">Giá đuôi</option>
+						<option data-type="dau">Giá đầu</option>
+					</select>
+					<textarea id="data" placeholder="Mỗi SKU là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-SKU: Bắt buộc (ABC123-DEF456 hoặc ABC123)\n-Giá: Bắt buộc"></textarea>
+				</div>
+
+				<div class="layout-tab suaHinhTheoSKU">
+					<input type="file" webkitdirectory directory multiple />
+					<p>Tải lên thư mục có chứa hình ảnh, không cần tải lên từng hình</p>
+					<p style="font-weight:700; color: crimson">*Tên hình ảnh phải là SKU của sản phẩm</p>
+				</div>
+
+				<div class="layout-tab suaTenPhanLoaiSKU">
+					<p>Nội dung sửa tên phân loại SKU.</p>
+					</div>
+
+				<div class="layout-tab kiemTraPhanLoai">
+					<select id="group">
+						<option>Phân Loại 1</option>
+						<option>Phân Loại 2</option>
+					</select>
+					<label for="type">Dò Chính Xác <input id="type" type="checkbox" /></label>
+					<textarea id="data"></textarea>
+				</div>
+
+				<div class="layout-tab themPhanLoai">
+					<input id="group" placeholder="Nhóm phân loại" value="1" />
+					<textarea id="phanLoai" placeholder="Nhập phân loại \nPhân Loại A, Phân Loại B, Phận Loại C, ...">Phân Loại A, Phân Loại B, Phận Loại C</textarea>
+				</div>
+
+				<div class="layout-tab xoaPhanLoai">
+					<textarea id="data" placeholder="Nhập SKU cần xóa, mỗi SKU là một dòng"></textarea>
+				</div>
+
+				<div class="layout-tab layPhanLoai">
+					<p>Số lượng tùy chỉnh?</p>
+					<input id="stock-edit" type="number" placeholder="Mặc định số lượng = 0" />
+					<div style="display: flex; justify-content: center; align-items: center">
+						<p>Lấy số lượng theo sàn</p>
+						<input type="checkbox" id="getStock" />
+					</div>
+				</div>
+
+				<div class="layout-tab layIDSanPham">
+					<label for="copy-type">Lấy đường dẫn sản phẩm</label>
+					<input type="checkbox" id="copy-type" />
+					<p style="font-weight:700; color: crimson">*Mặc định chỉ lấy ID sản phẩm</p>
+				</div>
+
+				<div class="layout-tab hienThiThemSanPham">
+					<p>Nội dung hiển thị thêm danh sách sản phẩm Sapo.</p>
+					</div>
+
+				<div class="layout-tab lienKetSKU">
+					<p>Cách liên kết SKU</p>
+					<div class="switch-wrapper">
+						<span class="switch-label">Tự Động</span>
+						<label class="switch">
+							<input type="checkbox" id="toggle-switch" checked />
+							<div class="slider">
+								<div class="slider-handle"></div>
+							</div>
+						</label>
+						<span class="switch-label">Thủ Công</span>
+					</div>
+				</div>
+
+				<div class="layout-tab kiemTraTon">
+					<textarea id="data"></textarea>
+				</div>
+
+				<div class="layout-tab splitExcelFile">
+					<input type="file" id="fileInput" accept=".xlsx, .xls">
+					<br><br>
+					<label>Số dòng đầu giữ lại (header + mô tả...):</label>
+					<input type="number" id="rowsToPreserve" value="1" min="0">
+					<br />
+					<label>Số dòng mỗi file:</label>
+					<input type="number" id="rowsPerFile" value="100" min="1">
+				</div>
+
+				<div class="layout-tab mergeExcelFile">
+					<input type="file" id="mergeFileInput" multiple accept=".xlsx, .xls">
+					<br><br>
+					<label>Dòng header:</label>
+					<input type="number" id="headerRowsCount" value="1" min="0">
+					<br />
+					<label>Số dòng mô tả:</label>
+					<input type="number" id="descriptionRowsCount" value="100" min="1">
+				</div>
+
+				<div class="layout-tab compareVoucher">
+					<button id="addVoucher">Thêm Voucher</button>
+					<textarea id="data"></textarea>
+					<div class="voucher-box">
+						<table>
+							<thead>
+								<tr>
+									<td>Kiểm Tra</td>
+									<td>Tiền Giảm</td>
+									<td>Giảm Tối Đa</td>
+									<td>Đơn Tối Thiểu</td>
+									<td></td>
+								</tr>
+							</thead>
+							<tbody>
+								<tr class="voucher-box root" hidden>
+									<td class="checked-box"></td>
+									<td class="discount-percent">
+										<input type="text" />
+										<select>
+											<option>%</option>
+											<option><u>đ</u></option>
+										</select>
+									</td>
+									<td class="max-discount">
+										<input type="text" />
+									</td>
+									<td class="condition-deal">
+										<input type="text" />
+									</td>
+									<td class="remove-voucher">Xóa Voucher</td>
+								</tr>
+								<tr class="voucher-box">
+									<td class="checked-box"></td>
+									<td class="discount-percent">
+										<input type="text" />
+										<select>
+											<option>%</option>
+											<option><u>đ</u></option>
+										</select>
+									</td>
+									<td class="max-discount">
+										<input type="text" />
+									</td>
+									<td class="condition-deal">
+										<input type="text" />
+									</td>
+									<td class="remove-voucher">Xóa Voucher</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+
+				<div class="layout-tab moLink">
+					<textarea id="data" placeholder="Nhập đường dẫn, mỗi đường dẫn trên một dòng"></textarea>
+				</div>
+
+				<div class="layout-tab tinhGiaBan">
+					<div class="input-cost">
+						<label for="cost">Nhập Giá Vốn</label>
+						<input type="text" id="cost" maxlength="15" placeholder="Nhập giá vốn (đầy đủ số)" />
+					</div>
+					<div class="output-cost">
+						<p>Giá sau Khuyễn mãi: <span id="after-price"></span></p>
+						<p>Giá trước Khuyễn mãi: <span id="before-price"></span></p>
+						<p>Giá Đăng Bán: <span id="last-price"></span></p>
+					</div>
+				</div>
+
+				<div class="layout-tab ktraGiaChuongTrinhKM">
+					<textarea id="group" placeholder="Nhập từ khóa của nhóm:\nSố phần trăm, key1, key2, key3,.. \nSố phần trăm, key1, key2, key3,..."></textarea>
+				</div>
+						
+				<div class="layout-tab thongKeDonHang">
+					<p>Nội dung thống kê đơn hàng.</p>
+				</div>
+
+				<div class="layout-tab chinhSuaFlashSale">
+					<p>Nội dung chỉnh sửa Flash Sale.</p>
+				</div>
+
+				<div class="layout-tab timkiemTheoSKU">
+					<input type="text" id="skuInput" placeholder="Nhập SKU sản phẩm" />
+					<button id="searchSkuButton">Tìm Kiếm</button>
+				</div>
+
+				<div class="layout-tab kiemTraThuocTinh">
+					<p>Nội dung kiểm tra thuộc tính.</p>
+				</div>
+
+				<div class="layout-tab no-layout">
+					<h3>Không tìm thấy layout cho chức năng này.</h3>
+					<p>Vui lòng kiểm tra lại data-function hoặc bổ sung nội dung layout tĩnh.</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="tab-pane fade" id="tab-custom" role="tabpanel" aria-labelledby="custom-tab">
+			<div class="TP-select">
+				<div class="TP-select-choice">
+					<div class="option-name">
+						<p>Chọn Chức Năng</p>
+					</div>
+				</div>
+				<div class="TP-select-list-option">
+					<div class="TP-select-option">
+						<div class="option-name">
+							<p>Shopee</p>
+						</div>
+						<div class="option-platform">
+							
+						</div>
+					</div>
+				</div>
+			</div>
+			<select id="optionSelect" class="form-select mb-3">
+				<option hidden>Chọn Chức Năng</option>
+				<option data-layout="chung">Chung</option>
+				<option data-layout="">Shopee</option>
+				<option data-layout="tiktok">Tiktok</option>
+				<option data-layout="lazada">Lazada</option>
+				<option data-layout="sapo">Sapo</option>
+				<option data-layout="khac">Khác</option>
+			</select>
+			<div class="layout-future optionSelect"></div>
+		</div>
+
+		<div class="tab-pane fade" id="tab-online-function" role="tabpanel" aria-labelledby="online-function-tab">
+			<select id="onlineSelect" class="form-select mb-3">
+				<option hidden>Chọn Chức Năng</option>
+				<option data-func="aiChat" data-layout="aiChatLayout">Veritas</option>
+				<option data-func="editDescription" data-layout="editDescriptionLayout">Sửa Mô Tả</option>
+			</select>
+			<div class="layout-future onlineSelect"></div>
+		</div>
+	</div>
+
+	<div class="button-control mt-auto pt-3">
+		<button id="excuse-command" data-func="" class="btn btn-danger w-100">Chạy</button>
+	</div>
 </div>
