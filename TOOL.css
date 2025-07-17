@@ -1,474 +1,942 @@
-/* --- HIỆU ỨNG CHUNG (Glassmorphism) --- */
-/* Áp dụng hiệu ứng gương cho các container chính */
-.tp-container,
-.modal-content { /* modal-content của Bootstrap sẽ có hiệu ứng gương */
-    background: rgba(255, 255, 255, 0.2); /* Nền trắng trong suốt */
-    border-radius: 18px; /* Bo góc tròn hơn */
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); /* Bóng đổ mềm mại */
-    backdrop-filter: blur(10px); /* Hiệu ứng mờ nền */
-    -webkit-backdrop-filter: blur(10px); /* Hỗ trợ trình duyệt Webkit */
-    border: 1px solid rgba(255, 255, 255, 0.18); /* Viền mờ trong suốt */
-    color: #333; /* Đảm bảo chữ dễ đọc trên nền sáng */
+@charset "UTF-8";
+body {
+  background: linear-gradient(135deg, #ffc4d5, #c4ffdb);
 }
 
-/* Điều chỉnh màu sắc chữ cho phù hợp với nền gương */
-.tp-container p,
-.tp-container label,
-.tp-container .program-title p,
-#custom-context-menu .menu-item {
-    color: #222; /* Màu chữ đậm hơn để dễ đọc trên nền mờ */
-}
-
-
-/* --- CÁC THÀNH PHẦN RIÊNG BIỆT --- */
-
-/* Popup / Modal */
-.tp-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 9998;
-    /* backdrop-filter sẽ được áp dụng trực tiếp lên modal-backdrop của Bootstrap */
-}
-
-.tp-popup .popup-box .content { /* Class này áp dụng cho div.content bên trong modal-body */
-    max-height: 100%;
-    overflow-y: auto;
-    font-family: monospace;
-    font-size: 14px;
-    padding: 1vh;
-    background: rgba(255, 255, 255, 0.7); /* Nền trong suốt hơn cho phần nội dung log */
-    border-radius: 8px;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
-    line-height: 1.5;
-    color: #222;
-}
-
-/* Toast Container (Tùy chỉnh) */
-#toast-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 10px;
-    z-index: 9999;
-}
-
-.toast {
-    width: auto;
-    max-width: 20vw;
-    border-radius: 6px;
-    color: white;
-    font-size: 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.3s ease;
-    position: relative;
-    padding: 10px 15px;
-    animation: slideIn 0.3s ease forwards;
-    /* Toast cũng có thể có glassmorphism nếu muốn, nhưng thường nó cần nền solid hơn để nổi bật */
-    background: rgba(0, 0, 0, 0.7); /* Màu nền đậm hơn để dễ đọc */
-}
-
-.toast.show { opacity: 1; transform: translateY(0); }
-.toast.success { background-color: #28a745; }
-.toast.error { background-color: #dc3545; }
-.toast.warning { background-color: #ffc107; color: #212529; }
-.toast.info { background-color: #17a2b8; }
-
-/* Custom Context Menu (Tùy chỉnh) */
-#custom-context-menu {
-    display: none;
-    position: absolute;
-    z-index: 9999;
-    min-width: 180px;
-    /* Áp dụng hiệu ứng glassmorphism */
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 8px; /* Giữ bo góc hiện có */
-    box-shadow: 0 8px 24px rgba(31, 38, 135, 0.37); /* Bóng đổ mềm mại hơn */
-    font-family: "Segoe UI", sans-serif;
-    animation: fadeIn 0.15s ease-in-out;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-#custom-context-menu .menu-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    color: #333;
-    transition: background 0.2s;
-}
-
-#custom-context-menu .menu-item:hover {
-    background-color: rgba(0, 123, 255, 0.1); /* Hover trong suốt hơn */
-    color: #007bff; /* Thay đổi màu chữ khi hover */
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.98); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-@media (prefers-color-scheme: dark) {
-    /* Điều chỉnh cho chế độ tối */
-    .tp-container,
-    .modal-content,
-    #custom-context-menu {
-        background: rgba(0, 0, 0, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #eee;
-    }
-    .tp-container p,
-    .tp-container label,
-    .tp-container .program-title p,
-    #custom-context-menu .menu-item {
-        color: #eee;
-    }
-    .tp-content .program-log {
-        background: rgba(0, 0, 0, 0.5); /* Log cũng trong suốt trong dark mode */
-        box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
-        color: #eee;
-    }
-    .tp-popup .popup-box .content {
-        background: rgba(0, 0, 0, 0.5);
-        box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
-        color: #eee;
-    }
-    .tp-content .tab-content select,
-    .tp-content .layout-future input,
-    .tp-content .layout-future textarea {
-        background: rgba(0, 0, 0, 0.5);
-        color: #eee;
-        border-color: rgba(255, 255, 255, 0.3);
-    }
-    .tp-content .program-title p:nth-child(2) {
-        color: #eee;
-    }
-    #custom-context-menu .menu-item:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: #fff;
-    }
-    .nav-link.active { /* Tab active trong dark mode */
-        background-color: rgba(0, 0, 0, 0.4) !important;
-        color: #fff !important;
-        border-color: rgba(255, 255, 255, 0.2) !important;
-    }
-    .nav-link { /* Tab non-active trong dark mode */
-        color: #bbb !important;
-    }
-}
-
-
-/* General Container (Tùy chỉnh) */
 .tp-container {
-    position: fixed;
-    z-index: 9999999;
-    user-select: none;
-    max-height: 90vh;
-    max-width: 70vw;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    /* Các thuộc tính glassmorphism đã chuyển lên chung */
-    padding: 1vh 1vw;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  z-index: 9999999;
+  font-size: 14px;
 }
-
+.tp-container * {
+  user-select: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-family: "Montserrat", Segoe UI, sans-serif;
+  box-sizing: border-box;
+}
 .tp-container *::-webkit-scrollbar {
-    display: none;
+  display: none;
+  width: 0;
 }
-
-/* Toggle Button (Tùy chỉnh) */
-.tp-button-toggle {
-    left: calc(100% - 7%);
-    top: calc(100% - 20%);
-    width: auto;
-    height: 5vh;
-    aspect-ratio: 16 / 9;
-    background: rgba(255, 255, 255, 0.6); /* Có thể giữ nền này hoặc chuyển sang glassmorphism */
-    border-radius: 10px; /* Bo góc nhẹ */
-    padding: 0.5vw 0.5vw;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    font-weight: 700;
-    transition: color 0.5s, background 0.3s;
-    cursor: pointer;
+.tp-container .TP-APPVIEW {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  display: grid;
+  align-items: stretch;
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 1vw;
+  padding: 0.25vh 0.5vw;
+  box-sizing: border-box;
+  transition: transform 0.4s ease-out;
 }
-
-.tp-button-toggle:hover {
-    background: rgba(255, 255, 255, 0.8); /* Nền sáng hơn khi hover */
+.tp-container .TP-APPVIEW.hidden {
+  transform: translateX(-100%);
 }
-
-.tp-button-toggle.active {
-    opacity: 1;
-    background: lightgreen;
+.tp-container .TP-APPVIEW .TP-APP-BOX {
+  width: auto;
+  height: 100%;
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 0.8em;
+  text-align: center;
+  padding: 2vh 0.5vw;
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 18%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  cursor: pointer;
+  transition: all 0.2s ease-out;
 }
-
-.tp-button-toggle svg {
-    color: pink;
-    width: 100%;
-    height: 100%;
-    font-size: 2em;
-    transition: color 0.5s;
+.tp-container .TP-APPVIEW .TP-APP-BOX .app-box-icon {
+  width: 70%;
+  height: 70%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5vh;
 }
-
-.tp-button-toggle.active svg {
-    color: #fff;
+.tp-container .TP-APPVIEW .TP-APP-BOX img,
+.tp-container .TP-APPVIEW .TP-APP-BOX svg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.15));
+  font-size: 3em;
 }
-
-/* Main Content Panel (Tùy chỉnh) */
-.tp-content {
-    width: auto;
-    height: auto;
-    left: 0;
-    top: 0;
-    /* Các thuộc tính glassmorphism đã chuyển lên .tp-container */
-    color: #000; /* Màu chữ mặc định */
-    /* border-radius, padding, backdrop-filter, border, box-shadow đã chuyển lên .tp-container */
-    flex-grow: 1;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+.tp-container .TP-APPVIEW .TP-APP-BOX p {
+  font-size: 0.9em;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.2;
 }
-
-.tp-content:hover {
-    opacity: 1;
+.tp-container .TP-APPVIEW .TP-APP-BOX:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
 }
-
-.tp-content > div {
-    margin: 1vh 0;
+.tp-container .TP-APPVIEW .TP-APP-BOX:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  background-color: rgba(240, 240, 240, 0.9);
 }
-
-.tp-content .copyable, .tp-popup .copyable {
-    user-select: text;
-    text-decoration: underline;
-    cursor: pointer;
+.tp-container .TP-APPVIEW .TP-APP-BOX.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(100%);
 }
-
-/* Program Title (Tùy chỉnh) */
-.tp-content .program-title {
-    width: 100%;
-    text-align: center;
-    font-weight: 700;
-    margin-bottom: 1vh;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="giaDuoi"] .app-box-icon svg {
+  color: #4CAF50 !important;
 }
-
-.tp-content .program-title p:nth-child(1) {
-    font-size: 1em;
-    font-weight: bold;
-    color: #555;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="flashSale"] .app-box-icon svg {
+  color: #FF5722 !important;
 }
-
-.tp-content .program-title p:nth-child(2) {
-    font-size: 1.1em;
-    color: #000;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="giaDuoiChuongTrinh"] .app-box-icon svg {
+  color: #2196F3 !important;
 }
-
-.tp-content .program-title p:nth-child(2).online {
-    color: lightgreen;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="kTr5LanGia"] .app-box-icon svg {
+  color: #FFC107 !important;
 }
-
-.tp-content .program-title p:nth-child(2).connect {
-    color: #f7ad00;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="saoChepFlashSale"] .app-box-icon svg {
+  color: #9C27B0 !important;
 }
-
-/* Program Log (Bên trong cần background hơi trong suốt) */
-.tp-content .program-log {
-    width: 100%;
-    height: auto;
-    max-height: 20vh;
-    overflow-y: auto;
-    background: rgba(255, 255, 255, 0.7); /* Nền trắng trong suốt cho log */
-    border-radius: 8px;
-    padding: 1vh 1vw;
-    margin-bottom: 1vh;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="kiemTraMaPhanLoai"] .app-box-icon svg {
+  color: #795548 !important;
 }
-
-.tp-content .program-log pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    font-family: monospace;
-    font-size: 13px;
-    color: #333; /* Màu chữ cho log */
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="suaGiaTheoSKU"] .app-box-icon svg {
+  color: #4CAF50 !important;
 }
-
-/* Tabs (Bootstrap Navs and Tabs) */
-.nav-tabs .nav-link {
-    background-color: rgba(255, 255, 255, 0.4) !important; /* Nền tab mờ */
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 8px 8px 0 0 !important; /* Bo góc trên */
-    margin-right: 5px;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    color: #555 !important;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="suaHinhTheoSKU"] .app-box-icon svg {
+  color: #00BCD4 !important;
 }
-
-.nav-tabs .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.6) !important; /* Sáng hơn khi hover */
-    color: #000 !important;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="suaTenPhanLoaiSKU"] .app-box-icon svg {
+  color: #607D8B !important;
 }
-
-.nav-tabs .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.8) !important; /* Nền active sáng hơn */
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    border-bottom-color: rgba(255, 255, 255, 0.8) !important; /* Khử viền dưới để liền với content */
-    color: #000 !important;
-    font-weight: bold;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="kiemTraPhanLoai"] .app-box-icon svg {
+  color: #FFC107 !important;
 }
-.nav-tabs .nav-link.disabled {
-    background-color: rgba(200, 200, 200, 0.3) !important;
-    cursor: not-allowed;
-    color: #999 !important;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="themPhanLoai"] .app-box-icon svg {
+  color: #4CAF50 !important;
 }
-
-.tab-content {
-    padding: 1vh;
-    background: rgba(255, 255, 255, 0.6); /* Nền cho nội dung tab, hơi trong suốt */
-    border-radius: 0 0 10px 10px; /* Bo góc dưới */
-    border: 1px solid rgba(255, 255, 255, 0.18); /* Viền cho nội dung tab */
-    border-top: none; /* Khử viền trên để liền với tab */
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05); /* Bóng đổ nhẹ bên trong */
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="xoaPhanLoai"] .app-box-icon svg {
+  color: #F44336 !important;
 }
-
-
-/* Form Controls (Tùy chỉnh nhẹ) */
-.tp-content .tab-content select {
-    height: 4vh;
-    line-height: 4vh;
-    text-indent: 10px;
-    border-radius: 10px; /* Override Bootstrap nếu muốn 10px */
-    font-size: 14px;
-    margin-bottom: 1vh;
-    background: rgba(255, 255, 255, 0.8); /* Nền input trong suốt */
-    color: #222;
-    border: 1px solid rgba(255, 255, 255, 0.5); /* Viền input mềm mại */
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="layPhanLoai"] .app-box-icon svg {
+  color: #3F51B5 !important;
 }
-
-.tp-content .tab-content select optgroup {
-    text-indent: 5%;
-    color: #333;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="layIDSanPham"] .app-box-icon svg {
+  color: #FF9800 !important;
 }
-
-.tp-content .layout-future * {
-    margin-bottom: 10px;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="hienThiThemSanPham"] .app-box-icon svg {
+  color: #8BC34A !important;
 }
-
-.tp-content .layout-future input,
-.tp-content .layout-future textarea {
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.8); /* Nền input trong suốt */
-    color: #222;
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
-    padding: 10px;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="lienKetSKU"] .app-box-icon svg {
+  color: #03A9F4 !important;
 }
-
-.tp-content .layout-future input:focus,
-.tp-content .layout-future textarea:focus,
-.tp-content .tab-content select:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Focus ring của Bootstrap */
-    background: #fff; /* Nền solid hơn khi focus */
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="kiemTraTon"] .app-box-icon svg {
+  color: #FFEB3B !important;
 }
-
-.tp-content .layout-future textarea {
-    min-height: 10vh;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="splitExcelFile"] .app-box-icon svg {
+  color: #E91E63 !important;
 }
-
-.tp-content .layout-future label {
-    font-weight: 500;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 5px;
-    color: #222;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="mergeExcelFile"] .app-box-icon svg {
+  color: #673AB7 !important;
 }
-
-/* Buttons (Sử dụng Bootstrap mặc định, nhưng có thể override bo góc) */
-.tp-content .layout-future button,
-.tp-content .button-control button {
-    border-radius: 8px; /* Bo góc 8px cho tất cả các nút */
-    /* Màu sắc và hover của Bootstrap đã đẹp rồi */
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="compareVoucher"] .app-box-icon svg {
+  color: #FF5722 !important;
 }
-
-.tp-content .layout-future table tr {
-    margin-top: 1vh;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="moLink"] .app-box-icon svg {
+  color: #7B1FA2 !important;
 }
-
-.tp-content .layout-future table tr td {
-    padding: 1vh 1vw;
-    text-align: center;
+.tp-container .TP-APPVIEW .TP-APP-BOX[data-function="tinhGiaBan"] .app-box-icon svg {
+  color: #009688 !important;
 }
-
-/* Footer Button Control (Tùy chỉnh nhẹ) */
-.tp-content .button-control button {
-    padding: 12px;
-    font-size: 15px;
+.tp-container .TP-input-file {
+  width: 100%;
+  height: auto;
 }
-
-/* Resize Handles (Giữ nguyên) */
-.resize-handle {
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    background: rgba(204, 204, 204, 0.3); /* Mờ hơn */
-    cursor: pointer;
-    opacity: 0; /* Ẩn mặc định */
-    border-radius: 4px; /* Bo góc nhẹ */
-    transition: opacity 0.2s ease, background 0.2s ease;
+.tp-container .TP-input-file .TP-input-view {
+  position: relative;
+  width: 100%;
+  height: 5vh;
+  line-height: 5vh;
+  overflow: hidden;
 }
-
-.tp-content:hover .resize-handle {
-    opacity: 1; /* Hiện ra khi hover lên container chính */
+.tp-container .TP-input-file .TP-input-view * {
+  position: absolute;
 }
-
-.resize-handle:hover {
-    background: rgba(0, 123, 255, 0.5); /* Màu sáng khi hover */
+.tp-container .TP-input-file .TP-input-view input {
+  opacity: 0;
+  z-index: 2;
 }
-
-.top-left { left: 0; top: 0; cursor: nw-resize; }
-.top-right { right: 0; top: 0; cursor: ne-resize; }
-.bottom-left { left: 0; bottom: 0; cursor: sw-resize; }
-.bottom-right { right: 0; bottom: 0; cursor: se-resize; }
-
-/* Custom Switch (Giữ nguyên) */
-.switch-wrapper { display: flex; align-items: center; gap: 10px; font-family: sans-serif; }
-.switch-label { font-size: 14px; font-weight: bold; color: #222; width: 50px; text-align: center; } /* Màu chữ đậm hơn */
-.switch { position: relative; width: 60px; height: 28px; cursor: pointer; }
-.switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-.slider {
-    position: relative;
-    background-color: rgba(200, 200, 200, 0.5); /* Nền slider trong suốt */
-    border-radius: 34px;
-    width: 100%;
-    height: 100%;
-    transition: background-color 0.3s ease-in-out;
-    box-sizing: border-box;
+.tp-container .TP-input-file .TP-input-view p {
+  width: 100%;
+  text-align: center;
+  z-index: 1;
 }
-.slider-handle {
-    position: absolute;
-    height: 22px;
-    width: 22px;
-    left: 3px;
-    top: 3px;
-    background-color: white;
-    border-radius: 50%;
-    transition: left 0.3s ease-in-out;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+.tp-container .TP-input-file .TP-file-view {
+  width: 100%;
+  height: auto;
+  max-height: 12vh;
+  overflow: scroll;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1vh 1vw;
+  scroll-behavior: smooth;
 }
-.switch input:checked + .slider { background-color: #007bff; }
-.switch input:checked + .slider .slider-handle { left: 35px; }
-.slider.round { border-radius: 14px; }
+.tp-container .TP-input-file .TP-file-view .TP-file-box {
+  width: 40%;
+  height: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.tp-container .TP-input-file .TP-file-view .TP-file-box p {
+  font-size: 0.6em;
+}
+.tp-container .TP-input-file .TP-file-view .TP-file-box img {
+  width: 50%;
+  height: auto;
+}
+.tp-container .TP-choice-box {
+  width: fit-content;
+  height: auto;
+  aspect-ratio: 1/1;
+  font-size: 0.7em;
+  margin: 0.5vw 0.5vh;
+  border: 1px solid pink;
+  border-radius: 5px;
+}
+.tp-container .TP-choice-box input {
+  display: none;
+}
+.tp-container .TP-choice-box input:checked ~ label {
+  background: pink;
+  color: #fff;
+}
+.tp-container .TP-choice-box label {
+  width: 100%;
+  height: 100%;
+  line-height: auto;
+  padding: 1vw 1vw;
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  text-align: center;
+  font-weight: 700;
+}
+.tp-container .TP-select {
+  width: 100%;
+  height: auto;
+  position: relative;
+  font-family: sans-serif;
+  border: 1px solid #eee;
+  border-radius: 5px;
+}
+.tp-container .TP-select .TP-select-choice {
+  width: 100%;
+  height: 5vh;
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  justify-content: space-around;
+  cursor: pointer;
+  background: #fff;
+  box-sizing: border-box;
+}
+.tp-container .TP-select .TP-select-choice:hover {
+  background-color: #f0f0f0;
+}
+.tp-container .TP-select .TP-select-choice .option-name {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+.tp-container .TP-select .TP-select-choice .option-name p {
+  margin: 0;
+  font-weight: bold;
+}
+.tp-container .TP-select .TP-select-choice .option-platform {
+  width: auto;
+  height: 100%;
+  aspect-ratio: 1/1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+.tp-container .TP-select .TP-select-choice .option-platform svg, .tp-container .TP-select .TP-select-choice .option-platform img {
+  width: auto;
+  height: 100%;
+  aspect-ratio: 1/1;
+}
+.tp-container .TP-select .TP-select-list-option {
+  position: absolute;
+  width: 100%;
+  top: 5vh;
+  background: #fff;
+  border: 1px solid #eee;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  box-sizing: border-box;
+  z-index: 10;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+}
+.tp-container .TP-select .TP-select-list-option .TP-select-option {
+  width: 100%;
+  height: 5vh;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1vw;
+  cursor: pointer;
+  box-sizing: border-box;
+  border-top: 1px solid #f0f0f0;
+}
+.tp-container .TP-select .TP-select-list-option .TP-select-option:first-child {
+  border-top: none;
+}
+.tp-container .TP-select .TP-select-list-option .TP-select-option:hover {
+  background-color: #f9f9f9;
+}
+.tp-container .TP-select .TP-select-list-option .TP-select-option .option-name {
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+.tp-container .TP-select .TP-select-list-option .TP-select-option .option-platform {
+  width: auto;
+  height: 3vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+}
+.tp-container .TP-select .TP-select-list-option .TP-select-option .option-platform svg, .tp-container .TP-select .TP-select-list-option .TP-select-option .option-platform img {
+  width: auto;
+  height: 100%;
+  aspect-ratio: 1/1;
+}
+.tp-container .TP-select:hover .TP-select-list-option, .tp-container .TP-select:focus-within .TP-select-list-option {
+  max-height: 100vh;
+  opacity: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.tp-container.tp-content {
+  position: relative;
+  width: auto;
+  max-width: 45vw;
+  height: auto;
+  max-height: 80vh;
+  aspect-ratio: 9/16;
+  left: 0;
+  top: 0;
+  color: #000;
+  flex-grow: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.1vh;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 20px;
+  padding: 2vh 2vw;
+  backdrop-filter: blur(10px);
+  overflow-y: auto;
+}
+.tp-container.tp-content .copyable {
+  user-select: text;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.tp-container.tp-content .color-theme {
+  width: 100%;
+  height: 5vh;
+  line-height: 5vh;
+}
+.tp-container.tp-content .color-theme .switch {
+  position: relative;
+  height: 5vh;
+  line-height: 5vh;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.tp-container.tp-content .color-theme .switch-label {
+  font-weight: bold;
+  position: relative;
+  z-index: 2;
+  float: left;
+  width: 100%;
+  font-size: 1.1em;
+  color: #676a6c;
+  text-align: center;
+  cursor: pointer;
+}
+.tp-container.tp-content .color-theme .switch-input {
+  display: none;
+}
+.tp-container.tp-content .color-theme .switch-input:checked + .switch-label {
+  color: #FFF;
+  transition: 0.15s ease-out;
+  transition-property: color, text-shadow;
+}
+.tp-container.tp-content .color-theme .switch-input:checked + .switch-label-y ~ .switch-selector {
+  transform: translateX(0%);
+  background-color: #1AB394;
+}
+.tp-container.tp-content .color-theme .switch-input:checked + .switch-label-i ~ .switch-selector {
+  transform: translateX(100%);
+  background-color: #f8ac59;
+}
+.tp-container.tp-content .color-theme .switch-input:checked + .switch-label-n ~ .switch-selector {
+  transform: translateX(200%);
+  background-color: #ed5565;
+}
+.tp-container.tp-content .color-theme .switch-selector {
+  position: absolute;
+  z-index: 1;
+  top: 0px;
+  left: 0px;
+  display: block;
+  width: calc(100% / 3);
+  height: 100%;
+  border-radius: 32px;
+  background-color: #1ab394;
+  transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+.tp-container.tp-content .program-title {
+  width: 100%;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.8em;
+  color: #000;
+}
+.tp-container.tp-content .server-status {
+  width: 100%;
+  text-align: center;
+  font-weight: 500;
+  color: #555;
+}
+.tp-container.tp-content .server-status #status {
+  font-size: 1.3em;
+}
+.tp-container.tp-content .server-status #server-url a {
+  font-size: 0.7em;
+  color: #0099ff;
+}
+.tp-container.tp-content .program-log {
+  width: 100%;
+  height: auto;
+  max-height: 20vh;
+  overflow-y: hidden;
+  padding: 1vh 1vw;
+  margin-bottom: 1vh;
+  text-align: right;
+}
+.tp-container.tp-content .program-log pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+  font-size: 13px;
+  color: #333;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  overflow: scroll;
+  padding: 1vh 1vw;
+  text-align: left;
+  width: 100%;
+  height: auto;
+  max-height: 15vh;
+}
+.tp-container.tp-content .program-log button {
+  background: none;
+  margin-top: 0.25vh;
+  font-size: 1.2em;
+  height: 3vh;
+}
+.tp-container.tp-content .nav-tabs {
+  width: 100%;
+  height: 7vh;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 1vw;
+  overflow-x: auto;
+  margin-bottom: 0 !important;
+  overflow: hidden;
+}
+.tp-container.tp-content .nav-tabs .nav-link {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 8px 8px 0 0 !important;
+  margin-right: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  color: #555 !important;
+  width: 100%;
+  padding: 0.5vh 1vw;
+  text-align: center;
+  transition: 0.5s;
+}
+.tp-container.tp-content .nav-tabs .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+  color: #000 !important;
+}
+.tp-container.tp-content .nav-tabs .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.8) !important;
+  color: #000 !important;
+  font-weight: bold;
+}
+.tp-container.tp-content .nav-tabs .nav-link.disabled {
+  background-color: rgba(200, 200, 200, 0.3) !important;
+  cursor: not-allowed;
+  color: #999 !important;
+}
+.tp-container.tp-content .tab-content {
+  border-radius: 0 0 10px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: none;
+}
+.tp-container.tp-content .tab-content .tab-pane {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+.tp-container.tp-content .tab-content select {
+  height: 4vh;
+  line-height: 4vh;
+  text-indent: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 1vh;
+  background: rgba(255, 255, 255, 0.8);
+  color: #222;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: none;
+}
+.tp-container.tp-content .tab-content select option {
+  text-indent: 10%;
+  color: #333;
+  margin-left: 2vw;
+}
+.tp-container.tp-content .tab-content .layout-future {
+  width: 100%;
+  position: absolute;
+  transition: transform 0.4s ease-out;
+  transform: translateX(200%);
+  left: 0;
+  display: flex;
+  flex-direction: column;
+}
+.tp-container.tp-content .tab-content .layout-future.active {
+  transform: translateX(0%);
+}
+.tp-container.tp-content .tab-content .layout-future .back {
+  cursor: pointer;
+  font-size: 1.2em;
+  color: #007bff;
+  margin-bottom: 1.5vw;
+  display: flex;
+  align-items: center;
+  gap: 0.5vw;
+  font-weight: bold;
+}
+.tp-container.tp-content .tab-content .layout-future .back:hover {
+  text-decoration: underline;
+}
+.tp-container.tp-content .tab-content .layout-future .back i {
+  font-size: 0.9em;
+}
+.tp-container.tp-content .tab-content .layout-future .tutorial {
+  height: auto;
+}
+.tp-container.tp-content .tab-content .layout-future .tutorial > p.title {
+  font-size: 1em !important;
+  font-weight: 600;
+  text-indent: 0;
+  height: fit-content;
+}
+.tp-container.tp-content .tab-content .layout-future .tutorial .tutorial-container {
+  max-height: 6vh;
+  font-size: 0.8em;
+  text-indent: 2vw;
+  overflow: scroll;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab {
+  width: 100%;
+  height: auto;
+  overflow: scroll;
+  display: none;
+  flex-grow: 1;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab.no-layout {
+  width: 100%;
+  height: auto;
+  text-align: center;
+  font-size: 1.25em;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab.no-layout p {
+  color: crimson;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab.active {
+  display: block;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab input[type="text"],
+.tp-container.tp-content .tab-content .layout-future .layout-tab input[type="number"],
+.tp-container.tp-content .tab-content .layout-future .layout-tab textarea {
+  width: 100%;
+  max-width: auto;
+  padding: 0 1vw;
+  height: 5vh;
+  resize: vertical;
+  border-radius: 15px;
+  text-indent: 2vw;
+  text-align: justify;
+  background: rgba(255, 255, 255, 0.8);
+  color: #333;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1vh;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab button {
+  font-size: 1.2em;
+  padding: 0.8vh 1.5vw;
+  border-radius: 8px;
+  color: #fff;
+  background-color: #1AB394;
+  border: none;
+  font-weight: 600;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab button:hover {
+  background-color: #14866f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab button:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab .switch-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 1.5vh;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab .switch-wrapper .switch-label {
+  font-weight: 500;
+  color: #333;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab .switch-wrapper .switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab .switch-wrapper .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab .switch-wrapper .switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab .switch-wrapper .switch .slider .slider-handle {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab .switch-wrapper .switch input:checked + .slider {
+  background-color: #2196F3;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab .switch-wrapper .switch input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+.tp-container.tp-content .tab-content .layout-future .layout-tab .switch-wrapper .switch input:checked + .slider .slider-handle {
+  transform: translateX(26px);
+}
+.tp-container.tp-content .tab-content .layout-future.ktraGiaChuongTrinhKM p, .tp-container.tp-content .tab-content .layout-future.ktraKhuyenMai p, .tp-container.tp-content .tab-content .layout-future.chinhSuaFlashSale p, .tp-container.tp-content .tab-content .layout-future.thongKeDonHang p, .tp-container.tp-content .tab-content .layout-future.kiemTraThuocTinh p {
+  text-align: center;
+  color: #333;
+  font-size: 1em;
+  margin-bottom: 1vh;
+}
+.tp-container.tp-content .tab-content .layout-future.chinhSuaKhuyenMaiTiktok .button-control-promotion {
+  display: flex;
+  justify-content: space-around;
+  margin: 1.5vh 0;
+}
+.tp-container.tp-content .tab-content .layout-future.chinhSuaKhuyenMaiTiktok .button-control-promotion button {
+  flex: 1;
+  margin: 0 5px;
+  background-color: #FFC107;
+  color: #333;
+}
+.tp-container.tp-content .tab-content .layout-future.chinhSuaKhuyenMaiTiktok .button-control-promotion button:hover {
+  background-color: #d39e00;
+}
+.tp-container.tp-content .tab-content .layout-future.chinhSuaKhuyenMaiTiktok .button-control-promotion #remo {
+  background-color: crimson;
+  color: #fff;
+}
+.tp-container.tp-content .tab-content .layout-future.chinhSuaKhuyenMaiTiktok .button-control-promotion #remo:hover {
+  background-color: #ad102f;
+}
+.tp-container.tp-content .tab-content .layout-future.chinhSuaKhuyenMaiTiktok p {
+  text-align: center;
+  font-weight: bold;
+  color: #333;
+  margin-top: 1vh;
+}
+.tp-container.tp-content .tab-content .layout-future.timkiemTheoSKU {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1vh;
+  padding-top: 2vh;
+}
+.tp-container.tp-content .tab-content .layout-future.timkiemTheoSKU #skuInput {
+  height: 6vh;
+  font-size: 1.1em;
+}
+.tp-container.tp-content .tab-content .layout-future.timkiemTheoSKU #searchSkuButton {
+  width: 50%;
+  height: 6vh;
+  background-color: #4CAF50;
+  font-size: 1.3em;
+  color: #fff;
+}
+.tp-container.tp-content .tab-content .layout-future.timkiemTheoSKU #searchSkuButton:hover {
+  background-color: #3d8b40;
+}
+.tp-container.tp-content .tab-content .layout-future.splitExcelFile input[type="file"], .tp-container.tp-content .tab-content .layout-future.mergeExcelFile input[type="file"] {
+  width: 100%;
+  height: auto;
+  padding: 1vh 0;
+  border: 1px dashed rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.6);
+}
+.tp-container.tp-content .tab-content .layout-future.splitExcelFile input[type="file"]::-webkit-file-upload-button, .tp-container.tp-content .tab-content .layout-future.mergeExcelFile input[type="file"]::-webkit-file-upload-button {
+  visibility: hidden;
+}
+.tp-container.tp-content .tab-content .layout-future.splitExcelFile input[type="file"]::before, .tp-container.tp-content .tab-content .layout-future.mergeExcelFile input[type="file"]::before {
+  content: "Chọn Tệp";
+  display: inline-block;
+  background: linear-gradient(top, #f9f9f9, #e3e3e3);
+  border: 1px solid #999;
+  border-radius: 3px;
+  padding: 8px 15px;
+  outline: none;
+  white-space: nowrap;
+  -webkit-user-select: none;
+  cursor: pointer;
+  text-shadow: 1px 1px #fff;
+  font-weight: 700;
+  font-size: 10pt;
+}
+.tp-container.tp-content .tab-content .layout-future.splitExcelFile input[type="file"]:hover::before, .tp-container.tp-content .tab-content .layout-future.mergeExcelFile input[type="file"]:hover::before {
+  border-color: black;
+}
+.tp-container.tp-content .tab-content .layout-future.splitExcelFile input[type="file"]:active::before, .tp-container.tp-content .tab-content .layout-future.mergeExcelFile input[type="file"]:active::before {
+  background: -webkit-linear-gradient(top, #e3e3e3, #f9f9f9);
+}
+.tp-container.tp-content .tab-content .layout-future.splitExcelFile label, .tp-container.tp-content .tab-content .layout-future.mergeExcelFile label {
+  display: block;
+  margin-top: 1.5vh;
+  margin-bottom: 0.5vh;
+  font-weight: 500;
+  color: #333;
+}
+.tp-container.tp-content .tab-content .layout-future.splitExcelFile input[type="number"], .tp-container.tp-content .tab-content .layout-future.mergeExcelFile input[type="number"] {
+  height: 4vh;
+  text-align: center;
+  width: 80%;
+  margin: 0 auto;
+  display: block;
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher #addVoucher {
+  margin-bottom: 1.5vh;
+  background-color: #03A9F4;
+  color: #fff;
+  font-size: 1.1em;
+  padding: 1vh 2vw;
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher #addVoucher:hover {
+  background-color: #0286c2;
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box {
+  overflow-x: auto;
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5vh;
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box table thead {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box table thead td {
+  padding: 1vh 1vw;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  font-weight: bold;
+  text-align: center;
+  color: #333;
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box table tbody tr {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box table tbody tr td {
+  padding: 1vh 1vw;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+  vertical-align: middle;
+  color: #333;
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box table tbody tr input[type="text"] {
+  width: 80px;
+  height: 3vh;
+  padding: 0 0.5vw;
+  text-indent: 0;
+  font-size: 0.9em;
+  margin: 0 auto;
+  display: block;
+  border-radius: 5px;
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box table tbody tr select {
+  width: 50px;
+  height: 3vh;
+  padding: 0 0.5vw;
+  font-size: 0.9em;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #333;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  margin-left: 5px;
+  display: inline-block;
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box table tbody tr .remove-voucher {
+  color: crimson;
+  cursor: pointer;
+  font-weight: bold;
+}
+.tp-container.tp-content .tab-content .layout-future.compareVoucher .voucher-box table tbody tr .remove-voucher:hover {
+  text-decoration: underline;
+}
+.tp-container.tp-content .tab-content .layout-future.tinhGiaBan .input-cost, .tp-container.tp-content .tab-content .layout-future.tinhGiaBan .output-cost {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  padding: 2vh 2vw;
+  margin-bottom: 2vh;
+}
+.tp-container.tp-content .tab-content .layout-future.tinhGiaBan .input-cost label, .tp-container.tp-content .tab-content .layout-future.tinhGiaBan .output-cost label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1vh;
+}
+.tp-container.tp-content .tab-content .layout-future.tinhGiaBan .input-cost input[type="text"], .tp-container.tp-content .tab-content .layout-future.tinhGiaBan .output-cost input[type="text"] {
+  height: 6vh;
+  font-size: 1.2em;
+  text-align: center;
+}
+.tp-container.tp-content .tab-content .layout-future.tinhGiaBan .output-cost p {
+  font-size: 1.1em;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5vh;
+}
+.tp-container.tp-content .tab-content .layout-future.tinhGiaBan .output-cost p span {
+  font-weight: bold;
+  color: #FF5722;
+}
+.tp-container.tp-content .button-control {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5vh;
+  display: flex;
+  justify-content: center;
+  gap: 1vw;
+  flex-wrap: wrap;
+}
+.tp-container.tp-content .button-control button {
+  position: relative;
+  font-size: 1.5em;
+  padding: 0.5vh 1vw;
+  border-radius: 0;
+  color: #000;
+  background-color: #fff;
+  border: none;
+  font-weight: 700;
+  transition: 0.5s;
+}
+.tp-container.tp-content .button-control button::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 100%;
+  right: 0;
+  top: 0;
+  background: crimson;
+  color: #fff;
+  transition: 0.5s;
+  z-index: -1;
+}
+.tp-container.tp-content .button-control button:hover {
+  border-radius: 10px;
+  background: none;
+  color: #fff;
+}
+.tp-container.tp-content .button-control button:hover::after {
+  width: 100%;
+  left: 0;
+}
