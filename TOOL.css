@@ -1,12 +1,13 @@
 @charset "UTF-8";
 body {
   background: linear-gradient(135deg, #ffc4d5, #c4ffdb);
+  position: relative;
 }
 
 .tp-container {
   display: flex;
   flex-direction: column;
-  position: fixed;
+  position: absolute;
   z-index: 9999999;
   font-size: 14px;
 }
@@ -376,7 +377,7 @@ body {
   color: #000;
   flex-grow: 1;
   overflow: hidden;
-  display: flex;
+  display: none;
   flex-direction: column;
   row-gap: 0.1vh;
   background: rgba(255, 255, 255, 0.4);
