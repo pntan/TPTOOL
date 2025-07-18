@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.31";
+	const VERSION = "2.2.32";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -216,7 +216,8 @@
 			"themPhanLoaiLazada": themPhanLoaiLazada,
 			"khoiPhucSanPhamLazada": khoiPhucSanPhamLazada,
 			"themHinhTheoSKULazada": themHinhTheoSKULazada,
-			// "themGiaTheoSKULazada": themGiaTheoSKULazada,
+			"layIDSanPhamLazada": layIDSanPhamLazada,
+			"themGiaTheoSKULazada": themGiaTheoSKULazada,
 			// "ktraGiaChuongTrinhKMLazada": ktraGiaChuongTrinhKMLazada,
 			// //-- KHÁC
 			"splitExcelFile": splitExcelFile,
@@ -1869,6 +1870,7 @@
 								<option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
 								<option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
 								<option data-func="themHinhTheoSKULazada" data-layout="themHinhTheoSKULazadaLayout">Sửa Hình Theo SKU</option>
+								<option data-func="layIDSanPhamLazada" data-layout="layIDSanPhamLazadaLayout"> Lấy ID Sản Phẩm</option>
 								<option disabled data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
 							</optgroup>
 
@@ -2256,7 +2258,7 @@
 						flex-grow: 1;
 						overflow: hidden;
 						// Ẩn hiện giao diện chính;
-						display: none;
+						display: flex;
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
@@ -3047,6 +3049,15 @@
 				`))
 				setEventMoLink();
 				break;
+			case "layIDSanPhamLazadaLayout":
+				content.append($(`
+						<div class="layout-tab">
+							<label for="copy-type">Lấy đường dẫn sản phẩm</label>
+							<input type="checkbox" id="copy-type" />
+							<p style="font-weight:700; color: crimson">*Mặc định chỉ lấy ID sản phẩm</p>
+						</div>
+				`));
+				break;
 			case "layIDSanPhamTiktokLayout":
 				content.append($(`
 						<div class="layout-tab">
@@ -3606,7 +3617,13 @@
 				case "themGiaTheoSKULazadaLayout":
 					content.append($(`
 						<div class="layout-tab">
-						<textarea id="data"></textarea>
+							<p>Cách sửa giá:</p>
+							<select id="type">
+								<option data-type="all">Tất cả</option>
+								<option data-type="duoi">Giá đuôi</option>
+								<option data-type="dau">Giá đầu</option>
+							</select>
+							<textarea id="data" placeholder="Mỗi SKU là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-SKU: Bắt buộc (ABC123-DEF456 hoặc ABC123)\n-Giá: Bắt buộc"></textarea>
 						</div>
 					`));
 					// setEventThemGiaTheoSKULazada();
@@ -4801,7 +4818,7 @@
 
 			var indexRow = 0;
 			async function nextRow(){
-				if(indexRow > row.length){
+				if(indexRow >= row.length){
 					boxToast(`Đã cập nhật giá đuôi`, "success");
 					boxLogging(`Đã cập nhất giá đuôi`);
 					return;
@@ -4812,6 +4829,52 @@
 
 				var name = row.eq(indexRow).find("td:nth-child(1) button span").text();
 
+				if(row.eq(indexRow).find("td.special_price").has("button.next-btn").length == 0){
+					var currentPrice = parseInt($(".special-price .number-text-scope").attr("title"));
+					if(currentPrice != giaKM){
+						var price = $(".special-price .number-text-scope");
+
+						console.log(price);
+
+						simulateReactEvent(price, "mouseover");
+
+						await delay(500);
+						
+						simulateReactEvent($(".next-overlay-wrapper .next-balloon-content button:nth-child(1) i"), "click");
+					}
+				}else{
+					row.eq(indexRow).find("td.special_price button.next-btn").click();
+				}
+
+				await delay(200);
+
+				var balloon = $(".next-overlay-wrapper .next-balloon-content").last();
+
+				console.log(balloon);
+				
+				var inputPrice = balloon.eq(0).find(".money-number-picker input");
+				var buttonClick = balloon.eq(0).find(".action-wrapper button:nth-child(1)");
+
+				simulateClearReactInput(inputPrice);
+
+				inputPrice.select();
+				
+				inputPrice.attr("value", giaKM);
+
+				inputPrice.val(giaKM);
+
+				inputPrice.blur();
+
+				await delay(200);
+
+				buttonClick.click();
+
+				await delay(200);
+
+				boxLogging(`Đã cập nhật giá đuôi cho ${name}`, [`${name}`], ["pink"]);
+
+				return;
+
 				if(row.eq(indexRow).find("td.special_price").has("button.next-btn").length > 0){
 					if(parseInt(giaKM) == 0)
 						giaKM = gia;
@@ -4820,12 +4883,10 @@
 
 					await delay(200);
 
-					var balloon = $(".next-overlay-wrapper .next-balloon-content");
+					var balloon = $(".next-overlay-wrapper .next-balloon-content").last();
 					
 					var inputPrice = balloon.eq(0).find(".money-number-picker input");
 					var buttonClick = balloon.eq(0).find(".action-wrapper button:nth-child(1)");
-
-					console.log(balloon, inputPrice, buttonClick);
 
 					inputPrice.select();
 					
@@ -4842,6 +4903,47 @@
 					await delay(200);
 
 					boxLogging(`Đã cập nhật giá đuôi cho ${name}`, [`${name}`], ["pink"]);
+				}else{
+					console.log(parseInt(price.attr("title")), parseInt(giaKM));
+					console.log(parseInt(price.attr("title")) != parseInt(giaKM));
+					if(parseInt(price.attr("title")) != parseInt(giaKM)){
+						simulateReactEvent(price, "mousemove");
+
+						var price = $(".special-price .number-text-scope");
+
+						simulateReactEvent(price, "mouseover");
+
+						await delay(500);
+						
+						simulateReactEvent($(".next-overlay-wrapper .next-balloon-content button:nth-child(1) i"), "click");
+
+						await delay(500);
+
+						var balloon = $(".next-overlay-wrapper .next-balloon-content").last();
+
+						console.log(balloon);
+						
+						var inputPrice = balloon.eq(0).find(".money-number-picker input");
+						var buttonClick = balloon.eq(0).find(".action-wrapper button:nth-child(1)");
+
+						simulateClearReactInput(inputPrice);
+
+						inputPrice.select();
+						
+						inputPrice.attr("value", giaKM);
+
+						inputPrice.val(giaKM);
+
+						inputPrice.blur();
+
+						await delay(200);
+
+						buttonClick.click();
+
+						await delay(200);
+
+						boxLogging(`Đã cập nhật giá đuôi cho ${name}`, [`${name}`], ["pink"]);
+					}
 				}
 
 				indexRow++;
@@ -6564,7 +6666,7 @@
 							break; // Thoát vòng lặp chính
 						}
 
-						await delay(500); 
+						await delay(150); 
 
 					} else {
 						// Không tìm thấy sản phẩm chưa xử lý nào trên DOM hiện tại (tất cả đã được gắn cờ hoặc không hợp lệ)
@@ -9208,6 +9310,178 @@
 			await nextData();
 
 			boxToast("Đã sửa giá các SKU được chọn", "success")
+		}
+
+		// Lấy ID sản phẩm Lazada
+		function layIDSanPhamLazada(){
+			var content = $(".pm-table-container .next-table-inner > div.next-table-body > table > tbody > .next-table-row");
+
+			var type = $(".tp-container.tp-content .layout-future .layout-tab #copy-type").prop("checked") ? "https://sellercenter.lazada.vn/apps/product/publish?productId=" : "";
+
+			var indexContent = 0;
+
+			var idList = [];
+
+			function nextContent(){
+				if(indexContent >= content.length){
+					boxLogging(`Đã sao chép các liên kết`);
+					boxToast(`Đã sao chép các liên kết`, "success");
+					navigator.clipboard.writeText(idList.join("\n"));
+					return;
+				}
+
+				var checKBox = content.eq(indexContent).find("td:nth-child(1) input");
+				var name = content.eq(indexContent).find("td:nth-child(2) .right-cell a");
+
+				var link = name.attr("href").split("/");
+
+				link = link[link.length - 1];
+				link = link.replace("i", "");
+				link = link.replace(".html", "");
+
+				idList.push(type + link);
+
+				indexContent++;
+				nextContent();
+			}
+
+			nextContent();
+		}
+
+		// Sửa giá theo SKU Lazada
+		function themGiaTheoSKULazada(){
+			var box = $(".next-table-body .next-table-row");
+
+			var type = $(".tp-container.tp-content #type option:selected");
+			type = type.data("type");
+
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data").val();
+
+			data = data.split("\n");
+
+			var indexData = 0;
+
+			async function nextData(){
+				if(indexData >= data.length){
+					boxLogging(`Đang kiểm tra gia đuôi`)
+					await delay(500);
+					giaDuoiLazada();
+					return;
+				}
+				var indexBox = 0;
+
+				var line = data[indexData].split("\t");
+				var sku = line[0].toString().trim();
+				var gia = line[1].toString().trim();
+		
+				function nextBox(){
+					if(indexBox >= box.length){
+						return;
+					}
+
+					var name = box.eq(indexBox).find("td:nth-child(1) button span");
+					var priceBox = box.eq(indexBox).find("td.price input");
+					var skuBox = box.eq(indexBox).find("td.SellerSku input");
+
+					switch(type){
+						case "all":
+							if(skuBox.val().includes(sku)){
+								var priceBox1 = priceBox.val().replace(/\B(?=(\d{3})+(?!\d))/g, ',') || "Không";
+								var gia1 = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+								if(parseInt(priceBox.val()) < parseInt(gia)){
+									boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${gia1} > ${priceBox1})`, [`${skuBox.val()}`], ["crimson"]);
+									box.eq(indexBox).css("background", "crimson");
+								}else{
+									simulateClearReactInput(priceBox);
+									priceBox.val(gia);
+									simulateReactEvent($(priceBox), "input");
+									box.eq(indexBox).css("background", "lightgreen");
+									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${priceBox1} thành ${gia1}`, [`${skuBox.val()}`, `${priceBox1}`, `${gia1}`], ["lightgreen", "orange", "orange"]);
+								}
+							}
+						break;
+
+						case "duoi":
+							if(skuBox.val().includes(sku)){
+								var price = tachGia(priceBox.val());
+								var giaDau = price.giaDau;
+								var giaDuoi = gia;
+
+								var editPrice = gopGia(giaDau, giaDuoi);
+
+								if(parseInt(editPrice.gia) > parseInt(price.gia)){
+									giaDau = parseInt(giaDau) - 1000;
+
+									editPrice = gopGia(giaDau, giaDuoi);
+								}
+
+								if(parseInt(giaDuoi) > parseInt(giaDau)){
+									boxLogging(`Bỏ qua SKU: [copy]${skuBox.val()}[/copy] (có giá đuôi cao hơn giá đầu)`, [`${skuBox.val()}`], ["crimson"]);
+									box.eq(indexBox).css("background", "crimson");
+									return;
+								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
+									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
+									box.eq(indexBox).css("background", "orange");
+									simulateClearReactInput(priceBox);
+									priceBox.val(editPrice.gia);
+									simulateReactEvent($(priceBox), "input");
+								}else{
+									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
+									simulateClearReactInput(priceBox);
+									priceBox.val(editPrice.gia);
+									simulateReactEvent($(priceBox), "input");
+									box.eq(indexBox).css("background", "lightgreen");
+								}
+							}
+						break;
+
+						case "dau":
+							if(skuBox.val().includes(sku)){
+								var price = tachGia(priceBox.val());
+								var giaDau = gia;
+								var giaDuoi = price.giaDuoi;
+
+								var editPrice = gopGia(giaDau, giaDuoi);
+
+								if(parseInt(editPrice.gia) > parseInt(price.gia)){
+									boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${editPrice.gia} > ${price.gia})`, [`${skuBox.val()}`], ["crimson"]);
+									box.eq(indexBox).css("background", "crimson");
+									return;
+								}
+
+								if(parseInt(giaDuoi) > parseInt(giaDau)){
+									boxLogging(`Bỏ qua SKU: [copy]${skuBox.val()}[/copy] (có giá đuôi cao hơn giá đầu)`, [`${skuBox.val()}`], ["crimson"]);
+									box.eq(indexBox).css("background", "crimson");
+									return;
+								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
+									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
+									box.eq(indexBox).css("background", "orange");
+									simulateClearReactInput(priceBox);
+									priceBox.val(editPrice.gia);
+									simulateReactEvent($(priceBox), "input");
+								}else{
+									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
+									simulateClearReactInput(priceBox);
+									priceBox.val(editPrice.gia);
+									simulateReactEvent($(priceBox), "input");
+									box.eq(indexBox).css("background", "lightgreen");
+								}
+							}
+						break;
+					}
+
+					indexBox++;
+					nextBox();
+				}
+
+				indexData++;
+				nextBox();
+
+				nextData();
+			}
+
+			nextData();
 		}
 
 		// Chat với AI
