@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.33";
+	const VERSION = "2.2.34";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -9147,14 +9147,17 @@
 
 				var checKBox = content.eq(indexContent).find("td:nth-child(1) input");
 				var name = content.eq(indexContent).find("td:nth-child(2) .right-cell a");
+				console.log(name.attr("href"));
 
-				var link = name.attr("href").split("/");
+				if(name.attr("href") != undefined){
+					var link = name.attr("href").split("/");
 
-				link = link[link.length - 1];
-				link = link.replace("i", "");
-				link = link.replace(".html", "");
+					link = link[link.length - 1];
+					link = link.replace("i", "");
+					link = link.replace(".html", "");
 
-				idList.push(type + link);
+					idList.push(type + link);
+				}
 
 				indexContent++;
 				nextContent();
