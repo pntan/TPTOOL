@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.32";
+	const VERSION = "2.2.33";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -463,6 +463,76 @@
 					}
 				}
 			}, delay);
+		}
+
+		// Giả lập kéo thả tệp vào một phần tử (element)
+		function simulateFileDrop(targetElement, files = [], options = {}) {
+			var el = targetElement[0] || targetElement; // Đảm bảo el là DOM element
+
+			if (!el) {
+				console.warn("simulateFileDrop: Target element not found.");
+				return;
+			}
+
+			var dataTransfer = new DataTransfer();
+			files.forEach(file => {
+				// Thay vì kiểm tra instanceof File, kiểm tra instanceof Blob
+				// vì File kế thừa từ Blob và Blob ít bị ảnh hưởng bởi ngữ cảnh hơn trong trường hợp này.
+				// Hoặc chỉ cần kiểm tra sự tồn tại của các thuộc tính cần thiết của một File/Blob.
+				if (file && (file instanceof Blob || (typeof file.name === 'string' && typeof file.size === 'number' && typeof file.type === 'string'))) {
+					dataTransfer.items.add(file);
+				} else {
+					console.warn("simulateFileDrop: Invalid file object provided. Must be an instance of File.", file);
+					// Log chi tiết hơn để debug
+					console.log("Details of invalid file:", file);
+					if (file) {
+						console.log("File constructor name:", file.constructor ? file.constructor.name : "N/A");
+						try {
+							console.log("Is file instanceof window.File?", file instanceof window.File);
+							// Có thể thêm kiểm tra instanceof Blob của cửa sổ chính
+							console.log("Is file instanceof window.Blob?", file instanceof window.Blob);
+						} catch (e) {
+							console.log("Error checking instanceof in window context:", e);
+						}
+					}
+				}
+			});
+
+			if (dataTransfer.items.length === 0) {
+				console.warn("simulateFileDrop: No valid files were added to DataTransfer.", files);
+				return; // Không có file nào hợp lệ để kéo thả
+			}
+
+			const dragEvents = ['dragenter', 'dragover', 'drop'];
+
+			dragEvents.forEach(eventType => {
+				var event;
+				if (eventType === 'dragenter' || eventType === 'dragover') {
+					event = new DragEvent(eventType, {
+						bubbles: true,
+						cancelable: true,
+						dataTransfer: dataTransfer,
+						...options
+					});
+					event.preventDefault();
+				} else if (eventType === 'drop') {
+					event = new DragEvent(eventType, {
+						bubbles: true,
+						cancelable: true,
+						dataTransfer: dataTransfer,
+						...options
+					});
+					event.preventDefault();
+				} else {
+					event = new DragEvent(eventType, {
+						bubbles: true,
+						cancelable: true,
+						...options
+					});
+				}
+				el.dispatchEvent(event);
+				console.log(`Dispatched ${eventType} event on`, el);
+			});
 		}
 
 		// Hàm giả lập thao tác người dùng (đã sửa đổi)
@@ -8755,13 +8825,13 @@
 			if (Object.keys(inputMap).length === 0) {
 				boxLogging("Chưa có hình ảnh nào được nạp vào bộ nhớ. Vui lòng chọn thư mục ảnh trước.", [], ["red"]);
 				boxToast("Chưa có ảnh! Vui lòng chọn thư mục ảnh.", "error");
-				return; 
+				return;
 			}
 
-			const mappingData = []; // Lưu trữ thông tin SKU/Name của các biến thể CÓ TRÊN SÀN VÀ CÓ ẢNH TƯƠNG ỨNG
+			var mappingData = []; // Lưu trữ thông tin SKU/Name của các biến thể CÓ TRÊN SÀN VÀ CÓ ẢNH TƯƠNG ỨNG
 
 			// **Bước 1: Thu thập thông tin các SKUs và tên biến thể từ bảng sản phẩm (tab SKU List)**
-			const tableRows = $(".props-sku-table .next-table-inner table tr");
+			var tableRows = $(".props-sku-table .next-table-inner table tr.next-table-row");
 			if (tableRows.length === 0) {
 				boxLogging("Không tìm thấy bảng SKU biến thể để lấy thông tin. Đảm bảo bạn đang ở trang quản lý biến thể sản phẩm.", [], ["red"]);
 				boxToast("Không tìm thấy bảng SKU!", "error");
@@ -8769,22 +8839,21 @@
 			}
 
 			boxLogging(`Đang thu thập thông tin SKU từ ${tableRows.length} hàng biến thể trên sàn...`, [], ["blue"]);
+
 			for (let i = 0; i < tableRows.length; i++) {
-				const row = tableRows.eq(i);
-				const nameBox = row.find("td:nth-child(1) button"); 
-				// const idElement = row.find("td").eq(0).find("p").eq(1).find(".copyable"); 
-				const skuInput = row.find("td:nth-child(5) input").find(`input#skus${idElement.text().trim()}`); 
+				var row = tableRows.eq(i);
+				var nameBox = row.find("td:nth-child(1) button");
+				var skuInput = row.find("td:nth-child(5) input");
 
 				if (skuInput.length > 0 && skuInput.val()) {
-					const skuValue = skuInput.val().trim().toUpperCase();
-					// CHỈ THÊM VÀO MAPPINGDATA NẾU SKU NÀY CÓ TRÊN SÀN VÀ CÓ FILE ẢNH TƯƠNG ỨNG
-					if (inputMap[skuValue]) { 
+					var skuValue = skuInput.val().trim().toUpperCase();
+					if (inputMap[skuValue] && inputMap[skuValue][0] && inputMap[skuValue][0].files.length > 0) {
 						mappingData.push({
 							name: nameBox.text().trim(),
 							sku: skuValue,
 						});
 					} else {
-						boxLogging(`SKU "${skuValue}" có trên sàn nhưng không có file ảnh tương ứng. Bỏ qua.`, [], ["gray"]);
+						boxLogging(`SKU "${skuValue}" có trên sàn nhưng không có file ảnh tương ứng trong bộ nhớ. Bỏ qua.`, [], ["gray"]);
 					}
 				}
 			}
@@ -8798,387 +8867,133 @@
 			boxLogging(`Tìm thấy ${mappingData.length} biến thể SKU có ảnh cần thêm/sửa trên sàn.`, [], ["blue"]);
 
 			// **Bước 2: Lặp qua từng container biến thể trên UI và xử lý ảnh (xóa trước, thêm sau)**
-			const variantImageContainers = $(".prop-group-body > div:nth-child(2) > div:nth-child(2) > div .prop-option-list .next-form-item");
+			var variantImageContainers = $(".prop-group-body > div:nth-child(2) > div:nth-child(2) > div .prop-option-list .next-form-item");
 
 			if (variantImageContainers.length === 0) {
 				boxLogging("Không tìm thấy các khối UI để tải ảnh biến thể. Đảm bảo bạn đang ở phần 'Thuộc tính bán hàng' và các biến thể đã được tạo.", [], ["red"]);
 				boxToast("Không tìm thấy UI upload ảnh!", "error");
-				return;``
+				return;
 			}
 
-			let processedCount = 0;
-			
-			for (let i = 0; i < variantImageContainers.length; i++) {
-				const currentVariantContainer = variantImageContainers.eq(i);
-				const imgBox = currentVariantContainer.find(".prop-option-item > div:nth-child(2) .gc-image-upload"); // Container chứa ảnh hiện tại
-				const nameInputForVariant = currentVariantContainer.find(".prop-option-item > div:nth-child(1)").find("input"); // Input chứa tên biến thể
+			// Hàm xóa ảnh hiện có cho một container biến thể cụ thể (sử dụng đệ quy)
+			async function deleteExistingImagesRecursive(containerElement, currentIndex = 0) {
+				var existingImages = containerElement.find(".gc-image-list .custom-sale-prop-image-item.gc-image-item");
+
+				if (currentIndex >= existingImages.length) {
+					boxLogging("Hoàn thành xóa tất cả ảnh cũ trong container này.", [], ["green"]);
+					return; // Dừng đệ quy
+				}
+
+				var imgItem = existingImages.eq(currentIndex);
+				var imgElement = imgItem.find("img");
+
+				simulateReactEvent(imgElement, "mouseover");
+
+				await delay(500);
+
+				var deleteButton = $(".next-overlay-wrapper .next-balloon-content .image-actions > button").eq(1).find("i");
+
+				if (deleteButton.length > 0) {
+					simulateReactEvent(deleteButton, "click");
+					boxLogging(`Đã bấm nút xóa ảnh thứ ${currentIndex + 1}.`, [], ["yellow"]);
+					await sleep(200); // Đợi ảnh được xóa và UI cập nhật
+					
+					// Gọi đệ quy cho ảnh tiếp theo
+					await deleteExistingImagesRecursive(containerElement, currentIndex); // currentIndex không tăng vì sau khi xóa, phần tử tiếp theo sẽ ở vị trí hiện tại
+				} else {
+					boxLogging(`Không tìm thấy nút xóa cho ảnh thứ ${currentIndex + 1}. Bỏ qua xóa.`, [], ["red"]);
+					// Gọi đệ quy cho ảnh tiếp theo (nếu không thể xóa ảnh hiện tại, chuyển sang ảnh kế tiếp)
+					await deleteExistingImagesRecursive(containerElement, currentIndex + 1);
+				}
+			}
+
+
+			// Hàm đệ quy để xử lý từng biến thể
+			async function processVariantRecursive(index) {
+				if (index >= variantImageContainers.length) {
+					boxLogging(`Hoàn thành quá trình thêm/sửa ảnh cho ${index} biến thể.`, [], ["green", "bold"]);
+					boxToast("Hoàn thành thêm ảnh theo SKU!", "success");
+					return; // Dừng đệ quy
+				}
+
+				var currentVariantContainer = variantImageContainers.eq(index);
+				var dropZone = currentVariantContainer.find(".prop-option-item > div:nth-child(2) .gc-image-upload .gc-drag-area.image-zone");
+				var fileInputTarget = currentVariantContainer.find(".prop-option-item > div:nth-child(2) .gc-image-upload input[type='file']");
+
+				var nameInputForVariant = currentVariantContainer.find(".prop-option-item > div:nth-child(1)").find("input");
 
 				if (nameInputForVariant.length === 0 || !nameInputForVariant.val()) {
-					boxLogging(`Cảnh báo: Không tìm thấy input tên biến thể hoặc giá trị rỗng cho container ${i}. Bỏ qua.`, [], ["yellow"]);
-					continue; 
+					boxLogging(`Cảnh báo: Không tìm thấy input tên biến thể hoặc giá trị rỗng cho container ${index}. Bỏ qua.`, [], ["yellow"]);
+					await processVariantRecursive(index + 1); // Tiếp tục với biến thể tiếp theo
+					return;
 				}
 
-				return;
+				const variantName = nameInputForVariant.val().trim();
+				const matchedMapping = mappingData.find(m => m.name === variantName);
 
-				const currentVariantName = nameInputForVariant.val().trim();
-				let foundMapping = null;
-
-				// Tìm trong mappingData đã được lọc (chỉ chứa các SKU có trên sàn và có ảnh)
-				for (let j = 0; j < mappingData.length; j++) {
-					// So sánh tên biến thể trên UI với tên biến thể trong mappingData
-					if (currentVariantName.includes(mappingData[j].name)) {
-						foundMapping = mappingData[j];
-						break;
-					}
+				if (!matchedMapping) {
+					boxLogging(`Biến thể "${variantName}" không có SKU phù hợp trong mappingData. Bỏ qua.`, [], ["gray"]);
+					await processVariantRecursive(index + 1); // Tiếp tục với biến thể tiếp theo
+					return;
 				}
 
-				if (foundMapping) {
-					const skuToProcess = foundMapping.sku;
-					const fileInputEl = inputMap[skuToProcess].get(0); // Lấy phần tử input file giả lập
+				const skuToUpload = matchedMapping.sku;
+				const filesToUploadInput = inputMap[skuToUpload];
 
-					// Kiểm tra lại file ảnh có sẵn trong inputMap không (phòng trường hợp lỗi logic mappingData)
-					if (!fileInputEl || !fileInputEl.files || fileInputEl.files.length === 0) {
-						boxLogging(`Lỗi: Không tìm thấy file ảnh cho SKU [copy]${skuToProcess}[/copy] trong bộ nhớ. Bỏ qua.`, [`${skuToProcess}`], ["red"]);
-						currentVariantContainer.css("background","red"); 
-						// await delay(500); 
-						continue; 
-					}
-					const file = fileInputEl.files[0];
-					const dt = new DataTransfer();
-					dt.items.add(file);
+				if (!filesToUploadInput || filesToUploadInput.length === 0 || filesToUploadInput[0].files.length === 0) {
+					boxLogging(`SKU "${skuToUpload}" (${variantName}) không có file ảnh nào được nạp trong inputMap. Bỏ qua.`, [], ["gray"]);
+					await processVariantRecursive(index + 1); // Tiếp tục với biến thể tiếp theo
+					return;
+				}
 
-					// **THAO TÁC XÓA ẢNH CŨ (ƯU TIÊN HÀNG ĐẦU)**
-					// Kiểm tra xem có ảnh đang hiển thị trong container này không
-					const existingImagePreview = imgBox.find("img"); 
-					if (existingImagePreview.length > 0) {
-						boxLogging(`Đang chuẩn bị xóa ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy])...`, [`${skuToProcess}`], ["orange"]);
-						
-						// Di chuột vào ảnh để hiển thị nút xóa
-						simulateReactEvent(imgBox.find("> div > div"), "mouseenter"); 
-						// await delay(400); // Chờ nút xóa hiện ra (điều chỉnh nếu cần)
+				const filesToUpload = Array.from(filesToUploadInput[0].files);
 
-						var delButton = imgBox.find(".core-space .core-space-item").eq(1); 
+				boxLogging(`Đang xử lý hình ảnh cho biến thể: "${variantName}" (SKU: ${skuToUpload}) - ${filesToUpload.length} file (Biến thể ${index + 1}/${variantImageContainers.length})`, [], ["cyan"]);
 
-						if (delButton.length > 0) {
-							boxLogging(`Đang click nút xóa cho biến thể "${currentVariantName}"...`, [], ["orange"]);
-							// delButton.get(0).click(); 
-							simulateReactEvent(delButton.find("svg"), "click");
-							await delay(200); // Rất quan trọng: Chờ ảnh xóa xong và UI cập nhật
-							boxLogging(`Đã xóa ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
+				// **Bước xóa ảnh hiện có (sử dụng đệ quy)**
+				deleteExistingImagesRecursive(currentVariantContainer);
+
+				await delay(500);
+
+				// **Giả lập kéo thả file vào vùng dropZone hoặc set trực tiếp vào file input**
+				if (fileInputTarget.length > 0) {
+					boxLogging(`Đang gán trực tiếp ${filesToUpload.length} file ảnh cho biến thể "${variantName}" qua input type="file"...`, [], ["green"]);
+
+					const dataTransfer = new DataTransfer();
+					filesToUpload.forEach(file => {
+						if (file instanceof File || (file && typeof file === 'object' && typeof file.name === 'string' && typeof file.size === 'number')) {
+							dataTransfer.items.add(file);
 						} else {
-							boxLogging(`Không tìm thấy nút xóa ảnh cho biến thể "${currentVariantName}". Có thể ảnh đã được xóa hoặc không có.`, [], ["yellow"]);
+							boxLogging(`Cảnh báo: File không hợp lệ khi thêm vào DataTransfer cho input direct:`, [], ["red"]);
+							console.error(file);
 						}
+					});
 
-						
-					} else {
-						boxLogging(`Không có ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]) để xóa.`, [`${skuToProcess}`], ["gray"]);
-					}
+					fileInputTarget[0].files = dataTransfer.files;
 
-					// **THAO TÁC THÊM ẢNH MỚI (CHỈ THỰC HIỆN SAU KHI ĐẢM BẢO CÓ INPUT)**
-					// Tìm lại input[type="file"] sau khi ảnh cũ đã được xóa (nếu có)
-					const imgInputTiktok = imgBox.find(".core-upload input[type='file']")[0]; 
+					simulateReactEvent(fileInputTarget, 'change');
+					simulateReactEvent(fileInputTarget, 'input');
 
-					if (!imgInputTiktok) {
-						boxLogging(`Lỗi: Không tìm thấy input upload ảnh cho biến thể "${currentVariantName}" (SKU: ${skuToProcess}) sau khi xóa ảnh cũ (nếu có).`, [`${currentVariantName}`, `${skuToProcess}`], ["red"]);
-						currentVariantContainer.css("background","red");
-						// await delay(500);
-						continue;
-					}
+					boxLogging(`Đã gán file cho biến thể "${variantName}".`, [], ["green"]);
 
-					boxLogging(`Đang thêm ảnh mới cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy])...`, [`${skuToProcess}`], ["blue"]);
-
-					$(nameInputForVariant).get(0).scrollIntoView({ behavior: 'smooth', block: 'center' });;
-					
-					imgInputTiktok.files = dt.files; // Gán file vào input
-
-					const changeEvent = new Event("change", { bubbles: true });
-					imgInputTiktok.dispatchEvent(changeEvent);
-
-					currentVariantContainer.css("background","lightgreen");
-					boxLogging(`Đã thêm ảnh cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
-					
-					await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
-					processedCount++;
+				} else if (dropZone.length > 0) {
+					boxLogging(`Đang giả lập kéo thả ${filesToUpload.length} file ảnh vào drop zone cho biến thể "${variantName}"...`, [], ["green"]);
+					simulateFileDrop(dropZone, filesToUpload);
+					boxLogging(`Đã giả lập kéo thả file cho biến thể "${variantName}".`, [], ["green"]);
 
 				} else {
-					// Trường hợp này xảy ra khi biến thể trên UI (currentVariantName)
-					// không tìm thấy trong mappingData (tức là không có SKU tương ứng hoặc không có ảnh đã nạp)
-					boxLogging(`Biến thể "${currentVariantName}" không có ảnh phù hợp đã nạp. Bỏ qua.`, [`${currentVariantName}`], ["crimson"]);
-					currentVariantContainer.css("background","crimson");
-					// await delay(500); 
+					boxLogging(`Cảnh báo: Không tìm thấy input file hoặc drop zone cho biến thể "${variantName}". Bỏ qua việc tải ảnh.`, [], ["yellow"]);
 				}
+
+				await delay(500); // Đợi để Lazada xử lý upload mỗi ảnh
+				
+				// Gọi đệ quy cho biến thể tiếp theo
+				await processVariantRecursive(index + 1);
 			}
+
+			// Bắt đầu quá trình đệ quy
+			await processVariantRecursive(0);
 		}
-
-		// Hàm trợ giúp để lấy cookie (cho XSRF-TOKEN)
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-            return null;
-        }
-
-        // Kích hoạt input file khi click nút
-        $('#triggerUploadButton').on('click', function() {
-            $('#imageUploadInput').click();
-        });
-
-        // Xử lý khi người dùng chọn file
-        $('#imageUploadInput').on('change', async function(event) {
-            const selectedFile = event.target.files[0];
-            if (selectedFile) {
-                $('#uploadStatus').text('Đang xử lý và tải lên...');
-                $('#uploadedImagePreview').hide(); // Ẩn preview cũ
-                console.log('File đã chọn:', selectedFile);
-
-                // Đây là các thông tin cần thiết từ ngữ cảnh của trang Lazada
-                // Bạn cần tự lấy chúng từ DOM hoặc URL hiện tại nếu muốn động
-                // Ví dụ, productId có thể lấy từ URL hoặc một phần tử ẩn trên trang
-                const currentProductId = '3070430347'; // Thay thế bằng productId thực tế của sản phẩm
-                const currentSpm = 'a1zawf.24863640.table_online_product.d_action_edit.40d41e13UwbeA3'; // Thay thế bằng spm thực tế
-                const currentSourceCode = 'product-manage'; // Hoặc giá trị bạn quan sát được
-
-                try {
-                    await startLazadaImageUpload(selectedFile, currentProductId, currentSpm, currentSourceCode);
-                    $('#uploadStatus').text('Tải lên hoàn tất!');
-                } catch (error) {
-                    $('#uploadStatus').text('Lỗi: ' + error.message);
-                    console.error('Lỗi trong quá trình tải ảnh:', error);
-                    alert('Có lỗi xảy ra khi tải ảnh. Vui lòng kiểm tra console để biết chi tiết.');
-                }
-            } else {
-                $('#uploadStatus').text('Chưa chọn ảnh nào.');
-            }
-        });
-
-        // === CÁC HÀM API ===
-
-        // Hàm chính điều phối quá trình tải lên
-        async function startLazadaImageUpload(file, productId, spm, sourceCode) {
-            // Lấy XSRF-TOKEN động từ cookie (thường là XSRF-TOKEN hoặc CSRFT)
-            const xsrfToken = getCookie('XSRF-TOKEN') || getCookie('CSRFT');
-            if (!xsrfToken) {
-                throw new Error('Không tìm thấy XSRF-TOKEN. Vui lòng đảm bảo bạn đã đăng nhập và đang chạy code trên trang Lazada Seller Center.');
-            }
-            // Giá trị bx-v có thể cố định hoặc bạn cần tìm cách lấy động nếu nó thay đổi
-            const bxV = '2.5.31'; // Lấy từ header bạn đã thấy
-            const refererUrl = window.location.href; // Hoặc URL cụ thể của trang publish product
-
-            console.log('Bước 1: Lấy thông tin xác thực tải lên...');
-            const authInfoResponse = await getUploadAuthInfo(productId, spm, sourceCode);
-            const uploadUrl = authInfoResponse.data.data.targetUrl;
-            if (!uploadUrl) {
-                throw new Error('Không nhận được targetUrl từ getUploadAuthInfo.');
-            }
-            console.log('Auth Info Response:', authInfoResponse);
-
-            console.log('Bước 2: Tải dữ liệu ảnh thực tế lên Lazada Server...');
-            // uploadedResponseData sẽ là object 'data' từ JSON phản hồi của Bước 2
-            const uploadedResponseData = await uploadFileToLazadaServer(
-                file,
-                productId,
-                spm,
-                sourceCode,
-                xsrfToken,
-                bxV,
-                refererUrl,
-                uploadUrl
-            );
-            console.log('Uploaded File Info (từ server Lazada):', uploadedResponseData);
-
-            // Đảm bảo có URL tạm thời và hash từ response Bước 2
-            if (!uploadedResponseData || !uploadedResponseData.url || !uploadedResponseData.features || !uploadedResponseData.features.image_hash) {
-                throw new Error('Phản hồi tải ảnh từ server Lazada không chứa đủ thông tin (URL hoặc hash).');
-            }
-
-            console.log('Bước 3: Đăng ký ảnh vào Media Center...');
-            // Truyền các thông tin cần thiết vào hàm addFileToMediaCenter
-            const finalResult = await addFileToMediaCenter(
-                file, // Truyền file gốc để lấy size và tên
-                uploadedResponseData.url, // URL tạm thời từ Bước 2
-                uploadedResponseData.features.image_hash, // Hash từ Bước 2
-                spm
-            );
-            console.log('Tải ảnh hoàn tất (Media Center):', finalResult);
-
-            if (finalResult && finalResult.data && finalResult.data.url) {
-                $('#uploadStatus').text('Tải lên thành công! URL ảnh: ' + finalResult.data.url);
-                $('#uploadedImagePreview').attr('src', finalResult.data.url).show();
-            } else {
-                throw new Error('Không lấy được URL ảnh cuối cùng từ Media Center.');
-            }
-        }
-
-        // --- Hàm cho Bước 1: Lấy thông tin xác thực ---
-        function getUploadAuthInfo(productId, spm, sourceCode) {
-            return new Promise((resolve, reject) => {
-                const apiPath = 'mtop.lazada.merchant.media.file.getuploadauthinfo';
-                const apiUrl = `/h5/${apiPath}/1.0/`; // Lazada thường dùng đường dẫn tương đối này
-
-                const mtopQueryParams = new URLSearchParams({
-                    jsv: '2.6.1',
-                    appKey: '4272',
-                    t: Date.now().toString(),
-                    v: '1.0',
-                    timeout: '30000',
-                    H5Request: 'true',
-                    url: apiPath,
-                    api: apiPath,
-                    type: 'originaljson',
-                    dataType: 'json',
-                    valueType: 'original',
-                    'x-i18n-regionID': 'LAZADA_VN'
-                });
-
-                const dataPayload = {
-                    _timezone: -7,
-                    spm: spm,
-                    productId: productId,
-                    sourceCode: sourceCode,
-                    host: 'sellercenter.lazada.vn'
-                };
-                mtopQueryParams.append('data', JSON.stringify(dataPayload));
-
-                $.ajax({
-                    url: apiUrl + '?' + mtopQueryParams.toString(),
-                    type: 'GET',
-                    success: function(response) {
-                        if (response && response.ret && response.ret[0].includes('SUCCESS')) {
-                            resolve(response);
-                        } else {
-                            reject(new Error('Lỗi lấy thông tin xác thực (getUploadAuthInfo): ' + JSON.stringify(response)));
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        reject(new Error('Lỗi AJAX getUploadAuthInfo: ' + error));
-                    }
-                });
-            });
-        }
-
-
-        // --- Hàm cho Bước 2: Tải dữ liệu ảnh thực tế lên Lazada Server ---
-        function uploadFileToLazadaServer(file, productId, spm, sourceCode, xsrfToken, bxV, refererUrl, uploadUrl) {
-            return new Promise((resolve, reject) => {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('_sourceCode', sourceCode);
-                formData.append('_productId', productId);
-                formData.append('_spm', spm);
-
-                $.ajax({
-                    url: `https://sellercenter.lazada.vn${uploadUrl}`,
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    headers: {
-                        'bx-v': bxV,
-                        'x-xsrf-token': xsrfToken,
-                        'referer': refererUrl
-                    },
-                    xhrFields: {
-                        withCredentials: true
-                    },
-                    success: function(response) {
-                        // Dựa vào response bạn cung cấp, nó có trường 'success' và 'data'
-                        if (response && response.success) {
-                            resolve(response.data); // Trả về object 'data' từ JSON phản hồi
-                        } else {
-                            reject(new Error('Lỗi từ server Lazada khi tải file: ' + JSON.stringify(response)));
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        reject(new Error(`Lỗi AJAX tải file lên Lazada Server (${xhr.status}): ${error} - ${xhr.responseText}`));
-                    }
-                });
-            });
-        }
-
-        // Hàm mới để lấy kích thước ảnh
-        function getImageDimensions(imageUrl) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = () => resolve({ width: img.width, height: img.height });
-                img.onerror = (e) => reject(new Error('Không thể tải ảnh để lấy kích thước: ' + imageUrl + ' Error: ' + (e.message || 'Unknown error')));
-                img.src = imageUrl;
-            });
-        }
-
-        // --- Hàm cho Bước 3: Đăng ký ảnh vào Media Center ---
-        // file: đối tượng File gốc được chọn
-        // tempImageUrl: URL tạm thời từ phản hồi của Bước 2 (uploadedResponseData.url)
-        // imageHash: Hash ảnh từ phản hồi của Bước 2 (uploadedResponseData.features.image_hash)
-        function addFileToMediaCenter(file, tempImageUrl, imageHash, spm) {
-            return new Promise(async (resolve, reject) => {
-                const apiPath = 'mtop.lazada.merchant.media.file.add';
-                const apiUrl = `/h5/${apiPath}/1.0/`;
-
-                // Lấy kích thước ảnh từ URL tạm thời
-                let imageWidth, imageHeight;
-                try {
-                    const dimensions = await getImageDimensions(tempImageUrl);
-                    imageWidth = dimensions.width;
-                    imageHeight = dimensions.height;
-                } catch (error) {
-                    console.error('Lỗi khi lấy kích thước ảnh:', error);
-                    // Tiếp tục với 0 hoặc giá trị mặc định nếu không lấy được kích thước
-                    imageWidth = 0;
-                    imageHeight = 0;
-                }
-
-                // Lấy định dạng file từ tên file gốc
-                const fileExtension = file.name.split('.').pop().toUpperCase();
-                const fileFormat = ['JPG', 'JPEG', 'PNG', 'GIF', 'WEBP'].includes(fileExtension) ? fileExtension : 'PNG'; // Đảm bảo định dạng hợp lệ
-
-                const dataPayload = {
-                    fileFormat: fileFormat,
-                    fileType: 'image',
-                    folderId: '0',
-                    source: 'console', // Hoặc 'product-manage' tùy ngữ cảnh
-                    spm: spm,
-                    url: tempImageUrl, // URL tạm thời từ phản hồi Bước 2
-                    name: file.name, // Tên file gốc
-                    size: file.size, // Kích thước file gốc
-                    width: imageWidth, // Chiều rộng ảnh
-                    height: imageHeight, // Chiều cao ảnh
-                    md5: imageHash // Hash MD5 của ảnh từ phản hồi Bước 2
-                    // gmtCreate, gmtModified có thể thêm nếu bạn muốn, nhưng thường không bắt buộc
-                };
-
-                const mtopQueryParams = new URLSearchParams({
-                    jsv: '2.6.1',
-                    appKey: '4272',
-                    t: Date.now().toString(),
-                    v: '1.0',
-                    timeout: '30000',
-                    H5Request: 'true',
-                    url: apiPath,
-                    api: apiPath,
-                    type: 'originaljson',
-                    dataType: 'json',
-                    valueType: 'original',
-                    'x-i18n-regionID': 'LAZADA_VN'
-                });
-                mtopQueryParams.append('data', JSON.stringify(dataPayload));
-
-                $.ajax({
-                    url: apiUrl + '?' + mtopQueryParams.toString(),
-                    type: 'POST',
-                    contentType: 'application/json',
-                    success: function(response) {
-                        if (response && response.ret && response.ret[0].includes('SUCCESS')) {
-                            resolve(response);
-                        } else {
-                            reject(new Error('Lỗi đăng ký Media Center: ' + JSON.stringify(response)));
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        reject(new Error('Lỗi AJAX đăng ký Media Center: ' + error));
-                    }
-                });
-            });
-        }
 		
 		async function suaGiaTheoSKUTiktok(){
 			var type = $(".tp-container.tp-content #type option:selected");
