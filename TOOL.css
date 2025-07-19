@@ -376,7 +376,7 @@ body {
   color: #000;
   flex-grow: 1;
   overflow: hidden;
-  display: none;
+  display: flex;
   flex-direction: column;
   row-gap: 0.1vh;
   background: rgba(255, 255, 255, 0.4);
