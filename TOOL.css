@@ -349,7 +349,8 @@ body {
   position: fixed;
   right: 0;
   bottom: 15vh;
-  background: rgba(255, 255, 255, 0.432);
+  background: url("https://github.com/pntan/TPTOOL/blob/main/background-button-toggle.gif?raw=true");
+  background-size: 100% 100%;
   border-radius: 10px;
   transition: background 0.5s;
 }
@@ -358,8 +359,25 @@ body {
   font-size: 2em;
   transition: 0.5s;
 }
-.tp-container.tp-button-toggle.active {
+.tp-container.tp-button-toggle::after {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 100%;
   background: #fff;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  transition: 0.5s;
+  opacity: 0.3;
+}
+.tp-container.tp-button-toggle.active {
+  background-size: 200% 200%;
+  background-position: 100%;
+}
+.tp-container.tp-button-toggle.active::after {
+  width: 100%;
+  right: 0;
 }
 .tp-container.tp-button-toggle.active svg {
   color: pink;
