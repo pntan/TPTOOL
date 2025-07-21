@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.35";
+	const VERSION = "2.2.36";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -218,6 +218,7 @@
 			"themHinhTheoSKULazada": themHinhTheoSKULazada,
 			"layIDSanPhamLazada": layIDSanPhamLazada,
 			"themGiaTheoSKULazada": themGiaTheoSKULazada,
+			"chuanHoaSKULazada": chuanHoaSKULazada,
 			// "ktraGiaChuongTrinhKMLazada": ktraGiaChuongTrinhKMLazada,
 			// //-- KHÁC
 			"splitExcelFile": splitExcelFile,
@@ -1002,6 +1003,45 @@
 			lastPrice = lastPrice.join("");
 
 			return {giaTruoc, giaSau, gia: lastPrice};
+		}		
+
+		function checkSKU(sku){
+			// Biểu thức chính quy để trích xuất phần SKU chính:
+			// ^                   : Bắt đầu chuỗi
+			// ([A-Z]+[A-Z0-9]*)   : NHÓM 1 - Phần đầu của SKU chính (bắt buộc): 1+ chữ cái hoa, theo sau là 0+ chữ hoa/số.
+			// (-[A-Z]+[A-Z0-9]*)? : NHÓM 2 - Phần sau của SKU chính (tùy chọn): Dấu gạch nối, 1+ chữ cái hoa, theo sau là 0+ chữ hoa/số.
+			// (.*)                : NHÓM 3 - Bất kỳ ký tự nào còn lại sau phần SKU chính (có thể là nhiễu).
+			// $                   : Kết thúc chuỗi
+			const pattern = /^([A-Z]+[A-Z0-9]*)(-[A-Z]+[A-Z0-9]*)?(.*)$/;
+
+			const match = sku.match(pattern);
+
+			if (match) {
+				let mainSkuPart = match[1]; // Lấy phần đầu của SKU chính
+
+				// Nếu có phần thứ hai của SKU chính, nối vào
+				if (match[2]) {
+					mainSkuPart += match[2];
+				}
+
+				const noisePart = match[3]; // Lấy phần còn lại (nhiễu)
+
+				const hasNoise = noisePart !== ''; // Có nhiễu nếu phần còn lại không rỗng
+
+				return {
+					sku: mainSkuPart, // Phần SKU chính được trích xuất
+					noise: noisePart,     // Phần nhiễu (rỗng nếu không có)
+					type: hasNoise    // true nếu có nhiễu, false nếu không
+				};
+			} else {
+				// Trường hợp không khớp với cả định dạng cơ bản của SKU chính (ví dụ: "123", "abc")
+				// Trong trường hợp này, toàn bộ chuỗi được coi là nhiễu.
+				return {
+					sku: "",          // Không trích xuất được SKU chính
+					noise: sku,           // Toàn bộ chuỗi là nhiễu
+					type: true        // Chắc chắn có nhiễu
+				};
+			}
 		}
 
 		// Gộp các obj
@@ -1941,6 +1981,7 @@
 								<option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
 								<option data-func="themHinhTheoSKULazada" data-layout="themHinhTheoSKULazadaLayout">Sửa Hình Theo SKU</option>
 								<option data-func="layIDSanPhamLazada" data-layout="layIDSanPhamLazadaLayout"> Lấy ID Sản Phẩm</option>
+								<option data-func="chuanHoaSKULazada">Chuẩn hóa SKU</option>
 								<option disabled data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
 							</optgroup>
 
@@ -7880,45 +7921,6 @@
 		async function lienKetSKUSapo(){
 			boxAlert("LIÊN KẾT SKU SAPO");
 
-			function checkSKU(sku){
-				// Biểu thức chính quy để trích xuất phần SKU chính:
-				// ^                   : Bắt đầu chuỗi
-				// ([A-Z]+[A-Z0-9]*)   : NHÓM 1 - Phần đầu của SKU chính (bắt buộc): 1+ chữ cái hoa, theo sau là 0+ chữ hoa/số.
-				// (-[A-Z]+[A-Z0-9]*)? : NHÓM 2 - Phần sau của SKU chính (tùy chọn): Dấu gạch nối, 1+ chữ cái hoa, theo sau là 0+ chữ hoa/số.
-				// (.*)                : NHÓM 3 - Bất kỳ ký tự nào còn lại sau phần SKU chính (có thể là nhiễu).
-				// $                   : Kết thúc chuỗi
-				const pattern = /^([A-Z]+[A-Z0-9]*)(-[A-Z]+[A-Z0-9]*)?(.*)$/;
-
-				const match = sku.match(pattern);
-
-				if (match) {
-					let mainSkuPart = match[1]; // Lấy phần đầu của SKU chính
-
-					// Nếu có phần thứ hai của SKU chính, nối vào
-					if (match[2]) {
-						mainSkuPart += match[2];
-					}
-
-					const noisePart = match[3]; // Lấy phần còn lại (nhiễu)
-
-					const hasNoise = noisePart !== ''; // Có nhiễu nếu phần còn lại không rỗng
-
-					return {
-						sku: mainSkuPart, // Phần SKU chính được trích xuất
-						noise: noisePart,     // Phần nhiễu (rỗng nếu không có)
-						type: hasNoise    // true nếu có nhiễu, false nếu không
-					};
-				} else {
-					// Trường hợp không khớp với cả định dạng cơ bản của SKU chính (ví dụ: "123", "abc")
-					// Trong trường hợp này, toàn bộ chuỗi được coi là nhiễu.
-					return {
-						sku: "",          // Không trích xuất được SKU chính
-						noise: sku,           // Toàn bộ chuỗi là nhiễu
-						type: true        // Chắc chắn có nhiễu
-					};
-				}
-			}
-
 			var typeLink = $(".tp-content .layout-future .layout-tab #toggle-switch").prop("checked");
 
 			boxAlert(`Đang Liên Kết SKU`);
@@ -8853,18 +8855,18 @@
 							sku: skuValue,
 						});
 					} else {
-						boxLogging(`SKU "${skuValue}" có trên sàn nhưng không có file ảnh tương ứng trong bộ nhớ. Bỏ qua.`, [], ["gray"]);
+						boxLogging(`Không tìm thấy hình cho SKU ${skuValue}`, [`${skuValue}`], ["crimson"]);
 					}
 				}
 			}
 
 			if (mappingData.length === 0) {
-				boxLogging("Không tìm thấy SKU nào trên sàn có file ảnh tương ứng đã nạp. Kiểm tra lại tên file và SKUs.", [], ["orange"]);
+				boxLogging("Không tìm thấy SKU nào trên sàn có file ảnh tương ứng đã nạp. Kiểm tra lại tên file và SKUs.", ["Không tìm thấy SKU nào trên sàn có file ảnh tương ứng đã nạp. Kiểm tra lại tên file và SKUs."], ["orange"]);
 				boxToast("Không tìm thấy SKU phù hợp!", "warning");
 				return;
 			}
 
-			boxLogging(`Tìm thấy ${mappingData.length} biến thể SKU có ảnh cần thêm/sửa trên sàn.`, [], ["blue"]);
+			boxLogging(`Tìm thấy ${mappingData.length} biến thể SKU có ảnh cần thêm/sửa trên sàn.`, [`${mappingData.length}`], ["blue"]);
 
 			// **Bước 2: Lặp qua từng container biến thể trên UI và xử lý ảnh (xóa trước, thêm sau)**
 			var variantImageContainers = $(".prop-group-body > div:nth-child(2) > div:nth-child(2) > div .prop-option-list .next-form-item");
@@ -8876,34 +8878,80 @@
 			}
 
 			// Hàm xóa ảnh hiện có cho một container biến thể cụ thể (sử dụng đệ quy)
-			async function deleteExistingImagesRecursive(containerElement, currentIndex = 0) {
-				var existingImages = containerElement.find(".gc-image-list .custom-sale-prop-image-item.gc-image-item");
+			async function deleteExistingImagesRecursive(containerElement) {
+				// Không cần currentIndex nữa, vì chúng ta sẽ luôn nhắm mục tiêu phần tử đầu tiên
+				// cho đến khi không còn ảnh nào.
 
-				if (currentIndex >= existingImages.length) {
-					boxLogging("Hoàn thành xóa tất cả ảnh cũ trong container này.", [], ["green"]);
-					return; // Dừng đệ quy
-				}
+				try {
+					let maxRetries = 10; // Số lần thử lại tối đa để chờ ảnh biến mất
+					let retryCount = 0;
+					let initialImageCount = containerElement.find(".gc-image-list .custom-sale-prop-image-item.gc-image-item").length;
 
-				var imgItem = existingImages.eq(currentIndex);
-				var imgElement = imgItem.find("img");
+					// Vòng lặp này sẽ tiếp tục cho đến khi không còn ảnh nào
+					// hoặc khi không tìm thấy nút xóa (có thể là lỗi UI hoặc không có ảnh)
+					while (true) {
+						var existingImages = containerElement.find(".gc-image-list .custom-sale-prop-image-item.gc-image-item");
 
-				simulateReactEvent(imgElement, "mouseover");
+						if (existingImages.length === 0) {
+							// boxAlert("Hoàn thành xóa tất cả ảnh cũ trong container này.", [], ["green"]);
+							console.log("Đã xóa hết ảnh trong container này.");
+							return; // Dừng vòng lặp khi không còn ảnh
+						}
 
-				await delay(500);
+						var imgItem = existingImages.eq(0); // Luôn nhắm mục tiêu ảnh đầu tiên
+						var imgElement = imgItem.find("img");
 
-				var deleteButton = $(".next-overlay-wrapper .next-balloon-content .image-actions > button").eq(1).find("i");
+						if (imgElement.length === 0) {
+							console.warn("Không tìm thấy thẻ <img> bên trong item ảnh. Có thể đã xóa hết hoặc cấu trúc HTML thay đổi. Dừng xóa.");
+							return; // Không tìm thấy ảnh để thao tác
+						}
 
-				if (deleteButton.length > 0) {
-					simulateReactEvent(deleteButton, "click");
-					boxLogging(`Đã bấm nút xóa ảnh thứ ${currentIndex + 1}.`, [], ["yellow"]);
-					await sleep(200); // Đợi ảnh được xóa và UI cập nhật
-					
-					// Gọi đệ quy cho ảnh tiếp theo
-					await deleteExistingImagesRecursive(containerElement, currentIndex); // currentIndex không tăng vì sau khi xóa, phần tử tiếp theo sẽ ở vị trí hiện tại
-				} else {
-					boxLogging(`Không tìm thấy nút xóa cho ảnh thứ ${currentIndex + 1}. Bỏ qua xóa.`, [], ["red"]);
-					// Gọi đệ quy cho ảnh tiếp theo (nếu không thể xóa ảnh hiện tại, chuyển sang ảnh kế tiếp)
-					await deleteExistingImagesRecursive(containerElement, currentIndex + 1);
+						simulateReactEvent(imgElement, "mouseover");
+						await delay(100); // Đợi popup hiện ra
+
+						var deleteButton = $(".next-overlay-wrapper .next-balloon-content .image-actions > button").eq(1).find("i");
+
+						if (deleteButton.length > 0) {
+							const prevImageCount = existingImages.length; // Số lượng ảnh trước khi xóa
+							simulateReactEvent(deleteButton, "click");
+							// boxLogging(`Đã bấm nút xóa ảnh.`, [], ["yellow"]);
+
+							// Bắt đầu vòng lặp chờ ảnh thực sự biến mất
+							let imageRemoved = false;
+							for (let i = 0; i < maxRetries; i++) {
+								await delay(100); // Đợi một chút
+								let currentImageCount = containerElement.find(".gc-image-list .custom-sale-prop-image-item.gc-image-item").length;
+								if (currentImageCount < prevImageCount) {
+									imageRemoved = true;
+									console.log(`Ảnh đã được xóa. Còn lại ${currentImageCount} ảnh.`);
+									break; // Ảnh đã biến mất, thoát vòng lặp chờ
+								}
+							}
+
+							if (!imageRemoved) {
+								// Nếu sau nhiều lần thử mà số lượng ảnh không giảm, có thể có vấn đề
+								console.warn("Không thể xác nhận ảnh đã được xóa sau khi click nút xóa. Có thể UI không cập nhật hoặc lỗi khác.");
+								// Bạn có thể chọn ném lỗi hoặc tiếp tục tùy theo mức độ nghiêm trọng của trường hợp này
+								throw new Error("Không thể xác nhận ảnh đã được xóa.");
+							}
+							retryCount = 0; // Reset số lần thử lại sau khi xóa thành công
+						} else {
+							console.warn(`Không tìm thấy nút xóa cho ảnh. Có thể ảnh đã bị ẩn hoặc đã xóa. Đang thử lại hoặc bỏ qua.`);
+							// Nếu không tìm thấy nút xóa, có thể UI chưa sẵn sàng hoặc ảnh đã biến mất
+							// Thử đợi thêm một chút và kiểm tra lại
+							retryCount++;
+							if (retryCount >= maxRetries) {
+								console.error("Không tìm thấy nút xóa sau nhiều lần thử. Dừng xóa cho container này.");
+								// boxAlert("Không tìm thấy nút xóa sau nhiều lần thử. Dừng xóa.", [], ["red"]);
+								throw new Error("Không tìm thấy nút xóa để xóa ảnh.");
+							}
+							await delay(200); // Chờ thêm trước khi thử lại vòng lặp
+						}
+					}
+				} catch (error) {
+					console.error("Lỗi trong deleteExistingImagesRecursive:", error);
+					boxAlert(`Lỗi khi xóa ảnh: ${error.message || JSON.stringify(error)}`, [], ["red"]);
+					throw error; // Ném lỗi để hàm gọi có thể xử lý
 				}
 			}
 
@@ -8923,7 +8971,7 @@
 				var nameInputForVariant = currentVariantContainer.find(".prop-option-item > div:nth-child(1)").find("input");
 
 				if (nameInputForVariant.length === 0 || !nameInputForVariant.val()) {
-					boxLogging(`Cảnh báo: Không tìm thấy input tên biến thể hoặc giá trị rỗng cho container ${index}. Bỏ qua.`, [], ["yellow"]);
+					boxLogging(`Cảnh báo: Không tìm thấy input tên biến thể hoặc giá trị rỗng cho container ${index}. Bỏ qua.`, ["Cảnh báo:"], ["yellow"]);
 					await processVariantRecursive(index + 1); // Tiếp tục với biến thể tiếp theo
 					return;
 				}
@@ -8932,7 +8980,7 @@
 				const matchedMapping = mappingData.find(m => m.name === variantName);
 
 				if (!matchedMapping) {
-					boxLogging(`Biến thể "${variantName}" không có SKU phù hợp trong mappingData. Bỏ qua.`, [], ["gray"]);
+					boxLogging(`Không tìm thấy tên phân loại ${variantName}`, [`${variantName}`], ["crimson"]);
 					await processVariantRecursive(index + 1); // Tiếp tục với biến thể tiếp theo
 					return;
 				}
@@ -8941,23 +8989,21 @@
 				const filesToUploadInput = inputMap[skuToUpload];
 
 				if (!filesToUploadInput || filesToUploadInput.length === 0 || filesToUploadInput[0].files.length === 0) {
-					boxLogging(`SKU "${skuToUpload}" (${variantName}) không có file ảnh nào được nạp trong inputMap. Bỏ qua.`, [], ["gray"]);
+					boxLogging(`Không tìm thấy ảnh cho SKU ${skuToUpload} (${variantName})`, [`${skuToUpload}`, `(${variantName})`], ["orange", "green"]);
 					await processVariantRecursive(index + 1); // Tiếp tục với biến thể tiếp theo
 					return;
 				}
 
 				const filesToUpload = Array.from(filesToUploadInput[0].files);
 
-				boxLogging(`Đang xử lý hình ảnh cho biến thể: "${variantName}" (SKU: ${skuToUpload}) - ${filesToUpload.length} file (Biến thể ${index + 1}/${variantImageContainers.length})`, [], ["cyan"]);
+				// boxLogging(`Đang xử lý hình ảnh cho biến thể: "${variantName}" (SKU: ${skuToUpload}) - ${filesToUpload.length} file (Biến thể ${index + 1}/${variantImageContainers.length})`, [], ["cyan"]);
 
 				// **Bước xóa ảnh hiện có (sử dụng đệ quy)**
-				deleteExistingImagesRecursive(currentVariantContainer);
-
-				await delay(500);
+				await deleteExistingImagesRecursive(currentVariantContainer);
 
 				// **Giả lập kéo thả file vào vùng dropZone hoặc set trực tiếp vào file input**
 				if (fileInputTarget.length > 0) {
-					boxLogging(`Đang gán trực tiếp ${filesToUpload.length} file ảnh cho biến thể "${variantName}" qua input type="file"...`, [], ["green"]);
+					// boxLogging(`Đang gán trực tiếp ${filesToUpload.length} file ảnh cho biến thể "${variantName}" qua input type="file"...`, [], ["green"]);
 
 					const dataTransfer = new DataTransfer();
 					filesToUpload.forEach(file => {
@@ -8974,18 +9020,20 @@
 					simulateReactEvent(fileInputTarget, 'change');
 					simulateReactEvent(fileInputTarget, 'input');
 
-					boxLogging(`Đã gán file cho biến thể "${variantName}".`, [], ["green"]);
+					// boxLogging(`Đã gán file cho biến thể "${variantName}".`, [], ["green"]);
+					boxLogging(`Hình cho biến thể ${variantName} đã được sửa`, [`${variantName}`], ["lightgreen"]);
 
 				} else if (dropZone.length > 0) {
-					boxLogging(`Đang giả lập kéo thả ${filesToUpload.length} file ảnh vào drop zone cho biến thể "${variantName}"...`, [], ["green"]);
+					// boxLogging(`Đang giả lập kéo thả ${filesToUpload.length} file ảnh vào drop zone cho biến thể "${variantName}"...`, [], ["green"]);
 					simulateFileDrop(dropZone, filesToUpload);
-					boxLogging(`Đã giả lập kéo thả file cho biến thể "${variantName}".`, [], ["green"]);
-
+					// boxLogging(`Đã giả lập kéo thả file cho biến thể "${variantName}".`, [], ["green"]);
+					boxLogging(`Hình cho biến thể ${variantName} đã được sửa`, [`${variantName}`], ["lightgreen"]);
 				} else {
-					boxLogging(`Cảnh báo: Không tìm thấy input file hoặc drop zone cho biến thể "${variantName}". Bỏ qua việc tải ảnh.`, [], ["yellow"]);
+					// boxLogging(`Cảnh báo: Không tìm thấy input file hoặc drop zone cho biến thể "${variantName}". Bỏ qua việc tải ảnh.`, [], ["yellow"]);
+					boxLogging(`Không thể sửa hình cho phân loại ${variantName}`, [`Không thể sửa hình cho phân loại`, `${variantName}`], ["red", "crimson"]);
 				}
 
-				await delay(500); // Đợi để Lazada xử lý upload mỗi ảnh
+				// await delay(700); // Đợi để Lazada xử lý upload mỗi ảnh
 				
 				// Gọi đệ quy cho biến thể tiếp theo
 				await processVariantRecursive(index + 1);
@@ -9299,6 +9347,40 @@
 			}
 
 			nextData();
+		}
+
+		// Chuẩn hóa SKU
+		function chuanHoaSKULazada(){
+			boxAlert("Chuẩn hóa SKU");
+
+			var box = $(".next-table-body .next-table-row");
+			var indexBox = 0;
+	
+			async function nextBox(){
+				if(indexBox >= box.length){
+					return;
+				}
+
+				var name = box.eq(indexBox).find("td:nth-child(1) button span");
+				var priceBox = box.eq(indexBox).find("td.price input");
+				var skuBox = box.eq(indexBox).find("td.SellerSku input");
+
+				var currentSKU = skuBox.val();
+
+				var sku = checkSKU(currentSKU);
+
+				if(sku.type){
+					simulateClearReactInput(skuBox);
+					simulateReactInput(skuBox, sku.sku);
+					simulateReactEvent(skuBox, "blur");
+					boxLogging(`SKU ${currentSKU} được chuẩn hóa thành ${sku.sku}`, [`${currentSKU}`, `${sku.sku}`], ["green", "orange"]);
+				}
+
+				indexBox++;
+				nextBox();
+			}
+
+			nextBox();
 		}
 
 		// Chat với AI
