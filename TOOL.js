@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.36";
+	const VERSION = "2.2.37";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -288,39 +288,41 @@
 		})
 
 		// Ghi log
-		function boxLogging(text, words = [], colors = []){
+		function boxLogging(text, words = [], colors = []) {
 			var log = $(".program-log pre.logging");
-			var data = log.html();
+			if (log.length === 0) {
+				console.warn("boxLogging: Element .program-log pre.logging not found.");
+				return;
+			}
+
 			var now = new Date();
 			var h = now.getHours() < 10 ? "0" + now.getHours() : now.getHours();
 			var m = now.getMinutes() < 10 ? "0" + now.getMinutes() : now.getMinutes();
 			var s = now.getSeconds() < 10 ? "0" + now.getSeconds() : now.getSeconds();
 			var time = `${h}:${m}:${s}`;
 
-			// Tìm đoạn cần đánh dấu sao chép trong text: [copy]...[/copy]
-			text = text.replace(/\[copy\](.*?)\[\/copy\]/g, `<span class="copyable">$1</span>`);
+			let newLogLine = `\n(${time}) `;
+
+			let formattedText = text.replace(/\[copy\](.*?)\[\/copy\]/g, `<span class="copyable">$1</span>`);
 
 			if (words.length === 0) {
-				log.html(`${data}\n(${time}) <span style="color: black;">${text}</span>`);
+				newLogLine += `<span style="color: black;">${formattedText}</span>`;
 			} else {
-				// Create a copy to modify, otherwise replacements might interfere with later searches if words overlap
-				let modifiedText = text;
+				let modifiedText = formattedText;
 				words.forEach((word, index) => {
-					// Escape the word BEFORE creating the RegExp
 					var escapedWord = escapeRegExp(word);
-					// Use the escaped word in the RegExp
 					var regex = new RegExp(`(${escapedWord})`, "gi");
-					// Perform replacement on the modifiedText
 					modifiedText = modifiedText.replace(regex, `<span style="color: ${colors[index]}; font-weight: bold;">$1</span>`);
 				});
-				// Set the final HTML
-				log.html(`${data}\n(${time}) ${modifiedText}`);
+				newLogLine += modifiedText;
 			}
-			log.scrollTop(log.prop("scrollHeight"));
 
-			log.find(".title").on("click", () => {
-				log.parent().toggle();
-			})
+			log.append(newLogLine);
+
+			// THAY ĐỔI TẠI ĐÂY: Thêm setTimeout
+			setTimeout(() => {
+				log.scrollTop(log.prop("scrollHeight"));
+			}, 0); // Một delay nhỏ để trình duyệt kịp cập nhật DOM
 		}
 
 		function escapeRegExp(string) {
@@ -9028,6 +9030,7 @@
 					simulateFileDrop(dropZone, filesToUpload);
 					// boxLogging(`Đã giả lập kéo thả file cho biến thể "${variantName}".`, [], ["green"]);
 					boxLogging(`Hình cho biến thể ${variantName} đã được sửa`, [`${variantName}`], ["lightgreen"]);
+					$(currentVariantContainer).find(".prop-option-item-wrap").css("background", "lightblue");
 				} else {
 					// boxLogging(`Cảnh báo: Không tìm thấy input file hoặc drop zone cho biến thể "${variantName}". Bỏ qua việc tải ảnh.`, [], ["yellow"]);
 					boxLogging(`Không thể sửa hình cho phân loại ${variantName}`, [`Không thể sửa hình cho phân loại`, `${variantName}`], ["red", "crimson"]);
