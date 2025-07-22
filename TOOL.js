@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.37";
+	const VERSION = "2.2.38";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -9358,7 +9358,10 @@
 
 			var box = $(".next-table-body .next-table-row");
 			var indexBox = 0;
-	
+
+			var listSKU = [];
+			var listCountSKU = [];
+			
 			async function nextBox(){
 				if(indexBox >= box.length){
 					return;
@@ -9370,16 +9373,58 @@
 
 				var currentSKU = skuBox.val();
 
-				var sku = checkSKU(currentSKU);
+				var skuInfo;
 
-				if(sku.type){
-					simulateClearReactInput(skuBox);
-					simulateReactInput(skuBox, sku.sku);
-					simulateReactEvent(skuBox, "blur");
-					boxLogging(`SKU ${currentSKU} được chuẩn hóa thành ${sku.sku}`, [`${currentSKU}`, `${sku.sku}`], ["green", "orange"]);
+				if(currentSKU.length != 0)
+					skuInfo = checkSKU(currentSKU); // Đổi tên biến để tránh trùng lặp với tham số của verifySKU
+				else
+					skuInfo = {
+						sku: "x0",
+						noise: "",
+						type: false
+					}
+
+				console.log(skuInfo);
+
+				async function verifySKU(skuData){ // Đổi tên tham số để rõ ràng hơn
+					let index = listSKU.indexOf(skuData.sku);
+					if(index == -1){
+						listSKU.push(skuData.sku);
+						listCountSKU.push(1);
+						index = listSKU.indexOf(skuData.sku); // Cập nhật index sau khi push
+					}else{
+						listCountSKU[index]++; // Sửa lỗi tăng biến đếm
+					}
+
+					let count = listCountSKU[index];
+					let countSuffix = "";
+					if(count > 1){ // Chỉ thêm suffix khi count > 1
+						if(count < 10) countSuffix = "v0" + count;
+						else countSuffix = "v" + count;
+					}
+					
+					return (`${skuData.sku}${countSuffix}`); // Sửa lỗi nối chuỗi đối tượng
 				}
 
+				simulateClearReactInput(skuBox);
+
+				let finalSku = "";
+				if(!skuInfo.sku.length == 0){
+					finalSku = await verifySKU(skuInfo); // Chờ Promise được giải quyết
+				}else{
+					finalSku = await verifySKU({sku: "x0"}); // Chờ Promise được giải quyết, truyền object hợp lệ
+				}
+				
+				simulateReactInput(skuBox, finalSku);
+				console.log(finalSku); // In ra giá trị đã được giải quyết
+
+				simulateReactEvent(skuBox, "blur");
+
+				boxLogging(`SKU ${currentSKU} được chuẩn hóa thành ${finalSku}`, [`${currentSKU}`, `${finalSku}`], ["green", "orange"]);
+
 				indexBox++;
+				// Gọi nextBox sau một độ trễ nhỏ để tránh lỗi stack overflow
+				await delay(0);
 				nextBox();
 			}
 
