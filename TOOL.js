@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.3.1";
+	const VERSION = "2.3.2";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -2400,21 +2400,42 @@
 						left: 0;
 						top: 0;
 						// transform: translate(-50%, -50%);
-						background: 0 4px 20px rgba(255, 255, 255, 0.4), 0 4px 30px rgba(0, 0, 0, 0.2);
 						color: #000;
 						// box-shadow: -5px 5px 5px #fff;
 						border-radius: 10px;
 						padding: 1vh 1vw;
-						backdrop-filter: blur(10px);
-						-webkit-backdrop-filter: blur(10px);
 						border: 1px solid rgba(255, 255, 255, 0.3);
 						flex-grow: 1;
 						overflow: hidden;
 						// Ẩn hiện giao diện chính;
-						display: flex;
+						display: none;
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
+					}
+
+					.tp-content::after{
+						position: absolute;
+						width: 100%;
+						height: 100%;
+						content: "";
+						background: url("https://github.com/pntan/TPTOOL/blob/main/bg-tool.png?raw=true");
+						background-size: auto 150%;
+						z-index: -2;
+						background-repeat: no-repeat;
+						background-position-x: center;
+						background-position-y: 85%;
+					}
+
+					.tp-content::before{
+						position: absolute;
+						width: 100%;
+						height: 100%;
+						content: "";
+						background: 0 4px 20px rgba(255, 255, 255, 0.4), 0 4px 30px rgba(0, 0, 0, 0.2);
+						backdrop-filter: blur(2px);
+						-webkit-backdrop-filter: blur(2px);
+						z-index: -1;
 					}
 
 					.tp-content:hover{
@@ -2470,7 +2491,7 @@
 						height: auto;
 						max-height: 20vh;
 						overflow-y: auto;
-						background: #fff;
+						background: rgba(255, 255, 255, 0.3);
 						border-radius: 8px;
 						padding: 1vh 1vw;
 						margin-bottom: 1vh;
