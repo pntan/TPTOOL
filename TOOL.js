@@ -2411,7 +2411,7 @@
 						flex-grow: 1;
 						overflow: hidden;
 						// Ẩn hiện giao diện chính;
-						display: none;
+						display: flex;
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
@@ -9491,7 +9491,7 @@
 
 			content_result = content_result[0];
 
-			if(content_result > donSieuToc){
+			if(content_result > 0){
 				await thongBaoDon("siêu tốc", content_result);
 			}
 
@@ -9511,7 +9511,7 @@
 					if(type == "chưa xử lý"){
 						source = "https://github.com/pntan/TPTOOL/raw/refs/heads/main/b%E1%BA%A1n%20c%C3%B3%20%C4%91%C6%A1n%20h%C3%A0ng%20m%E1%BB%9Bi.mp3";	
 					}else{
-						source = "https://github.com/pntan/TPTOOL/raw/refs/heads/main/b%E1%BA%A1n%20c%C3%B3%20%C4%91%C6%A1n%20si%C3%AAu%20t%E1%BB%91c%20.mp3";
+						source = "https://github.com/pntan/TPTOOL/raw/refs/heads/main/alo%20alo%20c%C3%B3%20%C4%91%C6%A1n%20si%C3%AAu%20.mp3";
 					}
 
 					audio.append($(`<source src="${source}" />`));
