@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.2.38";
+	const VERSION = "2.3.1";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -147,6 +147,10 @@
 			return;
 		createUI = true;
 
+		const TALKIFY_KEY_1 = "15744540-a072-402d-8877-29f0cc37669a";
+		const TALKIFY_KEY_2 = "10f50eb5-e8bf-4cac-b098-72b0dcd8849a";
+		const TALKIFY_KEY_3 = "be321fac-da91-4507-958f-6ff6f096b753";
+
 		createLayout($("body"));
 
 		applyNonce();
@@ -225,6 +229,7 @@
 			"mergeExcelFile": mergeExcelFile,
 			"compareVoucher": compareVoucher,
 			"moLink": moLink,
+			"kiemTraDon": kiemTraDon,
 		};
 
 		const actionOnlineMap = {
@@ -1379,6 +1384,40 @@
 			$(window).on('scroll mouseleave', hideAndRemoveTooltip);
 		}
 
+		function speakText(text, lang = 'vi-VN') {
+			// Kiểm tra xem trình duyệt có hỗ trợ Speech Synthesis không
+			if ('speechSynthesis' in window) {
+				// Tạo một đối tượng SpeechSynthesisUtterance với văn bản muốn đọc
+				const utterance = new SpeechSynthesisUtterance(text);
+
+				// Thiết lập ngôn ngữ. 'vi-VN' cho tiếng Việt, 'en-US' cho tiếng Anh, v.v.
+				utterance.lang = lang;
+
+				// Tùy chỉnh các thuộc tính của giọng nói (tùy chọn)
+				utterance.volume = 1; // Âm lượng (0 đến 1)
+				utterance.rate = 1;   // Tốc độ nói (0.1 đến 10)
+				utterance.pitch = 1;  // Cao độ (0 đến 2)
+
+				// Bạn cũng có thể chọn một giọng nói cụ thể nếu muốn (tùy chọn)
+				// Lưu ý: Danh sách giọng nói cần được tải xong.
+				const voices = window.speechSynthesis.getVoices();
+				const selectedVoice = voices.find(voice => voice.lang === lang);
+				if (selectedVoice) {
+				    utterance.voice = selectedVoice;
+				}else
+					return false;
+
+				// Yêu cầu trình duyệt phát âm thanh
+				window.speechSynthesis.speak(utterance);
+				return true;
+			} else {
+				// Thông báo nếu trình duyệt không hỗ trợ
+				console.warn("Trình duyệt của bạn không hỗ trợ Speech Synthesis (Text-to-Speech).");
+				return false;
+				// Có thể thêm fallback UI cho người dùng ở đây
+			}
+		}
+
 		// Broadcast tab
 		var tpBroadcast = new BroadcastChannel("tp-broadcast-tab");
 		// Kiểm tra nếu có tab cha đã mở tab này
@@ -1955,6 +1994,7 @@
 								<option data-func="layIDSanPhamShopee" data-layout="layIDSanPhamShopeeLayout">Lấy ID Sản Phẩm</option>
 								<option data-func="layLinkChuaSKUShopee" data-layout="layLinkChuaSKUShopeeLayout">Lấy Link Chứa SKU</option>
 								<option data-func="suaTonSKUNhieuLinkShopee" data-layout="suaTonSKUNhieuLinkShopeeLayout">Sửa Tồn Theo SKU Nhiều Link</option>
+								<option data-func="kiemTraDon">Theo Dõi Đơn Mới</option>
 								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
 								<!-- <option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option> -->
 								<!-- <option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option> -->
@@ -2371,7 +2411,7 @@
 						flex-grow: 1;
 						overflow: hidden;
 						// Ẩn hiện giao diện chính;
-						display: none;
+						display: flex;
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
@@ -9429,6 +9469,87 @@
 			}
 
 			nextBox();
+		}
+
+		var donSieuToc = 0;
+		var donChuaXuLy = 0;
+		var indexRun = 0;
+		// Kiểm tra đơn hàng
+		async function kiemTraDon(){
+			boxAlert(`Số Lần Chạy ${indexRun++}`);
+			boxAlert(`Kiểm tra đơn`)
+			// Đơn siêu tốc
+			var content1 = $(".order-list-search-and-filter").eq(0).find(".eds-form-item").eq(0).find(".eds-radio-button__label .meta");
+
+			// Đơn chưa xử lý
+			var content2 = $(".order-list-search-and-filter").eq(0).find(".eds-form-item").eq(1).find(".eds-radio-button__label .meta");
+
+			content1 = content1.eq(1).text().trim().replace("(", "");
+			content1 = content1.replace(")", "");
+
+			if(content1 > donSieuToc){
+				await thongBaoDon("siêu tốc", content1);
+				donSieuToc = content1;
+			}
+
+			if(content2){
+				content2 = content2.eq(0).text().trim().replace("(", "");
+				content2 = content2.replace(")", "");
+
+				if(content2 > donChuaXuLy){
+					await thongBaoDon("chưa xử lý", content2);
+				}
+
+				donChuaXuLy = content2;
+			}
+
+			console.log(donSieuToc, content1, donChuaXuLy, content2);
+
+			async function thongBaoDon(type, count){
+				var speak = speakText(`Bạn có ${count} đơn ${type}`, "vi-VN");
+
+				if(!speak){
+					$("audio.TP-audio").remove();
+
+					var audio = $(`<audio class="TP-audio"></audio>`);
+					audio.volume = 1;
+
+					var source = "";
+
+					if(type == "chưa xử lý"){
+						source = "https://github.com/pntan/TPTOOL/raw/refs/heads/main/b%E1%BA%A1n%20c%C3%B3%20%C4%91%C6%A1n%20h%C3%A0ng%20m%E1%BB%9Bi.mp3";	
+					}else{
+						source = "https://github.com/pntan/TPTOOL/raw/refs/heads/main/b%E1%BA%A1n%20c%C3%B3%20%C4%91%C6%A1n%20si%C3%AAu%20t%E1%BB%91c%20.mp3";
+					}
+
+					audio.append($(`<source src="${source}" />`));
+
+					$("body").append(audio);
+
+					simulateReactEvent($("body"), "click");
+
+					audio.get(0).play();
+				}
+			}
+
+			var menu = $(".sidebar-menu .sidebar-menu-box.ps_menu_order .sidebar-submenu li");
+
+			await delay(3000);
+			simulateReactEvent(menu.eq(1).find("a"), "click");
+			await delay(200);
+			simulateReactEvent(menu.eq(0).find("a"), "click");
+
+			await delay(1000);
+
+			$(".feedback-wrapper").parent().parent().remove();
+
+			var coolDown = setTimeout(kiemTraDon, 5000);
+
+			await delay(5000);
+
+			clearTimeout(coolDown);
+
+			return;
 		}
 
 		// Chat với AI
