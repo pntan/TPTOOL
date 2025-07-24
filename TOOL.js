@@ -9472,38 +9472,30 @@
 		}
 
 		var donSieuToc = 0;
-		var donChuaXuLy = 0;
 		var indexRun = 0;
 		// Kiểm tra đơn hàng
 		async function kiemTraDon(){
+			await delay(5000);
 			boxAlert(`Số Lần Chạy ${indexRun++}`);
 			boxAlert(`Kiểm tra đơn`)
 			// Đơn siêu tốc
-			var content1 = $(".order-list-search-and-filter").eq(0).find(".eds-form-item").eq(0).find(".eds-radio-button__label .meta");
+			var content1 = $(".order-list-search-and-filter").eq(0).find(".eds-form-item").eq(0).find("label");
+			simulateReactEvent(content1.last(), "click");
 
 			// Đơn chưa xử lý
-			var content2 = $(".order-list-search-and-filter").eq(0).find(".eds-form-item").eq(1).find(".eds-radio-button__label .meta");
+			var content2 = $(".order-list-search-and-filter").eq(0).find(".eds-form-item").eq(1).find("label");
+			simulateReactEvent(content2.eq(content2.length - 2), "click");
 
-			content1 = content1.eq(1).text().trim().replace("(", "");
-			content1 = content1.replace(")", "");
+			var content_result = $(".result-count-wrapper .text-section").text();
+			content_result.split(" ");
 
-			if(content1 > donSieuToc){
-				await thongBaoDon("siêu tốc", content1);
-				donSieuToc = content1;
+			content_result = content_result[0];
+
+			if(content_result > donSieuToc){
+				await thongBaoDon("siêu tốc", content_result);
 			}
 
-			if(content2){
-				content2 = content2.eq(0).text().trim().replace("(", "");
-				content2 = content2.replace(")", "");
-
-				if(content2 > donChuaXuLy){
-					await thongBaoDon("chưa xử lý", content2);
-				}
-
-				donChuaXuLy = content2;
-			}
-
-			console.log(donSieuToc, content1, donChuaXuLy, content2);
+			donSieuToc = content_result;
 
 			async function thongBaoDon(type, count){
 				var speak = speakText(`Bạn có ${count} đơn ${type}`, "vi-VN");
@@ -9533,21 +9525,16 @@
 			}
 
 			var menu = $(".sidebar-menu .sidebar-menu-box.ps_menu_order .sidebar-submenu li");
+			
+			await(5000);
 
-			await delay(3000);
 			simulateReactEvent(menu.eq(1).find("a"), "click");
-			await delay(200);
-			simulateReactEvent(menu.eq(0).find("a"), "click");
-
 			await delay(1000);
+			simulateReactEvent(menu.eq(0).find("a"), "click");
 
 			$(".feedback-wrapper").parent().parent().remove();
 
-			var coolDown = setTimeout(kiemTraDon, 5000);
-
-			await delay(5000);
-
-			clearTimeout(coolDown);
+			setTimeout(kiemTraDon, 5000);
 
 			return;
 		}
