@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.3.2";
+	const VERSION = "2.3.3";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -223,6 +223,7 @@
 			"layIDSanPhamLazada": layIDSanPhamLazada,
 			"themGiaTheoSKULazada": themGiaTheoSKULazada,
 			"chuanHoaSKULazada": chuanHoaSKULazada,
+			"layPhanLoaiLazada": layPhanLoaiLazada,
 			// "ktraGiaChuongTrinhKMLazada": ktraGiaChuongTrinhKMLazada,
 			// //-- KHÁC
 			"splitExcelFile": splitExcelFile,
@@ -1162,9 +1163,13 @@
 			const opts = { ...defaultOptions, ...options };
 
 			let currentTooltip = null;
-			let hoverTimeout = null;
-			const HOVER_DELAY = 100;
-			let lastTargetImage = null;
+			let hoverImageTimeout = null; // Timeout để hiển thị tooltip sau khi hover ảnh
+			let hideTooltipTimeout = null; // Timeout để ẩn tooltip sau khi rời khỏi ảnh/tooltip
+			const HOVER_DELAY = 100; // Delay trước khi hiển thị tooltip
+			const HIDE_DELAY = 150;  // Delay trước khi ẩn tooltip, cho phép di chuyển chuột vào tooltip
+
+			let currentHoveredImage = null; // Lưu trữ ảnh đang được hover
+			let isMouseOverTooltip = false; // Cờ kiểm tra chuột có đang trên tooltip không
 
 			// Hàm tính toán vị trí tối ưu cho tooltip
 			const calculateTooltipPosition = (e, tooltipElement, currentWidth, currentHeight, attemptScaling = false) => {
@@ -1178,23 +1183,14 @@
 				let bestFitFound = false;
 				
 				// Khoảng cách tối thiểu từ con trỏ để tooltip không bị đè
-				var cursorOffset = 10; 
+				const cursorOffset = opts.offsetX; 
 
-				var eWidth  = $(e.target).outerWidth();
-				var eHeight = $(e.target).outerHeight();
-
-				cursorOffset = eWidth > eHeight ? eWidth : eHeight;
-
-				// Các chiến lược thử vị trí theo thứ tự ưu tiên: Trái -> Dưới -> Phải -> Trên
+				// Các chiến lược thử vị trí theo thứ tự ưu tiên: Phải -> Dưới -> Trái -> Trên
 				const priorityPositions = [
-					// Trái: Căn giữa theo chiều dọc của con trỏ
-					{ x: mouseX - currentWidth - cursorOffset, y: mouseY - currentHeight / 2 },
-					// Dưới: Căn giữa theo chiều ngang của con trỏ
-					{ x: mouseX - currentWidth / 2, y: mouseY + cursorOffset },
-					// Phải: Căn giữa theo chiều dọc của con trỏ
-					{ x: mouseX + cursorOffset, y: mouseY - currentHeight / 2 },
-					// Trên: Căn giữa theo chiều ngang của con trỏ
-					{ x: mouseX - currentWidth / 2, y: mouseY - currentHeight - cursorOffset }
+					{ x: mouseX + cursorOffset, y: mouseY - currentHeight / 2 }, // Phải
+					{ x: mouseX - currentWidth / 2, y: mouseY + cursorOffset }, // Dưới
+					{ x: mouseX - currentWidth - cursorOffset, y: mouseY - currentHeight / 2 }, // Trái
+					{ x: mouseX - currentWidth / 2, y: mouseY - currentHeight - cursorOffset } // Trên
 				];
 
 				for (const pos of priorityPositions) {
@@ -1216,85 +1212,80 @@
 					);
 
 					if (fitsInViewport) {
-						// Kiểm tra xem vị trí này có đè lên con trỏ không
+						// Kiểm tra xem vị trí này có đè lên con trỏ (điểm e.clientX, e.clientY) không
 						const doesOverlapCursor = (
 							mouseX >= tempX && mouseX <= tempX + currentWidth &&
 							mouseY >= tempY && mouseY <= tempY + currentHeight
 						);
 
-						if (!doesOverlapCursor) {
+						if (!doesOverlapCursor) { // Ưu tiên vị trí không đè lên con trỏ
 							finalX = tempX;
 							finalY = tempY;
 							bestFitFound = true;
 							break;
+						} else if (!bestFitFound) { // Nếu không tìm được vị trí không đè, chấp nhận vị trí đầu tiên dù có đè
+							finalX = tempX;
+							finalY = tempY;
+							bestFitFound = true;
 						}
 					}
 				}
 
-				// Nếu không tìm được vị trí lý tưởng không đè lên con trỏ
-				// và được phép thử scale lại
+				// Logic scale nếu không tìm được vị trí tốt
 				if (!bestFitFound && attemptScaling) {
 					console.log("Không đủ chỗ không đè lên chuột, đang cố gắng scale tooltip.");
 
-					// Tính toán không gian khả dụng sau khi trừ đi lề
 					let availableWidthPx = viewportWidth - 2 * cursorOffset; 
 					let availableHeightPx = viewportHeight - 2 * cursorOffset;
 
-					// Áp dụng lại max-width/max-height dựa trên không gian khả dụng và đơn vị ban đầu của người dùng
-					// (Chuyển đổi vw/vh thành px nếu cần để tính toán)
 					let desiredMaxWidthPx = (opts.widthUnit === 'vw' ? (opts.maxWidth / 100) * viewportWidth : opts.maxWidth);
 					let desiredMaxHeightPx = (opts.heightUnit === 'vh' ? (opts.maxHeight / 100) * viewportHeight : opts.maxHeight);
 
-					// Giới hạn kích thước theo không gian khả dụng
 					let newMaxWidth = Math.min(desiredMaxWidthPx, availableWidthPx);
 					let newMaxHeight = Math.min(desiredMaxHeightPx, availableHeightPx);
 
 					tooltipElement.css({
-						'max-width': `${newMaxWidth}px`, // Tạm thời dùng px để đảm bảo vừa
+						'max-width': `${newMaxWidth}px`,
 						'max-height': `${newMaxHeight}px`
 					});
 
-					// Lấy lại kích thước thực tế sau khi đã scale
 					currentWidth = tooltipElement.outerWidth();
 					currentHeight = tooltipElement.outerHeight();
 					console.log(`Tooltip scaled to: ${currentWidth}px x ${currentHeight}px`);
 
-					// Thử lại tìm vị trí với kích thước mới (chỉ một lần nữa sau khi scale)
-					// Lặp lại logic tìm vị trí nhưng không thử scale lần nữa (avoid infinite loop)
 					return calculateTooltipPosition(e, tooltipElement, currentWidth, currentHeight, false); 
 				}
 
 				return { x: finalX, y: finalY, found: bestFitFound };
 			};
 
-
 			// Hàm tạo và hiển thị tooltip
 			const createAndShowTooltip = (e, $hoveredImage) => {
-				if (lastTargetImage && lastTargetImage[0] === $hoveredImage[0]) {
+				// Nếu đã có tooltip và chuột vẫn đang trên ảnh hoặc tooltip hiện tại, không làm gì
+				if (currentTooltip && (currentHoveredImage && currentHoveredImage[0] === $hoveredImage[0] || isMouseOverTooltip)) {
 					return;
 				}
 
+				// Xóa tooltip cũ nếu có
 				if (currentTooltip) {
 					currentTooltip.remove();
-					currentTooltip = null;
 				}
 				
-				lastTargetImage = $hoveredImage;
-				console.log("Tạo và hiển thị tooltip cho:", lastTargetImage[0]);
+				currentHoveredImage = $hoveredImage;
+				console.log("Tạo và hiển thị tooltip cho:", currentHoveredImage[0]);
 
-				// 1. Tạo phần tử tooltip ban đầu với max-width/max-height được thiết lập
 				currentTooltip = $('<div>')
 					.addClass(opts.tooltipClass)
 					.css({
 						position: 'fixed',
 						'z-index': 99999,
-						'pointer-events': 'none',
+						'pointer-events': 'auto', // LUÔN ĐỂ AUTO để cho phép tương tác
 						'background-color': 'rgba(0, 0, 0, 0.8)',
 						color: 'white',
 						padding: '8px',
 						'border-radius': '4px',
 						'box-shadow': '0 2px 10px rgba(0, 0, 0, 0.3)',
-						'max-width': `${opts.maxWidth}${opts.widthUnit}`, // Áp dụng max-width/height ban đầu
+						'max-width': `${opts.maxWidth}${opts.widthUnit}`,
 						'max-height': `${opts.maxHeight}${opts.heightUnit}`,
 						overflow: 'auto',
 						display: 'block',
@@ -1305,24 +1296,32 @@
 
 				$('body').append(currentTooltip);
 
-				// 2. Đo kích thước tooltip sau khi được thêm vào DOM
 				let tooltipWidth = currentTooltip.outerWidth();
 				let tooltipHeight = currentTooltip.outerHeight();
 
-				// 3. Tính toán vị trí ban đầu (không scale)
-				let positionResult = calculateTooltipPosition(e, currentTooltip, tooltipWidth, tooltipHeight, true); // true = cho phép thử scale
+				let positionResult = calculateTooltipPosition(e, currentTooltip, tooltipWidth, tooltipHeight, true);
 
-				// 4. Nếu không tìm thấy vị trí tốt với kích thước ban đầu,
-				// hàm calculateTooltipPosition đã tự động scale và tìm lại.
-				// Chỉ cần áp dụng kết quả cuối cùng.
 				currentTooltip.css({
 					left: `${positionResult.x}px`,
 					top: `${positionResult.y}px`
 				});
 
-				// 5. Nếu sau khi mọi nỗ lực mà tooltip vẫn bị tràn hoặc không tối ưu,
-				// có thể điều chỉnh lại lần cuối để nó nằm gọn trong viewport
-				// (Điều này thường không cần nếu logic trên hoạt động đúng)
+				// Đặt sự kiện mouseenter và mouseleave cho tooltip
+				currentTooltip.on('mouseenter', function() {
+					clearTimeout(hideTooltipTimeout); // Ngừng ẩn tooltip nếu chuột vào lại tooltip
+					isMouseOverTooltip = true;
+				}).on('mouseleave', function() {
+					isMouseOverTooltip = false;
+					// Bắt đầu đếm ngược để ẩn tooltip sau khi rời khỏi nó
+					hideTooltipTimeout = setTimeout(() => {
+						// Chỉ ẩn nếu chuột không còn trên ảnh gốc và không còn trên tooltip
+						if (!currentHoveredImage.is(':hover') && !isMouseOverTooltip) {
+							hideAndRemoveTooltip();
+						}
+					}, HIDE_DELAY);
+				});
+
+				// Đảm bảo tooltip nằm gọn trong viewport sau cùng
 				const viewportWidth = window.innerWidth;
 				const viewportHeight = window.innerHeight;
 				let finalX = parseFloat(currentTooltip.css('left'));
@@ -1344,20 +1343,27 @@
 			};
 
 			const hideAndRemoveTooltip = () => {
-				if (hoverTimeout) {
-					clearTimeout(hoverTimeout);
-					hoverTimeout = null;
+				if (hoverImageTimeout) {
+					clearTimeout(hoverImageTimeout);
+					hoverImageTimeout = null;
+				}
+				if (hideTooltipTimeout) {
+					clearTimeout(hideTooltipTimeout);
+					hideTooltipTimeout = null;
 				}
 				if (currentTooltip) {
 					currentTooltip.remove();
 					currentTooltip = null;
 				}
-				lastTargetImage = null;
+				currentHoveredImage = null; // Reset ảnh đang hover
+				isMouseOverTooltip = false; // Reset cờ
 			};
 
-			$(document).on('mouseover', function(e) {
-				if (hoverTimeout) {
-					clearTimeout(hoverTimeout);
+			$(document).on('mousemove', function(e) {
+				// Xóa bất kỳ timeout ẩn nào nếu chuột di chuyển trở lại
+				if (hideTooltipTimeout) {
+					clearTimeout(hideTooltipTimeout);
+					hideTooltipTimeout = null;
 				}
 
 				const elementsAtPoint = document.elementsFromPoint(e.clientX, e.clientY);
@@ -1371,17 +1377,50 @@
 					}
 				}
 
-				if (targetImage) {
-					hoverTimeout = setTimeout(() => {
-						createAndShowTooltip(e, targetImage);
-					}, HOVER_DELAY);
-				} else {
+				// Kiểm tra xem chuột có đang trên ảnh gốc HAY trên tooltip không
+				const isCurrentlyOverImage = targetImage !== null;
+				const isOverExistingTooltip = currentTooltip && currentTooltip.is(':hover');
+
+				if (isCurrentlyOverImage) {
+					// Nếu chuột đang trên một ảnh:
+					if (!currentHoveredImage || currentHoveredImage[0] !== targetImage[0]) {
+						// Nếu đây là ảnh mới, hủy timeout hiển thị cũ (nếu có) và thiết lập cái mới
+						if (hoverImageTimeout) clearTimeout(hoverImageTimeout);
+						hoverImageTimeout = setTimeout(() => {
+							createAndShowTooltip(e, targetImage);
+						}, HOVER_DELAY);
+					} else {
+						// Nếu vẫn trên cùng ảnh và tooltip đã hiển thị, có thể cập nhật vị trí
+						// (Tùy chọn: bỏ qua nếu muốn hiệu suất cao hơn và không cần tooltip di chuyển theo từng pixel chuột)
+						if (currentTooltip) {
+						// currentTooltip.css({
+						//     left: `${e.clientX + opts.offsetX}px`,
+						//     top: `${e.clientY + opts.offsetY}px`
+						// });
+						}
+					}
+				} else if (!isOverExistingTooltip) {
+					// Nếu chuột không trên ảnh VÀ không trên tooltip hiện có
+					// Bắt đầu đếm ngược để ẩn tooltip
+					if (currentTooltip && !hideTooltipTimeout) { // Chỉ đặt timeout nếu chưa có
+						hideTooltipTimeout = setTimeout(() => {
+							hideAndRemoveTooltip();
+						}, HIDE_DELAY);
+					}
+				}
+			});
+
+			// Các sự kiện ẩn tooltip khi chuột rời khỏi cửa sổ hoặc cuộn trang
+			$(document).on('mouseleave', function(e) {
+				// Chỉ ẩn nếu chuột không ở trên tooltip khi rời khỏi document
+				if (!isMouseOverTooltip) {
 					hideAndRemoveTooltip();
 				}
 			});
 
-			$(document).on('mouseout', hideAndRemoveTooltip);
-			$(window).on('scroll mouseleave', hideAndRemoveTooltip);
+			$(window).on('scroll', hideAndRemoveTooltip);
+			// Bạn có thể bỏ dòng này nếu muốn tooltip không bị ẩn khi tab mất focus/chuyển tab
+			// $(window).on('blur', hideAndRemoveTooltip);
 		}
 
 		function speakText(text, lang = 'vi-VN') {
@@ -2022,7 +2061,8 @@
 								<option data-func="themPhanLoaiLazada" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
 								<option data-func="themGiaTheoSKULazada" data-layout="themGiaTheoSKULazadaLayout">Sửa giá theo SKU</option>
 								<option data-func="themHinhTheoSKULazada" data-layout="themHinhTheoSKULazadaLayout">Sửa Hình Theo SKU</option>
-								<option data-func="layIDSanPhamLazada" data-layout="layIDSanPhamLazadaLayout"> Lấy ID Sản Phẩm</option>
+								<option data-func="layIDSanPhamLazada" data-layout="layIDSanPhamLazadaLayout">Lấy ID Sản Phẩm</option>
+								<option data-func="layPhanLoaiLazada" data-layout="layPhanLoaiLazadaLayout">Lấy Phân Loại</option>
 								<option data-func="chuanHoaSKULazada">Chuẩn hóa SKU</option>
 								<option disabled data-func="ktraGiaChuongTrinhKMLazada" data-layout="ktraGiaChuongTrinhKMLazadaLayout">Kiểm Tra Giá Khuyến Mãi</option>
 							</optgroup>
@@ -3335,6 +3375,18 @@
 				setEventSuaTonSKUNhieuLinkShopee();
 				break;
 			case "layPhanLoaiShopeeLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<p>Số lượng tùy chỉnh?</p>
+						<input id="stock-edit" type="number" placeholder="Mặc định số lượng = 0" />
+						<div style="display: flex; justify-content: center; align-items: center">
+							<p>Lấy số lượng theo sàn</p>
+							<input type="checkbox" id="getStock" />
+						</div>
+					</div>
+				`))
+				break;
+			case "layPhanLoaiLazadaLayout":
 				content.append($(`
 					<div class="layout-tab">
 						<p>Số lượng tùy chỉnh?</p>
@@ -9558,6 +9610,102 @@
 			setTimeout(kiemTraDon, 5000);
 
 			return;
+		}
+
+		async function layPhanLoaiLazada(){
+			boxAlert("LẤY PHÂN LOẠI");
+
+			var mappingData = []; // Lưu trữ thông tin SKU/Name của các biến thể CÓ TRÊN SÀN VÀ CÓ ẢNH TƯƠNG ỨNG
+
+			// **Bước 1: Thu thập thông tin các SKUs và tên biến thể từ bảng sản phẩm (tab SKU List)**
+			var tableRows = $(".props-sku-table .next-table-inner table tr.next-table-row");
+
+			boxLogging(`Đang thu thập thông tin SKU từ ${tableRows.length} hàng biến thể trên sàn...`, [], ["blue"]);
+			
+			for (let i = 0; i < tableRows.length; i++) {
+				var row = tableRows.eq(i);
+				var nameBox = row.find("td:nth-child(1) button");
+				var price = row.find("td:nth-child(2) input");
+				var stock = row.find("td:nth-child(4) input");
+				var skuInput = row.find("td:nth-child(5) input");
+				var skuValue = skuInput.val().trim().toUpperCase();
+				mappingData.push({					
+							name: nameBox.text().trim(),
+							sku: skuValue,
+							price: price,
+							stock: stock
+						});
+			}
+
+			boxLogging(`Tìm thấy ${mappingData.length} biến thể SKU có ảnh cần thêm/sửa trên sàn.`, [`${mappingData.length}`], ["blue"]);
+
+			// **Bước 2: Lặp qua từng container biến thể trên UI và xử lý ảnh (xóa trước, thêm sau)**
+			var variantImageContainers = $(".prop-group-body > div:nth-child(2) > div:nth-child(2) > div .prop-option-list .next-form-item");
+
+			if (variantImageContainers.length === 0) {
+				boxLogging("Không tìm thấy các khối UI để tải ảnh biến thể. Đảm bảo bạn đang ở phần 'Thuộc tính bán hàng' và các biến thể đã được tạo.", [], ["red"]);
+				boxToast("Không tìm thấy UI upload ảnh!", "error");
+				return;
+			}
+
+			console.log(mappingData, variantImageContainers);
+
+			let currentList = [];
+			var zip = new JSZip();
+
+			for (let i = 0; i < mappingData.length; i++) {
+				var name = mappingData[i].name;
+				// var detailRow = boxDetail.eq(i).find(".table-cell");
+				var price = mappingData[i].price;
+				let stockVal = mappingData[i].stock;
+				var skuText = mappingData[i].sku;
+
+				var getStock = $(".tp-container.tp-content .layout-future #getStock").prop("checked");
+				if (!getStock) {
+					var editStock = $(".tp-container.tp-content .layout-future #stock-edit").val();
+					stockVal = editStock.length === 0 ? 0 : editStock;
+				}
+
+				var copyVariant = `${name}\t${skuText}\t${price}\t${stockVal}`;
+				currentList.push(copyVariant);
+
+				// Tải ảnh lớn → chuyển sang PNG thật sự
+				var img = variantImageContainers.eq(i).find("img");
+				if (img.length) {
+					let url = img.eq(0).attr("src");
+					if (url) {
+						var fullUrl = url;
+
+						try {
+							var response = await fetch(fullUrl);
+							var blob = await response.blob();
+
+							var imageBitmap = await createImageBitmap(blob);
+							var canvas = document.createElement("canvas");
+							canvas.width = imageBitmap.width;
+							canvas.height = imageBitmap.height;
+
+							var ctx = canvas.getContext("2d");
+							ctx.drawImage(imageBitmap, 0, 0);
+
+							var pngBlob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+
+							var filename = `${skuText}.png`;
+							var arrayBuffer = await pngBlob.arrayBuffer();
+							zip.file(filename, arrayBuffer);
+						} catch (error) {
+							console.error('Lỗi tải/chuyển ảnh:', fullUrl, error);
+						}
+					}
+				}
+			}
+
+			zip.generateAsync({ type: 'blob' }).then(function (zipBlob) {
+				saveAs(zipBlob, "Anh_Phan_Loai_PNG.zip");
+			});
+
+			boxToast(`Đã sao chép tên ${currentList.length} phân loại`, "success");
+			navigator.clipboard.writeText(currentList.join("\n"));
 		}
 
 		// Chat với AI
