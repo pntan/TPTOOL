@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.3.3";
+	const VERSION = "2.3.4";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -1278,7 +1278,7 @@
 					.addClass(opts.tooltipClass)
 					.css({
 						position: 'fixed',
-						'z-index': 99999,
+						'z-index': 1,
 						'pointer-events': 'auto', // LUÔN ĐỂ AUTO để cho phép tương tác
 						'background-color': 'rgba(0, 0, 0, 0.8)',
 						color: 'white',
