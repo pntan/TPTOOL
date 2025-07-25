@@ -2585,8 +2585,8 @@
 						right: 0;
 						content: "";
 						background: 0 4px 20px rgba(255, 255, 255, 0.4), 0 4px 30px rgba(0, 0, 0, 0.2);
-						backdrop-filter: blur(5px);
-						-webkit-backdrop-filter: blur(5px);
+						backdrop-filter: blur(-5px);
+						-webkit-backdrop-filter: blur(-5px);
 						z-index: -1;
 					}
 
