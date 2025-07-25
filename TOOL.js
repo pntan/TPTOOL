@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.3.4";
+	const VERSION = "2.3.5";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -2277,10 +2277,10 @@
 
 					.tp-container{
 						position: fixed;
+						width: fit-content;
+						height: fit-content;
 						z-index: 9999999;
 						user-select: none;
-						max-height: 90vh;
-						max-width: 70vw;
 						overflow: hidden;
 						display: flex;
 						flex-direction: column;
@@ -2297,15 +2297,15 @@
 					}
 
 					.tp-button-toggle{
-						left: calc(100% - 7%);
-						top: calc(100% - 20%);
+						right: 7%;
+						bottom: 5vh;
 						width: auto;
-						height: 5vh;
+						height: 4vh;
 						aspect-ratio: 16 / 9;
 						// border-radius: 10px;
 						background: rgba(255, 255, 255, 0.6);
 						// box-shadow: -5px 5px 10px #000;
-						padding: 0.5vw 0.5vw;
+						padding: 0.25vh 0.25vw;
 						display: flex;
 						align-items: center;
 						justify-content: center;
@@ -2327,9 +2327,9 @@
 
 					.tp-button-toggle svg{
 						color: pink;
-						width: 100%;
-						height: 100%;
-						font-size: 2em;
+						width: auto;
+						height: 70%;
+						font-size: 1.3em;
 						transition: color 0.5s;
 					}
 
@@ -2437,8 +2437,8 @@
 						// display: none;
 						width: auto;
 						height: auto;
-						left: 0;
-						top: 0;
+						right: 7vw;
+						bottom: 10vh;
 						// transform: translate(-50%, -50%);
 						color: #000;
 						// box-shadow: -5px 5px 5px #fff;
@@ -2452,30 +2452,7 @@
 						flex-direction: column;
 						//opacity: 1;
 						//transition: opacity 0.3s ease;
-					}
-
-					.tp-content::after{
-						position: absolute;
-						width: 100%;
-						height: 100%;
-						content: "";
-						background: url("https://github.com/pntan/TPTOOL/blob/main/bg-tool.png?raw=true");
-						background-size: auto 150%;
-						z-index: -2;
-						background-repeat: no-repeat;
-						background-position-x: center;
-						background-position-y: 85%;
-					}
-
-					.tp-content::before{
-						position: absolute;
-						width: 100%;
-						height: 100%;
-						content: "";
-						background: 0 4px 20px rgba(255, 255, 255, 0.4), 0 4px 30px rgba(0, 0, 0, 0.2);
-						backdrop-filter: blur(2px);
-						-webkit-backdrop-filter: blur(2px);
-						z-index: -1;
+						color: #fff;
 					}
 
 					.tp-content:hover{
@@ -2556,7 +2533,7 @@
 					.tab-box {
 						cursor: pointer;
 						padding: 0.5vh 1vw;
-						background: rgba(255,255,255,0.6);
+						background: rgba(0, 0, 0, 0.6);
 						border-radius: 5px;
 						box-shadow: 0 0 5px #00000030;
 						font-weight: 600;
@@ -2567,7 +2544,7 @@
 
 					.tab-box.disabled{
 						cursor: not-allowed;
-						background: whitesmoke;
+						background: rgba(104, 104, 104, 1);
 					}
 
 					.tab-box.active {
@@ -2580,6 +2557,37 @@
 						flex-grow: 1;
 						overflow-y: auto;
 						padding: 1vh;
+						position: relative;
+						background: rgba(255, 255, 255, 0.3);
+						border-radius: 15px;
+					}					
+
+					.tp-content::after{
+						position: absolute;
+						top: 0;
+						left: 0;
+						bottom: 0;
+						right: 0;
+						content: "";
+						background: url("https://github.com/pntan/TPTOOL/blob/main/bg-tool.png?raw=true");
+						background-size: cover;
+						z-index: -2;
+						background-repeat: no-repeat;
+						background-position-x: center;
+						background-position-y: 85%;
+					}
+
+					.tp-content::before{
+						position: absolute;						
+						top: 0;
+						left: 0;
+						bottom: 0;
+						right: 0;
+						content: "";
+						background: 0 4px 20px rgba(255, 255, 255, 0.4), 0 4px 30px rgba(0, 0, 0, 0.2);
+						backdrop-filter: blur(5px);
+						-webkit-backdrop-filter: blur(5px);
+						z-index: -1;
 					}
 
 					.tab-content.active {
@@ -2925,7 +2933,7 @@
 					// $(this).draggable('option', 'cursorAt', { left: Math.floor(width / 2), top: Math.floor(height / 2) });
 				},
 
-				drag: function() {
+				drag: function( event, ui ) {
 					var offset = $(this).offset();
 					var xPos = offset.left;
 					var yPos = offset.top;
@@ -2933,7 +2941,26 @@
 					//localStorage.setItem("positionXTP",xPos);
 					//boxAlert(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`);
 					//boxLogging(`Tọa độ hiện tại X: ${xPos} - Y: ${yPos}`, [`${xPos}`, `${yPos}`], ["orange", "yellow"]);
-				},
+
+					
+					var $this = $(this);
+					var parentWidth = $this.parent().width();
+					var parentHeight = $this.parent().height();
+					var elementWidth = $this.outerWidth();
+					var elementHeight = $this.outerHeight();
+
+					// Tính toán lại right và bottom
+					var newRight = parentWidth - (ui.position.left + elementWidth);
+					var newBottom = parentHeight - (ui.position.top + elementHeight);
+
+					// Áp dụng lại
+					$this.css({
+					'right': newRight + 'px',
+					'bottom': newBottom + 'px',
+					'left': 'auto', // Đảm bảo left và top không ghi đè
+					'top': 'auto'
+					});
+				}
 			});
 
 			// Thay đổi kích thước (4 góc)
@@ -9548,7 +9575,6 @@
 		var indexRun = 0;
 		// Kiểm tra đơn hàng
 		async function kiemTraDon(){
-			await delay(5000);
 			boxAlert(`Số Lần Chạy ${indexRun++}`);
 			boxAlert(`Kiểm tra đơn`)
 			// Đơn siêu tốc
@@ -9559,8 +9585,12 @@
 			var content2 = $(".order-list-search-and-filter").eq(0).find(".eds-form-item").eq(1).find("label");
 			simulateReactEvent(content2.eq(content2.length - 2), "click");
 
+			await delay(1000);
+
 			var content_result = $(".result-count-wrapper .text-section").text();
-			content_result.split(" ");
+			content_result = content_result.split(" ");
+
+			console.log(content_result);
 
 			content_result = content_result[0];
 
