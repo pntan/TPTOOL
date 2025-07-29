@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.3.6";
+	const VERSION = "2.3.7";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -8130,7 +8130,7 @@
 								variant_action.find("> div[data-for^='tool-tip-cancel']").click();
 							}
 						}
-					}	
+					}						
 					
 					if(!typeLink){
 						// Loại liên kết tự động
@@ -8174,7 +8174,7 @@
 									simulateClearing(headerInput, 0);
 									await delay(200);
 									simulateReactInput(headerInput, sku);
-									await delay(500);
+									await delay(2000);
 								}
 
 								var popupContents = $(".popup-select-product-body .pspb-row");
@@ -8192,14 +8192,14 @@
 									}
 								}
 
-								simulateReactEvent(checkBox, "click");
-
 								indexVariant++;
 								nextVariant();
 
 							}, {once: true});
 						}
 					}
+
+					simulateReactEvent(checkBox, "click");
 				}
 
 				nextVariant();
@@ -9547,15 +9547,23 @@
 		async function kiemTraDon(){
 			boxAlert(`Số Lần Chạy ${indexRun++}`);
 			boxAlert(`Kiểm tra đơn`)
+
+			//Chọn tab phù hợp
+			var tab = $(".portal-panel .eds-tabs__nav-warp .eds-tabs__nav-tab:nth-child(3)");
+			simulateReactEvent(tab,  "click");
+			await delay(2000);
+
 			// Đơn siêu tốc
 			var content1 = $(".order-list-search-and-filter").eq(0).find(".eds-form-item").eq(0).find("label");
 			simulateReactEvent(content1.last(), "click");
+
+			await delay(2000);
 
 			// Đơn chưa xử lý
 			var content2 = $(".order-list-search-and-filter").eq(0).find(".eds-form-item").eq(1).find("label");
 			simulateReactEvent(content2.eq(content2.length - 2), "click");
 
-			await delay(20000);
+			await delay(2000);
 
 			var content_result = $(".result-count-wrapper .text-section").text();
 			content_result = content_result.split(" ");
@@ -9598,11 +9606,9 @@
 			}
 
 			var menu = $(".sidebar-menu .sidebar-menu-box.ps_menu_order .sidebar-submenu li");
-			
-			await(5000);
 
 			simulateReactEvent(menu.eq(1).find("a"), "click");
-			await delay(1000);
+			await delay(500);
 			simulateReactEvent(menu.eq(0).find("a"), "click");
 
 			$(".feedback-wrapper").parent().parent().remove();
@@ -9632,8 +9638,8 @@
 				mappingData.push({					
 							name: nameBox.text().trim(),
 							sku: skuValue,
-							price: price,
-							stock: stock
+							price: price.val().trim(),
+							stock: stock.val().trim()
 						});
 			}
 
