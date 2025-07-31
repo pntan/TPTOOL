@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.3.7";
+	const VERSION = "2.4.0";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -194,6 +194,7 @@
 			"themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
 			"layPhanLoaiShopee": layPhanLoaiShopee,
 			"layIDSanPhamShopee": layIDSanPhamShopee,
+			"tichGTN": tichGTN,
 			// "themPhanLoaiShopee": themPhanLoaiShopee,
 			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
@@ -2034,6 +2035,7 @@
 								<option data-func="layLinkChuaSKUShopee" data-layout="layLinkChuaSKUShopeeLayout">Lấy Link Chứa SKU</option>
 								<option data-func="suaTonSKUNhieuLinkShopee" data-layout="suaTonSKUNhieuLinkShopeeLayout">Sửa Tồn Theo SKU Nhiều Link</option>
 								<option data-func="kiemTraDon">Theo Dõi Đơn Mới</option>
+								<option data-func="tichGTN">Tích Chọn GTN</option>
 								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
 								<!-- <option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option> -->
 								<!-- <option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option> -->
@@ -9712,6 +9714,29 @@
 
 			boxToast(`Đã sao chép tên ${currentList.length} phân loại`, "success");
 			navigator.clipboard.writeText(currentList.join("\n"));
+		}
+
+		function tichGTN(){
+			boxAlert("Tích GTN");
+			var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+			var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+			var indexBox = 0;
+			async function nextBox(){
+				if(indexBox >= box.length){
+					boxLogging("Đã tích GTN cho tất cả các biến thể", [], ["green"]);
+					return;
+				}
+				var boxGTN = box.eq(indexBox).find(".item-without-gtin-container label");
+				
+				simulateReactEvent(boxGTN, "click");
+
+				indexBox++;
+				await delay(200);
+				nextBox();
+			};
+
+			nextBox();
 		}
 
 		// Chat với AI
