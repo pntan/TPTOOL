@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.4.1";
+	const VERSION = "2.5.0";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -195,6 +195,7 @@
 			"layPhanLoaiShopee": layPhanLoaiShopee,
 			"layIDSanPhamShopee": layIDSanPhamShopee,
 			"tichGTN": tichGTN,
+			"layAnhFullSize": layAnhFullSize,
 			// "themPhanLoaiShopee": themPhanLoaiShopee,
 			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
@@ -2036,6 +2037,7 @@
 								<option data-func="suaTonSKUNhieuLinkShopee" data-layout="suaTonSKUNhieuLinkShopeeLayout">Sửa Tồn Theo SKU Nhiều Link</option>
 								<option data-func="kiemTraDon">Theo Dõi Đơn Mới</option>
 								<option data-func="tichGTN">Tích Chọn GTN</option>
+								<option data-func="layAnhFullSize" data-layout="layAnhFullSizeLayout">Lấy Ảnh Full Kích Thước</option>
 								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
 								<!-- <option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option> -->
 								<!-- <option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option> -->
@@ -3214,17 +3216,24 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "layAnhFullSizeLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<textarea id="data" placeholder="Link ảnh gốc"></textarea>
+					</div>	
+				`));
+				break;
 			case "suaGiaTheoSKUTiktokLayout":
 				content.append($(`
-				<div class="layout-tab">
-					<p>Cách sửa giá:</p>
-					<select id="type">
-						<option data-type="all">Tất cả</option>
-						<option data-type="duoi">Giá đuôi</option>
-						<option data-type="dau">Giá đầu</option>
-					</select>
-					<textarea id="data" placeholder="Mỗi SKU là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-SKU: Bắt buộc (ABC123-DEF456 hoặc ABC123)\n-Giá: Bắt buộc"></textarea>
-				</div>
+					<div class="layout-tab">
+						<p>Cách sửa giá:</p>
+						<select id="type">
+							<option data-type="all">Tất cả</option>
+							<option data-type="duoi">Giá đuôi</option>
+							<option data-type="dau">Giá đầu</option>
+						</select>
+						<textarea id="data" placeholder="Mỗi SKU là một dòng, và các thuộc tính dưới đây sẽ cách nhau 1 tab\n-SKU: Bắt buộc (ABC123-DEF456 hoặc ABC123)\n-Giá: Bắt buộc"></textarea>
+					</div>
 				`));
 				break;
 			case "giaDuoiShopeeLayout":
@@ -9716,6 +9725,7 @@
 			navigator.clipboard.writeText(currentList.join("\n"));
 		}
 
+		// Tích chọn GTN
 		function tichGTN(){
 			boxAlert("Tích GTN");
 			var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
@@ -9737,6 +9747,17 @@
 			};
 
 			nextBox();
+		}
+
+		// Lấy ảnh phân loại
+		function layAnhFullSize(){
+			var data = $(".tp-container.tp-content .layout-future #data").val();
+
+			data = data.split("\n");
+
+			$.each(data, (indexData, valueData) => {
+				window.open(`https://banhang.shopee.vn/api/v1/cdn_proxy/${data[indexData].split("/")[data[indexData].split("/").length - 1].replace("_tn", "")}`, "_blank");
+			});
 		}
 
 		// Chat với AI
