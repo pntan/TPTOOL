@@ -1,10 +1,11 @@
+(function() {
 	'use strict';
 
 	// Trạng thái hiển thị của giao diện
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.4.0";
+	const VERSION = "2.4.1";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -54,11 +55,11 @@
 					}
 				}
 				// Bổ sung kiểm tra biến toàn cục cho các thư viện cụ thể như jQuery
-				if (currentUrl.includes('jquery.min.js') && typeof jQuery !== 'undefined') {
-					alreadyExists = true;
-				} else if (currentUrl.includes('elevatezoom.min.js') && typeof $.fn.elevateZoom !== 'undefined') {
-					alreadyExists = true;
-				}
+				// if (currentUrl.includes('jquery.min.js') && typeof jQuery !== 'undefined') {
+				// 	alreadyExists = true;
+				// } else if (currentUrl.includes('elevatezoom.min.js') && typeof $.fn.elevateZoom !== 'undefined') {
+				// 	alreadyExists = true;
+				// }
 
 			} else if (fileExtension === 'css') {
 				elementTagName = 'link';
@@ -1148,281 +1149,281 @@
 		 * @param {string} [options.tooltipClass='custom-tooltip'] Class CSS thêm vào tooltip div.
 		 * @param {string} [options.imageFilterSelector='img'] Selector để lọc các thẻ img cụ thể nếu muốn, mặc định là tất cả img.
 		 */
-		function zoomImg(getContentHtmlCallback, options = {}) {
-			console.log("Hàm zoomImg đang được khởi tạo...");
+		// function zoomImg(getContentHtmlCallback, options = {}) {
+		// 	console.log("Hàm zoomImg đang được khởi tạo...");
 
-			const defaultOptions = {
-				offsetX: 15,
-				offsetY: 15,
-				maxWidth: 300,
-				widthUnit: 'px',
-				maxHeight: 200,
-				heightUnit: 'px',
-				tooltipClass: 'custom-tooltip',
-				imageFilterSelector: 'img'
-			};
-			const opts = { ...defaultOptions, ...options };
+		// 	const defaultOptions = {
+		// 		offsetX: 15,
+		// 		offsetY: 15,
+		// 		maxWidth: 300,
+		// 		widthUnit: 'px',
+		// 		maxHeight: 200,
+		// 		heightUnit: 'px',
+		// 		tooltipClass: 'custom-tooltip',
+		// 		imageFilterSelector: 'img'
+		// 	};
+		// 	const opts = { ...defaultOptions, ...options };
 
-			let currentTooltip = null;
-			let hoverImageTimeout = null; // Timeout để hiển thị tooltip sau khi hover ảnh
-			let hideTooltipTimeout = null; // Timeout để ẩn tooltip sau khi rời khỏi ảnh/tooltip
-			const HOVER_DELAY = 100; // Delay trước khi hiển thị tooltip
-			const HIDE_DELAY = 150;  // Delay trước khi ẩn tooltip, cho phép di chuyển chuột vào tooltip
+		// 	let currentTooltip = null;
+		// 	let hoverImageTimeout = null; // Timeout để hiển thị tooltip sau khi hover ảnh
+		// 	let hideTooltipTimeout = null; // Timeout để ẩn tooltip sau khi rời khỏi ảnh/tooltip
+		// 	const HOVER_DELAY = 100; // Delay trước khi hiển thị tooltip
+		// 	const HIDE_DELAY = 150;  // Delay trước khi ẩn tooltip, cho phép di chuyển chuột vào tooltip
 
-			let currentHoveredImage = null; // Lưu trữ ảnh đang được hover
-			let isMouseOverTooltip = false; // Cờ kiểm tra chuột có đang trên tooltip không
+		// 	let currentHoveredImage = null; // Lưu trữ ảnh đang được hover
+		// 	let isMouseOverTooltip = false; // Cờ kiểm tra chuột có đang trên tooltip không
 
-			// Hàm tính toán vị trí tối ưu cho tooltip
-			const calculateTooltipPosition = (e, tooltipElement, currentWidth, currentHeight, attemptScaling = false) => {
-				const mouseX = e.clientX;
-				const mouseY = e.clientY;
-				const viewportWidth = window.innerWidth;
-				const viewportHeight = window.innerHeight;
+		// 	// Hàm tính toán vị trí tối ưu cho tooltip
+		// 	const calculateTooltipPosition = (e, tooltipElement, currentWidth, currentHeight, attemptScaling = false) => {
+		// 		const mouseX = e.clientX;
+		// 		const mouseY = e.clientY;
+		// 		const viewportWidth = window.innerWidth;
+		// 		const viewportHeight = window.innerHeight;
 
-				let finalX = 0;
-				let finalY = 0;
-				let bestFitFound = false;
+		// 		let finalX = 0;
+		// 		let finalY = 0;
+		// 		let bestFitFound = false;
 				
-				// Khoảng cách tối thiểu từ con trỏ để tooltip không bị đè
-				const cursorOffset = opts.offsetX; 
+		// 		// Khoảng cách tối thiểu từ con trỏ để tooltip không bị đè
+		// 		const cursorOffset = opts.offsetX; 
 
-				// Các chiến lược thử vị trí theo thứ tự ưu tiên: Phải -> Dưới -> Trái -> Trên
-				const priorityPositions = [
-					{ x: mouseX + cursorOffset, y: mouseY - currentHeight / 2 }, // Phải
-					{ x: mouseX - currentWidth / 2, y: mouseY + cursorOffset }, // Dưới
-					{ x: mouseX - currentWidth - cursorOffset, y: mouseY - currentHeight / 2 }, // Trái
-					{ x: mouseX - currentWidth / 2, y: mouseY - currentHeight - cursorOffset } // Trên
-				];
+		// 		// Các chiến lược thử vị trí theo thứ tự ưu tiên: Phải -> Dưới -> Trái -> Trên
+		// 		const priorityPositions = [
+		// 			{ x: mouseX + cursorOffset, y: mouseY - currentHeight / 2 }, // Phải
+		// 			{ x: mouseX - currentWidth / 2, y: mouseY + cursorOffset }, // Dưới
+		// 			{ x: mouseX - currentWidth - cursorOffset, y: mouseY - currentHeight / 2 }, // Trái
+		// 			{ x: mouseX - currentWidth / 2, y: mouseY - currentHeight - cursorOffset } // Trên
+		// 		];
 
-				for (const pos of priorityPositions) {
-					let tempX = pos.x;
-					let tempY = pos.y;
+		// 		for (const pos of priorityPositions) {
+		// 			let tempX = pos.x;
+		// 			let tempY = pos.y;
 
-					// Đảm bảo tooltip không vượt quá biên trái/trên của viewport
-					if (tempX < 0) tempX = 0;
-					if (tempY < 0) tempY = 0;
+		// 			// Đảm bảo tooltip không vượt quá biên trái/trên của viewport
+		// 			if (tempX < 0) tempX = 0;
+		// 			if (tempY < 0) tempY = 0;
 					
-					// Đảm bảo tooltip không vượt quá biên phải/dưới của viewport
-					if (tempX + currentWidth > viewportWidth) tempX = viewportWidth - currentWidth;
-					if (tempY + currentHeight > viewportHeight) tempY = viewportHeight - currentHeight;
+		// 			// Đảm bảo tooltip không vượt quá biên phải/dưới của viewport
+		// 			if (tempX + currentWidth > viewportWidth) tempX = viewportWidth - currentWidth;
+		// 			if (tempY + currentHeight > viewportHeight) tempY = viewportHeight - currentHeight;
 
-					// Kiểm tra xem sau khi điều chỉnh, tooltip có nằm hoàn toàn trong viewport không
-					const fitsInViewport = (
-						tempX >= 0 && tempX + currentWidth <= viewportWidth &&
-						tempY >= 0 && tempY + currentHeight <= viewportHeight
-					);
+		// 			// Kiểm tra xem sau khi điều chỉnh, tooltip có nằm hoàn toàn trong viewport không
+		// 			const fitsInViewport = (
+		// 				tempX >= 0 && tempX + currentWidth <= viewportWidth &&
+		// 				tempY >= 0 && tempY + currentHeight <= viewportHeight
+		// 			);
 
-					if (fitsInViewport) {
-						// Kiểm tra xem vị trí này có đè lên con trỏ (điểm e.clientX, e.clientY) không
-						const doesOverlapCursor = (
-							mouseX >= tempX && mouseX <= tempX + currentWidth &&
-							mouseY >= tempY && mouseY <= tempY + currentHeight
-						);
+		// 			if (fitsInViewport) {
+		// 				// Kiểm tra xem vị trí này có đè lên con trỏ (điểm e.clientX, e.clientY) không
+		// 				const doesOverlapCursor = (
+		// 					mouseX >= tempX && mouseX <= tempX + currentWidth &&
+		// 					mouseY >= tempY && mouseY <= tempY + currentHeight
+		// 				);
 
-						if (!doesOverlapCursor) { // Ưu tiên vị trí không đè lên con trỏ
-							finalX = tempX;
-							finalY = tempY;
-							bestFitFound = true;
-							break;
-						} else if (!bestFitFound) { // Nếu không tìm được vị trí không đè, chấp nhận vị trí đầu tiên dù có đè
-							finalX = tempX;
-							finalY = tempY;
-							bestFitFound = true;
-						}
-					}
-				}
+		// 				if (!doesOverlapCursor) { // Ưu tiên vị trí không đè lên con trỏ
+		// 					finalX = tempX;
+		// 					finalY = tempY;
+		// 					bestFitFound = true;
+		// 					break;
+		// 				} else if (!bestFitFound) { // Nếu không tìm được vị trí không đè, chấp nhận vị trí đầu tiên dù có đè
+		// 					finalX = tempX;
+		// 					finalY = tempY;
+		// 					bestFitFound = true;
+		// 				}
+		// 			}
+		// 		}
 
-				// Logic scale nếu không tìm được vị trí tốt
-				if (!bestFitFound && attemptScaling) {
-					console.log("Không đủ chỗ không đè lên chuột, đang cố gắng scale tooltip.");
+		// 		// Logic scale nếu không tìm được vị trí tốt
+		// 		if (!bestFitFound && attemptScaling) {
+		// 			console.log("Không đủ chỗ không đè lên chuột, đang cố gắng scale tooltip.");
 
-					let availableWidthPx = viewportWidth - 2 * cursorOffset; 
-					let availableHeightPx = viewportHeight - 2 * cursorOffset;
+		// 			let availableWidthPx = viewportWidth - 2 * cursorOffset; 
+		// 			let availableHeightPx = viewportHeight - 2 * cursorOffset;
 
-					let desiredMaxWidthPx = (opts.widthUnit === 'vw' ? (opts.maxWidth / 100) * viewportWidth : opts.maxWidth);
-					let desiredMaxHeightPx = (opts.heightUnit === 'vh' ? (opts.maxHeight / 100) * viewportHeight : opts.maxHeight);
+		// 			let desiredMaxWidthPx = (opts.widthUnit === 'vw' ? (opts.maxWidth / 100) * viewportWidth : opts.maxWidth);
+		// 			let desiredMaxHeightPx = (opts.heightUnit === 'vh' ? (opts.maxHeight / 100) * viewportHeight : opts.maxHeight);
 
-					let newMaxWidth = Math.min(desiredMaxWidthPx, availableWidthPx);
-					let newMaxHeight = Math.min(desiredMaxHeightPx, availableHeightPx);
+		// 			let newMaxWidth = Math.min(desiredMaxWidthPx, availableWidthPx);
+		// 			let newMaxHeight = Math.min(desiredMaxHeightPx, availableHeightPx);
 
-					tooltipElement.css({
-						'max-width': `${newMaxWidth}px`,
-						'max-height': `${newMaxHeight}px`
-					});
+		// 			tooltipElement.css({
+		// 				'max-width': `${newMaxWidth}px`,
+		// 				'max-height': `${newMaxHeight}px`
+		// 			});
 
-					currentWidth = tooltipElement.outerWidth();
-					currentHeight = tooltipElement.outerHeight();
-					console.log(`Tooltip scaled to: ${currentWidth}px x ${currentHeight}px`);
+		// 			currentWidth = tooltipElement.outerWidth();
+		// 			currentHeight = tooltipElement.outerHeight();
+		// 			console.log(`Tooltip scaled to: ${currentWidth}px x ${currentHeight}px`);
 
-					return calculateTooltipPosition(e, tooltipElement, currentWidth, currentHeight, false); 
-				}
+		// 			return calculateTooltipPosition(e, tooltipElement, currentWidth, currentHeight, false); 
+		// 		}
 
-				return { x: finalX, y: finalY, found: bestFitFound };
-			};
+		// 		return { x: finalX, y: finalY, found: bestFitFound };
+		// 	};
 
-			// Hàm tạo và hiển thị tooltip
-			const createAndShowTooltip = (e, $hoveredImage) => {
-				// Nếu đã có tooltip và chuột vẫn đang trên ảnh hoặc tooltip hiện tại, không làm gì
-				if (currentTooltip && (currentHoveredImage && currentHoveredImage[0] === $hoveredImage[0] || isMouseOverTooltip)) {
-					return;
-				}
+		// 	// Hàm tạo và hiển thị tooltip
+		// 	const createAndShowTooltip = (e, $hoveredImage) => {
+		// 		// Nếu đã có tooltip và chuột vẫn đang trên ảnh hoặc tooltip hiện tại, không làm gì
+		// 		if (currentTooltip && (currentHoveredImage && currentHoveredImage[0] === $hoveredImage[0] || isMouseOverTooltip)) {
+		// 			return;
+		// 		}
 
-				// Xóa tooltip cũ nếu có
-				if (currentTooltip) {
-					currentTooltip.remove();
-				}
+		// 		// Xóa tooltip cũ nếu có
+		// 		if (currentTooltip) {
+		// 			currentTooltip.remove();
+		// 		}
 				
-				currentHoveredImage = $hoveredImage;
-				console.log("Tạo và hiển thị tooltip cho:", currentHoveredImage[0]);
+		// 		currentHoveredImage = $hoveredImage;
+		// 		console.log("Tạo và hiển thị tooltip cho:", currentHoveredImage[0]);
 
-				currentTooltip = $('<div>')
-					.addClass(opts.tooltipClass)
-					.css({
-						position: 'fixed',
-						'z-index': 1,
-						'pointer-events': 'auto', // LUÔN ĐỂ AUTO để cho phép tương tác
-						'background-color': 'rgba(0, 0, 0, 0.8)',
-						color: 'white',
-						padding: '8px',
-						'border-radius': '4px',
-						'box-shadow': '0 2px 10px rgba(0, 0, 0, 0.3)',
-						'max-width': `${opts.maxWidth}${opts.widthUnit}`,
-						'max-height': `${opts.maxHeight}${opts.heightUnit}`,
-						overflow: 'auto',
-						display: 'block',
-						'word-wrap': 'break-word',
-						'box-sizing': 'border-box'
-					})
-					.append(getContentHtmlCallback($hoveredImage));
+		// 		currentTooltip = $('<div>')
+		// 			.addClass(opts.tooltipClass)
+		// 			.css({
+		// 				position: 'fixed',
+		// 				'z-index': 1,
+		// 				'pointer-events': 'auto', // LUÔN ĐỂ AUTO để cho phép tương tác
+		// 				'background-color': 'rgba(0, 0, 0, 0.8)',
+		// 				color: 'white',
+		// 				padding: '8px',
+		// 				'border-radius': '4px',
+		// 				'box-shadow': '0 2px 10px rgba(0, 0, 0, 0.3)',
+		// 				'max-width': `${opts.maxWidth}${opts.widthUnit}`,
+		// 				'max-height': `${opts.maxHeight}${opts.heightUnit}`,
+		// 				overflow: 'auto',
+		// 				display: 'block',
+		// 				'word-wrap': 'break-word',
+		// 				'box-sizing': 'border-box'
+		// 			})
+		// 			.append(getContentHtmlCallback($hoveredImage));
 
-				$('body').append(currentTooltip);
+		// 		$('body').append(currentTooltip);
 
-				let tooltipWidth = currentTooltip.outerWidth();
-				let tooltipHeight = currentTooltip.outerHeight();
+		// 		let tooltipWidth = currentTooltip.outerWidth();
+		// 		let tooltipHeight = currentTooltip.outerHeight();
 
-				let positionResult = calculateTooltipPosition(e, currentTooltip, tooltipWidth, tooltipHeight, true);
+		// 		let positionResult = calculateTooltipPosition(e, currentTooltip, tooltipWidth, tooltipHeight, true);
 
-				currentTooltip.css({
-					left: `${positionResult.x}px`,
-					top: `${positionResult.y}px`
-				});
+		// 		currentTooltip.css({
+		// 			left: `${positionResult.x}px`,
+		// 			top: `${positionResult.y}px`
+		// 		});
 
-				// Đặt sự kiện mouseenter và mouseleave cho tooltip
-				currentTooltip.on('mouseenter', function() {
-					clearTimeout(hideTooltipTimeout); // Ngừng ẩn tooltip nếu chuột vào lại tooltip
-					isMouseOverTooltip = true;
-				}).on('mouseleave', function() {
-					isMouseOverTooltip = false;
-					// Bắt đầu đếm ngược để ẩn tooltip sau khi rời khỏi nó
-					hideTooltipTimeout = setTimeout(() => {
-						// Chỉ ẩn nếu chuột không còn trên ảnh gốc và không còn trên tooltip
-						if (!currentHoveredImage.is(':hover') && !isMouseOverTooltip) {
-							hideAndRemoveTooltip();
-						}
-					}, HIDE_DELAY);
-				});
+		// 		// Đặt sự kiện mouseenter và mouseleave cho tooltip
+		// 		currentTooltip.on('mouseenter', function() {
+		// 			clearTimeout(hideTooltipTimeout); // Ngừng ẩn tooltip nếu chuột vào lại tooltip
+		// 			isMouseOverTooltip = true;
+		// 		}).on('mouseleave', function() {
+		// 			isMouseOverTooltip = false;
+		// 			// Bắt đầu đếm ngược để ẩn tooltip sau khi rời khỏi nó
+		// 			hideTooltipTimeout = setTimeout(() => {
+		// 				// Chỉ ẩn nếu chuột không còn trên ảnh gốc và không còn trên tooltip
+		// 				if (!currentHoveredImage.is(':hover') && !isMouseOverTooltip) {
+		// 					hideAndRemoveTooltip();
+		// 				}
+		// 			}, HIDE_DELAY);
+		// 		});
 
-				// Đảm bảo tooltip nằm gọn trong viewport sau cùng
-				const viewportWidth = window.innerWidth;
-				const viewportHeight = window.innerHeight;
-				let finalX = parseFloat(currentTooltip.css('left'));
-				let finalY = parseFloat(currentTooltip.css('top'));
+		// 		// Đảm bảo tooltip nằm gọn trong viewport sau cùng
+		// 		const viewportWidth = window.innerWidth;
+		// 		const viewportHeight = window.innerHeight;
+		// 		let finalX = parseFloat(currentTooltip.css('left'));
+		// 		let finalY = parseFloat(currentTooltip.css('top'));
 
-				if (finalX + currentTooltip.outerWidth() > viewportWidth) {
-					finalX = viewportWidth - currentTooltip.outerWidth();
-				}
-				if (finalY + currentTooltip.outerHeight() > viewportHeight) {
-					finalY = viewportHeight - currentTooltip.outerHeight();
-				}
-				if (finalX < 0) finalX = 0;
-				if (finalY < 0) finalY = 0;
+		// 		if (finalX + currentTooltip.outerWidth() > viewportWidth) {
+		// 			finalX = viewportWidth - currentTooltip.outerWidth();
+		// 		}
+		// 		if (finalY + currentTooltip.outerHeight() > viewportHeight) {
+		// 			finalY = viewportHeight - currentTooltip.outerHeight();
+		// 		}
+		// 		if (finalX < 0) finalX = 0;
+		// 		if (finalY < 0) finalY = 0;
 
-				currentTooltip.css({
-					left: `${finalX}px`,
-					top: `${finalY}px`
-				});
-			};
+		// 		currentTooltip.css({
+		// 			left: `${finalX}px`,
+		// 			top: `${finalY}px`
+		// 		});
+		// 	};
 
-			const hideAndRemoveTooltip = () => {
-				if (hoverImageTimeout) {
-					clearTimeout(hoverImageTimeout);
-					hoverImageTimeout = null;
-				}
-				if (hideTooltipTimeout) {
-					clearTimeout(hideTooltipTimeout);
-					hideTooltipTimeout = null;
-				}
-				if (currentTooltip) {
-					currentTooltip.remove();
-					currentTooltip = null;
-				}
-				currentHoveredImage = null; // Reset ảnh đang hover
-				isMouseOverTooltip = false; // Reset cờ
-			};
+		// 	const hideAndRemoveTooltip = () => {
+		// 		if (hoverImageTimeout) {
+		// 			clearTimeout(hoverImageTimeout);
+		// 			hoverImageTimeout = null;
+		// 		}
+		// 		if (hideTooltipTimeout) {
+		// 			clearTimeout(hideTooltipTimeout);
+		// 			hideTooltipTimeout = null;
+		// 		}
+		// 		if (currentTooltip) {
+		// 			currentTooltip.remove();
+		// 			currentTooltip = null;
+		// 		}
+		// 		currentHoveredImage = null; // Reset ảnh đang hover
+		// 		isMouseOverTooltip = false; // Reset cờ
+		// 	};
 
-			$(document).on('mousemove', function(e) {
-				// Xóa bất kỳ timeout ẩn nào nếu chuột di chuyển trở lại
-				if (hideTooltipTimeout) {
-					clearTimeout(hideTooltipTimeout);
-					hideTooltipTimeout = null;
-				}
+		// 	$(document).on('mousemove', function(e) {
+		// 		// Xóa bất kỳ timeout ẩn nào nếu chuột di chuyển trở lại
+		// 		if (hideTooltipTimeout) {
+		// 			clearTimeout(hideTooltipTimeout);
+		// 			hideTooltipTimeout = null;
+		// 		}
 
-				const elementsAtPoint = document.elementsFromPoint(e.clientX, e.clientY);
-				let targetImage = null;
+		// 		const elementsAtPoint = document.elementsFromPoint(e.clientX, e.clientY);
+		// 		let targetImage = null;
 
-				for (const el of elementsAtPoint) {
-					const $el = $(el); 
-					if ($el.is('img') && $el.is(opts.imageFilterSelector)) {
-						targetImage = $el;
-						break;
-					}
-				}
+		// 		for (const el of elementsAtPoint) {
+		// 			const $el = $(el); 
+		// 			if ($el.is('img') && $el.is(opts.imageFilterSelector)) {
+		// 				targetImage = $el;
+		// 				break;
+		// 			}
+		// 		}
 
-				// Kiểm tra xem chuột có đang trên ảnh gốc HAY trên tooltip không
-				const isCurrentlyOverImage = targetImage !== null;
-				const isOverExistingTooltip = currentTooltip && currentTooltip.is(':hover');
+		// 		// Kiểm tra xem chuột có đang trên ảnh gốc HAY trên tooltip không
+		// 		const isCurrentlyOverImage = targetImage !== null;
+		// 		const isOverExistingTooltip = currentTooltip && currentTooltip.is(':hover');
 
-				if (isCurrentlyOverImage) {
-					// Nếu chuột đang trên một ảnh:
-					if (!currentHoveredImage || currentHoveredImage[0] !== targetImage[0]) {
-						// Nếu đây là ảnh mới, hủy timeout hiển thị cũ (nếu có) và thiết lập cái mới
-						if (hoverImageTimeout) clearTimeout(hoverImageTimeout);
-						hoverImageTimeout = setTimeout(() => {
-							createAndShowTooltip(e, targetImage);
-						}, HOVER_DELAY);
-					} else {
-						// Nếu vẫn trên cùng ảnh và tooltip đã hiển thị, có thể cập nhật vị trí
-						// (Tùy chọn: bỏ qua nếu muốn hiệu suất cao hơn và không cần tooltip di chuyển theo từng pixel chuột)
-						if (currentTooltip) {
-						// currentTooltip.css({
-						//     left: `${e.clientX + opts.offsetX}px`,
-						//     top: `${e.clientY + opts.offsetY}px`
-						// });
-						}
-					}
-				} else if (!isOverExistingTooltip) {
-					// Nếu chuột không trên ảnh VÀ không trên tooltip hiện có
-					// Bắt đầu đếm ngược để ẩn tooltip
-					if (currentTooltip && !hideTooltipTimeout) { // Chỉ đặt timeout nếu chưa có
-						hideTooltipTimeout = setTimeout(() => {
-							hideAndRemoveTooltip();
-						}, HIDE_DELAY);
-					}
-				}
-			});
+		// 		if (isCurrentlyOverImage) {
+		// 			// Nếu chuột đang trên một ảnh:
+		// 			if (!currentHoveredImage || currentHoveredImage[0] !== targetImage[0]) {
+		// 				// Nếu đây là ảnh mới, hủy timeout hiển thị cũ (nếu có) và thiết lập cái mới
+		// 				if (hoverImageTimeout) clearTimeout(hoverImageTimeout);
+		// 				hoverImageTimeout = setTimeout(() => {
+		// 					createAndShowTooltip(e, targetImage);
+		// 				}, HOVER_DELAY);
+		// 			} else {
+		// 				// Nếu vẫn trên cùng ảnh và tooltip đã hiển thị, có thể cập nhật vị trí
+		// 				// (Tùy chọn: bỏ qua nếu muốn hiệu suất cao hơn và không cần tooltip di chuyển theo từng pixel chuột)
+		// 				if (currentTooltip) {
+		// 				// currentTooltip.css({
+		// 				//     left: `${e.clientX + opts.offsetX}px`,
+		// 				//     top: `${e.clientY + opts.offsetY}px`
+		// 				// });
+		// 				}
+		// 			}
+		// 		} else if (!isOverExistingTooltip) {
+		// 			// Nếu chuột không trên ảnh VÀ không trên tooltip hiện có
+		// 			// Bắt đầu đếm ngược để ẩn tooltip
+		// 			if (currentTooltip && !hideTooltipTimeout) { // Chỉ đặt timeout nếu chưa có
+		// 				hideTooltipTimeout = setTimeout(() => {
+		// 					hideAndRemoveTooltip();
+		// 				}, HIDE_DELAY);
+		// 			}
+		// 		}
+		// 	});
 
-			// Các sự kiện ẩn tooltip khi chuột rời khỏi cửa sổ hoặc cuộn trang
-			$(document).on('mouseleave', function(e) {
-				// Chỉ ẩn nếu chuột không ở trên tooltip khi rời khỏi document
-				if (!isMouseOverTooltip) {
-					hideAndRemoveTooltip();
-				}
-			});
+		// 	// Các sự kiện ẩn tooltip khi chuột rời khỏi cửa sổ hoặc cuộn trang
+		// 	$(document).on('mouseleave', function(e) {
+		// 		// Chỉ ẩn nếu chuột không ở trên tooltip khi rời khỏi document
+		// 		if (!isMouseOverTooltip) {
+		// 			hideAndRemoveTooltip();
+		// 		}
+		// 	});
 
-			$(window).on('scroll', hideAndRemoveTooltip);
-			// Bạn có thể bỏ dòng này nếu muốn tooltip không bị ẩn khi tab mất focus/chuyển tab
-			// $(window).on('blur', hideAndRemoveTooltip);
-		}
+		// 	$(window).on('scroll', hideAndRemoveTooltip);
+		// 	// Bạn có thể bỏ dòng này nếu muốn tooltip không bị ẩn khi tab mất focus/chuyển tab
+		// 	// $(window).on('blur', hideAndRemoveTooltip);
+		// }
 
 		function speakText(text, lang = 'vi-VN') {
 			// Kiểm tra xem trình duyệt có hỗ trợ Speech Synthesis không
@@ -1473,47 +1474,47 @@
 			boxAlert("CHECKPAGE");
 
 			// Phóng to hình ảnh khi hover
-			zoomImg(
-				($hoveredImage) => {
-					// Đây là hàm callback để tạo nội dung cho tooltip.
-					// $hoveredImage là đối tượng jQuery của thẻ <img> mà người dùng đang hover.
+			// zoomImg(
+			// 	($hoveredImage) => {
+			// 		// Đây là hàm callback để tạo nội dung cho tooltip.
+			// 		// $hoveredImage là đối tượng jQuery của thẻ <img> mà người dùng đang hover.
 
-					const imageUrl = $hoveredImage.attr('src'); 
-					// Thử tìm URL ảnh lớn hơn nếu có
-					const fullSizeImageUrl = $hoveredImage.attr('data-full-size-url') 
-										|| $hoveredImage.attr('data-src') 
-										|| imageUrl;
+			// 		const imageUrl = $hoveredImage.attr('src'); 
+			// 		// Thử tìm URL ảnh lớn hơn nếu có
+			// 		const fullSizeImageUrl = $hoveredImage.attr('data-full-size-url') 
+			// 							|| $hoveredImage.attr('data-src') 
+			// 							|| imageUrl;
 					
-					// Cố gắng tìm tên sản phẩm hoặc thông tin liên quan từ các phần tử cha hoặc anh chị em
-					let productName = "Sản phẩm";
-					// Các selector phổ biến cho container sản phẩm trên các sàn khác nhau
-					const $productCard = $hoveredImage.closest('.theme-arco-table-tr, .product-card, .item-card, .sc-card-product'); 
-					if ($productCard.length) {
-						// Các selector phổ biến cho tên sản phẩm
-						productName = $productCard.find('h1, h2, h3, .product-name, .item-title, .title, [data-name="product-title"]').first().text().trim() || productName;
-					}
+			// 		// Cố gắng tìm tên sản phẩm hoặc thông tin liên quan từ các phần tử cha hoặc anh chị em
+			// 		let productName = "Sản phẩm";
+			// 		// Các selector phổ biến cho container sản phẩm trên các sàn khác nhau
+			// 		const $productCard = $hoveredImage.closest('.theme-arco-table-tr, .product-card, .item-card, .sc-card-product'); 
+			// 		if ($productCard.length) {
+			// 			// Các selector phổ biến cho tên sản phẩm
+			// 			productName = $productCard.find('h1, h2, h3, .product-name, .item-title, .title, [data-name="product-title"]').first().text().trim() || productName;
+			// 		}
 
-					return $(`
-						<div style="text-align: center;">
-							<!-- <h4 style="margin: 0 0 8px; color: white; font-size: 1.1em; max-height: 40px; overflow: hidden;">${productName}</h4> -->
-							<img src="${fullSizeImageUrl}" style="width: 100%; height: auto; display: block; margin: auto; border: 1px solid #555; object-fit: contain;">
-							<!-- <p style="font-size: 0.85em; margin-top: 8px; color: #ccc;">URL: <span style="font-size: 0.7em;">${imageUrl.substring(0, Math.min(imageUrl.length, 60))}...</span></p> -->
-						</div>
-					`);
-				},
-				{
-					offsetX: 20,
-					offsetY: 20,
-					maxWidth: 30,
-					widthUnit: "vw",
-					maxHeight: "auto",
-					heightUnit: "",
-					tooltipClass: 'product-image-zoom-tooltip',
-					// Thay đổi 'img' nếu bạn muốn chỉ nhắm mục tiêu các hình ảnh cụ thể
-					// Ví dụ: 'img.product-thumbnail', '.some-container img', 'img[alt]', v.v.
-					imageFilterSelector: 'img' 
-				}
-			);
+			// 		return $(`
+			// 			<div style="text-align: center;">
+			// 				<!-- <h4 style="margin: 0 0 8px; color: white; font-size: 1.1em; max-height: 40px; overflow: hidden;">${productName}</h4> -->
+			// 				<img src="${fullSizeImageUrl}" style="width: 100%; height: auto; display: block; margin: auto; border: 1px solid #555; object-fit: contain;">
+			// 				<!-- <p style="font-size: 0.85em; margin-top: 8px; color: #ccc;">URL: <span style="font-size: 0.7em;">${imageUrl.substring(0, Math.min(imageUrl.length, 60))}...</span></p> -->
+			// 			</div>
+			// 		`);
+			// 	},
+			// 	{
+			// 		offsetX: 20,
+			// 		offsetY: 20,
+			// 		maxWidth: 30,
+			// 		widthUnit: "vw",
+			// 		maxHeight: "auto",
+			// 		heightUnit: "",
+			// 		tooltipClass: 'product-image-zoom-tooltip',
+			// 		// Thay đổi 'img' nếu bạn muốn chỉ nhắm mục tiêu các hình ảnh cụ thể
+			// 		// Ví dụ: 'img.product-thumbnail', '.some-container img', 'img[alt]', v.v.
+			// 		imageFilterSelector: 'img' 
+			// 	}
+			// );
 
 			var domain = window.location;
 			var host = domain.host, pathName = domain.pathname, port = domain.port, protocol = domain.protocol;
