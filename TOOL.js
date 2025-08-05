@@ -1,4 +1,3 @@
-(function() {
 	'use strict';
 
 	// Trạng thái hiển thị của giao diện
