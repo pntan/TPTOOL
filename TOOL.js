@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.5.0";
+	const VERSION = "2.6.0";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -195,7 +195,8 @@
 			"layPhanLoaiShopee": layPhanLoaiShopee,
 			"layIDSanPhamShopee": layIDSanPhamShopee,
 			"tichGTN": tichGTN,
-			"layAnhFullSize": layAnhFullSize,
+			"layAnhFullSizeShopee": layAnhFullSizeShopee,
+			"saoChepPhanLoaiShopee": saoChepPhanLoaiShopee,
 			// "themPhanLoaiShopee": themPhanLoaiShopee,
 			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
@@ -474,6 +475,63 @@
 					}
 				}
 			}, delay);
+		}
+
+		/**
+		 * Tải file từ một đường dẫn URL, chuyển đổi thành đối tượng File và gán vào input file đích.
+		 * * @param {string} url - Đường dẫn URL tới file ảnh.
+		 * @param {string} filename - Tên file mong muốn.
+		 * @param {HTMLElement|jQuery} targetFileInput - Phần tử input type="file" đích hoặc jQuery object.
+		 * @param {number} [delay=100] - Thời gian chờ (ms) trước khi gắn file và kích hoạt sự kiện.
+		 * @returns {Promise<File|null>} Một Promise trả về đối tượng File đã được tạo hoặc null nếu có lỗi.
+		*/
+		async function attachUrlToFileToInput(url, filename, targetFileInput, delay = 100) {
+			try {
+				// --- Chuẩn hóa tham số đầu vào ---
+				let targetFileInputEl;
+				if (targetFileInput instanceof jQuery) {
+					targetFileInputEl = targetFileInput.get(0);
+				} else if (targetFileInput instanceof HTMLElement) {
+					targetFileInputEl = targetFileInput;
+				} else {
+					console.error("Lỗi: targetFileInput không phải là phần tử DOM hợp lệ hoặc jQuery object.");
+					return null;
+				}
+				
+				if (targetFileInputEl.type !== 'file') {
+					console.error("Lỗi: targetFileInput không phải là input type='file'.");
+					return null;
+				}
+
+				// --- 1. Tải file từ URL ---
+				const response = await fetch(url);
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				
+				const blob = await response.blob();
+				const fileObject = new File([blob], filename, { type: blob.type });
+
+				// --- 2. Gán đối tượng File vào input đích ---
+				const dataTransfer = new DataTransfer();
+				dataTransfer.items.add(fileObject);
+
+				// Chờ một chút để đảm bảo UI kịp xử lý, sau đó gán file
+				await new Promise(resolve => setTimeout(resolve, delay));
+				
+				targetFileInputEl.files = dataTransfer.files;
+
+				// --- 3. Kích hoạt sự kiện 'change' ---
+				const changeEvent = new Event("change", { bubbles: true });
+				targetFileInputEl.dispatchEvent(changeEvent);
+
+				console.log(`Đã gắn file '${fileObject.name}' từ URL vào input thành công.`);
+				return fileObject;
+				
+			} catch (error) {
+				console.error('Lỗi khi xử lý file từ URL:', error);
+				return null;
+			}
 		}
 
 		// Giả lập kéo thả tệp vào một phần tử (element)
@@ -788,6 +846,21 @@
 			setNativeValue(el, '');
 		}
 
+		async function urlToFile(url, filename) {
+			try {
+				const response = await fetch(url);
+				if (!response.ok) {
+					throw new Error(`HTTP error! status: ${response.status}`);
+				}
+				const blob = await response.blob();
+				const file = new File([blob], filename, { type: blob.type });
+				return file;
+			} catch (error) {
+				console.error('Lỗi khi chuyển đổi URL thành File:', error);
+				return null;
+			}
+		}
+
 		// Hàm theo dõi phần tử
 		function waitForElement(root, selector, callback, options = {}) {
 			var {
@@ -1013,7 +1086,135 @@
 			lastPrice = lastPrice.join("");
 
 			return {giaTruoc, giaSau, gia: lastPrice};
-		}		
+		}	
+		
+		/**
+		 * Chuyển đổi một màu RGB hoặc RGBA thành định dạng Hex.
+		 * @param {string} rgbValue Chuỗi màu RGB/RGBA, ví dụ: "rgb(255, 182, 193)" hoặc "rgba(255, 182, 193, 0.5)".
+		 * @return {string|null} Mã màu Hex, ví dụ: "#ffb6c1", hoặc null nếu không hợp lệ.
+		*/
+		function rgbToHex(rgbValue) {
+			if (!rgbValue || typeof rgbValue !== 'string') {
+				return null;
+			}
+			
+			// Tìm các giá trị số trong chuỗi rgb
+			const matches = rgbValue.match(/\d+/g);
+			if (!matches || matches.length < 3) {
+				return null;
+			}
+			
+			const [r, g, b] = matches.map(Number);
+			
+			// Chuyển đổi từng giá trị thành Hex và định dạng lại
+			function toHex(c) {
+				const hex = c.toString(16);
+				return hex.length === 1 ? "0" + hex : hex;
+			}
+			
+			return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+		}
+
+		/**
+		 * Đối tượng quản lý các hàm và dữ liệu liên quan đến màu pastel.
+		 */
+		const pastelColorManager = (function() {
+			// Danh sách 60 mã màu pastel
+			const allPastelColors = [
+				// Hồng
+				'#fbcfe8', '#fecaca', '#fce7f3', '#fef2f2', '#fecdd3', '#ffe4e6', '#ffccd5', '#ffd1dc', '#ffb6c1', '#fbb6c1',
+				// Cam
+				'#fef3c7', '#fcd34d', '#fed7aa', '#ffedd5', '#ffe5b4', '#ffaf70', '#ffd8b6', '#ffbf69', '#ffcc80', '#ffe0b5',
+				// Vàng
+				'#fef9c3', '#fde047', '#fdfa58', '#faf089', '#fef08a', '#f8d386', '#fff5b7', '#fff8dc', '#ffffa5', '#ffcc00',
+				// Xanh lá
+				'#d9f99d', '#bbf7d0', '#86efac', '#dcfce7', '#ecfccb', '#b6e7a9', '#c4e2af', '#b7e4c7', '#c1f1c6', '#a5d6a7',
+				// Xanh dương
+				'#bfdbfe', '#93c5fd', '#bae6fd', '#dbeafe', '#d1e6f9', '#b2e6ff', '#a4e8f7', '#a1c4e1', '#b3d9ff', '#87ceeb',
+				// Tím
+				'#ddd6fe', '#c4b5fd', '#d8b4fe', '#e9d5ff', '#a8a29e', '#d6b0ff', '#e0c1f5', '#e2b3f1', '#d4a1f5', '#e9affc',
+			];
+
+			// Mảng để lưu trữ các màu đã được sử dụng (chỉ trong chế độ ngẫu nhiên)
+			let usedColors = [];
+
+			return {
+				/**
+				 * Trả về một mã màu pastel ngẫu nhiên hoặc chuyển đổi một mã màu cụ thể thành Hex.
+				 * @param {string} colorInput (Không bắt buộc) Mã màu đầu vào (Hex, RGB, RGBA).
+				 * @param {boolean} avoidDuplicates (Không bắt buộc) Nếu là true, hàm sẽ trả về một màu chưa được sử dụng.
+				 * @return {string} Mã màu Hex chuẩn, ví dụ: '#fbcfe8'.
+				 */
+				get: function(colorInput = '', avoidDuplicates = false) {
+					const input = String(colorInput).trim().toLowerCase();
+					
+					// 1. Nếu có tham số đầu vào (màu do người dùng chọn)
+					if (input) {
+						// Kiểm tra định dạng hex
+						const hexRegex = /^#([0-9a-f]{6}|[0-9a-f]{3})$/i;
+						if (hexRegex.test(input)) {
+							return input;
+						}
+
+						// Kiểm tra và chuyển đổi định dạng RGB/RGBA
+						if (input.startsWith('rgb')) {
+							const hexColor = rgbToHex(input);
+							if (hexColor) {
+								return hexColor;
+							}
+						}
+						
+						// Nếu không khớp với định dạng nào, trả về màu ngẫu nhiên và đưa ra cảnh báo
+						console.warn(`Đầu vào màu không hợp lệ: "${colorInput}". Trả về màu ngẫu nhiên.`);
+					}
+
+					// 2. Chế độ ngẫu nhiên (không có tham số hoặc tham số không hợp lệ)
+					if (avoidDuplicates) {
+						// Chế độ không trùng lặp
+						if (usedColors.length === allPastelColors.length) {
+							console.warn('Tất cả các màu đã được sử dụng. Bắt đầu lại từ đầu.');
+							usedColors = []; // Reset danh sách
+						}
+						
+						let availableColors = allPastelColors.filter(color => !usedColors.includes(color));
+						const randomIndex = Math.floor(Math.random() * availableColors.length);
+						const randomColor = availableColors[randomIndex];
+						
+						usedColors.push(randomColor);
+						return randomColor;
+
+					} else {
+						// Chế độ ngẫu nhiên mặc định (có thể trùng lặp)
+						const randomIndex = Math.floor(Math.random() * allPastelColors.length);
+						const randomColor = allPastelColors[randomIndex];
+						
+						usedColors.push(randomColor); // Vẫn ghi lại màu đã dùng
+						return randomColor;
+					}
+				},
+
+				/**
+				 * Trả về mảng các màu đã được sử dụng.
+				 * @return {Array<string>} Danh sách các mã màu hex đã sử dụng.
+				 */
+				getUsedColors: function() {
+					return [...usedColors]; // Trả về một bản sao để tránh thay đổi trực tiếp
+				},
+				
+				/**
+				 * Xóa danh sách các màu đã được sử dụng.
+				 */
+				resetUsedColors: function() {
+					usedColors = [];
+					console.log('Đã xóa danh sách màu đã sử dụng.');
+				}
+			};
+		})();
+
+		// Hàm gọi chính mà bạn sẽ sử dụng.
+		function getColor(colorInput = '', avoidDuplicates = false) {
+			return pastelColorManager.get(colorInput, avoidDuplicates);
+		}
 
 		function checkSKU(sku){
 			// Biểu thức chính quy để trích xuất phần SKU chính:
@@ -2037,7 +2238,8 @@
 								<option data-func="suaTonSKUNhieuLinkShopee" data-layout="suaTonSKUNhieuLinkShopeeLayout">Sửa Tồn Theo SKU Nhiều Link</option>
 								<option data-func="kiemTraDon">Theo Dõi Đơn Mới</option>
 								<option data-func="tichGTN">Tích Chọn GTN</option>
-								<option data-func="layAnhFullSize" data-layout="layAnhFullSizeLayout">Lấy Ảnh Full Kích Thước</option>
+								<option data-func="layAnhFullSizeShopee" data-layout="layAnhFullSizeShopeeLayout">Lấy Ảnh Full Kích Thước</option>
+								<option data-func="saoChepPhanLoaiShopee" data-layout="saoChepPhanLoaiShopeeLayout">Sao Chép Phân Loại</option>
 								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
 								<!-- <option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option> -->
 								<!-- <option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option> -->
@@ -3216,7 +3418,14 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
-			case "layAnhFullSizeLayout":
+			case "saoChepPhanLoaiShopeeLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<textarea id="data" placeholder="SKU cần sao chép"></textarea>
+					</div>
+				`));
+				break;
+			case "layAnhFullSizeShopeeLayout":
 				content.append($(`
 					<div class="layout-tab">
 						<textarea id="data" placeholder="Link ảnh gốc"></textarea>
@@ -9750,7 +9959,11 @@
 		}
 
 		// Lấy ảnh phân loại
-		function layAnhFullSize(){
+		function layAnhFullSizeShopee(...data){
+			data = data[0];
+			if(data)
+				return (`https://banhang.shopee.vn/api/v1/cdn_proxy/${data.split("/")[data.split("/").length - 1].replace("_tn", "")}`);
+
 			var data = $(".tp-container.tp-content .layout-future #data").val();
 
 			data = data.split("\n");
@@ -9758,6 +9971,189 @@
 			$.each(data, (indexData, valueData) => {
 				window.open(`https://banhang.shopee.vn/api/v1/cdn_proxy/${data[indexData].split("/")[data[indexData].split("/").length - 1].replace("_tn", "")}`, "_blank");
 			});
+		}
+
+		// Sao chép Phân Loại Shopee
+		async function saoChepPhanLoaiShopee() {
+			boxAlert("ĐANG SAO CHÉP PHÂN LOẠI SHOPEE...");
+
+			var data = $(".tp-container.tp-content .layout-future #data").val();
+			data = data.split("\n")
+
+			var indexData = 0;
+			async function nextData(){
+				if(indexData >= data.length){
+					return;
+				}
+				var sku = data[indexData];
+
+				var color;
+			
+				var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item");
+				var boxDetail = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+				var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+				var indexCheckSKU = 0;
+				async function checkSKU(){
+					if(indexCheckSKU >= boxDetail.length){
+						return false;
+					}
+					var skuBox = boxDetail.eq(indexCheckSKU).find(".table-cell .sku-textarea textarea");
+					var nameBox = boxLeft.eq(indexCheckSKU).find(".table-cell")
+					var variantName = nameBox.contents().filter(function(){
+						return this.nodeType === 3;
+					})[0]?.nodeValue.trim();
+					
+					var variantImg = layAnhFullSizeShopee(boxLeft.eq(indexCheckSKU).find("img").attr("src"));
+
+					if(skuBox.val().includes(sku)){
+						color = getColor("", true);
+						var variant = {name: variantName, sku: skuBox.val(), img: variantImg};
+						simulateClearReactInput(skuBox);
+						simulateReactInput(skuBox, "x0");
+						boxDetail.eq(indexCheckSKU).css("background", color);
+						boxLeft.eq(indexCheckSKU).css("background", color);
+						console.log(variant);
+						return (variant);
+					}
+
+					indexCheckSKU++;
+					return await checkSKU();
+				}
+
+				var checkSKU = await checkSKU();
+
+				console.log(checkSKU);
+
+				if(checkSKU == undefined || !checkSKU){
+					indexData++;
+					nextData();
+				}
+
+				var inputName = box.eq(box.length - 1).find("input");
+
+				simulateReactInput(inputName, checkSKU.name);
+
+				await delay(500);
+
+				var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item");
+
+				box.eq(box.length - 2).find("input").parent().css("background", color);
+
+				var indexBox = 0;
+				async function nextBox(){
+					if(indexBox >= box.length){
+						return;
+					}
+
+					if(box.eq(indexBox).find("input").val().includes(checkSKU.name))
+						box.eq(indexBox).find("input").parent().css("background", color);
+
+					indexBox++;
+					await nextBox();
+				}
+
+				await nextBox();
+
+				await delay(500);
+
+				async function nextBoxDetail(){
+					var boxDetail = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+					var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+					var indexBoxDetail = boxDetail.length - 1;
+
+					var skuBox = boxDetail.eq(indexBoxDetail).find(".table-cell .sku-textarea textarea");
+					var nameBox = boxLeft.eq(indexBoxDetail).find(".table-cell")
+					var variantName = nameBox.contents().filter(function(){
+						return this.nodeType === 3;
+					})[0]?.nodeValue.trim();
+
+					simulateReactInput(skuBox, checkSKU.sku);
+					console.log("ABC", checkSKU.img, `${checkSKU.sku}.png`, boxLeft.eq(indexBoxDetail).find(".table-cell").eq(0).find("input[type=file]")[0]);
+					attachUrlToFileToInput(checkSKU.img, `${checkSKU.sku}.png`, boxLeft.eq(indexBoxDetail).find(".table-cell").eq(0).find("input[type=file]")[0]);
+					
+					boxDetail.eq(indexBoxDetail).css("background", color);
+					boxLeft.eq(indexBoxDetail).css("background", color);
+				}
+
+				await nextBoxDetail();
+
+				indexData++;
+				await nextData();
+			}
+
+			await nextData();
+
+			return;
+
+			// Lấy dữ liệu và xử lý ban đầu
+			var dataString = $(".tp-container.tp-content .layout-future #data").val();
+			if (!dataString) {
+				boxAlert("Lỗi: Không tìm thấy dữ liệu để sao chép.");
+				return;
+			}
+			var data = dataString.split("\n").map(line => line.trim());
+
+			// Bước 1: Thu thập danh sách biến thể từ trang
+			var boxDetail = $(".variation-model-table-main .table-cell-wrapper");
+			var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+			var variantList = [];
+			for (var i = 0; i <= boxDetail.length; i++) {
+				var skuBox = $(boxDetail).eq(i).find(".sku-textarea textarea");
+				if (!skuBox.length) continue;
+
+				var nameBox = $(boxLeft).eq(i).find(".table-cell");
+				var variantName = nameBox.contents()
+                    .filter(function() {
+                        return this.nodeType === 3; // chỉ lấy text thuần
+                    })[0]?.nodeValue.trim();
+
+				console.log(boxLeft.eq(i), i, nameBox, variantName);
+				
+				if (data.some(line => line.includes(skuBox.val()?.trim()))) {
+					variantList.push({ name: variantName, sku: skuBox.val() });
+					simulateClearReactInput(skuBox);
+					simulateReactInput(skuBox, "x0");
+				}
+			}
+
+			if (variantList.length === 0) {
+				boxAlert("Không tìm thấy SKU nào khớp với dữ liệu đã nhập.");
+				return;
+			}
+
+			// Bước 2: Điền các biến thể vào form
+			boxAlert(`Đã tìm thấy ${variantList.length} biến thể khớp. Bắt đầu điền...`);
+
+			var shopeeVariantBoxes = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item");
+			var lastVariantBox = shopeeVariantBoxes.eq(shopeeVariantBoxes.length - 1);
+
+			for (var variant of variantList) {
+				await delay(300);
+
+				console.log(variant);
+
+				// Lấy lại phần tử input mỗi lần lặp để đảm bảo không bị lỗi khi DOM thay đổi
+				var inputBox = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item").eq(-1).find("input");
+
+				simulateReactInput(inputBox, variant.name);
+
+				await delay(500); // Tăng thời gian chờ để Shopee kịp xử lý
+
+				// Lấy lại danh sách các ô SKU sau khi thêm biến thể mới
+				var newBoxDetail = $(".variation-model-table-main .table-cell-wrapper");
+				var lastSkuBox = $(newBoxDetail).eq(newBoxDetail.length - 1).find(".sku-textarea textarea");
+				
+				// Điền giá trị sku vào ô mới được tạo
+				lastSkuBox.val(variant.sku);
+				simulateReactInput(lastSkuBox, variant.sku); // Mô phỏng gõ phím để kích hoạt sự kiện của Shopee
+
+				boxAlert(`Đã điền biến thể: ${variant.name}`);
+			}
+			
+			boxAlert("Hoàn tất sao chép phân loại Shopee!");
 		}
 
 		// Chat với AI
