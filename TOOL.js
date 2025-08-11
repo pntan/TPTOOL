@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.7.0";
+	const VERSION = "2.8.0";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -185,7 +185,8 @@
 			"kiemTraMaPhanLoaiShopee": kiemTraMaPhanLoaiShopee,
 			"suaGiaSKUShopee": suaGiaSKUShopee,
 			"suaHinhSKUShopee": suaHinhSKUShopee,
-			"suaTenSKUShopee": suaTenSKUShopee,
+			"suaTenSKUShopee": suaTenSKUShopee,			
+			"suaSKUTheoTenShopee": suaSKUTheoTenShopee,
 			"suaTonSKUNhieuLinkShopee": suaTonSKUNhieuLinkShopee,
 			"layLinkChuaSKUShopee": layLinkChuaSKUShopee,
 			"themKyTuPhanLoaiShopee": themKyTuPhanLoaiShopee,
@@ -2229,6 +2230,7 @@
 								<option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
 								<option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
 								<option data-func="suaTenSKUShopee" data-layout="suaTenSKUShopeeLayout">Sửa Tên Phân Loại Theo SKU</option>
+								<option data-func="suaSKUTheoTenShopee" data-layout="suaSKUTheoTenShopeeLayout">Sửa SKU Theo Tên</option>
 								<option data-func="themKyTuPhanLoaiShopee" data-layout="themKyTuPhanLoaiShopeeLayout">Sửa Tên Phân Loại</option>
 								<option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
 								<option data-func="cTrinhKMShopee" data-layout="cTrinhKMShopeeLayout">Điều Chỉnh Chương Trình Khuyến Mãi</option>
@@ -3420,6 +3422,13 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "suaSKUTheoTenShopeeLayout":
+				content.append($(`
+						<div class="layout-tab">
+							<textarea id="data" placeholder="Mỗi phân loại là một hàng, trong đó:\n - Tên\n - SKU"></textarea>
+						</div>
+				`))
+				break;
 			case "suaTenSKUShopeeLayout":				
 				content.append($(`
 					<div class="layout-tab">
@@ -10355,7 +10364,6 @@
 						return this.nodeType === 3;
 					})[0]?.nodeValue.trim();
 
-					console.log("SS: " + skuBox.val().includes(sku), skuBox.val(), sku);
 					if(skuBox.val().includes(sku)){
 						var last_name = box.eq(indexBoxDetail).find("input").val();
 						if(last_name != name){
@@ -10373,6 +10381,57 @@
 					nextBoxDetail();
 				}
 
+				nextBoxDetail();
+
+				indexData++;
+				nextData();
+			}
+
+			nextData();
+		}
+
+		// Thêm SKU theo tên phân loại
+		function suaSKUTheoTenShopee(){
+			var data = $(".tp-container.tp-content .layout-future #data").val();
+
+			data = data.split("\n");
+
+			var indexData = 0;
+			function nextData(){
+				if(indexData >= data.length){
+					return;
+				}
+
+				var line = data[indexData].split("\t");
+				var name = line[0];
+				var sku = line[1];
+
+				var boxDetail = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+				var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+				var indexBoxDetail = 0;
+				function nextBoxDetail(){
+					if(indexBoxDetail >= boxDetail.length){
+						return;
+					}
+
+					var skuBox = boxDetail.eq(indexBoxDetail).find(".table-cell .sku-textarea textarea");
+					var nameBox = boxLeft.eq(indexBoxDetail).find(".table-cell")
+					var variantName = nameBox.contents().filter(function(){
+						return this.nodeType === 3;
+					})[0]?.nodeValue.trim();
+
+					if(variantName.includes(name)){
+						simulateClearReactInput(skuBox);
+						simulateReactInput(skuBox, sku);
+						boxDetail.eq(indexBoxDetail).css("background", "lightgreen");
+						boxLogging(`Đã thêm SKU ${sku} cho ${variantName}`, [`${sku}`, `${variantName}`], ["green"]);
+					}
+
+					indexBoxDetail++;
+					nextBoxDetail();
+				}
+				
 				nextBoxDetail();
 
 				indexData++;
