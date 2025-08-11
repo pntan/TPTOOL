@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.6.0";
+	const VERSION = "2.7.0";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -185,19 +185,20 @@
 			"kiemTraMaPhanLoaiShopee": kiemTraMaPhanLoaiShopee,
 			"suaGiaSKUShopee": suaGiaSKUShopee,
 			"suaHinhSKUShopee": suaHinhSKUShopee,
+			"suaTenSKUShopee": suaTenSKUShopee,
 			"suaTonSKUNhieuLinkShopee": suaTonSKUNhieuLinkShopee,
 			"layLinkChuaSKUShopee": layLinkChuaSKUShopee,
 			"themKyTuPhanLoaiShopee": themKyTuPhanLoaiShopee,
 			"comboKMShopee": comboKMShopee,
 			"cTrinhKMShopee": cTrinhKMShopee,
 			"kiemTraPhanLoaiShopee": kiemTraPhanLoaiShopee,
-			"themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
 			"layPhanLoaiShopee": layPhanLoaiShopee,
 			"layIDSanPhamShopee": layIDSanPhamShopee,
 			"tichGTN": tichGTN,
 			"layAnhFullSizeShopee": layAnhFullSizeShopee,
 			"saoChepPhanLoaiShopee": saoChepPhanLoaiShopee,
-			// "themPhanLoaiShopee": themPhanLoaiShopee,
+			"themPhanLoaiShopee": themPhanLoaiShopee,
+			// "themPhanLoaiNhieuLinkShopee": themPhanLoaiNhieuLinkShopee,
 			// "giaDuoiChuongTrinhShopee": giaDuoiChuongTrinhShopee,
 			// //"keoPhanLoaiShopee": keoPhanLoaiShopee,
 			// //"batKhuyenMaiShopee": batKhuyenMaiShopee,
@@ -1645,7 +1646,7 @@
 				const voices = window.speechSynthesis.getVoices();
 				const selectedVoice = voices.find(voice => voice.lang === lang);
 				if (selectedVoice) {
-				    utterance.voice = selectedVoice;
+					utterance.voice = selectedVoice;
 				}else
 					return false;
 
@@ -2227,11 +2228,12 @@
 								<option data-func="kiemTraMaPhanLoaiShopee">Hiển Thị Mã Phân Loại</option>
 								<option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
 								<option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
+								<option data-func="suaTenSKUShopee" data-layout="suaTenSKUShopeeLayout">Sửa Tên Phân Loại Theo SKU</option>
 								<option data-func="themKyTuPhanLoaiShopee" data-layout="themKyTuPhanLoaiShopeeLayout">Sửa Tên Phân Loại</option>
 								<option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
 								<option data-func="cTrinhKMShopee" data-layout="cTrinhKMShopeeLayout">Điều Chỉnh Chương Trình Khuyến Mãi</option>
+								<option data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option>
 								<option data-func="kiemTraPhanLoaiShopee" data-layout="kiemTraPhanLoaiShopeeLayout">Kiểm Tra Phân Loại</option>
-								<option data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại</option>
 								<option data-func="layPhanLoaiShopee" data-layout="layPhanLoaiShopeeLayout">Lấy Phân Loại</option>
 								<option data-func="layIDSanPhamShopee" data-layout="layIDSanPhamShopeeLayout">Lấy ID Sản Phẩm</option>
 								<option data-func="layLinkChuaSKUShopee" data-layout="layLinkChuaSKUShopeeLayout">Lấy Link Chứa SKU</option>
@@ -2240,8 +2242,8 @@
 								<option data-func="tichGTN">Tích Chọn GTN</option>
 								<option data-func="layAnhFullSizeShopee" data-layout="layAnhFullSizeShopeeLayout">Lấy Ảnh Full Kích Thước</option>
 								<option data-func="saoChepPhanLoaiShopee" data-layout="saoChepPhanLoaiShopeeLayout">Sao Chép Phân Loại</option>
+								<option disabled data-func="themPhanLoaiNhieuLinkShopee" data-layout="themPhanLoaiNhieuLinkShopeeLayout">Thêm Phân Loại Nhiều Link</option>
 								<option disabled data-func="giaDuoiChuongTrinhShopee" data-layout="giaDuoiChuongTrinhShopeeLayout">Cập Nhật Giá Đăng Ký Chương Trình</option>
-								<!-- <option disabled data-func="themPhanLoaiShopee" data-layout="themPhanLoaiShopeeLayout">Thêm Phân Loại</option> -->
 								<!-- <option disabled data-func="keoPhanLoaiShopee" data-layout="keoPhanLoaiShopeeLayout">Kéo Phân Loại</option> -->
 							</optgroup>
 
@@ -3418,10 +3420,29 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
+			case "suaTenSKUShopeeLayout":				
+				content.append($(`
+					<div class="layout-tab">
+						<textarea id="data" placeholder="Mỗi phân loại là một hàng, trong đó:\n - SKU\n - Tên Phân Loại\nSố lượng ký tự sẽ được đếm tự động không cần quan tâm"></textarea>
+					</div>
+				`));
+				setEventSuaTenSKUShopee();
+				break;
 			case "saoChepPhanLoaiShopeeLayout":
 				content.append($(`
 					<div class="layout-tab">
 						<textarea id="data" placeholder="SKU cần sao chép"></textarea>
+					</div>
+				`));
+				break;
+			case "themPhanLoaiShopeeLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<select id="group">
+							<option>Phân Loại 1</option>
+							<option>Phân Loại 2</option>
+						</select>
+						<textarea id="data"></textarea>
 					</div>
 				`));
 				break;
@@ -5597,6 +5618,121 @@
 			$(".tp-container.tp-content .layout-future .layout-tab #reporting").on("click", () => {
 				baoCaoThemPhanLoai();
 			})
+		}
+
+		// Thêm phân loại 1 link
+		function themPhanLoaiShopee(){
+			var group = $(".tp-container .content-layout .layout-tab #group").find("option:selected").index();
+			//var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
+			var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item");
+
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data");
+			var array = data.val().split("\n");
+
+				var arrayData = [], arraySku = [];
+
+				$.each(array, (index, value) => {
+					value = value.split("\t");
+					arrayData.push(value[0]);
+					arraySku.push(value[1]);
+				});
+
+				var currentPos = 0;
+
+			function writeValue(){
+				if(currentPos >= arrayData.length){
+					boxLogging(`Đã thêm phân loại, đang dò SKU...`, [`Đã thêm phân loại, đang dò SKU...`], ["orange"])
+					themSKUTheoPhanLoaiShopee(data);
+					return;
+				}
+
+				var inputBox = box.eq(box.length - 1).find("input").trigger("input");
+
+				inputBox.select();
+				inputBox.attr("modelValue", arrayData[currentPos]);
+				inputBox.val(arrayData[currentPos]);
+
+				if (window.getSelection) {
+					window.getSelection().removeAllRanges();
+				}else if (document.selection) {
+					document.selection.empty();
+				}
+
+				if ("createEvent" in document) {
+					var evt = document.createEvent("HTMLEvents");
+					evt.initEvent("input", false, true);
+					$(inputBox).get(0).dispatchEvent(evt);
+				}
+				else {
+					$(inputBox).get(0).fireEvent("oninput");
+				}
+
+				currentPos++;
+
+				setTimeout(writeValue, 500);
+			}
+			writeValue();
+		}
+
+		// Thêm SKU theo tên phân loại shopee
+		function themSKUTheoPhanLoaiShopee(){
+			var data = $(".tp-container.tp-content .layout-future .layout-tab #data");
+
+			var array = $(data).val().split("\n");
+
+			var arrayData = [], arraySku = [];
+
+			$.each(array, (index, value) => {
+				value = value.split("\t");
+				arrayData.push(value[0]);
+				arraySku.push(value[1]);
+			});
+
+			var currentPos = 0;
+			var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+			var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+			function writeValue(){
+				if(currentPos >= box.length){
+					boxLogging(`Đã thêm SKU`, [`Đã thêm SKU`], ["green"]);
+					return;
+				}
+
+				var name = boxLeft.eq(currentPos).find(".table-cell.first-variation-cell")
+				var nameProduct = name.contents()
+					.filter(function() {
+						return this.nodeType === 3; // chỉ lấy text thuần
+					})[0]?.nodeValue.trim();
+				var skuBox = box.eq(currentPos).find(".table-cell").eq(2).find("textarea");
+				var priceBox = box.eq(currentPos).find(".table-cell").eq(0).find("input");
+
+
+				if(arrayData.includes(nameProduct)){
+					var pos = arrayData.indexOf(nameProduct);
+					skuBox.attr("modelValue", arraySku[pos]);
+					skuBox.val(arraySku[pos]).trigger("input");
+
+					if (window.getSelection) {
+						window.getSelection().removeAllRanges();
+					}else if (document.selection) {
+						document.selection.empty();
+					}
+
+					if ("createEvent" in document) {
+						var evt = document.createEvent("HTMLEvents");
+						evt.initEvent("input", false, true);
+						$(skuBox).get(0).dispatchEvent(evt);
+					}
+					else {
+						$(skuBox).get(0).fireEvent("oninput");
+					}
+				}
+
+				currentPos++;
+
+				setTimeout(writeValue, 10);
+			}
+			writeValue();
 		}
 
 		// Thêm phân loại hàng loạt
@@ -10106,9 +10242,9 @@
 
 				var nameBox = $(boxLeft).eq(i).find(".table-cell");
 				var variantName = nameBox.contents()
-                    .filter(function() {
-                        return this.nodeType === 3; // chỉ lấy text thuần
-                    })[0]?.nodeValue.trim();
+					.filter(function() {
+						return this.nodeType === 3; // chỉ lấy text thuần
+					})[0]?.nodeValue.trim();
 
 				console.log(boxLeft.eq(i), i, nameBox, variantName);
 				
@@ -10154,6 +10290,96 @@
 			}
 			
 			boxAlert("Hoàn tất sao chép phân loại Shopee!");
+		}
+
+		function setEventSuaTenSKUShopee(){
+			$(".tp-container.tp-content .layout-future #data").on("change", function(){
+				var data = $(this).val();
+
+				var formatData;
+
+				data = data.split("\n");
+
+				$.each(data, (index, value) => {
+					value = value.split("\t");
+
+					var len = value[value.length - 1].length;
+
+					data[index] += `\t(${len})`;
+
+					formatData = data;
+				})
+
+				formatData = formatData.join("\n");
+
+				$(this).val(formatData);
+			})
+
+		}
+
+		function suaTenSKUShopee(){
+			var data = $(".tp-container.tp-content .layout-future #data").val();
+
+			data = data.split("\n");
+
+			var indexData = 0;
+			function nextData(){
+				if(indexData >= data.length){
+					return;
+				}
+				var current_data = data[indexData].split("\t");
+				var sku = current_data[0];
+				var name = current_data[1];
+				var len = current_data[2];
+
+				if(len > 20){
+					boxLogging("Số ký tự vượt quá giới hạn cho phép", ["Số ký tự vượt quá giới hạn cho phép"], ["crimson"]);
+					indexData++;
+					nextData();
+					return;
+				}
+
+				var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item");
+				var boxDetail = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+				var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+
+				var indexBoxDetail = 0;
+				function nextBoxDetail(){
+					if(indexBoxDetail >= boxDetail.length){
+						return;
+					}
+
+					var skuBox = boxDetail.eq(indexBoxDetail).find(".table-cell .sku-textarea textarea");
+					var nameBox = boxLeft.eq(indexBoxDetail).find(".table-cell")
+					var variantName = nameBox.contents().filter(function(){
+						return this.nodeType === 3;
+					})[0]?.nodeValue.trim();
+
+					console.log("SS: " + skuBox.val().includes(sku), skuBox.val(), sku);
+					if(skuBox.val().includes(sku)){
+						var last_name = box.eq(indexBoxDetail).find("input").val();
+						if(last_name != name){
+							simulateClearReactInput(box.eq(indexBoxDetail).find("input"));
+							simulateReactInput(box.eq(indexBoxDetail).find("input"), name);
+							box.eq(indexBoxDetail).find("input").css("background", "lightgreen");
+							boxLogging(`Đã sửa tên cho SKU ${sku} | ${last_name} thành ${name}`, [`${sku}`, last_name, name], ["green", "green", "green"]);
+						}else{
+							box.eq(indexBoxDetail).find("input").css("background", "orange");
+							boxLogging(`Giữ nguyên tên ${last_name} cho SKU ${sku}`, [`${sku}`, last_name], ["orange", "orange"]);
+						}
+					}
+
+					indexBoxDetail++;
+					nextBoxDetail();
+				}
+
+				nextBoxDetail();
+
+				indexData++;
+				nextData();
+			}
+
+			nextData();
 		}
 
 		// Chat với AI
