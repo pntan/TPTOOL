@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.8.0";
+	const VERSION = "2.11.1";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -180,13 +180,11 @@
 			// --- SHOPEE
 			"giaDuoiShopee": giaDuoiShopee,
 			"kTr5LanGiaShopee": kTr5LanGiaShopee,
-			"tinhGiaBan": tinhGiaBan,
 			"flashSaleShopee": flashSaleShopee,
 			"kiemTraMaPhanLoaiShopee": kiemTraMaPhanLoaiShopee,
 			"suaGiaSKUShopee": suaGiaSKUShopee,
 			"suaHinhSKUShopee": suaHinhSKUShopee,
-			"suaTenSKUShopee": suaTenSKUShopee,			
-			"suaSKUTheoTenShopee": suaSKUTheoTenShopee,
+			"suaTenSKUShopee": suaTenSKUShopee,
 			"suaTonSKUNhieuLinkShopee": suaTonSKUNhieuLinkShopee,
 			"layLinkChuaSKUShopee": layLinkChuaSKUShopee,
 			"themKyTuPhanLoaiShopee": themKyTuPhanLoaiShopee,
@@ -236,6 +234,10 @@
 			"compareVoucher": compareVoucher,
 			"moLink": moLink,
 			"kiemTraDon": kiemTraDon,
+			"tinhGiaBan": tinhGiaBan,
+			"tinhGiaTruocKM": tinhGiaTruocKM,
+			"gopGiaBan": gopGiaBan,
+			"tachGiaBan": tachGiaBan,
 		};
 
 		const actionOnlineMap = {
@@ -1017,77 +1019,74 @@
 			return {gia, giaDau, giaDuoi};
 		}
 
-		// Gộp giá
+		/**
+		 * Gộp giá trị với cơ chế làm tròn và giới hạn số chữ số, ưu tiên phần giá sau.
+		 * @param {string | number} beforePrice Giá trị cũ.
+		 * @param {string | number} afterPrice Giá trị mới.
+		 * @returns {{ giaTruoc: string, giaSau: string, gia: string }}
+		 */
 		function gopGia(beforePrice, afterPrice){
-			afterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-			beforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			// 1. Chuẩn hóa giá trị đầu vào thành số nguyên
+			const parsedBeforePrice = parseInt(beforePrice.toString().replace(/[,.]/g, ''), 10);
+			const parsedAfterPrice = parseInt(afterPrice.toString().replace(/[,.]/g, ''), 10);
 
-			var giaTruoc = beforePrice, giaSau = afterPrice;
-
-			var len = beforePrice.split(",").length;
-			var dong = 0, arrayTien = [], tienTruoc = 0, tienSau = 0;
-			arrayTien = beforePrice.split(",");
-			dong = arrayTien[arrayTien.length - 1];
-			for(var i = 0; i < arrayTien.length - 1; i++){
-				tienTruoc += arrayTien[i];
+			if (isNaN(parsedBeforePrice) || isNaN(parsedAfterPrice)) {
+				return null;
 			}
 
-			tienTruoc = parseInt(tienTruoc);
-			if(parseInt(dong) > 0)
-				tienTruoc += 1;
+			// 2. Tách phần giá đầu (hàng nghìn) và giá đuôi (3 chữ số cuối)
+			const beforeParts = {
+				giaDau: Math.floor(parsedBeforePrice / 1000),
+				giaDuoi: parsedBeforePrice % 1000
+			};
 
-			arrayTien = afterPrice.split(",");
-			dong = arrayTien[arrayTien.length - 1];
-			for(i = 0; i < arrayTien.length - 1; i++){
-				tienSau += arrayTien[i];
+			const afterParts = {
+				giaDau: Math.floor(parsedAfterPrice / 1000),
+				giaDuoi: parsedAfterPrice % 1000
+			};
+			
+			// 3. Áp dụng logic làm tròn lần đầu cho giá trước
+			let newGiaDau = beforeParts.giaDau;
+			if (beforeParts.giaDuoi > 0) {
+				newGiaDau += 1;
 			}
+			
+			// 4. Tạo giá trị tạm thời bằng cách nối giá đầu và giá sau
+			let rawMergedPrice = `${newGiaDau}${afterParts.giaDau}`;
+			
+			// 5. Kiểm tra giới hạn số chữ số và điều chỉnh
+			const beforePriceLength = parsedBeforePrice.toString().length;
+			const afterGiaDauString = afterParts.giaDau.toString();
+			const rawMergedPriceLength = rawMergedPrice.length;
+			let finalPriceString;
 
-			tienSau = parseInt(tienSau);
-			if(parseInt(dong) > 0)
-				tienSau += 1;
+			if (rawMergedPriceLength > beforePriceLength) {
+				// Nếu số chữ số bị tràn, ưu tiên giữ phần giá sau
+				const newBeforeGiaDauLength = beforePriceLength - afterGiaDauString.length;
+				let truncatedBeforeGiaDau = newGiaDau.toString().substring(0, newBeforeGiaDauLength);
 
-			afterPrice = tienSau + "000";
-			beforePrice = tienTruoc + "000";
-
-			var arrayBefore = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
-			var arrayAfter = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',').split(",");
-
-			var lastPrice = [], giaDau, giaDuoi;
-
-			for(i = 0; i < arrayBefore.length - 1; i++){
-				giaDau += arrayBefore[i];
-			}
-
-			for(i = 0; i < arrayAfter.length - 1; i++){
-				giaDuoi += arrayAfter[i];
-			}
-
-			giaDau = giaDau.substring(9);
-			giaDuoi = giaDuoi.substring(9);
-
-			lastPrice = beforePrice.split("");
-
-			$.each(lastPrice, (index, value) => {
-				lastPrice[index] = 0;
-			})
-
-			var flagDau, flagCuoi;
-
-			$.each(giaDau.split(""), (index, value) => {
-				lastPrice[index] = giaDau[index];
-				flagDau = index;
-			})
-
-			$.each(giaDuoi.split(""), (index, value) => {
-				if(lastPrice.length - giaDuoi.length + index == flagDau){
-					lastPrice[flagDau - 1] = parseInt(lastPrice[flagDau - 1]) + 1;
+				// Kiểm tra chữ số đầu tiên của phần giá sau để làm tròn lại phần đầu đã cắt
+				if (parseInt(afterGiaDauString[0], 10) > 0) {
+					truncatedBeforeGiaDau = (parseInt(truncatedBeforeGiaDau, 10)).toString();
 				}
-				lastPrice[lastPrice.length - giaDuoi.length + index] = giaDuoi[index];
-			})
+				
+				finalPriceString = `${truncatedBeforeGiaDau}${afterGiaDauString}`;
+				
+			} else {
+				// Nếu không bị tràn, lấy giá trị gộp ban đầu
+				finalPriceString = rawMergedPrice;
+			}
+			
+			// 6. Định dạng lại các giá trị để trả về
+			const formattedLastPrice = finalPriceString.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			const formattedBeforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			const formattedAfterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-			lastPrice = lastPrice.join("");
-
-			return {giaTruoc, giaSau, gia: lastPrice};
+			return {
+				giaTruoc: formattedBeforePrice,
+				giaSau: formattedAfterPrice,
+				gia: formattedLastPrice
+			};
 		}	
 		
 		/**
@@ -2230,7 +2229,6 @@
 								<option data-func="suaGiaSKUShopee" data-layout="suaGiaSKUShopeeLayout">Sửa Giá Theo SKU</option>
 								<option data-func="suaHinhSKUShopee" data-layout="suaHinhSKUShopeeLayout">Sửa Hình Theo SKU</option>
 								<option data-func="suaTenSKUShopee" data-layout="suaTenSKUShopeeLayout">Sửa Tên Phân Loại Theo SKU</option>
-								<option data-func="suaSKUTheoTenShopee" data-layout="suaSKUTheoTenShopeeLayout">Sửa SKU Theo Tên</option>
 								<option data-func="themKyTuPhanLoaiShopee" data-layout="themKyTuPhanLoaiShopeeLayout">Sửa Tên Phân Loại</option>
 								<option data-func="comboKMShopee" data-layout="comboKMShopeeLayout">Điều Chỉnh Combo Khuyến Mãi</option>
 								<option data-func="cTrinhKMShopee" data-layout="cTrinhKMShopeeLayout">Điều Chỉnh Chương Trình Khuyến Mãi</option>
@@ -2291,6 +2289,9 @@
 								<option data-func="compareVoucher" data-layout="compareVoucherLayout">So Sánh Voucher</option>
 								<option data-func="moLink" data-layout="moLinkLayout">Mở Link Hàng Loạt</option>
 								<option data-func="tinhGiaBan" data-layout="tinhGiaBanLayout">Tính Giá Bán</option>
+								<option data-func="tinhGiaTruocKM" data-layout="tinhGiaTruocKMLayout">Tính Giá Trước KM</option>
+								<option data-func="gopGiaBan" data-layout="gopGiaBanLayout">Gộp Giá Bán</option>
+								<option data-func="tachGiaBan" data-layout="tachGiabanLayout">Tách Giá Bán</option>
 								<!-- <option disabled data-func="autobrowser" data-layout="autobrowserLayout">Trình Duyệt Tự Động</option> -->
 							</optgroup>
 
@@ -3422,11 +3423,26 @@
 		var content = $(".layout-future.functionSelect");
 		$(".layout-tab").remove();
 		switch(layoutName){
-			case "suaSKUTheoTenShopeeLayout":
+			case "tachGiaBanLayout":
 				content.append($(`
 						<div class="layout-tab">
-							<textarea id="data" placeholder="Mỗi phân loại là một hàng, trong đó:\n - Tên\n - SKU"></textarea>
+							<textarea id="data" placeholder="Mỗi dòng là một giá cần tách giá đầu và đuôi"></textarea>
 						</div>
+				`))
+				break;
+			case "gopGiaBanLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<textarea id="data" placeholder="Mỗi dòng là một giá, trong đó\n - Giá trước KM\n - Giá sau KM"></textarea>
+					</div>
+				`))
+				break;
+			case "tinhGiaTruocKMLayout":
+				content.append($(`
+					<div class="layout-tab">
+						<input type="number" id="percent" placeholder="Nhập phần trăm muốn tăng, mặc định là 30%" />
+						<textarea id="data" placeholder="Mỗi dòng là một giá đuôi"></textarea>
+					</div>
 				`))
 				break;
 			case "suaTenSKUShopeeLayout":				
@@ -4953,6 +4969,7 @@
 
 		// Sửa giá theo SKU sản phẩm
 		function suaGiaSKUShopee(){
+			boxAlert("SỬA GIÁ THEO SKU")
 			var type = $(".tp-container.tp-content #type option:selected");
 			type = type.data("type");
 
@@ -4980,8 +4997,11 @@
 									box.eq(index).css("background", "crimson");
 								}else{
 									priceBox.val(gia);
-									simulateReactEvent($(priceBox), "input");
-									box.eq(index).css("background", "lightgreen");
+									
+									simulateClearReactInput($(priceBox));
+									simulateReactInput($(priceBox), editPrice.gia);
+									// simulateReactEvent($(priceBox), "input");
+									// box.eq(index).css("background", "lightgreen");
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${priceBox1} thành ${gia1}`, [`${skuBox.val()}`, `${priceBox1}`, `${gia1}`], ["lightgreen", "orange", "orange"]);
 								}
 							}
@@ -5008,12 +5028,16 @@
 								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
 									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
 									box.eq(index).css("background", "orange");
-									priceBox.val(editPrice.gia);
-									simulateReactEvent($(priceBox), "input");
+									simulateClearReactInput($(priceBox));
+									simulateReactInput($(priceBox), editPrice.gia);
+									// priceBox.val(editPrice.gia);
+									// simulateReactEvent($(priceBox), "input");
 								}else{
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
-									priceBox.val(editPrice.gia);
-									simulateReactEvent($(priceBox), "input");
+									simulateClearReactInput($(priceBox));
+									simulateReactInput($(priceBox), editPrice.gia);
+									// priceBox.val(editPrice.gia);
+									// simulateReactEvent($(priceBox), "input");
 									box.eq(index).css("background", "lightgreen");
 								}
 							}
@@ -5040,12 +5064,16 @@
 								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
 									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
 									box.eq(index).css("background", "orange");
-									priceBox.val(editPrice.gia);
-									simulateReactEvent($(priceBox), "input");
+									simulateClearReactInput($(priceBox));
+									simulateReactInput($(priceBox), editPrice.gia);
+									// priceBox.val(editPrice.gia);
+									// simulateReactEvent($(priceBox), "input");
 								}else{
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
-									priceBox.val(editPrice.gia);
-									simulateReactEvent($(priceBox), "input");
+									simulateClearReactInput($(priceBox));
+									simulateReactInput($(priceBox), editPrice.gia);
+									// priceBox.val(editPrice.gia);
+									// simulateReactEvent($(priceBox), "input");
 									box.eq(index).css("background", "lightgreen");
 								}
 							}
@@ -10364,6 +10392,7 @@
 						return this.nodeType === 3;
 					})[0]?.nodeValue.trim();
 
+					console.log("SS: " + skuBox.val().includes(sku), skuBox.val(), sku);
 					if(skuBox.val().includes(sku)){
 						var last_name = box.eq(indexBoxDetail).find("input").val();
 						if(last_name != name){
@@ -10390,49 +10419,85 @@
 			nextData();
 		}
 
-		// Thêm SKU theo tên phân loại
-		function suaSKUTheoTenShopee(){
+		// Tính giá bán trước KM
+		function tinhGiaTruocKM(){
+			boxAlert("TÍNH GIÁ TRƯỚC KHUYẾN MÃI");
+			var percent = $(".tp-container.tp-content .layout-future #percent").val()
+
+			if(percent.length <= 0)
+				percent = 30;
+
+			percent = parseFloat(percent);
+
 			var data = $(".tp-container.tp-content .layout-future #data").val();
 
 			data = data.split("\n");
 
+			console.log(percent);
+			console.log(data);
+
+			var data_list = [];
+
 			var indexData = 0;
 			function nextData(){
 				if(indexData >= data.length){
+					navigator.clipboard.writeText(data_list.join("\n"));
+					return;
+				}
+
+				data_list.push(parseInt(data[indexData] * (1 + percent / 100)));
+
+				indexData++;
+				nextData();
+			}
+
+			nextData();
+		}
+
+		// Gộp giá bán
+		function gopGiaBan(){
+			var data = $(".tp-container.tp-content .layout-future #data").val().split("\n");
+
+			var data_list = [];
+
+			var indexData = 0;
+			function nextData(){
+				if(indexData >= data.length){
+					navigator.clipboard.writeText(data_list.join("\n"));
 					return;
 				}
 
 				var line = data[indexData].split("\t");
-				var name = line[0];
-				var sku = line[1];
+				var giaTruoc = line[0];
+				var giaSau = line[1];
 
-				var boxDetail = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
-				var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+				data_list.push(gopGia(giaTruoc, giaSau).gia);
 
-				var indexBoxDetail = 0;
-				function nextBoxDetail(){
-					if(indexBoxDetail >= boxDetail.length){
-						return;
-					}
+				indexData++;
+				nextData();
+			}
 
-					var skuBox = boxDetail.eq(indexBoxDetail).find(".table-cell .sku-textarea textarea");
-					var nameBox = boxLeft.eq(indexBoxDetail).find(".table-cell")
-					var variantName = nameBox.contents().filter(function(){
-						return this.nodeType === 3;
-					})[0]?.nodeValue.trim();
+			nextData();
+		}
 
-					if(variantName.includes(name)){
-						simulateClearReactInput(skuBox);
-						simulateReactInput(skuBox, sku);
-						boxDetail.eq(indexBoxDetail).css("background", "lightgreen");
-						boxLogging(`Đã thêm SKU ${sku} cho ${variantName}`, [`${sku}`, `${variantName}`], ["green"]);
-					}
+		// Tách giá bán
+		function tachGiaBan(){
+			var data = $(".tp-container.tp-content .layout-future #data").val().split("\n");
 
-					indexBoxDetail++;
-					nextBoxDetail();
+			var data_list = [];
+
+			var indexData = 0;
+			function nextData(){
+				if(indexData >= data.length){
+					navigator.clipboard.writeText(data_list.join("\n"));
+					return;
 				}
-				
-				nextBoxDetail();
+
+				var gia_tach = tachGia(data[indexData]);
+				var giaDau = gia_tach.giaDau;
+				var giaDuoi = gia_tach.giaDuoi;
+
+				data_list.push({giaDau, giaDuoi});
 
 				indexData++;
 				nextData();
