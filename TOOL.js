@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.11.1";
+	const VERSION = "2.11.2";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -1078,9 +1078,13 @@
 			}
 			
 			// 6. Định dạng lại các giá trị để trả về
-			const formattedLastPrice = finalPriceString.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-			const formattedBeforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-			const formattedAfterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			// const formattedLastPrice = finalPriceString.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			// const formattedBeforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			// const formattedAfterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+			const formattedLastPrice = finalPriceString.toString();
+			const formattedBeforePrice = beforePrice.toString();
+			const formattedAfterPrice = afterPrice.toString();
 
 			return {
 				giaTruoc: formattedBeforePrice,
@@ -5014,6 +5018,8 @@
 								var giaDuoi = gia;
 
 								var editPrice = gopGia(giaDau, giaDuoi);
+
+								console.log(editPrice);
 
 								if(parseInt(editPrice.gia) > parseInt(price.gia)){
 									giaDau = parseInt(giaDau) - 1000;
