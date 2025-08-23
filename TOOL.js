@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.11.2";
+	const VERSION = "2.11.3";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -984,114 +984,103 @@
 		}
 
 
-		// Tách giá
-		function tachGia(price){
-			var gia = price.toString().replace(",", "");
-			gia = gia.replace(".", "");
-			gia = gia.trim();
-			//boxAlert(gia);
-			var mid = Math.ceil(gia.length / 2);
-			var du = Math.floor(gia.length % 2);
+		function gopGia(giaDau, giaDuoi) {
+			// Chuẩn hóa đầu vào
+			if (giaDau == null || giaDuoi == null) return null;
+			var sD = String(Math.abs(Math.trunc(giaDau)));
+			var sA = String(Math.abs(Math.trunc(giaDuoi)));
+			var L = sD.length;
 
-			var giaDau = gia.slice(0, mid - du);
-			var giaDuoi = gia.slice(mid - du);
+			// 1) Lấy prefix ban đầu (floor(len/2)), tối thiểu 2 chữ số
+			let prefixLen = Math.floor(L / 2);
+			if (prefixLen < 2) prefixLen = Math.min(2, L); // không vượt quá L
+			let prefixStr = sD.slice(0, prefixLen);
+			var rightOfPrefix = sD.slice(prefixLen); // phần còn lại của giaDau
 
-			var lastDau = parseInt(giaDau);
-			var lastDuoi = parseInt(giaDuoi);
+			// 2) Nếu phần còn lại có chữ số khác 0 thì +1 cho prefix
+			var hasNonZeroInRight = /[1-9]/.test(rightOfPrefix);
+			let prefixNum = prefixStr ? parseInt(prefixStr, 10) : 0;
+			if (hasNonZeroInRight) prefixNum = prefixNum + 1;
 
-			giaDau = lastDau.toString().padEnd(gia.length, "0");
-			giaDuoi = lastDuoi.toString().padEnd(gia.length, "0");
-			while(parseInt(giaDau) < parseInt(giaDuoi) && giaDau.length <= giaDau.length){
-				giaDuoi = giaDuoi.split("");
-				giaDuoi.pop();
-				giaDuoi = giaDuoi.join("");
+			// 3) Lấy suffix = giaDuoi bỏ trailing zeros
+			let suffix = sA.replace(/000$/,'');
+			if (suffix === '') suffix = '0';
+
+			// 4) Lặp điều chỉnh cho tới khi vừa (có guard để tránh vòng vô hạn)
+			let guard = 0;
+			while ((prefixNum.toString().length + suffix.length) > L && guard < 200) {
+			guard++;
+			var totalLen = prefixNum.toString().length + suffix.length;
+			var over = totalLen - L;
+
+			// Thử cắt prefix nếu có thể (phải giữ >= 2 chữ số)
+			var prefixCurStr = prefixNum.toString();
+			if (prefixCurStr.length - over >= 2) {
+				// Bỏ over chữ số cuối của prefix, rồi +1 (làm tròn như bạn yêu cầu)
+				var newPref = prefixCurStr.slice(0, -over);
+				prefixNum = (parseInt(newPref, 10) || 0) + 1;
+				continue; // kiểm tra lại
 			}
 
-			var giaCuoi = giaDuoi;
+			// Nếu không cắt được prefix (đã còn 2 chữ số) -> cắt suffix từ phải qua trái
+			// Cho tới khi vừa hoặc suffix chỉ còn 1 chữ số
+			while ((prefixNum.toString().length + suffix.length) > L && suffix.length > 1) {
+				suffix = suffix.slice(0, -1);
+			}
+			// Sau khi cắt xong, làm tròn suffix lên +1
+			suffix = String((parseInt(suffix, 10) || 0) + 1);
 
-			//giaDau = giaDau.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-			//giaDuoi = giaDuoi.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-			//gia = gia.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+			// Sau khi tăng suffix có thể làm phát sinh overflow (tăng độ dài suffix)
+			// -> vòng while bên ngoài sẽ kiểm tra lại và tiếp tục điều chỉnh nếu cần
+			}
 
-			//boxAlert(giaDuoi);
-			//boxLogging(`Giá Gốc ${gia} => Giá Đuôi ${giaDuoi}`, [`${gia}`, `${giaDuoi}`], ["green", "yellow"]);
+			if (guard >= 200) {
+			// Không thể điều chỉnh trong giới hạn hợp lý
+			throw new Error('Không thể gộp theo quy tắc (vòng lặp vượt guard)');
+			}
 
-			return {gia, giaDau, giaDuoi};
+			// 5) Ghép lại: prefix padEnd tới độ dài ban đầu và cộng suffix
+			var prefixPad = prefixNum.toString().padEnd(L, '0'); // ví dụ '173' -> '173000'
+			var result = parseInt(prefixPad, 10) + parseInt(suffix, 10);
+
+			return {giaDau: giaDau.toString(), giaDuoi: giaDuoi.toString(), gia: result.toString()};
 		}
 
-		/**
-		 * Gộp giá trị với cơ chế làm tròn và giới hạn số chữ số, ưu tiên phần giá sau.
-		 * @param {string | number} beforePrice Giá trị cũ.
-		 * @param {string | number} afterPrice Giá trị mới.
-		 * @returns {{ giaTruoc: string, giaSau: string, gia: string }}
-		 */
-		function gopGia(beforePrice, afterPrice){
-			// 1. Chuẩn hóa giá trị đầu vào thành số nguyên
-			const parsedBeforePrice = parseInt(beforePrice.toString().replace(/[,.]/g, ''), 10);
-			const parsedAfterPrice = parseInt(afterPrice.toString().replace(/[,.]/g, ''), 10);
+		// Tách giá trị thành giá đầu và giá đuôi theo cơ chế gộp
+		function tachGia(price) {
+			// 1. Chuẩn hóa input
+			var gia = price.toString().replace(/[,.]/g, "").trim();
 
-			if (isNaN(parsedBeforePrice) || isNaN(parsedAfterPrice)) {
-				return null;
-			}
+			// 2. Xác định điểm chia ban đầu
+			var flag = Math.ceil(gia.length / 2);
 
-			// 2. Tách phần giá đầu (hàng nghìn) và giá đuôi (3 chữ số cuối)
-			const beforeParts = {
-				giaDau: Math.floor(parsedBeforePrice / 1000),
-				giaDuoi: parsedBeforePrice % 1000
-			};
-
-			const afterParts = {
-				giaDau: Math.floor(parsedAfterPrice / 1000),
-				giaDuoi: parsedAfterPrice % 1000
-			};
-			
-			// 3. Áp dụng logic làm tròn lần đầu cho giá trước
-			let newGiaDau = beforeParts.giaDau;
-			if (beforeParts.giaDuoi > 0) {
-				newGiaDau += 1;
-			}
-			
-			// 4. Tạo giá trị tạm thời bằng cách nối giá đầu và giá sau
-			let rawMergedPrice = `${newGiaDau}${afterParts.giaDau}`;
-			
-			// 5. Kiểm tra giới hạn số chữ số và điều chỉnh
-			const beforePriceLength = parsedBeforePrice.toString().length;
-			const afterGiaDauString = afterParts.giaDau.toString();
-			const rawMergedPriceLength = rawMergedPrice.length;
-			let finalPriceString;
-
-			if (rawMergedPriceLength > beforePriceLength) {
-				// Nếu số chữ số bị tràn, ưu tiên giữ phần giá sau
-				const newBeforeGiaDauLength = beforePriceLength - afterGiaDauString.length;
-				let truncatedBeforeGiaDau = newGiaDau.toString().substring(0, newBeforeGiaDauLength);
-
-				// Kiểm tra chữ số đầu tiên của phần giá sau để làm tròn lại phần đầu đã cắt
-				if (parseInt(afterGiaDauString[0], 10) > 0) {
-					truncatedBeforeGiaDau = (parseInt(truncatedBeforeGiaDau, 10)).toString();
+			function kiemTraGia(flag) {
+				if (flag < 2) {
+					// prefix tối thiểu 2 số
+					return {
+						gia: gia,
+						giaDau: parseInt(gia.slice(0, 2).padEnd(gia.length, "0")),
+						giaDuoi: parseInt(gia.slice(2).padEnd(gia.length, "0"))
+					};
 				}
-				
-				finalPriceString = `${truncatedBeforeGiaDau}${afterGiaDauString}`;
-				
-			} else {
-				// Nếu không bị tràn, lấy giá trị gộp ban đầu
-				finalPriceString = rawMergedPrice;
+
+				var gia_dau_tam = parseInt(gia.slice(0, flag).padEnd(gia.length, "0"));
+				var gia_duoi_tam = parseInt(gia.slice(flag).padEnd(gia.length, "0"));
+
+				if (gia_dau_tam < gia_duoi_tam) {
+					return kiemTraGia(flag - 1);
+				} else {
+						return {
+							gia: gia.toString(),
+							giaDau: gia_dau_tam.toString(),
+							giaDuoi: gia_duoi_tam.toString()
+						};
+				}
 			}
-			
-			// 6. Định dạng lại các giá trị để trả về
-			// const formattedLastPrice = finalPriceString.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-			// const formattedBeforePrice = beforePrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-			// const formattedAfterPrice = afterPrice.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-			const formattedLastPrice = finalPriceString.toString();
-			const formattedBeforePrice = beforePrice.toString();
-			const formattedAfterPrice = afterPrice.toString();
+			return kiemTraGia(flag);
+		}
 
-			return {
-				giaTruoc: formattedBeforePrice,
-				giaSau: formattedAfterPrice,
-				gia: formattedLastPrice
-			};
-		}	
 		
 		/**
 		 * Chuyển đổi một màu RGB hoặc RGBA thành định dạng Hex.
@@ -5003,7 +4992,7 @@
 									priceBox.val(gia);
 									
 									simulateClearReactInput($(priceBox));
-									simulateReactInput($(priceBox), editPrice.gia);
+									simulateReactInput($(priceBox), gia);
 									// simulateReactEvent($(priceBox), "input");
 									// box.eq(index).css("background", "lightgreen");
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${priceBox1} thành ${gia1}`, [`${skuBox.val()}`, `${priceBox1}`, `${gia1}`], ["lightgreen", "orange", "orange"]);
@@ -5018,8 +5007,6 @@
 								var giaDuoi = gia;
 
 								var editPrice = gopGia(giaDau, giaDuoi);
-
-								console.log(editPrice);
 
 								if(parseInt(editPrice.gia) > parseInt(price.gia)){
 									giaDau = parseInt(giaDau) - 1000;
