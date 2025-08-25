@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.11.3";
+	const VERSION = "2.11.4";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -5365,7 +5365,10 @@
 
 				await delay(200);
 
-				boxLogging(`Đã cập nhật giá đuôi cho ${name}`, [`${name}`], ["pink"]);
+				boxLogging(`Đã cập nhật giá đuôi cho ${name}`, [`${name}`], ["pink"]);			
+
+				indexRow++;
+				nextRow();
 
 				return;
 
@@ -5439,9 +5442,6 @@
 						boxLogging(`Đã cập nhật giá đuôi cho ${name}`, [`${name}`], ["pink"]);
 					}
 				}
-
-				indexRow++;
-				nextRow();
 			}
 			nextRow();
 		}
