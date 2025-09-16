@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.11.4";
+	const VERSION = "2.11.5";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -1759,7 +1759,9 @@
 						
 						$(".tp-inputfake").remove(); // Xóa các input giả trước đó
 						var el1 = $("[class ^= 'uploadContainer']");
-						var detailImg = $(el1).find("> div").eq(1).find("[class ^= 'uploadRender']");
+						var detailImg = $(el1).find("> div div[class ^= 'uploadRender']"); //.eq(1).find("[class ^= 'uploadRender']");
+
+						console.log(el1, detailImg);
 
 						$.each(detailImg, (index, value) => {
 							if(!detailImg.eq(index).find(".cursor-default .core-upload input[type='file']").length > 0){
@@ -7871,12 +7873,16 @@
 					return;
 				}
 
-				var box = $(".sc-dHntBn.hkbMon div div.flex.flex-row.relative");
+				var box = $("#sale_properties > div > div > div:nth-child(3) div div.flex.flex-row.relative");
 
 				var newBox = box.eq(box.length - 1).find("input");
 
+				console.log(box, newBox);
+
 				var imgBox = newBox.eq(0);
 				var nameBox = newBox.eq(1);
+
+				console.log(name[i], nameBox);
 
 				simulateReactInput(nameBox, name[i]);
 
@@ -8537,12 +8543,13 @@
 
 							simulateReactEvent(variant_action.find("> div[data-for^='tool-tip-handle'] > div"), "click");
 
-							await delay(200);
+							await delay(2000);
 
-							waitForElement($("body"), ".popup-select-product-body .popup-select-product-body .pspb-row", async (el) => {
+							waitForElement($("body"), ".popup-select-product-v2 .popup-select-product-body .pspb-row", async (el) => {
 								var el = $(".popup-select-product-v2");
+								console.log(el);
 
-								var headerInput = $(el).find('.popup-select-product-header input');
+								var headerInput = $(el).find('.popup-select-product-header input[class="popup-select-product-header-input"]');
 
 								var sku = currentSKU.sku != '' ? currentSKU.sku : "x0";
 
@@ -8551,7 +8558,7 @@
 
 								await delay(1500);
 
-								el = $(".popup-select-product-body .popup-select-product-body");
+								el = $(".popup-select-product-v2 .popup-select-product-body");
 
 								console.log(el.text());
 
@@ -8563,7 +8570,7 @@
 									await delay(2000);
 								}
 
-								var popupContents = $(".popup-select-product-body .pspb-row");
+								var popupContents = $(".popup-select-product-v2 .popup-select-product-body .pspb-row");
 
 								for(var popupContentsElement of popupContents){
 									var popContent = $(popupContentsElement);
@@ -9343,7 +9350,7 @@
 			for (let i = 0; i < tableRows.length; i++) {
 				var row = tableRows.eq(i);
 				var nameBox = row.find("td:nth-child(1) button");
-				var skuInput = row.find("td:nth-child(5) input");
+				var skuInput = row.find("td:nth-child(4) input");
 
 				if (skuInput.length > 0 && skuInput.val()) {
 					var skuValue = skuInput.val().trim().toUpperCase();
