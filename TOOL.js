@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.12.0";
+	const VERSION = "2.12.1";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -10528,6 +10528,13 @@
 				// Mở đoạn chat cuối cùng
 				var last_chat = list_chat.find("> div").eq(list_chat.find("> div").length - 2);
 
+				console.log(last_chat);
+
+				last_chat = last_chat.find("div");
+
+				simulateReactEvent($(last_chat), "mouseenter");
+				simulateReactEvent(last_chat, "mousedown");
+				simulateReactEvent(last_chat, "mouseup");
 				simulateReactEvent(last_chat, "click");
 			} else {
 				console.log("Không tìm thấy phần tử chat.");
