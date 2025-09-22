@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.11.5";
+	const VERSION = "2.12.0";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -1745,7 +1745,7 @@
 						$(el).click();
 						boxToast("Đã mở rộng danh sách phân loại");
 					});
-				}
+				}					
 			}else if(host.includes("tiktok.com")){ // Kiểm tra trang Tiktok
 				$("#tab-function optgroup[label='TikTok']").show(); // Hiển thị optgroup TikTok
 
@@ -10505,6 +10505,53 @@
 
 			nextData();
 		}
+
+		// Mở đoạn chat trễ nhất kế tiếp
+		async function openNextLastChat() {
+			// Lấy phần tử chứa danh sách chat
+			var list_chat = $("div[data-cy='webchat-conversation-body'] div[data-cy='webchat-conversation-list-wrapper'] div.shopee-react-checkbox-group div.ReactVirtualized__Grid__innerScrollContainer");
+
+			// Kiểm tra xem phần tử có tồn tại không để tránh lỗi
+			if (list_chat.length > 0) {
+				// Lấy chiều cao cuộn thực của phần tử DOM
+				var scrollHeight = list_chat[0].scrollHeight;
+
+				console.log(list_chat, list_chat.parent(), scrollHeight);
+
+				// Cuộn xuống cuối phần tử với hiệu ứng mượt
+				$(list_chat.parent()).animate({
+					scrollTop: scrollHeight
+				}, 800);
+
+				await delay(800);
+
+				// Mở đoạn chat cuối cùng
+				var last_chat = list_chat.find("> div").eq(list_chat.find("> div").length - 2);
+
+				simulateReactEvent(last_chat, "click");
+			} else {
+				console.log("Không tìm thấy phần tử chat.");
+			}
+		}
+
+		let lastControlPress = 0; // Lưu thời gian của lần nhấn Control trước đó
+		const doublePressDelay = 300; // Thời gian tối đa (ms) giữa hai lần nhấn
+
+		$(document).on("keydown", function(e) {
+			// Kiểm tra xem phím đang nhấn có phải là Control (Ctrl) không
+			if (e.key === "Shift") {
+				const currentTime = new Date().getTime(); // Lấy thời gian hiện tại
+				const timeDiff = currentTime - lastControlPress; // Tính khoảng thời gian giữa hai lần nhấn
+
+				// Kiểm tra xem khoảng thời gian có nhỏ hơn ngưỡng cho double press không
+				if (timeDiff < doublePressDelay) {
+					openNextLastChat(); // Gọi hàm khi phát hiện double press
+				}
+
+				// Cập nhật lại thời gian của lần nhấn Control gần nhất
+				lastControlPress = currentTime;
+			}
+		});
 
 		// Chat với AI
 		function aiChat(){
