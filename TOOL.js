@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.12.1";
+	const VERSION = "2.12.2";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -10508,36 +10508,45 @@
 
 		// Mở đoạn chat trễ nhất kế tiếp
 		async function openNextLastChat() {
-			// Lấy phần tử chứa danh sách chat
-			var list_chat = $("div[data-cy='webchat-conversation-body'] div[data-cy='webchat-conversation-list-wrapper'] div.shopee-react-checkbox-group div.ReactVirtualized__Grid__innerScrollContainer");
+			console.log(window.location.pathname);
+			if(window.location.pathname == "/new-webchat/conversations"){
+				// Lấy phần tử chứa danh sách chat
+				var list_chat = $("div[data-cy='webchat-conversation-body'] div[data-cy='webchat-conversation-list-wrapper'] div.shopee-react-checkbox-group div.ReactVirtualized__Grid__innerScrollContainer");
 
-			// Kiểm tra xem phần tử có tồn tại không để tránh lỗi
-			if (list_chat.length > 0) {
-				// Lấy chiều cao cuộn thực của phần tử DOM
-				var scrollHeight = list_chat[0].scrollHeight;
+				// Kiểm tra xem phần tử có tồn tại không để tránh lỗi
+				if (list_chat.length > 0) {
+					// Lấy chiều cao cuộn thực của phần tử DOM
+					var scrollHeight = list_chat[0].scrollHeight;
 
-				console.log(list_chat, list_chat.parent(), scrollHeight);
+					console.log(list_chat, list_chat.parent(), scrollHeight);
 
-				// Cuộn xuống cuối phần tử với hiệu ứng mượt
-				$(list_chat.parent()).animate({
-					scrollTop: scrollHeight
-				}, 800);
+					// Cuộn xuống cuối phần tử với hiệu ứng mượt
+					$(list_chat.parent()).animate({
+						scrollTop: scrollHeight
+					}, 800);
 
-				await delay(800);
+					await delay(800);
 
-				// Mở đoạn chat cuối cùng
-				var last_chat = list_chat.find("> div").eq(list_chat.find("> div").length - 2);
+					// Mở đoạn chat cuối cùng
+					var last_chat = list_chat.find("> div").eq(list_chat.find("> div").length - 2);
 
-				console.log(last_chat);
+					console.log(last_chat);
 
-				last_chat = last_chat.find("div");
+					last_chat = last_chat.find("div");
 
-				simulateReactEvent($(last_chat), "mouseenter");
-				simulateReactEvent(last_chat, "mousedown");
-				simulateReactEvent(last_chat, "mouseup");
-				simulateReactEvent(last_chat, "click");
-			} else {
-				console.log("Không tìm thấy phần tử chat.");
+					simulateReactEvent($(last_chat), "mouseenter");
+					simulateReactEvent(last_chat, "mousedown");
+					simulateReactEvent(last_chat, "mouseup");
+					simulateReactEvent(last_chat, "click");
+				} else {
+					console.log("Không tìm thấy phần tử chat.");
+				}
+			}else if(window.location.pathname == "/chat/inbox/current"){
+				var list_chat = $("div#chat-conversation-list > div > div > div > div > div");
+
+				list_chat = list_chat.find("> div:nth-child(1)");
+
+				simulateReactEvent(list_chat, "click");
 			}
 		}
 
