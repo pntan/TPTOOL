@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.12.2";
+	const VERSION = "2.12.3";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -10527,8 +10527,31 @@
 
 					await delay(800);
 
-					// Mở đoạn chat cuối cùng
+					// Mở đoạn chat đầu tiên
 					var last_chat = list_chat.find("> div").eq(list_chat.find("> div").length - 2);
+
+					var lengthChat = list_chat.find("> div").length - 2;
+					function findStartChat(){
+						if(lengthChat < 0){
+							return false;
+						}
+
+						console.log(list_chat.find("> div").eq(lengthChat), list_chat.find("> div").eq(lengthChat).css("height"));
+
+						if(list_chat.find("> div").eq(lengthChat).css("height") == "48px"){
+							console.log(list_chat.find("> div").eq(lengthChat).text());
+							if(list_chat.find("> div").eq(lengthChat).text().includes("Chưa phản hồi"))
+								return lengthChat += 1;
+						}
+
+						lengthChat--;
+						return findStartChat();
+					}
+
+					last_chat = findStartChat() || last_chat;
+
+
+					last_chat = list_chat.find("> div").eq(last_chat);
 
 					console.log(last_chat);
 
