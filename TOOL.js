@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.12.3";
+	const VERSION = "2.12.4";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -536,6 +536,92 @@
 				console.error('Lỗi khi xử lý file từ URL:', error);
 				return null;
 			}
+		}
+
+		/**
+		 * Áp dụng CSS một cách bền vững bằng cách sử dụng MutationObserver để chống lại Virtual DOM.
+		 * Chấp nhận: 1. Selector CSS (string), 2. Đối tượng jQuery, 3. Phần tử DOM thuần.
+		 *
+		 * @param {string|jQuery|HTMLElement} target - Selector CSS, Đối tượng jQuery, hoặc Phần tử DOM thuần.
+		 * @param {string} styleString - Chuỗi CSS style (ví dụ: 'background-color: red !important;').
+		 */
+		function applyStyleCSS(target, styleString) {
+				if (!target || !styleString) {
+						console.warn("applyPersistentCSS: Target hoặc Style String không hợp lệ.");
+						return;
+				}
+
+				let selector = null;
+
+				// --- Xác định Selector và Target ---
+				if (typeof target === 'string') {
+						// Trường hợp 1: Selector là chuỗi
+						selector = target;
+				} else if (target instanceof jQuery) {
+						// Trường hợp 2: Đối tượng jQuery
+						// Lấy selector từ jQuery object nếu có, hoặc tạo selector tạm thời
+						if (target.selector && target.selector !== '') {
+								selector = target.selector;
+						} else {
+								// Tạm thời chỉ áp dụng cho phần tử đầu tiên, sau đó quay lại DOM thuần
+								// Rất khó để theo dõi một jQuery object không có selector gốc.
+								console.warn("Target là jQuery object không có selector. Chỉ áp dụng một lần cho phần tử đầu tiên.");
+								
+								const el = target.get(0);
+								if (el) {
+										enforceStyleSingle(el, styleString);
+										return; // Không cần MutationObserver nếu chỉ áp dụng 1 lần
+								}
+								return;
+						}
+				} else if (target instanceof HTMLElement) {
+						// Trường hợp 3: Phần tử DOM thuần
+						// Tương tự, chỉ áp dụng cho phần tử này một lần.
+						enforceStyleSingle(target, styleString);
+						return; // Không cần MutationObserver
+				} else {
+						console.error("applyPersistentCSS: Target không phải là selector, jQuery object, hay DOM element.");
+						return;
+				}
+
+				// --- Hàm áp dụng style cho một phần tử DOM đơn lẻ ---
+				function enforceStyleSingle(el, style) {
+						if (!el.getAttribute('data-custom-style-applied')) {
+								const currentStyle = el.getAttribute('style') || '';
+								// Ghi đè hoặc thêm style mới, sử dụng !important
+								el.setAttribute('style', `${currentStyle.trim()}; ${style}`);
+								el.setAttribute('data-custom-style-applied', 'true');
+						}
+				}
+
+				// --- Hàm áp dụng style cho tất cả phần tử khớp selector ---
+				function enforceStyleBulk() {
+						if (!selector) return;
+						const elements = document.querySelectorAll(selector);
+						elements.forEach(el => {
+								enforceStyleSingle(el, styleString);
+						});
+				}
+
+				// 1. Áp dụng lần đầu
+				enforceStyleBulk();
+
+				// 2. Thiết lập MutationObserver để theo dõi và áp dụng lại (chỉ khi có selector)
+				if (selector) {
+						const observer = new MutationObserver((mutationsList, observer) => {
+								// Mỗi khi DOM thay đổi, áp dụng lại style cho các phần tử khớp selector
+								enforceStyleBulk();
+						});
+
+						// Bắt đầu theo dõi toàn bộ <body>
+						observer.observe(document.body, { 
+								childList: true, 
+								subtree: true,   
+								attributes: true 
+						});
+
+						console.log(`Bắt đầu theo dõi DOM để áp dụng CSS bền vững cho: ${selector}`);
+				}
 		}
 
 		// Giả lập kéo thả tệp vào một phần tử (element)
@@ -3641,6 +3727,15 @@
 							<p>Lấy số lượng theo sàn</p>
 							<input type="checkbox" id="getStock" />
 						</div>
+						<div class="switch-wrapper">
+							<span class="switch-label">Tải ảnh phân loại</span>
+							<label class="switch">
+								<input type="checkbox" id="toggle-switch" />
+								<div class="slider">
+									<div class="slider-handle"></div>
+								</div>
+							</label>
+						</div>
 					</div>
 				`))
 				break;
@@ -5115,77 +5210,122 @@
 			});
 		}
 
-		function suaHinhSKUShopee(){
+		function suaHinhSKUShopee() {
+			// box: Danh sách tất cả các dòng SKU (Phần cuộn)
 			var box = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+			// boxLeft: Danh sách các dòng chỉ chứa ô upload ảnh (Phần cố định bên trái)
 			var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
 
 			var clickInput = false;
 
-			$.each(box, async (index) => {
-				var skuBox = box.eq(index).find(".table-cell").eq(2).find("textarea");
-				var sku = skuBox.val().trim().toUpperCase();
+			// 1. Tính toán Tỷ lệ SKU trên mỗi nhóm (SKU_PER_GROUP)
+			if (boxLeft.length === 0) {
+					boxToast("Không tìm thấy ô upload ảnh phân loại nào.", "error");
+					return;
+			}
+			
+			// Giả định rằng các nhóm SKU được chia đều
+			const SKU_PER_GROUP = Math.floor(box.length / boxLeft.length);
+			if (SKU_PER_GROUP === 0) {
+					boxToast("Dữ liệu SKU và Ảnh không hợp lệ. Số SKU ít hơn số ô ảnh.", "error");
+					return;
+			}
+			
+			boxLogging(`Đã xác định có ${SKU_PER_GROUP} SKU/dòng phụ cho mỗi ảnh phân loại.`, [], ["blue"]);
 
-				var imgInputShopee = boxLeft.eq(index).find(".table-cell").eq(0).find("input[type=file]")[0];
+			// 2. Duyệt qua TẤT CẢ các ô chứa ảnh đại diện (boxLeft)
+			$.each(boxLeft, async (index) => {
+					// Tính toán chỉ số của SKU đại diện (SKU đầu tiên của nhóm) trong danh sách 'box'
+					const skuRepresentativeIndex = index * SKU_PER_GROUP;
+					
+					// Lấy phần tử SKU đại diện
+					var currentSkuBox = box.eq(skuRepresentativeIndex);
 
-				// Tìm SKU tương ứng trong inputMap
-				// var found = Object.keys(inputMap).find(key =>
-				// 	sku.includes(key.toUpperCase()) || key.toUpperCase().includes(sku)
-				// );
+					// Lấy SKU từ dòng đầu tiên của nhóm
+					var skuBox = currentSkuBox.find(".table-cell").eq(2).find("textarea");
+					var sku = skuBox.val().trim().toUpperCase();
 
-				if (inputMap[sku]) {
-					if(boxLeft.eq(index).find(".table-cell img.shopee-image-manager__image").length > 0){
-						// boxLogging(`Phân Loại ${sku} đã có ảnh`, [`${sku}`], ["crimson"]);
-						var delButton = boxLeft.eq(index).find("span.shopee-image-manager__icon.shopee-image-manager__icon--delete");
+					// Lấy input file của ô ảnh hiện tại (tại index của boxLeft)
+					var imgInputShopee = boxLeft.eq(index).find(".table-cell").eq(0).find("input[type=file]")[0];
+					
+					// --- Logic Xử lý Ảnh cho Nhóm SKU ---
+					
+					if (inputMap[sku]) {
+							// 1. Kiểm tra và Xóa ảnh cũ (trên ô ảnh đại diện)
+							if (boxLeft.eq(index).find(".table-cell img.shopee-image-manager__image").length > 0) {
+									var delButton = boxLeft.eq(index).find("span.shopee-image-manager__icon.shopee-image-manager__icon--delete");
 
-						simulateReactEvent($(delButton), 'click');
+									simulateReactEvent($(delButton), 'click');
+									boxLogging(`Đã xóa ảnh cũ cho nhóm SKU bắt đầu bằng [copy]${sku}[/copy]`, [`${sku}`], ["orange"]);
+									
+									boxLeft.eq(index).css({"background": "orange", "color": "#000"});
+									await delay(500); // Chờ xóa ảnh
+							}
 
-						boxLogging(`Đã xóa ảnh của SKU [copy]${sku}[/copy]`, [`${sku}`], ["orange"]);
+							// 2. Gán và Upload ảnh mới (chỉ thao tác trên ô ảnh đại diện)
+							var fileInputEl = inputMap[sku].get(0);
+							if (!fileInputEl || !fileInputEl.files || fileInputEl.files.length === 0) return;
 
-						boxLeft.eq(index).css({
-							"background": "orange",
-						});
-						// Chờ xóa ảnh
-						await delay(500);
+							var file = fileInputEl.files[0];
+							var dt = new DataTransfer();
+							dt.items.add(file);
+							
+							// Nếu cần click input đầu tiên để kích hoạt UI React, hãy bật đoạn này
+							// if(!clickInput){
+							//    imgInputShopee.click();
+							//    clickInput = true;
+							// }
+							
+							setTimeout(() => {
+									imgInputShopee.files = dt.files;
+									
+									// Kích hoạt sự kiện change để Shopee nhận diện file mới
+									var evt = new Event("change", { bubbles: true });
+									imgInputShopee.dispatchEvent(evt);
+									
+									boxLogging(`Đã gán ảnh mới cho nhóm SKU bắt đầu bằng [copy]${sku}[/copy]`, [`${sku}`], ["green"])
+									boxLeft.eq(index).css({ "background": "lightgreen", "color": "#000" });
+							}, 100);
+
+							// 3. Đánh dấu các SKU phụ (cấp 2) thuộc nhóm này
+							for (let i = 0; i < SKU_PER_GROUP; i++) {
+									const currentSkuIndex = skuRepresentativeIndex + i;
+									if (currentSkuIndex < box.length) {
+											let currentSkuBoxToMark = box.eq(currentSkuIndex);
+											let subSku = currentSkuBoxToMark.find(".table-cell").eq(2).find("textarea").val().trim().toUpperCase();
+
+											// Đánh dấu thành công cho tất cả các dòng SKU trong nhóm
+											currentSkuBoxToMark.css({ "background": "lightgreen", "color": "#000" });
+											
+											if(i > 0){
+													// Ghi log cho các SKU phụ
+													boxLogging(`SKU phụ [copy]${subSku}[/copy] dùng chung ảnh`, [`${subSku}`], ["green"])
+											}
+									}
+							}
+
+					} else {
+							// Trường hợp không tìm thấy ảnh trong inputMap cho SKU đại diện này
+							boxLogging(`SKU đại diện [copy]${sku}[/copy] không có ảnh trong inputMap`, [`${sku}`], ["crimson"])
+							boxLeft.eq(index).css({ "background": "crimson", "color": "#fff" });
+							
+							// Đánh dấu các SKU phụ thuộc nhóm này là lỗi (vì SKU đại diện không có ảnh)
+							for (let i = 0; i < SKU_PER_GROUP; i++) {
+									const currentSkuIndex = skuRepresentativeIndex + i;
+									if (currentSkuIndex < box.length) {
+											let subSku = box.eq(currentSkuIndex).find(".table-cell").eq(2).find("textarea").val().trim().toUpperCase();
+											box.eq(currentSkuIndex).css({ "background": "crimson", "color": "#fff" });
+											if(i > 0){
+													boxLogging(`SKU phụ [copy]${subSku}[/copy] lỗi theo nhóm`, [`${subSku}`], ["crimson"])
+											}
+									}
+							}
 					}
-
-					// inputMap[found] là jQuery object, cần lấy phần tử gốc
-					var fileInputEl = inputMap[sku].get(0);
-					if (!fileInputEl || !fileInputEl.files || fileInputEl.files.length === 0) return;
-
-					var file = fileInputEl.files[0];
-					var dt = new DataTransfer();
-					dt.items.add(file);
-
-					// Click input đầu tiên để kích hoạt UI React
-					if(!clickInput){
-						// imgInputShopee.click();
-						clickInput = true;
-					}
-
-					setTimeout(() => {
-						imgInputShopee.files = dt.files;
-
-						// Tạo sự kiện change để Shopee nhận diện file mới
-						var evt = new Event("change", { bubbles: true });
-						imgInputShopee.dispatchEvent(evt);
-						boxLogging(`Đã sửa ảnh cho SKU [copy]${sku}[/copy]`, [`${sku}`], ["green"])
-						boxLeft.eq(index).css({
-							"background": "lightgreen",
-							color: "#000"
-						});
-					}, 100); // có thể chỉnh tăng lên nếu chưa kịp load
-				}else{
-					boxLogging(`SKU [copy]${sku}[/copy] không có ảnh`, [`${sku}`], ["crimson"])
-					boxLeft.eq(index).css({
-						"background": "crimson",
-						"color": "#fff"
-					});
-				}
 
 			});
 
 			boxToast("Đã sửa hình ảnh của những SKU đã tải lên", "success")
-		}
+	}
 
 		// Thêm ký tự giới tính vào tên phân loại shopee
 		function setEventThemKyTuPhanLoaiShopee(){
@@ -7216,7 +7356,9 @@
 
 						nextProductToProcess.addClass("tp-flag");
 
-						var nameElement = nextProductToProcess.find(".theme-arco-table-td").eq(0).find("span");
+						console.log(nextProductToProcess);
+
+						var nameElement = nextProductToProcess.find(".theme-arco-table-td").eq(1).find("span");
 						var productName = nameElement.text().trim();
 
 						var activeStatus = nextProductToProcess.find(".theme-arco-table-td").eq(nextProductToProcess.find(".theme-arco-table-td").length - 1).find("button[role='switch']");
@@ -7227,8 +7369,8 @@
 
 						boxLogging(`Đang xử lý sản phẩm: "${productName}"`, [`${productName}`], ["cyan"]);
 
-						var currentPrice = nextProductToProcess.find(".theme-arco-table-td").eq(1).find("span p");
-						var promotionPrice = nextProductToProcess.find(".theme-arco-table-td").eq(2).find("input");
+						var currentPrice = nextProductToProcess.find(".theme-arco-table-td").eq(2).find("span p");
+						var promotionPrice = nextProductToProcess.find(".theme-arco-table-td").eq(3).find("input");
 
 						if (promotionPrice.length > 0) {
 							if (promotionPrice.val().length > 0) {
@@ -7292,7 +7434,7 @@
 						var reloadedProductRows = $(".theme-arco-table-content-inner .theme-arco-table-body").find("div div > div");
 						
 						let newUnprocessedFoundAfterScroll = false;
-						for (let i = 0; i < reloadedProductRows.length; i++) {
+						for (let i = 0; i < reloadedProductRows.length; i++) { 
 							let row = $(reloadedProductRows).eq(i);
 							if (row.is(".theme-arco-table-tr, .theme-arco-table-row-custom-expand, .styled") && !row.hasClass("tp-flag")) {
 								newUnprocessedFoundAfterScroll = true;
@@ -7698,73 +7840,135 @@
 			// $("button[data-uid='deletecolumnui:button:0d701']").click();
 		}
 
-		// Lấy phân loại shopee
+		// Lấy phân loại shopee, hỗ trợ phân loại cấp 2 (Tải ảnh lặp lại với tên của TẤT CẢ SKU trong nhóm)
 		async function layPhanLoaiShopee() {
-			boxToast("Đang xử lý");
-			var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
-			var boxDetail = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
-			var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
+				boxToast("Đang xử lý");
+				var box = $(".variation-edit-item.version-a").eq(0).find(".option-container .options-item.drag-item");
+				var boxDetail = $(".variation-model-table-main .eds-scrollbar.middle-scroll-container .eds-scrollbar__content .variation-model-table-body .table-cell-wrapper");
+				var boxLeft = $(".variation-model-table-fixed-left .variation-model-table-body .table-cell-wrapper");
 
-			let currentList = [];
-			var zip = new JSZip();
+				let currentList = [];
+				var zip = new JSZip();
+				let imageBlobs = []; // Mảng lưu trữ các blob ảnh đã tải xuống
+				let skuToImageMap = {}; // Map lưu trữ SKU -> Blob index
 
-			for (let i = 0; i < box.length; i++) {
-				var el = box[i];
-				var name = $(el).find(".variation-input-item-container.variation-input-item input").val();
-				var detailRow = boxDetail.eq(i).find(".table-cell");
-				var price = detailRow.eq(0).find("input").val();
-				let stockVal = detailRow.eq(1).find("input").val();
-				var skuText = detailRow.eq(2).find("textarea").val() || `variant-${i}`;
-
-				var getStock = $(".tp-container.tp-content .layout-future #getStock").prop("checked");
-				if (!getStock) {
-					var editStock = $(".tp-container.tp-content .layout-future #stock-edit").val();
-					stockVal = editStock.length === 0 ? 0 : editStock;
+				// 1. Tính toán Tỷ lệ SKU trên mỗi nhóm
+				if (boxLeft.length === 0 || boxDetail.length === 0) {
+						boxToast("Không tìm thấy dữ liệu phân loại.", "error");
+						return;
+				}
+				const SKU_PER_GROUP = Math.floor(boxDetail.length / boxLeft.length);
+				if (SKU_PER_GROUP === 0) {
+						boxToast("Dữ liệu SKU và Ảnh không hợp lệ.", "error");
+						return;
 				}
 
-				var copyVariant = `${name}\t${skuText}\t${price}\t${stockVal}`;
-				currentList.push(copyVariant);
+				let lastRepresentativeName = ""; 
+				let imageBlobIndex = 0; // Chỉ số theo dõi vị trí trong mảng imageBlobs
 
-				// Tải ảnh lớn → chuyển sang PNG thật sự
-				var img = boxLeft.eq(i).find("img");
-				if (img.length) {
-					let url = img.attr("src");
-					if (url) {
-						var parts = url.split("/");
-						var fileId = parts[parts.length - 1];
-						fileId = fileId.toString().replace("_tn", "");
-						var fullUrl = `https://banhang.shopee.vn/api/v1/cdn_proxy/${fileId}`;
+				// 2. Vòng lặp chính duyệt qua TẤT CẢ các dòng SKU (boxDetail)
+				for (let i = 0; i < boxDetail.length; i++) {
+						var detailRow = boxDetail.eq(i).find(".table-cell");
 
-						try {
-							var response = await fetch(fullUrl);
-							var blob = await response.blob();
-
-							var imageBitmap = await createImageBitmap(blob);
-							var canvas = document.createElement("canvas");
-							canvas.width = imageBitmap.width;
-							canvas.height = imageBitmap.height;
-
-							var ctx = canvas.getContext("2d");
-							ctx.drawImage(imageBitmap, 0, 0);
-
-							var pngBlob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
-
-							var filename = `${skuText}.png`;
-							var arrayBuffer = await pngBlob.arrayBuffer();
-							zip.file(filename, arrayBuffer);
-						} catch (error) {
-							console.error('Lỗi tải/chuyển ảnh:', fullUrl, error);
+						// Lấy thông tin SKU, Giá, Tồn kho (Có trên TẤT CẢ các dòng)
+						var price = detailRow.eq(0).find("input").val();
+						let stockVal = detailRow.eq(1).find("input").val();
+						var skuText = detailRow.eq(2).find("textarea").val() || `variant-${i}`;
+						
+						// ... (Xử lý logic lấy Tồn kho tùy chọn) ...
+						var getStock = $(".tp-container.tp-content .layout-future #getStock").prop("checked");
+						if (!getStock) {
+								var editStock = $(".tp-container.tp-content .layout-future #stock-edit").val();
+								stockVal = editStock.length === 0 ? 0 : editStock;
 						}
-					}
+
+						// --- 3. Xử lý Tải Ảnh và Tên Phân loại (Chỉ cho SKU Đại diện) ---
+						if (i % SKU_PER_GROUP === 0) {
+								const groupIndex = i / SKU_PER_GROUP; 
+								
+								// Lấy Tên phân loại cấp 1
+								var el = box[groupIndex]; 
+								lastRepresentativeName = $(el).find(".variation-input-item-container.variation-input-item input").val() || `Phân loại ${groupIndex + 1}`;
+								
+								// Tải ảnh và chuyển sang PNG thật sự
+								var img = boxLeft.eq(groupIndex).find("img"); 
+								if (img.length) {
+										let url = img.attr("src");
+										if (url) {
+												var parts = url.split("/");
+												var fileId = parts[parts.length - 1].toString().replace("_tn", "");
+												var fullUrl = `https://banhang.shopee.vn/api/v1/cdn_proxy/${fileId}`;
+
+												try {
+														var response = await fetch(fullUrl);
+														var blob = await response.blob();
+														var imageBitmap = await createImageBitmap(blob);
+														var canvas = document.createElement("canvas");
+														canvas.width = imageBitmap.width;
+														canvas.height = imageBitmap.height;
+														var ctx = canvas.getContext("2d");
+														ctx.drawImage(imageBitmap, 0, 0);
+
+														var pngBlob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+														
+														// LƯU BLOB ẢNH VÀO MẢNG
+														imageBlobs[imageBlobIndex] = pngBlob;
+
+												} catch (error) {
+														console.error('Lỗi tải/chuyển ảnh:', fullUrl, error);
+														imageBlobs[imageBlobIndex] = null; // Đánh dấu lỗi
+												}
+										}
+								} else {
+										imageBlobs[imageBlobIndex] = null; // Đánh dấu không có ảnh
+								}
+								
+								imageBlobIndex++; // Tăng chỉ số cho lần tải ảnh tiếp theo
+						}
+						
+						// --- 4. Thu thập Dữ liệu SKU và Gán Chỉ số Blob ---
+						
+						// Gán tên phân loại cấp 1 đã lưu (lastRepresentativeName)
+						var currentGroupName = lastRepresentativeName;
+						
+						// Dòng dữ liệu cần sao chép
+						var copyVariant = `${currentGroupName}\t${skuText}\t${price}\t${stockVal}`;
+						currentList.push(copyVariant);
+						
+						// LƯU CHỈ SỐ BLOB VÀO MAP ĐỂ XỬ LÝ SAU
+						skuToImageMap[skuText] = imageBlobIndex - 1; 
 				}
-			}
 
-			zip.generateAsync({ type: 'blob' }).then(function (zipBlob) {
-				saveAs(zipBlob, "Anh_Phan_Loai_PNG.zip");
-			});
+				// 5. Xử lý Tải Ảnh vào ZIP (Lặp lại cho tất cả SKU)
+				let imagesAddedCount = 0;
+				for (let i = 0; i < currentList.length; i++) {
+						const parts = currentList[i].split('\t');
+						const sku = parts[1]; // Lấy SKU từ dữ liệu đã thu thập
+						const blobIndex = skuToImageMap[sku];
+						
+						if (blobIndex !== undefined && imageBlobs[blobIndex]) {
+								const pngBlob = imageBlobs[blobIndex];
+								var filename = `${sku}.png`;
+								var arrayBuffer = await pngBlob.arrayBuffer();
+								zip.file(filename, arrayBuffer); // Thêm ảnh vào ZIP với tên là SKU hiện tại
+								imagesAddedCount++;
+						}
+				}
 
-			boxToast(`Đã sao chép tên ${currentList.length} phân loại`, "success");
-			navigator.clipboard.writeText(currentList.join("\n"));
+				navigator.clipboard.writeText(currentList.join("\n"));
+
+				boxToast(`Đã sao chép ${currentList.length} phân loại`, "success");
+
+				var downloadImage = false;
+				$(".tp-container.tp-content .layout-future .layout-tab .switch-wrapper .switch #toggle-switch").prop("checked") ? downloadImage = true : downloadImage = false;
+
+				if (downloadImage){
+					// Kết thúc: Nén file và Sao chép dữ liệu
+					boxToast(`Đang nén và tải về ${imagesAddedCount} ảnh theo SKU`, "success");
+					zip.generateAsync({ type: 'blob' }).then(function (zipBlob) {
+							saveAs(zipBlob, "Anh_Phan_Loai_PNG.zip");
+					});
+				}
 		}
 
 		// Tự động thêm preview link
@@ -9559,6 +9763,8 @@
 			var groupVariant = parseInt($("#sale_properties .space-y-12 > div").length) - 1;
 
 			var indexData = 0, indexBox = 0;
+
+			$(".core-table-content-inner table tbody tr").find(".tp-alert").remove();
 			
 			async function nextData(){
 				if(indexData == arrayData.length){
@@ -9592,11 +9798,11 @@
 
 								if(parseInt(priceBox.val()) < parseInt(gia)){
 									boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${gia1} > ${priceBox1})`, [`${skuBox.val()}`], ["crimson"]);
-									box.eq(indexBox).css("color", "crimson");
+									nameBox.html(`${nameBox.text().trim()} <span class="tp-alert" style='color: crimson;'>(Giá đuôi cao hơn giá đầu)</span>`);
 								}else{
 									simulateClearReactInput($(priceBox));
 									simulateReactInput($(priceBox), editPrice.gia);
-									box.eq(indexBox).css("color", "lightgreen");
+									nameBox.html(`${nameBox.text().trim()} <span class="tp-alert" style='color: lightgreen;'>(Đã sửa giá)</span>`);
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${priceBox1} thành ${gia1}`, [`${skuBox.val()}`, `${priceBox1}`, `${gia1}`], ["lightgreen", "orange", "orange"]);
 								}
 							}
@@ -9618,18 +9824,18 @@
 
 								if(parseInt(giaDuoi) > parseInt(giaDau)){
 									boxLogging(`Bỏ qua SKU: [copy]${skuBox.val()}[/copy] (có giá đuôi cao hơn giá đầu)`, [`${skuBox.val()}`], ["crimson"]);
-									box.eq(indexBox).css("color", "crimson");
+									nameBox.html(`${nameBox.text().trim()} <span class="tp-alert" style='color: crimson;'>(Giá đuôi cao hơn giá đầu)</span>`);
 									return;
 								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
 									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
 									simulateClearReactInput($(priceBox));
 									simulateReactInput($(priceBox), editPrice.gia);
-									box.eq(indexBox).css("color", "orange");
+									nameBox.html(`${nameBox.text().trim()} <span class="tp-alert" style='color: orange;'>(Giá đuôi cận giá đầu)</span>`);
 								}else{
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
 									simulateClearReactInput($(priceBox));
 									simulateReactInput($(priceBox), editPrice.gia);
-									box.eq(indexBox).css("color", "lightgreen");
+									nameBox.html(`${nameBox.text().trim()} <span class="tp-alert" style='color: lightgreen;'>(Đã sửa giá)</span>`);
 								}
 							}
 						break;
@@ -9644,24 +9850,24 @@
 
 								if(parseInt(editPrice.gia) > parseInt(price.gia)){
 									boxLogging(`SKU: [copy]${skuBox.val()}[/copy] có giá mới cao hơn giá hiện tại (${editPrice.gia} > ${price.gia})`, [`${skuBox.val()}`], ["crimson"]);
-									box.eq(indexBox).css("color", "crimson");
+									nameBox.html(`${nameBox.text().trim()} <span class="tp-alert" style='color: crimson;'>(Giá đuôi cao hơn giá đầu)</span>`);
 									return;
 								}
 
 								if(parseInt(giaDuoi) > parseInt(giaDau)){
 									boxLogging(`Bỏ qua SKU: [copy]${skuBox.val()}[/copy] (có giá đuôi cao hơn giá đầu)`, [`${skuBox.val()}`], ["crimson"]);
-									box.eq(indexBox).css("color", "crimson");
+									nameBox.html(`${nameBox.text().trim()} <span class="tp-alert" style='color: crimson;'>(Giá đuôi cao hơn giá đầu)</span>`);
 									return;
 								}else if(parseInt(giaDuoi) >= parseInt(giaDau) - 5000){
 									boxLogging(`SKU [copy]${skuBox.val()}[/copy] có giá đuôi cận giá đầu`, [`${skuBox.val()}`], ["orange"]);
 									simulateClearReactInput($(priceBox));
 									simulateReactInput($(priceBox), editPrice.gia);
-									box.eq(indexBox).css("color", "orange");
+									nameBox.html(`${nameBox.text().trim()} <span class="tp-alert" style='color: orange;'>(Giá đuôi cận giá đầu)</span>`);
 								}else{
 									boxLogging(`Giá của [copy]${skuBox.val()}[/copy] đã sửa từ ${price.gia} thành ${editPrice.gia}`, [`${skuBox.val()}`, `${price.gia}`, `${editPrice.gia}`], ["lightgreen", "green", "green"]);
 									simulateClearReactInput($(priceBox));
 									simulateReactInput($(priceBox), editPrice.gia);
-									box.eq(indexBox).css("color", "lightgreen");
+									nameBox.html(`${nameBox.text().trim()} <span class="tp-alert" style='color: lightgreen;'>(Đã sửa giá)</span>`);
 								}
 							}
 						break;
