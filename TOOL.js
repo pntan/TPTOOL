@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.12.4";
+	const VERSION = "2.12.5";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -7766,20 +7766,53 @@
 
 			row.find(".tp-model-id").remove();
 
-			$.each(row, (index, value) => {
-				var name = row.eq(index).find("td.core-table-td").eq(0);
-				var price = row.eq(index).find("td.core-table-td div#skus");
-				// var stock = row.eq(index).find("td.core-table-td").eq(2);
-				// var sku = row.eq(index).find("td.core-table-td").eq(3);
+			var indexRow = 0;
+			function nextRow(){
+				if(indexRow >= row.length){
+					boxToast("Đã kiểm tra xong mã phân loại", "success");
+					return;
+				}
 
-				var productID = price.data("id");
-				productID = productID.split(".");
-				productID = productID[productID.length - 1];
+				var name = row.eq(indexRow).find("td.core-table-td").eq(0);
+				var price = row.eq(indexRow).find("td.core-table-td div#skus");
+				// var stock = row.eq(indexRow).find("td.core-table-td").eq(2);
+				// var sku = row.eq(indexRow).find("td.core-table-td").eq(3);
+				try{
+					var productID = price.data("id");
 
-				name.find(".core-table-cell-wrap-value").append($(`
-					<p class="tp-model-id">ID phân loại: <span class="copyable" style="cursor: pointer;">${productID}</span></p>
-				`))
-			})
+					productID = productID.split(".");
+					productID = productID[productID.length - 1];
+
+					name.find(".core-table-cell-wrap-value").append($(`
+						<p class="tp-model-id">ID phân loại: <span class="copyable" style="cursor: pointer;">${productID}</span></p>
+					`));
+				}catch(e){
+					console.warn("Không lấy được mã phân loại của dòng", indexRow + 1);
+				}
+
+				indexRow++;
+				nextRow();
+			}
+			nextRow();
+
+
+			// $.each(row, (index, value) => {
+			// 	var name = row.eq(index).find("td.core-table-td").eq(0);
+			// 	var price = row.eq(index).find("td.core-table-td div#skus");
+			// 	// var stock = row.eq(index).find("td.core-table-td").eq(2);
+			// 	// var sku = row.eq(index).find("td.core-table-td").eq(3);
+
+			// 	var productID = price.data("id");
+
+			// 	console.log(index, productID);
+
+			// 	productID = productID.split(".");
+			// 	productID = productID[productID.length - 1];
+
+			// 	name.find(".core-table-cell-wrap-value").append($(`
+			// 		<p class="tp-model-id">ID phân loại: <span class="copyable" style="cursor: pointer;">${productID}</span></p>
+			// 	`))
+			// })
 		}
 
 		// Chỉnh sữa chương trình khuyến mãi Tiktok
@@ -9116,6 +9149,8 @@
 		async function themHinhTheoSKUTiktok() {
 			boxLogging("BẮT ĐẦU THÊM HÌNH ẢNH THEO SKU TIKTOK", [], ["green"]);
 
+			kiemTraMaPhanLoaiTiktok();
+
 			if (Object.keys(inputMap).length === 0) {
 				boxLogging("Chưa có hình ảnh nào được nạp vào bộ nhớ. Vui lòng chọn thư mục ảnh trước.", [], ["red"]);
 				boxToast("Chưa có ảnh! Vui lòng chọn thư mục ảnh.", "error");
@@ -9225,7 +9260,7 @@
 							boxLogging(`Đang click nút xóa cho biến thể "${currentVariantName}"...`, [], ["orange"]);
 							// delButton.get(0).click(); 
 							simulateReactEvent(delButton.find("svg"), "click");
-							await delay(200); // Rất quan trọng: Chờ ảnh xóa xong và UI cập nhật
+							// await delay(200); // Rất quan trọng: Chờ ảnh xóa xong và UI cập nhật
 							boxLogging(`Đã xóa ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
 						} else {
 							boxLogging(`Không tìm thấy nút xóa ảnh cho biến thể "${currentVariantName}". Có thể ảnh đã được xóa hoặc không có.`, [], ["yellow"]);
@@ -9259,7 +9294,7 @@
 					currentVariantContainer.css("background","lightgreen");
 					boxLogging(`Đã thêm ảnh cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
 					
-					await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
+					// await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
 					processedCount++;
 
 				} else {
