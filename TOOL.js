@@ -4,7 +4,7 @@
 	var createUI = false;
 
 	// Phiên bản của chương trình
-	const VERSION = "2.12.5";
+	const VERSION = "2.12.6";
 
 	/*var Jqu = document.createElement("script");
 	Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -9260,7 +9260,7 @@
 							boxLogging(`Đang click nút xóa cho biến thể "${currentVariantName}"...`, [], ["orange"]);
 							// delButton.get(0).click(); 
 							simulateReactEvent(delButton.find("svg"), "click");
-							// await delay(200); // Rất quan trọng: Chờ ảnh xóa xong và UI cập nhật
+							await delay(200); // Rất quan trọng: Chờ ảnh xóa xong và UI cập nhật
 							boxLogging(`Đã xóa ảnh cũ cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
 						} else {
 							boxLogging(`Không tìm thấy nút xóa ảnh cho biến thể "${currentVariantName}". Có thể ảnh đã được xóa hoặc không có.`, [], ["yellow"]);
@@ -9294,7 +9294,7 @@
 					currentVariantContainer.css("background","lightgreen");
 					boxLogging(`Đã thêm ảnh cho biến thể "${currentVariantName}" (SKU: [copy]${skuToProcess}[/copy]).`, [`${skuToProcess}`], ["green"]);
 					
-					// await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
+					await delay(100); // Rất quan trọng: Chờ ảnh tải lên và hiển thị đầy đủ
 					processedCount++;
 
 				} else {
