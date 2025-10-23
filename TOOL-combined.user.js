@@ -15,6 +15,17 @@
 // @require      https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js
+//@reqquire      https://code.jquery.com/jquery-3.7.1.min.js
+//@reqquire      https://code.jquery.com/ui/1.14.1/jquery-ui.js
+//@reqquire      https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js
+//@reqquire      https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js
+//@reqquire      https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js
+//@reqquire      https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js
+//@reqquire      https://kit.fontawesome.com/e538a919ef.js
+//@reqquire      https://cdn.socket.io/4.8.1/socket.io.min.js
+//@reqquire      https://cdn.boxicons.com/fonts/basic/boxicons.min.css
+//@reqquire      https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css
+//@reqquire      https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js
 // @connect      raw.githubusercontent.com
 // ==/UserScript==
 /* globals       jQuery, $, waitForKeyElements */
