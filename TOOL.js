@@ -10388,7 +10388,7 @@
           let count = listCountSKU[index];
           let countSuffix = "";
           if (count > 1) { // Chỉ thêm suffix khi count > 1
-            if (count < 10) countSuffix = "v0" + count;
+            if (count < 10) countSuffix = "v" + count;
             else countSuffix = "v" + count;
           }
 
