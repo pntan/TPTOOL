@@ -4,7 +4,7 @@
   var createUI = false;
 
   // Phiên bản của chương trình
-  const VERSION = "2.12.6";
+  const VERSION = "2.12.7";
 
   /*var Jqu = document.createElement("script");
   Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
