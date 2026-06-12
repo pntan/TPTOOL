@@ -1,10 +1,10 @@
-  'use strict';
+'use strict';
 
   // Trạng thái hiển thị của giao diện
   var createUI = false;
 
   // Phiên bản của chương trình
-  const VERSION = "2.12.7";
+  const VERSION = "2.17.7";
 
   /*var Jqu = document.createElement("script");
   Jqu.setAttribute("src", "https://code.jquery.com/jquery-3.7.1.min.js");
@@ -10984,14 +10984,17 @@
     // Tách giá bán
     function tachGiaBan() {
       var data = $(".tp-container.tp-content .layout-future #data").val().split("\n");
-
       var data_list = [];
-
       var indexData = 0;
 
       function nextData() {
         if (indexData >= data.length) {
+          // Log ra để kiểm tra nếu cần
+          console.log(data_list.join("\n")); 
+          
+          // Sao chép chuỗi đã được nối bằng dấu xuống dòng
           navigator.clipboard.writeText(data_list.join("\n"));
+          alert("Đã sao chép vào bộ nhớ tạm!"); // Thêm thông báo cho tiện theo dõi
           return;
         }
 
@@ -10999,10 +11002,8 @@
         var giaDau = gia_tach.giaDau;
         var giaDuoi = gia_tach.giaDuoi;
 
-        data_list.push({
-          giaDau,
-          giaDuoi
-        });
+        // Thay vì push object, ta push chuỗi định dạng: "giaDau[TAB]giaDuoi"
+        data_list.push(giaDau + "\t" + giaDuoi);
 
         indexData++;
         nextData();
