@@ -6,26 +6,42 @@
 // @author       TanPhan
 // @match        https://*/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=http://anonymouse.org/
+
 // @grant        GM_xmlhttpRequest
-// @require      https://code.jquery.com/jquery-3.7.1.min.js
-// @require      https://code.jquery.com/ui/1.14.1/jquery-ui.js
-// @require      https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js
-// @require      https://code.jquery.com/jquery-3.7.1.min.js
-// @require      https://code.jquery.com/ui/1.14.1/jquery-ui.js
-// @require      https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js
-// @require      https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js
-// @require      https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js
-// @reqquire      https://code.jquery.com/jquery-3.7.1.min.js
-// @reqquire      https://code.jquery.com/ui/1.14.1/jquery-ui.js
-// @reqquire      https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js
-// @reqquire      https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js
-// @reqquire      https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js
-// @reqquire      https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js
-// @reqquire      https://kit.fontawesome.com/e538a919ef.js
-// @reqquire      https://cdn.socket.io/4.8.1/socket.io.min.js
-// @reqquire      https://cdn.boxicons.com/fonts/basic/boxicons.min.css
-// @reqquire      https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css
-// @reqquire      https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js
+// @grant        GM.xmlHttpRequest
+// @grant        GM.setValue
+// @grant        GM.setValues
+// @grant        GM.getValue
+// @grant        GM.getValues
+// @grant        GM.deleteValue
+// @grant        GM.deleteValues
+// @grant        GM.listValues
+// @grant        GM.addValueChangeListener
+// @grant        GM.removeValueChangeListener
+// @grant        GM.registerMenuCommand
+// @grant        GM.unregisterMenuCommand
+// @grant        GM.notification
+// @grant        GM.openInTab
+// @grant        GM.setClipboard
+// @grant        GM.download
+// @grant        GM.getResourceText
+// @grant        GM.getResourceUrl
+// @grant        GM.addElement
+// @grant        GM.addStyle
+// @grant        GM.audio
+// @grant        GM.cookie
+// @grant        GM.getTab
+// @grant        GM.getTabs
+// @grant        GM.saveTab
+// @grant        GM.info
+// @grant        GM.log
+
+// @grant        GM_webRequest
+// @grant        unsafeWindow
+// @grant        window.close
+// @grant        window.focus
+// @grant        window.onurlchange
+
 // @connect      raw.githubusercontent.com
 // ==/UserScript==
 /* globals       jQuery, $, waitForKeyElements */
