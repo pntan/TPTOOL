@@ -47,8 +47,8 @@
 
 // @license      MIT
 
-// @run-at       document-start
 // ==/UserScript==
+// @run-at       document-start
 
 (function () {
   // Ghi console log
@@ -71,12 +71,13 @@
     "https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
     "https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js",
-    "https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js",
-    "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4",
+    "https://cdn.jsdelivr.net/npm/chart.js",
+    // "https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js",
+    // "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4",
   ];
   const CSS_LIB = [
-    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
-    'https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css'
+    // 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
+    // 'https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css'
   ];
 
   function LOAD_JS(url) {
@@ -798,7 +799,7 @@
     });
   }
 
-  function get_detail_page(){
+  function get_detail_page() {
     const URL = window.location;
     return {
       title: document.title,
@@ -820,11 +821,193 @@
     };
   }
 
-  // Chi tiết sản phẩm https://banhang.shopee.vn/portal/product/3778222809
-  function PRODUCT_DETAIL_SHOPEE() {
+  const PAGE_INFO = get_detail_page();
+
+  // GIẢ LẬP API NỘI BỘ SHOPEE
+  async function SHOPEE_API({ path = "", method = "GET", payload = {} }) {
+    let requestUrl = path;
+
+    // Nếu là GET và có payload, tự động chuyển thành Query Parameters trên URL
+    if (method.toUpperCase() === "GET" && Object.keys(payload).length > 0) {
+      const queryString = new URLSearchParams(payload).toString();
+      requestUrl += (path.includes("?") ? "&" : "?") + queryString;
+    }
+
+    return new Promise((resolve, reject) => {
+      GM.xmlHttpRequest({
+        method: method,
+        url: requestUrl,
+        // Chỉ truyền data (body) nếu KHÔNG PHẢI là GET hoặc HEAD
+        data: method.toUpperCase() !== "GET" && method.toUpperCase() !== "HEAD" ? JSON.stringify(payload) : undefined,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        onload: (res) => {
+          if (res.status === 200) {
+            try {
+              // Parse sẵn kết quả trả về từ Shopee thành JSON cho dễ dùng
+              resolve(JSON.parse(res.responseText));
+            } catch (e) {
+              resolve(res.responseText);
+            }
+          } else {
+            reject(`Lỗi HTTP ${res.status}: ${res.statusText}`);
+          }
+        },
+        onerror: (err) => reject(err)
+      });
+    });
+  }
+
+  // Chi tiết sản phẩm https://banhang.shopee.vn/portal/product/[product_id]
+  async function PRODUCT_DETAIL_SHOPEE() {
     console_log("PRODUCT_DETAIL_SHOPEE");
-    const data = get_detail_page();
-    console.log(data);
+    console.log(PAGE_INFO);
+
+    if (!PAGE_INFO.domain === "banhang.shopee.vn") return;
+
+    if (!PAGE_INFO.pathname.startsWith("/portal/product/")) return;
+
+    // Mở rộng danh sách phân loại
+    waitForElement(document.body, ".product-tier-variation .variation-model-table-footer .show-more-button button", (el) => {
+      console.log(el);
+      const SHOW_MORE_BUTTON = $(el);
+      if (SHOW_MORE_BUTTON.text().toLowerCase() != "ẩn") SHOW_MORE_BUTTON.click();
+    });
+
+    // Lấy thông tin từ API
+    const ITEM_DATA = await SHOPEE_API({
+      path: "https://banhang.shopee.vn/api/v3/product/get_product_info",
+      method: "GET",
+      payload: {
+        product_id: PAGE_INFO.pathname.split("/")[3],
+        is_draft: false
+      }
+    })
+
+    if (ITEM_DATA.code !== 0) {
+      console_log("Lỗi khi lấy thông tin sản phẩm", "error");
+      return;
+    }
+
+    var max_price_variant = null, min_price_variant = null;
+    const MODEL_LIST = ITEM_DATA.data.product_info.model_list;
+    for (const model of MODEL_LIST) {
+      const model_price = model.price_info;
+      const [normal_price, promotion_price] = [model_price.normal_price, model_price.promotion_price];
+      const max_price = Math.max(normal_price, promotion_price);
+      const min_price = Math.min(normal_price, promotion_price);
+
+      if (max_price_variant === null || max_price > max_price_variant.price) {
+        max_price_variant = { price: max_price, model };
+      }
+
+      if ((min_price_variant === null || min_price < min_price_variant.price) && min_price > 0) {
+        min_price_variant = { price: min_price, model };
+      }
+    }
+
+    // Khung thông tin bên trái
+    $(".product .product-edit__container .product-edit__side").append(`
+      <div id="tpv3-price-panel" style="width: 100%; border: 1px solid #ccc; border-radius: 7px; background: #fff; padding: 10px; margin-bottom: 15px;">
+        <p style="font-weight: bold; margin-bottom: 10px;">Thông tin giá</p>
+        
+        <!-- Thông tin giá cao nhất và thấp nhất -->
+        <div style="width: 100%; display: flex; flex-direction: row; gap: 10px; margin-bottom: 10px;">
+          <!-- Cao nhất -->
+          <div style="display: flex; flex-direction: row; gap: 5px; width: 50%;">
+            <label>MAX:</label>
+            <input style="width: 100%; border: 1px solid #ddd; border-radius: 4px; text-align: center;" type="text" id="max-price" value="${max_price_variant.price.toLocaleString()}đ" disabled />
+          </div>
+
+          <!-- Thấp nhất -->
+          <div style="display: flex; flex-direction: row; gap: 5px; width: 50%;">
+            <label>MIN:</label>
+            <input style="width: 100%; border: 1px solid #ddd; border-radius: 4px; text-align: center;" type="text" id="min-price" value="${min_price_variant.price.toLocaleString()}đ" disabled />
+          </div>
+        </div>
+
+        <!-- Vùng bọc canvas với chiều cao CỐ ĐỊNH để Chart.js không bị kéo giãn -->
+        <div style="position: relative; width: 100%; height: 130px;">
+          <canvas id="tpv3-price-chart"></canvas>
+        </div>
+      </div>
+    `);
+
+    // Biểu đồ giá
+    
+
+    const limitFromMin = min_price_variant.price * 5;
+    const limitFromMax = max_price_variant.price / 5;
+
+    const priceChart = $("#tpv3-price-chart").get(0);
+    new Chart(priceChart, {
+      type: 'bar',
+      data: {
+        labels: ['Dải giá an toàn'], // Chỉ dùng một nhãn duy nhất
+        datasets: [
+          {
+            label: 'Vùng giá (Min -> Max)',
+            position: "left",
+            // data: [[giá trị bắt đầu, giá trị kết thúc]]
+            data: [[min_price_variant.price, max_price_variant.price]],
+            backgroundColor: 'rgba(59, 130, 246, 0.2)', // Xanh dương nhạt
+            borderColor: 'rgb(59, 130, 246)',
+            borderWidth: 1,
+            barPercentage: 1.0, // Làm thanh to hết mức
+            categoryPercentage: 1.0,
+          },
+          {
+            label: 'Vùng overlap Min (Min -> Min*5)',
+            // Vùng an toàn từ Min kéo đến giới hạn 5 lần
+            data: [[min_price_variant.price, Math.min(max_price_variant.price, limitFromMin)]],
+            backgroundColor: 'rgba(16, 185, 129, 0.4)', // Xanh lá đậm (vùng overlap)
+            borderColor: 'rgb(16, 185, 129)',
+            borderWidth: 1,
+            barPercentage: 0.7, // Làm thanh nhỏ hơn một chút để tạo hiệu ứng "vùng đè"
+            categoryPercentage: 0.7,
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'y', // Biểu đồ ngang
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true, // Hiện chú thích để người dùng phân biệt vùng
+            position: 'bottom',
+            labels: { boxWidth: 12, font: { size: 10 } }
+          },
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                // Hiển thị dạng khoảng: [Min VNĐ - Max VNĐ]
+                let range = context.raw;
+                return ` ${context.dataset.label}: ${range[0].toLocaleString()}đ - ${range[1].toLocaleString()}đ`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: false, // Bắt đầu từ Min chứ không phải 0 để biểu đồ tập trung hơn
+            suggestedMin: Math.max(0, min_price_variant.price - (min_price_variant.price * 0.1)), // Cho mút trái rộng hơn một chút
+            grid: { color: '#f3f4f6' },
+            ticks: {
+              callback: function (value) {
+                return value.toLocaleString() + 'đ';
+              }
+            }
+          },
+          y: {
+            stacked: true, // Quan trọng: Stack các bar đè lên nhau
+            grid: { display: false },
+            display: false // Ẩn nhãn trục Y vì chỉ có một dòng
+          }
+        }
+      }
+    });
   }
 
   async function INIT() {
