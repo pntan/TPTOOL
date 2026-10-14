@@ -907,103 +907,108 @@
       }
     }
 
+    // Biểu đồ giá
+    const limitFromMin = min_price_variant.price * 5;
+    const limitFromMax = max_price_variant.price / 5;
+
+    // Tính toán vùng giao nhau (khoảng giá an toàn thực tế)
+    const safeMin = Math.max(min_price_variant.price, limitFromMax);
+    const safeMax = Math.min(max_price_variant.price, limitFromMin);
+    const isSafeRangeValid = safeMin <= safeMax;
+
     // Khung thông tin bên trái
+    $(".product .product-edit__container .product-edit__side").css("overflow-y", "scroll")
     $(".product .product-edit__container .product-edit__side").append(`
       <div id="tpv3-price-panel" style="width: 100%; border: 1px solid #ccc; border-radius: 7px; background: #fff; padding: 10px; margin-bottom: 15px;">
-        <p style="font-weight: bold; margin-bottom: 10px;">Thông tin giá</p>
+        <p style="font-weight: bold; margin-bottom: 8px;">Thông tin giá sản phẩm</p>
         
-        <!-- Thông tin giá cao nhất và thấp nhất -->
-        <div style="width: 100%; display: flex; flex-direction: row; gap: 10px; margin-bottom: 10px;">
-          <!-- Cao nhất -->
-          <div style="display: flex; flex-direction: row; gap: 5px; width: 50%;">
+        <!-- Input MIN / MAX -->
+        <div style="width: 100%; display: flex; gap: 10px; margin-bottom: 8px;">
+          <div style="display: flex; gap: 5px; width: 50%;">
             <label>MAX:</label>
-            <input style="width: 100%; border: 1px solid #ddd; border-radius: 4px; text-align: center;" type="text" id="max-price" value="${max_price_variant.price.toLocaleString()}đ" disabled />
+            <input style="width: 100%; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 12px;" type="text" value="${max_price_variant.price.toLocaleString()}đ" disabled />
           </div>
-
-          <!-- Thấp nhất -->
-          <div style="display: flex; flex-direction: row; gap: 5px; width: 50%;">
+          <div style="display: flex; gap: 5px; width: 50%;">
             <label>MIN:</label>
-            <input style="width: 100%; border: 1px solid #ddd; border-radius: 4px; text-align: center;" type="text" id="min-price" value="${min_price_variant.price.toLocaleString()}đ" disabled />
+            <input style="width: 100%; border: 1px solid #ddd; border-radius: 4px; text-align: center; font-size: 12px;" type="text" value="${min_price_variant.price.toLocaleString()}đ" disabled />
           </div>
         </div>
 
-        <!-- Vùng bọc canvas với chiều cao CỐ ĐỊNH để Chart.js không bị kéo giãn -->
-        <div style="position: relative; width: 100%; height: 130px;">
+        <!-- HIỂN THỊ KHOẢNG GIÁ AN TOÀN BẰNG CON SỐ CỤ THỂ 
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 8px; margin-bottom: 10px; font-size: 12px;">
+          <span style="font-weight: bold; color: #15803d;">🛡️ Dải giá an toàn có thể đặt:</span><br/>
+          <span style="color: #166534; font-weight: 600; font-size: 13px;">
+            ${isSafeRangeValid ? `${safeMin.toLocaleString()}đ - ${safeMax.toLocaleString()}đ` : '⚠️ Không có vùng giao (Khoảng cách quá 5 lần!)'}
+          </span>
+        </div>-->
+
+        <!-- Canvas biểu đồ -->
+        <div style="position: relative; width: 100%; height: auto; aspect-ratio: 16/10">
           <canvas id="tpv3-price-chart"></canvas>
         </div>
       </div>
     `);
 
-    // Biểu đồ giá
-    
-
-    const limitFromMin = min_price_variant.price * 5;
-    const limitFromMax = max_price_variant.price / 5;
-
     const priceChart = $("#tpv3-price-chart").get(0);
-    new Chart(priceChart, {
+    if (window.myPriceChart instanceof Chart) {
+      window.myPriceChart.destroy();
+    }
+
+    window.myPriceChart = new Chart(priceChart, {
       type: 'bar',
       data: {
-        labels: ['Dải giá an toàn'], // Chỉ dùng một nhãn duy nhất
+        labels: ['Khoảng giá'],
         datasets: [
           {
-            label: 'Vùng giá (Min -> Max)',
-            position: "left",
-            // data: [[giá trị bắt đầu, giá trị kết thúc]]
-            data: [[min_price_variant.price, max_price_variant.price]],
-            backgroundColor: 'rgba(59, 130, 246, 0.2)', // Xanh dương nhạt
-            borderColor: 'rgb(59, 130, 246)',
+            label: '(Max/5 -> Max)',
+            data: [[limitFromMax, max_price_variant.price]],
+            backgroundColor: 'rgba(255, 118, 118, 0.34)',
+            borderColor: 'rgb(255, 45, 45)',
             borderWidth: 1,
-            barPercentage: 1.0, // Làm thanh to hết mức
-            categoryPercentage: 1.0,
+            barThickness: 12 // Cố định độ dày thanh bar để dễ nhìn
           },
           {
-            label: 'Vùng overlap Min (Min -> Min*5)',
-            // Vùng an toàn từ Min kéo đến giới hạn 5 lần
-            data: [[min_price_variant.price, Math.min(max_price_variant.price, limitFromMin)]],
-            backgroundColor: 'rgba(16, 185, 129, 0.4)', // Xanh lá đậm (vùng overlap)
-            borderColor: 'rgb(16, 185, 129)',
+            label: 'Khoảng an toàn',
+            data: [[safeMin, safeMax]],
+            backgroundColor: 'rgba(121, 250, 117, 0.7)',
+            borderColor: 'rgb(63, 255, 57)',
             borderWidth: 1,
-            barPercentage: 0.7, // Làm thanh nhỏ hơn một chút để tạo hiệu ứng "vùng đè"
-            categoryPercentage: 0.7,
+            barThickness: 12 // Thanh lớn nhất nằm giữa
+          },
+          {
+            label: '(Min -> Min*5)',
+            data: [[min_price_variant.price, limitFromMin]],
+            backgroundColor: 'rgba(163, 237, 255, 0.34)',
+            borderColor: 'rgb(27, 209, 255)',
+            borderWidth: 1,
+            barThickness: 12 // Thanh nhỏ hơn nằm bên trong
           }
         ]
       },
       options: {
-        indexAxis: 'y', // Biểu đồ ngang
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            display: true, // Hiện chú thích để người dùng phân biệt vùng
+            display: true,
             position: 'bottom',
-            labels: { boxWidth: 12, font: { size: 10 } }
-          },
-          tooltip: {
-            callbacks: {
-              label: function (context) {
-                // Hiển thị dạng khoảng: [Min VNĐ - Max VNĐ]
-                let range = context.raw;
-                return ` ${context.dataset.label}: ${range[0].toLocaleString()}đ - ${range[1].toLocaleString()}đ`;
-              }
-            }
+            labels: { boxWidth: 10, font: { size: 10 } }
           }
         },
         scales: {
           x: {
-            beginAtZero: false, // Bắt đầu từ Min chứ không phải 0 để biểu đồ tập trung hơn
-            suggestedMin: Math.max(0, min_price_variant.price - (min_price_variant.price * 0.1)), // Cho mút trái rộng hơn một chút
+            beginAtZero: false,
             grid: { color: '#f3f4f6' },
             ticks: {
               callback: function (value) {
-                return value.toLocaleString() + 'đ';
+                return value.toLocaleString();
               }
             }
           },
           y: {
-            stacked: true, // Quan trọng: Stack các bar đè lên nhau
-            grid: { display: false },
-            display: false // Ẩn nhãn trục Y vì chỉ có một dòng
+            stacked: true,
+            grid: { display: false }
           }
         }
       }
