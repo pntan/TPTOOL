@@ -139,6 +139,79 @@
   }
 
   /**
+   * Tạo chuỗi ngẫu nhiên với các tùy chọn linh hoạt
+   * @param {Object} options - Các tùy chọn cấu hình
+   * @param {string} options.type - Loại chuỗi: "string" (chữ cái), "number" (số), "hex" (mã hex), "mixed" (hỗn hợp), "custom" (tự định nghĩa)
+   * @param {number} options.len - Độ dài chuỗi cần tạo
+   * @param {number} options.complexity - Mức độ phức tạp: 1 (cơ bản), 2 (có ký tự đặc biệt), 3 (cực kỳ phức tạp)
+   * @param {string} options.customChars - Ký tự tùy chỉnh (chỉ dùng khi type là "custom")
+   * @returns {string} Chuỗi ngẫu nhiên được tạo ra
+  */
+  function generateRandomString(options = {}) {
+    const {
+      type = "string", // "string" (chữ cái), "number" (số), "hex" (mã hex), "mixed" (hỗn hợp), "custom" (tự định nghĩa)
+      len = 10,        // Độ dài chuỗi cần tạo
+      complexity = 1,  // 1: Cơ bản, 2: Có ký tự đặc biệt, 3: Cực kỳ phức tạp (chống trùng lặp cao)
+      customChars = "" // Dùng khi type là "custom"
+    } = options;
+
+    // Định nghĩa các bộ ký tự tương ứng
+    const sets = {
+      lower: "abcdefghijklmnopqrstuvwxyz",
+      upper: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+      number: "0123456789",
+      hex: "0123456789abcdef",
+      special: "!@#$%^&*()_+-=[]{}|;:,.<>?"
+    };
+
+    let chars = "";
+
+    // Xây dựng tập ký tự dựa trên type và complexity
+    switch (type.toLowerCase()) {
+      case "number":
+        chars = sets.number;
+        break;
+      case "hex":
+        chars = sets.hex;
+        break;
+      case "custom":
+        chars = customChars || sets.lower + sets.number;
+        break;
+      case "string":
+      case "mixed":
+      default:
+        chars = sets.lower + sets.upper;
+        if (complexity >= 1) {
+          chars += sets.number;
+        }
+        if (complexity >= 2) {
+          chars += sets.special;
+        }
+        if (complexity >= 3) {
+          // Thêm các ký tự mở rộng để tăng tính độc nhất và phức tạp
+          chars += "~`-_=+[]{}|;:',.<>?/\\";
+        }
+        break;
+    }
+
+    // Thuật toán sinh chuỗi ngẫu nhiên (dùng crypto hoặc Math.random bảo đảm phân phối đều)
+    let result = "";
+    const charsLength = chars.length;
+    
+    for (let i = 0; i < len; i++) {
+      const randomIndex = Math.floor(Math.random() * charsLength);
+      result += chars.charAt(randomIndex);
+    }
+
+    // Đảm bảo kết quả luôn trả về kiểu chuỗi (text) dù đầu vào là số
+    return String(result);
+  }
+
+  const add_variant_btn_id = generateRandomString({ len: 20, type: "mixed" });
+  const confirm_data_btn_id = generateRandomString({ len: 20, type: "mixed" });
+  const cancel_data_btn_id = generateRandomString({ len: 20, type: "mixed" });
+
+  /**
      * Gắn một file từ một input file nguồn sang một input file đích và kích hoạt sự kiện change.
      *
      * @param {HTMLElement|jQuery} sourceFileInput - Phần tử input type="file" gốc hoặc jQuery object chứa file cần lấy.
@@ -823,6 +896,71 @@
 
   const PAGE_INFO = get_detail_page();
 
+  // GG SHEET QUERY
+  async function GGSHEET_QUERY({ 
+    spreadsheet_id = "1PMSjIuXRuXVCyHnKjNQyrksPGSEAgOCqsd3gWzCQpPs", 
+    sheet_name = "DATABASE", 
+    headers = 1, 
+    query = "",
+    parseObjects = true // Mặc định true để tự động map thành Object theo tên cột
+  }) {
+    const query_encode = encodeURIComponent(query);
+    const url = `https://docs.google.com/spreadsheets/d/${spreadsheet_id}/gviz/tq?tqx=out:json&sheet=${sheet_name}&tq=${query_encode}&headers=${headers}`;
+
+    return new Promise((resolve, reject) => {
+      GM.xmlHttpRequest({
+        method: "GET",
+        url: url,
+        onload: function (response) {
+          if (response.status === 200) {
+            try {
+              let text = response.responseText;
+              const jsonString = text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1);
+              const json = JSON.parse(jsonString);
+
+              // Kiểm tra nếu API trả về lỗi từ Google
+              if (json.status !== "ok") {
+                reject("Google Sheet Query Error: " + (json.errors ? json.errors[0].detailed_message : "Unknown error"));
+                return;
+              }
+
+              // Nếu không bật parseObjects thì trả về nguyên bản JSON gốc của Google
+              if (!parseObjects) {
+                resolve(json);
+                return;
+              }
+
+              // Tiến hành map dữ liệu sạch sẽ theo tên cột (labels)
+              const cols = json.table.cols.map(col => col.label ? col.label.replace(/\n/g, " ").trim() : "");
+              const rows = json.table.rows;
+
+              const mappedData = rows.map(row => {
+                const rowObj = {};
+                row.c.forEach((cell, index) => {
+                  const colName = cols[index];
+                  if (colName) {
+                    // Lấy giá trị .v (giá trị thực), nếu ô trống thì trả về null hoặc chuỗi rỗng
+                    rowObj[colName] = cell ? cell.v : null;
+                  }
+                });
+                return rowObj;
+              });
+
+              resolve(mappedData);
+            } catch (e) {
+              reject("Lỗi phân tích dữ liệu JSON: " + e);
+            }
+          } else {
+            reject("Lỗi HTTP: " + response.status);
+          }
+        },
+        onerror: function (err) {
+          reject(err);
+        }
+      });
+    });
+  }
+
   // GIẢ LẬP API NỘI BỘ SHOPEE
   async function SHOPEE_API({ path = "", method = "GET", payload = {} }) {
     let requestUrl = path;
@@ -857,6 +995,28 @@
         onerror: (err) => reject(err)
       });
     });
+  }
+
+  async function INPUT_FORM({ placeholder = "", callback = (value) }){
+    $("body").prepend(`
+      <div class="width: 100%; height: 100%; position: fixed; z-index: 999999999999;">
+        <div class="width: 100%; height: 100%; background: #000; opacity: 0.7;"></div>
+        <div class="width: fit-content; height: fit-content">
+          <textarea placeholder="${placeholder}"></textarea>
+          <button id=${confirm_data_btn_id}>Xác Nhận</button>
+          <button id=${cancel_data_btn_id}>Hủy</button>
+        </div>
+      </div>  
+    `)
+
+    $(`#${confirm_data_btn_id}`).on("click", () => {
+      const value = $(`#${confirm_data_btn_id}`).siblings("textarea").val();
+      callback(value);
+    })
+
+    $(`#${cancel_data_btn_id}`).on("click", () => {
+      $(this).parent().parent().remove();
+    })
   }
 
   // Chi tiết sản phẩm https://banhang.shopee.vn/portal/product/[product_id]
@@ -918,8 +1078,8 @@
 
     // Khung thông tin bên trái
     $(".product .product-edit__container .product-edit__side").css("overflow-y", "scroll")
-    $(".product .product-edit__container .product-edit__side").append(`
-      <div id="tpv3-price-panel" style="width: 100%; border: 1px solid #ccc; border-radius: 7px; background: #fff; padding: 10px; margin-bottom: 15px;">
+    $(".product .product-edit__container .product-edit__side").prepend(`
+      <div style="width: 100%; border: 1px solid #ccc; border-radius: 7px; background: #fff; padding: 10px; margin-bottom: 15px;">
         <p style="font-weight: bold; margin-bottom: 8px;">Thông tin giá sản phẩm</p>
         
         <!-- Input MIN / MAX -->
@@ -1007,12 +1167,35 @@
             }
           },
           y: {
-            stacked: true,
+            stacked: false,
             grid: { display: false }
           }
         }
       }
     });
+
+    // Thêm phân loại
+    // Nút thêm phân loại
+    waitForElement(document.body, ".product-tier-variation .edit-row.batch-edit-row", (el) => {
+      $(el).after(`
+        <div>
+          <button
+            id="${add_variant_btn_id}"
+            style="width: fit-content; height: fit-content; background: #fff; border-radius: 7px; padding: 5px 10px; border: 1px #000 solid"
+          >
+            Thêm phân loại
+          </button>
+        </div>
+      `);
+    });
+
+    $(document).on("click", `#${add_variant_btn_id}`, () => {
+      console_log("THÊM PHÂN LOẠI");
+      INPUT_FORM({ placeholder: 'Nhập SKU cần thêm', callback: (value) => { console.log(value); } });
+    });
+
+    const result = await GGSHEET_QUERY({ query: `SELECT * WHERE B = 'GDA215-G0584'` });
+    console.log(result);
   }
 
   async function INIT() {
