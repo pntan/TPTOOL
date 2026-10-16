@@ -210,6 +210,7 @@
   const add_variant_btn_id = generateRandomString({ len: 20, type: "mixed" });
   const confirm_data_btn_id = generateRandomString({ len: 20, type: "mixed" });
   const cancel_data_btn_id = generateRandomString({ len: 20, type: "mixed" });
+  const texttarea_input_data_id = generateRandomString({ len: 20, type: "mixed" });
 
   /**
      * Gắn một file từ một input file nguồn sang một input file đích và kích hoạt sự kiện change.
@@ -999,30 +1000,41 @@
 
   async function INPUT_FORM({ placeholder = "", callback = (value) }){
     $("body").prepend(`
-      <div class="width: 100%; height: 100%; position: fixed; z-index: 999999999999;">
-        <div class="width: 100%; height: 100%; background: #000; opacity: 0.7;"></div>
-        <div class="width: fit-content; height: fit-content">
-          <textarea placeholder="${placeholder}"></textarea>
-          <button id=${confirm_data_btn_id}>Xác Nhận</button>
-          <button id=${cancel_data_btn_id}>Hủy</button>
+      <div style="width: 100%; height: 100%; position: fixed; z-index: 999999999999;">
+        <div style="width: 100%; height: 100%; background: #000; opacity: 0.7;"></div>
+        <div style="width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: flex; justify-content: center; align-items: center;">
+          <div style="width: fit-content; height: fit-content; display: flex; flex-direction: column; gap: 10px;">
+            <textarea 
+              id="${texttarea_input_data_id}"
+              placeholder="${placeholder}" 
+              style="width: auto; min-width: 300px; height: auto; min-height: 300px; padding: 10px; border-radius: 10px; resize: both;"></textarea>
+            <div style="display: flex; gap: 10px;">
+              <button id=${confirm_data_btn_id} style="padding: 10px; background: #4CAF50; color: white; border: none; cursor: pointer;">Xác Nhận</button>
+              <button id=${cancel_data_btn_id} style="padding: 10px; background: #f44336; color: white; border: none; cursor: pointer;">Hủy</button>
+            </div>
+          </div>
         </div>
       </div>  
     `)
 
-    $(`#${confirm_data_btn_id}`).on("click", () => {
-      const value = $(`#${confirm_data_btn_id}`).siblings("textarea").val();
-      callback(value);
+    $(document).on("click", `#${confirm_data_btn_id}`, function(e){
+      const value = $(`#${texttarea_input_data_id}`).val();
+      const format_value = [];
+      for (const line of value.toString().split("\n")){
+        format_value.push(line.trim().split("\t"));
+      }
+      callback(format_value);
     })
 
-    $(`#${cancel_data_btn_id}`).on("click", () => {
-      $(this).parent().parent().remove();
+    $(document).on("click", `#${cancel_data_btn_id}`, function(e){
+      $(this).parent().parent().parent().parent().remove();
     })
   }
 
   // Chi tiết sản phẩm https://banhang.shopee.vn/portal/product/[product_id]
   async function PRODUCT_DETAIL_SHOPEE() {
-    console_log("PRODUCT_DETAIL_SHOPEE");
-    console.log(PAGE_INFO);
+    // console_log("PRODUCT_DETAIL_SHOPEE");
+    // console.log(PAGE_INFO);
 
     if (!PAGE_INFO.domain === "banhang.shopee.vn") return;
 
@@ -1174,7 +1186,6 @@
       }
     });
 
-    // Thêm phân loại
     // Nút thêm phân loại
     waitForElement(document.body, ".product-tier-variation .edit-row.batch-edit-row", (el) => {
       $(el).after(`
@@ -1189,13 +1200,24 @@
       `);
     });
 
-    $(document).on("click", `#${add_variant_btn_id}`, () => {
-      console_log("THÊM PHÂN LOẠI");
-      INPUT_FORM({ placeholder: 'Nhập SKU cần thêm', callback: (value) => { console.log(value); } });
-    });
+    // Thêm phân loại
+    const add_variant_func = async (value) => {
+      const SKU_LIST = [];
+      for(const line of value){
+        const sku = line[0];
+        const result = await GGSHEET_QUERY({ query: `SELECT * WHERE B = '${sku}'` });
+        console.log(result);
+        SKU_LIST.push(result);
+      }
 
-    const result = await GGSHEET_QUERY({ query: `SELECT * WHERE B = 'GDA215-G0584'` });
-    console.log(result);
+      const TIER_LEN = ITEM_DATA.data.product_info.tier_variation.length;
+      console_log("SỐ CẤP PHÂN LOẠI CỦA LINK")
+      console.log(TIER_LEN);
+    }
+
+    $(document).on("click", `#${add_variant_btn_id}`, () => {
+      INPUT_FORM({ placeholder: 'Nhập SKU cần thêm', callback: (value) => { add_variant_func(value); } });
+    });
   }
 
   async function INIT() {
